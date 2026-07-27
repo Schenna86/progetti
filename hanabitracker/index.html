@@ -77,6 +77,12 @@
   </div>
 
   <button onclick="inizia()">Inizia</button>
+  
+  <div class="option-group">
+  <h3>Modalità chiara</h3>
+  <div class="radio-group">
+  
+  <button onclick="iniziaw()">Inizia</button>
 
   <script>
     function inizia() {
@@ -85,6 +91,13 @@
       const posizione = document.querySelector('input[name="posizione"]:checked').value;
       window.location.href = `gioco.html?giocatori=${giocatori}&arcobaleno=${arcobaleno}&reset=${posizione}`;
     }
+      function iniziaw() {
+      const giocatori = document.querySelector('input[name="giocatori"]:checked').value;
+      const arcobaleno = document.getElementById('arcobaleno').checked ? 'on' : 'off';
+      const posizione = document.querySelector('input[name="posizione"]:checked').value;
+      window.location.href = `giocow.html?giocatori=${giocatori}&arcobaleno=${arcobaleno}&reset=${posizione}`;
+    }
+    
   </script>
   <div class="versione">1.5</div>
 </body>
