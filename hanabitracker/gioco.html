@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hanabi Tracker</title>
+    <style>
+        body {
+          font-family: sans-serif;
+          background: #424242;
+          margin: 0;
+          padding: 1rem;
+          color: #eee;
+        }
+        .container { max-width: 1000px; margin: auto; }
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        .cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+          gap: 0.75rem;
+        }
+        .card {
+          background: #7d7d7d;
+          border: 2px solid #ccc;
+          border-radius: 1rem;
+          padding: 0.75rem;
+          text-align: center;
+          cursor: pointer;
+          transition: border-color .12s ease, box-shadow .12s ease, background .2s;
+          position: relative;
+          user-select: none;
+          -webkit-user-select: none;
+          touch-action: manipulation;
+          color: #000000;
+        }
+        * { -webkit-tap-highlight-color: transparent; }
+    
+        .card.selected { border-color: #007bff; box-shadow: 0 0 10px rgba(0,123,255,0.5); }
+        .card .main { font-size: 2rem; font-weight: bold; }
+    	.draw-label{
+      font-size: 0.78rem;
+      font-weight: 700;
+      opacity: .85;
+      margin-bottom: 6px;
+      text-align: center;
+      color: #111;
+    }
+        .indizi-negativi { font-size: 0.75rem; margin-top: 0.3rem; color: #ccc; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+        .control-row { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+        .controls button {
+          padding: 0.5rem 1rem; font-size: 1rem; border: none; border-radius: 5px;
+          cursor: pointer; min-width: 60px;
+        }
+        .yellow { color: gold; } .red { color: red; } .blue { color: blue; }
+        .green { color: green; } .white { color: white; }
+        .rainbow {
+          background: linear-gradient(to right, red, orange, yellow, green, blue, violet);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold;
+        }
+        .reset-button {
+          position: absolute; top: 4px; right: 4px; background: #f0f0f0; border: none;
+          border-radius: 5px; cursor: pointer; font-size: 0.7rem; padding: 2px 5px;
+        }
+        .residue-section { align-items: center; margin-top: 2rem; }
+        .residue-row {
+          display: flex; align-items: center; margin-bottom: 0.5rem; gap: 0.3rem; flex-wrap: wrap;
+        }
+        .residue-label { visibility: hidden; width: 0; margin: 0; padding: 0; }
+        .residue-button {
+          padding: 0.3rem 0.6rem; border-radius: 5px; background: #ccc; border: 1px solid #ccc;
+          cursor: pointer; min-width: 28px; text-align: center; transition: background 0.2s, opacity 0.2s;
+        }
+        .residue-button.oscurata { background: #333; color: white; opacity: 0.4; }
+        .residue-row[data-colore="Gia"] .residue-button { color: gold; }
+        .residue-row[data-colore="Ros"] .residue-button { color: red; }
+        .residue-row[data-colore="Blu"] .residue-button { color: blue; }
+        .residue-row[data-colore="Ver"] .residue-button { color: green; }
+        .residue-row[data-colore="Bia"] .residue-button { color: white; }
+        .residue-row[data-colore="Arcobaleno"] .residue-button {
+          background: linear-gradient(to right, red, orange, yellow, green, blue, violet);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold;
+        }
+        .versione { position: fixed; bottom: 10px; right: 15px; font-size: 0.85rem; color: #aaa; opacity: 0.7; }
+        .hantrack { position: fixed; bottom: 10px; left: 15px; font-size: 0.85rem; color: #aaa; opacity: 0.7; }
+    
+        .card-hints { margin-top: 6px; text-align: center; font-size: 0.88rem; width: 100%; }
+        .card-columns-wrap { display: flex; justify-content: center; gap: 20px; width: 100%; margin-top: 2px; }
+        .card-col-table { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 58px; max-width: 72px; }
+        .card-row-flex { display: flex; align-items: center; gap: 6px; min-height: 21px; }
+        .color-dot, .number-hint {
+          width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          font-size: 1em; margin-right: 3px; opacity: 1;
+        }
+        .color-dot.oscurato, .number-hint.oscurato { opacity: 0.09; filter: grayscale(100%); }
+        .number-hint {
+          background: #1c1c1c66; border-radius: 7px; color: #fff; width: 18px; height: 18px;
+          text-align: center; font-size: 1em; font-weight: bold; line-height: 18px;
+        }
+        .color-dot.yellow { background: gold; }
+        .color-dot.red { background: red; }
+        .color-dot.blue { background: blue; }
+        .color-dot.green { background: green; }
+        .color-dot.white { background: white; border: 1px solid #ccc; }
+        .color-dot.rainbow { background: linear-gradient(to right, red, orange, yellow, green, blue, violet); }
+        .probability-value { font-size: 0.89em; color: #eee; min-width: 29px; text-align: left; margin: 0 2px 0 0; }
+        .probability-value.spenta { opacity: 0.15; }
+        @media (max-width: 600px) {
+          .card-hints { font-size: 1.01em; }
+          .card-columns-wrap { gap: 8px; }
+          .card-col-table { min-width: 50px; max-width: 60px; }
+          .probability-value { font-size: 0.97em; }
+        }
+    
+        /* Overlay (modale) */
+        .overlay {
+          position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none;
+          align-items: center; justify-content: center; z-index: 9999;
+        }
+        .modal {
+          background: #2b2b2b; border-radius: 14px; padding: 16px; width: min(520px, 92vw);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #444;
+        }
+        .modal h3 { margin: 0 0 10px 0; }
+        .modal .section { margin-top: 10px; }
+        .modal .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+        .modal button {
+          padding: 8px 12px; border-radius: 8px; border: 1px solid #666; background: #3a3a3a; color: #eee; cursor: pointer;
+        }
+        .modal button:hover { filter: brightness(1.1); }
+        .modal .color-chip { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #888; display: block; }
+        .chip-btn {
+          width: 34px; height: 34px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+          border: 1px solid #666; background: #3a3a3a; cursor: pointer;
+        }
+        .modal .row { display: flex; gap: 10px; align-items: center; }
+        .modal .footer { display: flex; justify-content: space-between; margin-top: 12px; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <button onclick="tornaAllaHome()">Torna alla Home</button>
+            <button onclick="undo()">Undo</button>
+        </div>
+		<div id="remaining-counter" style="text-align: center; margin-top: 1rem; font-size: 1rem;">Carte rimaste nel mazzo: 0</div>
+        <div class="cards" id="cards"></div>
+
+        <div class="controls">
+            <div class="control-row" id="color-controls"></div>
+            <div class="control-row" id="number-controls"></div>
+        </div>
+
+        <div class="residue-section">
+            <h2>Carte Residue</h2>
+            <div id="residue-tracker"></div>
+        </div>
+    </div>
+
+    <!-- Wake lock -->
+    <div style="text-align: center; margin-top: 1rem;">
+        <label style="color: white;">
+            <input type="checkbox" id="wakelock-toggle" /> Mantieni schermo attivo
+        </label>
+    </div>
+
+    <!-- OVERLAY: pressione lunga -->
+    <div id="overlay" class="overlay" onclick="if(event.target===this) chiudiOverlay()">
+        <div class="modal">
+            <h3>Imposta rapidamente</h3>
+
+            <div class="section">
+                <div class="row"><strong>Colore:</strong></div>
+                <div class="btns" id="overlay-colori"></div>
+                <div class="btns" style="margin-top:6px;">
+                    <button onclick="rimuoviColore()">Rimuovi colore</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="row"><strong>Numero:</strong></div>
+                <div class="btns" id="overlay-numeri"></div>
+                <div class="btns" style="margin-top:6px;">
+                    <button onclick="rimuoviNumero()">Rimuovi numero</button>
+                </div>
+            </div>
+
+            <div class="footer">
+                <button onclick="chiudiOverlay()">Chiudi</button>
+                <button onclick="chiudiOverlay()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ======== Parametri da homepage ======== */
+        const urlParams = new URLSearchParams(window.location.search);
+        const numGiocatori = parseInt(urlParams.get("giocatori")) || 4;
+        const cartePerGiocatore = numGiocatori <= 3 ? 5 : 4;
+        const arcobalenoAttivo = ["on", "true", "1"].includes(urlParams.get("arcobaleno"));
+        const resetMode = urlParams.get("reset") || "sinistra";
+        
+        /* ======== Costanti gioco ======== */
+        const COLORI_INDIZI = ['Gia', 'Ros', 'Blu', 'Ver', 'Bia'];
+        const COLORI = arcobalenoAttivo ? [...COLORI_INDIZI, 'Arcobaleno'] : [...COLORI_INDIZI];
+        const NUMERI = ['1','2','3','4','5'];
+        const DISTRIBUZIONE = ['1','1','1','2','2','3','3','4','4','5'];
+        
+        /* ======== Stato ======== */
+        let carte = [];
+        let carteResidue = {};
+        let numeriOscurati = [];
+        let historyStack = [];
+        let drawCounter = 0; // cresce ad ogni sostituzione (pescata)
+        
+        /* ======== Anti-doppio toggle / ghost click ======== */
+        let lastTouchTs = 0;                 // timestamp ultimo touchend
+        let lastToggleGuard = { i:null, ts:0 };
+        
+        /* ======== Long press handling (>= 1000ms) ======== */
+        let lpTimer = null;
+        let lpTriggered = false; // true quando scatta il timeout (overlay aperto)
+        let lpIndex = null;
+        const LONG_PRESS_MS = 1000;
+        
+        function startPressTimer(index) {
+          cancelPressTimer();        // reset eventuale timer precedente
+          lpTriggered = false;       // nuovo ciclo: non è ancora scattato
+          lpIndex = index;
+          lpTimer = setTimeout(() => {
+            lpTimer = null;          // timer consumato
+            lpTriggered = true;      // long-press attivo -> apri overlay
+            apriOverlay(index);
+          }, LONG_PRESS_MS);
+        }
+        
+        // triggerClick: se true prova a fare click breve
+        // index: l'indice della carta coinvolta
+        function cancelPressTimer(triggerClick = false, index = null) {
+          if (lpTimer) {
+            // Timer non è ancora scattato -> era un tap breve
+            clearTimeout(lpTimer);
+            lpTimer = null;
+            if (triggerClick && index !== null) handleClickCard(index);
+          } else {
+            // Timer non in corso: se non è scattato long-press, consenti click
+            if (triggerClick && index !== null && !lpTriggered) {
+              handleClickCard(index);
+            }
+          }
+        }
+        
+        function handleClickCard(index) {
+          // Debounce: evita doppio toggle ravvicinato sulla stessa carta (touch+mouse)
+          const now = Date.now();
+          if (lastToggleGuard.i === index && (now - lastToggleGuard.ts) < 250) return;
+          lastToggleGuard = { i:index, ts: now };
+          toggleSelection(index);
+        }
+        
+        /* ======== Overlay helpers ======== */
+        function apriOverlay(index) {
+          // Popola i bottoni colore (solo pallini)
+          const coloriWrap = document.getElementById('overlay-colori');
+          coloriWrap.innerHTML = COLORI.map(col => {
+            const cls = coloreClasse(col);
+            const chipStyle = col === 'Arcobaleno'
+              ? 'background: linear-gradient(to right, red, orange, yellow, green, blue, violet);'
+              : (cls === 'white'
+                  ? 'background:white;border:1px solid #ccc;'
+                  : `background:${getCssColorFromClass(cls)};`);
+            return `
+              <button class="chip-btn" title="${col}" aria-label="${col}" onclick="impostaColore('${col}')">
+                <span class="color-chip" style="${chipStyle}"></span>
+              </button>
+            `;
+          }).join('');
+        
+          // Bottoni numeri
+          const numeriWrap = document.getElementById('overlay-numeri');
+          numeriWrap.innerHTML = NUMERI.map(n => `<button onclick="impostaNumero('${n}')">${n}</button>`).join('');
+        
+          document.getElementById('overlay').style.display = 'flex';
+        }
+        
+        function chiudiOverlay() {
+          document.getElementById('overlay').style.display = 'none';
+          // lpTriggered rimane true finché non parte un nuovo ciclo (nuovo touch/mouse)
+        }
+        
+        function impostaColore(colore) {
+          if (lpIndex == null) return;
+          pushHistory();
+          const c = carte[lpIndex];
+          c.colore = [colore];
+          aggiornaArcobaleni();
+          render();
+          saveState();
+        }
+        
+        function impostaNumero(numero) {
+          if (lpIndex == null) return;
+          pushHistory();
+          const c = carte[lpIndex];
+          c.numero = numero;
+          render();
+          saveState();
+        }
+        
+        function rimuoviColore() {
+          if (lpIndex == null) return;
+          pushHistory();
+          carte[lpIndex].colore = [];
+          render();
+          saveState();
+        }
+        
+        function rimuoviNumero() {
+          if (lpIndex == null) return;
+          pushHistory();
+          carte[lpIndex].numero = null;
+          render();
+          saveState();
+        }
+        
+        /* Utility per trasformare classi colore in CSS */
+        function getCssColorFromClass(cls) {
+          switch (cls) {
+            case 'yellow': return 'gold';
+            case 'red': return 'red';
+            case 'blue': return 'blue';
+            case 'green': return 'green';
+            case 'white': return 'white';
+            default: return '#888';
+          }
+        }
+        
+        /* ======== Funzioni base ======== */
+        function coloreClasse(c) {
+          return {
+            Gia: 'yellow', Ros: 'red', Blu: 'blue',
+            Ver: 'green', Bia: 'white', Arcobaleno: 'rainbow'
+          }[c] || '';
+        }
+        
+        function inizializzaCarteResidue() {
+          COLORI.forEach(col => {
+            carteResidue[col] = DISTRIBUZIONE.map((n, idx) => ({
+              numero: n, id: `${col}-${idx}`, oscurata: false
+            }));
+          });
+        }
+        
+        function pushHistory() {
+          historyStack.push(JSON.parse(JSON.stringify({ carte, carteResidue, numeriOscurati, drawCounter })));
+          if (historyStack.length > 100) historyStack.shift();
+        }
+        
+        function undo() {
+          if (!historyStack.length) return;
+          const prev = historyStack.pop();
+          carte = prev.carte;
+          carteResidue = prev.carteResidue;
+          numeriOscurati = prev.numeriOscurati;
+          drawCounter = prev.drawCounter ?? 0;
+          render();
+          saveState();
+        }
+        
+        function saveState() {
+          const state = { carte, carteResidue, numeriOscurati, drawCounter };
+          localStorage.setItem('hanabiTrackerState', JSON.stringify(state));
+        }
+        
+        function loadState() {
+          const saved = localStorage.getItem('hanabiTrackerState');
+          if (saved) {
+            try {
+              const state = JSON.parse(saved);
+              carte = state.carte || [];
+              carteResidue = state.carteResidue || {};
+              numeriOscurati = state.numeriOscurati || [];
+              // compatibilità con salvataggi vecchi
+              drawCounter = state.drawCounter ?? Math.max(0, ...carte.map(c => c.drawId || 0));
+              // Normalizza anche i salvataggi creati dalle versioni precedenti.
+              carte.forEach(c => {
+                c.colore = Array.isArray(c.colore) ? c.colore : [];
+                c.notColor = Array.isArray(c.notColor) ? c.notColor : [];
+                c.numero = c.numero == null ? null : String(c.numero);
+                c.notNumber = Array.isArray(c.notNumber) ? c.notNumber.map(String) : [];
+                c.notColorAuto = Array.isArray(c.notColorAuto) ? c.notColorAuto : [];
+                c.notNumberAuto = Array.isArray(c.notNumberAuto) ? c.notNumberAuto.map(String) : [];
+                c.selected = Boolean(c.selected);
+                if (c.drawId == null) c.drawId = 0;
+              });
+              return true;
+            } catch {}
+          }
+          return false;
+        }
+        
+        function start(n) {
+          historyStack = [];
+          drawCounter = 0;
+          carte = Array(n).fill(0).map(() => ({
+            colore: [], notColor: [], numero: null, notNumber: [],
+        
+            drawId: 0 // 0 = "Carta iniziale"
+          }));
+          inizializzaCarteResidue();
+          numeriOscurati = [];
+          render();
+          saveState();
+        }
+        
+        
+        function toggleSelection(i) {
+          pushHistory();
+          carte[i].selected = !carte[i].selected;
+          // 🔹 no re-render: aggiorno solo la card per evitare stutter
+          const el = document.getElementById(`card-${i}`);
+          if (el) el.classList.toggle('selected', carte[i].selected);
+          saveState();
+        }
+        
+        function assegnaIndizioColore(colore) {
+          if (!carte.some(c => c.selected)) return;
+          pushHistory();
+          const selezionate = carte.filter(c => c.selected);
+          const altre = carte.filter(c => !c.selected);
+        
+          selezionate.forEach(c => { if (!c.colore.includes(colore)) c.colore.push(colore); });
+          altre.forEach(c => {
+            if (!c.notColor.includes(colore)) c.notColor.push(colore);
+            if (!c.notColor.includes('Arcobaleno')) c.notColor.push('Arcobaleno');
+          });
+        
+          carte.forEach(c => c.selected = false);
+          aggiornaArcobaleni();
+          render();
+          saveState();
+        }
+        
+        function assegnaIndizioNumero(numero) {
+          if (!carte.some(c => c.selected)) return;
+          pushHistory();
+          carte.forEach(c => {
+            if (c.selected) c.numero = numero;
+            else if (!c.notNumber.includes(numero)) c.notNumber.push(numero);
+            c.selected = false;
+          });
+          render();
+          saveState();
+        }
+        
+        function aggiornaArcobaleni() {
+			if (!arcobalenoAttivo) return;
+			carte.forEach(c => {
+			if (c.colore.length > 1 && !c.colore.includes('Arcobaleno')) {
+			c.coloreOriginale = [...c.colore];  // Salva storia
+		c.colore = ['Arcobaleno'];
+		}
+		});
+		}
+        
+        function resetCard(i) {
+          pushHistory();
+          const nuovaCarta = {
+            colore: [], notColor: [], numero: null, notNumber: [],
+        
+            drawId: ++drawCounter // <-- questa è la “pescata”
+          };
+        
+          if (resetMode === "sinistra") {
+            carte.splice(i, 1);
+            carte.unshift(nuovaCarta);
+          } else if (resetMode === "destra") {
+            carte.splice(i, 1);
+            carte.push(nuovaCarta);
+          } else {
+            carte[i] = nuovaCarta;
+          }
+        
+          render();
+          saveState();
+        }
+        
+        
+		function toggleResidua(colore, id) {
+			const carta = carteResidue[colore].find(c => c.id === id);
+				if (carta) { 
+					pushHistory();  // Aggiungi history prima
+					carta.oscurata = !carta.oscurata; 
+					render(); 
+					saveState(); 
+				}
+		}
+        
+        function tornaAllaHome() {
+          if (confirm("Vuoi davvero tornare alla Home? ATTENZIONE: perderai tutti i dati salvati.")) {
+            localStorage.removeItem('hanabiTrackerState');
+            window.location.href = "index.html";
+          }
+        }
+        
+        
+        /* ======== Probabilità esatte su tutta la mano ======== */
+        function buildResidueCounts() {
+          const counts = {};
+          COLORI.forEach(col => {
+            counts[col] = { '1':0,'2':0,'3':0,'4':0,'5':0 };
+            (carteResidue[col] || []).forEach(x => {
+              if (!x.oscurata && counts[col][x.numero] !== undefined) counts[col][x.numero]++;
+            });
+          });
+          return counts;
+        }
+
+        function calcolaCarteRimaste() {
+          const counts = buildResidueCounts();
+          return Object.values(counts).reduce(
+            (tot, col) => tot + Object.values(col).reduce((a, b) => a + b, 0),
+            0
+          );
+        }
+
+        function valoriNegati(carta, campoManuale, campoAutomatico) {
+          return new Set([
+            ...(Array.isArray(carta[campoManuale]) ? carta[campoManuale] : []),
+            ...(Array.isArray(carta[campoAutomatico]) ? carta[campoAutomatico] : [])
+          ]);
+        }
+
+        function coloriCompatibili(carta) {
+          const indizi = Array.isArray(carta.colore) ? carta.colore : [];
+          let possibili;
+
+          if (indizi.length === 0) {
+            possibili = [...COLORI];
+          } else if (indizi.length === 1) {
+            const colore = indizi[0];
+            if (colore === 'Arcobaleno') {
+              possibili = arcobalenoAttivo ? ['Arcobaleno'] : [];
+            } else {
+              possibili = arcobalenoAttivo
+                ? [colore, 'Arcobaleno']
+                : [colore];
+            }
+          } else {
+            // Più indizi colore diversi possono identificare soltanto l'arcobaleno.
+            possibili = arcobalenoAttivo ? ['Arcobaleno'] : [];
+          }
+
+          const vietati = valoriNegati(carta, 'notColor', 'notColorAuto');
+          return possibili.filter(col => COLORI.includes(col) && !vietati.has(col));
+        }
+
+        function numeriCompatibili(carta) {
+          const vietati = valoriNegati(carta, 'notNumber', 'notNumberAuto');
+          const possibili = carta.numero ? [String(carta.numero)] : [...NUMERI];
+          return possibili.filter(num => NUMERI.includes(num) && !vietati.has(num));
+        }
+
+        function inserisciOrdinato(valori, nuovoValore) {
+          const risultato = valori.slice();
+          let pos = risultato.length;
+          while (pos > 0 && risultato[pos - 1] > nuovoValore) pos--;
+          risultato.splice(pos, 0, nuovoValore);
+          return risultato;
+        }
+
+        function occorrenze(valori, valore) {
+          let totale = 0;
+          for (const x of valori) if (x === valore) totale++;
+          return totale;
+        }
+
+        function calcolaProbabilitaMano() {
+          const residue = buildResidueCounts();
+          const tipi = [];
+          const disponibilita = [];
+
+          COLORI.forEach(colore => {
+            NUMERI.forEach(numero => {
+              tipi.push({ colore, numero });
+              disponibilita.push(residue[colore]?.[numero] || 0);
+            });
+          });
+
+          const candidati = carte.map(carta => {
+            const colori = new Set(coloriCompatibili(carta));
+            const numeri = new Set(numeriCompatibili(carta));
+            const lista = [];
+
+            tipi.forEach((tipo, indice) => {
+              if (
+                disponibilita[indice] > 0 &&
+                colori.has(tipo.colore) &&
+                numeri.has(tipo.numero)
+              ) {
+                lista.push(indice);
+              }
+            });
+
+            return lista;
+          });
+
+          const risultatiVuoti = carte.map(() => ({
+            colori: Object.fromEntries(COLORI.map(c => [c, 0])),
+            numeri: Object.fromEntries(NUMERI.map(n => [n, 0]))
+          }));
+
+          if (candidati.some(lista => lista.length === 0)) {
+            return { valido: false, totale: 0, carte: risultatiVuoti };
+          }
+
+          // Le carte più vincolate vengono elaborate per prime: stesso risultato,
+          // ma molte meno combinazioni da esplorare.
+          const ordine = carte
+            .map((_, indice) => indice)
+            .sort((a, b) => candidati[a].length - candidati[b].length);
+
+          const memo = new Map();
+
+          function contaCompletamenti(posizione, tipiUsati) {
+            if (posizione === ordine.length) return 1;
+
+            const chiave = `${posizione}|${tipiUsati.join('.')}`;
+            if (memo.has(chiave)) return memo.get(chiave);
+
+            const indiceCarta = ordine[posizione];
+            let totale = 0;
+
+            for (const tipoIndice of candidati[indiceCarta]) {
+              const disponibili =
+                disponibilita[tipoIndice] - occorrenze(tipiUsati, tipoIndice);
+              if (disponibili <= 0) continue;
+
+              const prossimiUsati = inserisciOrdinato(tipiUsati, tipoIndice);
+              totale += disponibili * contaCompletamenti(posizione + 1, prossimiUsati);
+            }
+
+            memo.set(chiave, totale);
+            return totale;
+          }
+
+          const totaleCombinazioni = contaCompletamenti(0, []);
+          if (totaleCombinazioni <= 0) {
+            return { valido: false, totale: 0, carte: risultatiVuoti };
+          }
+
+          const pesiPerCartaETipo = carte.map(() => Array(tipi.length).fill(0));
+          let stati = new Map();
+          stati.set('', { usati: [], peso: 1 });
+
+          for (let posizione = 0; posizione < ordine.length; posizione++) {
+            const indiceCarta = ordine[posizione];
+            const prossimiStati = new Map();
+
+            for (const stato of stati.values()) {
+              for (const tipoIndice of candidati[indiceCarta]) {
+                const disponibili =
+                  disponibilita[tipoIndice] - occorrenze(stato.usati, tipoIndice);
+                if (disponibili <= 0) continue;
+
+                const prossimiUsati = inserisciOrdinato(stato.usati, tipoIndice);
+                const completamenti =
+                  contaCompletamenti(posizione + 1, prossimiUsati);
+                if (completamenti <= 0) continue;
+
+                const pesoPassaggio = stato.peso * disponibili;
+                pesiPerCartaETipo[indiceCarta][tipoIndice] +=
+                  pesoPassaggio * completamenti;
+
+                const chiave = prossimiUsati.join('.');
+                const esistente = prossimiStati.get(chiave);
+                if (esistente) {
+                  esistente.peso += pesoPassaggio;
+                } else {
+                  prossimiStati.set(chiave, {
+                    usati: prossimiUsati,
+                    peso: pesoPassaggio
+                  });
+                }
+              }
+            }
+
+            stati = prossimiStati;
+          }
+
+          const risultati = carte.map((_, indiceCarta) => {
+            const perColore = Object.fromEntries(COLORI.map(c => [c, 0]));
+            const perNumero = Object.fromEntries(NUMERI.map(n => [n, 0]));
+
+            tipi.forEach((tipo, tipoIndice) => {
+              const probabilita =
+                pesiPerCartaETipo[indiceCarta][tipoIndice] / totaleCombinazioni;
+              perColore[tipo.colore] += probabilita;
+              perNumero[tipo.numero] += probabilita;
+            });
+
+            return { colori: perColore, numeri: perNumero };
+          });
+
+          return {
+            valido: true,
+            totale: totaleCombinazioni,
+            carte: risultati
+          };
+        }
+
+        function formattaPercentuali(valori) {
+          const puliti = valori.map(v => Number.isFinite(v) && v > 0 ? v : 0);
+          const somma = puliti.reduce((a, b) => a + b, 0);
+          if (somma <= 0) return puliti.map(() => '0%');
+
+          const esatti = puliti.map(v => (v / somma) * 100);
+          const interi = esatti.map(Math.floor);
+          let mancanti = 100 - interi.reduce((a, b) => a + b, 0);
+
+          const ordineResti = esatti
+            .map((v, i) => ({ i, resto: v - interi[i] }))
+            .sort((a, b) => b.resto - a.resto || a.i - b.i);
+
+          for (let i = 0; i < mancanti; i++) {
+            interi[ordineResti[i % ordineResti.length].i]++;
+          }
+
+          return interi.map(v => `${v}%`);
+        }
+
+
+/* ======== Render ======== */
+        function render() {
+          const cardsEl = document.getElementById('cards');
+          const remainingDiv = document.getElementById('remaining-counter');
+          if (remainingDiv) {
+            remainingDiv.innerText = `Carte rimaste nel mazzo: ${calcolaCarteRimaste()}`;
+          }
+
+          const probabilitaMano = calcolaProbabilitaMano();
+          let warningDiv = document.getElementById('probability-warning');
+          if (!warningDiv && remainingDiv) {
+            warningDiv = document.createElement('div');
+            warningDiv.id = 'probability-warning';
+            warningDiv.style.cssText =
+              'text-align:center;margin:.35rem 0 1rem;color:#ffb3b3;font-weight:700;';
+            remainingDiv.insertAdjacentElement('afterend', warningDiv);
+          }
+          if (warningDiv) {
+            warningDiv.textContent = probabilitaMano.valido
+              ? ''
+              : 'Attenzione: gli indizi non sono compatibili con le carte residue.';
+          }
+          // --- ranking pescate: 1=ultima, 2=penultima, ecc.
+          const drawn = carte
+            .map((c, i) => ({ i, id: c.drawId || 0 }))
+            .filter(x => x.id > 0)
+            .sort((a, b) => b.id - a.id);
+        
+          const rankByIndex = new Map();
+          drawn.forEach((x, r) => rankByIndex.set(x.i, r + 1));
+        
+          function drawLabelFor(i) {
+            const id = carte[i].drawId || 0;
+            if (id === 0) return "Carta iniziale";
+            const rank = rankByIndex.get(i) || 999;
+            if (rank === 1) return "Ultima pescata";
+            if (rank === 2) return "Penultima pescata";
+            if (rank === 3) return "Terzultima pescata";
+            if (rank === 4) return "Quartultima pescata";
+            if (rank === 5) return "Quintultima pescata";
+            return `${rank}ª ultima pescata`;
+          }
+        
+          cardsEl.innerHTML = carte.map((c, i) => {
+            let content = '?';
+            let cls = '';
+            if (c.numero && c.colore.length) {
+              cls = coloreClasse(c.colore[0]);
+              content = `<span class="${cls}">${c.numero}</span>`;
+            } else if (c.numero) {
+              content = c.numero;
+            } else if (c.colore.length) {
+              cls = coloreClasse(c.colore[0]);
+              content = `<span class="${cls}">?</span>`;
+            }
+        
+            const coloriDaMostrare = c.colore.length === 1
+              ? (arcobalenoAttivo && c.colore[0] !== 'Arcobaleno' ? [c.colore[0], 'Arcobaleno'] : [c.colore[0]])
+              : COLORI;
+            const numeriDaMostrare = c.numero ? [c.numero] : NUMERI;
+        
+            const negColor = [
+              ...(Array.isArray(c.notColor) ? c.notColor : []),
+              ...(Array.isArray(c.notColorAuto) ? c.notColorAuto : [])
+            ];
+            const negNumber = [
+              ...(Array.isArray(c.notNumber) ? c.notNumber : []),
+              ...(Array.isArray(c.notNumberAuto) ? c.notNumberAuto : [])
+            ];
+
+            const probabilitaCarta = probabilitaMano.carte[i];
+            const probCol = formattaPercentuali(
+              coloriDaMostrare.map(col => probabilitaCarta?.colori?.[col] || 0)
+            );
+            const probNum = formattaPercentuali(
+              numeriDaMostrare.map(num => probabilitaCarta?.numeri?.[num] || 0)
+            );
+
+            const pescataLabel = drawLabelFor(i);
+        
+            return `
+              <div>
+                <div id="card-${i}" class="card${c.selected ? ' selected' : ''}"
+                     onmousedown="if (Date.now() - lastTouchTs < 600) return; startPressTimer(${i})"
+                     onmouseup="if (Date.now() - lastTouchTs < 600) { lastTouchTs = 0; return; } cancelPressTimer(true, ${i})"
+                     onmouseleave="cancelPressTimer(false, ${i})"
+                     ontouchstart="startPressTimer(${i})"
+                     ontouchend="lastTouchTs = Date.now(); cancelPressTimer(true, ${i})">
+                  <button class="reset-button"
+                    onmousedown="event.stopPropagation(); cancelPressTimer(false, ${i});"
+                    onmouseup="event.stopPropagation(); cancelPressTimer(false, ${i});"
+                    ontouchstart="event.stopPropagation(); cancelPressTimer(false, ${i});"
+                    ontouchend="event.stopPropagation(); cancelPressTimer(false, ${i});"
+                    onclick="event.stopPropagation(); resetCard(${i})">✕</button>
+        
+                  <div class="draw-label">${pescataLabel}</div>
+                  <div class="main">${content}</div>
+                </div>
+        
+                <div class="card-hints">
+                  <div class="card-columns-wrap">
+                    <div class="card-col-table">
+                      ${coloriDaMostrare.map((col, idx) => `
+                        <div class="card-row-flex">
+                          <div class="color-dot ${coloreClasse(col)}${negColor.includes(col) ? ' oscurato' : ''}"></div>
+                          <span class="probability-value${negColor.includes(col) ? ' spenta' : ''}">${probCol[idx]}</span>
+                        </div>
+                      `).join('')}
+                    </div>
+                    <div class="card-col-table">
+                      ${numeriDaMostrare.map((num, idx) => `
+                        <div class="card-row-flex">
+                          <div class="number-hint${negNumber.includes(num) ? ' oscurato' : ''}">${num}</div>
+                          <span class="probability-value${negNumber.includes(num) ? ' spenta' : ''}">${probNum[idx]}</span>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        
+          document.getElementById('color-controls').innerHTML =
+            COLORI_INDIZI.map(c => `<button class="${coloreClasse(c)}" onclick="assegnaIndizioColore('${c}')">${c}</button>`).join('');
+          document.getElementById('number-controls').innerHTML =
+            NUMERI.map(n => `<button onclick="assegnaIndizioNumero('${n}')">${n}</button>`).join('');
+          document.getElementById('residue-tracker').innerHTML = COLORI.map(col => `
+            <div class="residue-row" data-colore="${col}">
+              <div class="residue-label"></div>
+              ${carteResidue[col].map(c =>
+                `<div class="residue-button${c.oscurata ? ' oscurata' : ''}" onclick="toggleResidua('${col}', '${c.id}')">${c.numero}</div>`).join('')}
+            </div>
+          `).join('');
+        }
+        
+        
+        /* ======== Avvio ======== */
+        if (!loadState()) start(cartePerGiocatore);
+        else render();
+        
+        /* ======== Wake lock ======== */
+        let wakeLock = null;
+        async function attivaWakeLock() {
+          try {
+            if ('wakeLock' in navigator) {
+              wakeLock = await navigator.wakeLock.request('screen');
+              wakeLock.addEventListener('release', () => console.log('🔓 Wake Lock rilasciato'));
+            }
+          } catch (err) { console.error(`${err.name}, ${err.message}`); }
+        }
+        document.addEventListener('visibilitychange', () => {
+          if (wakeLock !== null && document.visibilityState === 'visible') { attivaWakeLock(); }
+        });
+        const wakeLockToggle = document.getElementById('wakelock-toggle');
+        const savedPref = localStorage.getItem('hanabiWakeLock');
+        if (savedPref === 'true') { wakeLockToggle.checked = true; attivaWakeLock(); }
+        wakeLockToggle.addEventListener('change', async function () {
+          localStorage.setItem('hanabiWakeLock', this.checked ? 'true' : 'false');
+          if (this.checked) await attivaWakeLock();
+          else if (wakeLock) { await wakeLock.release(); wakeLock = null; }
+        });
+    </script>
+
+    <div class="hantrack">Hanabi tracker</div>
+    <div class="versione">1.61</div>
+</body>
+
+</html>
