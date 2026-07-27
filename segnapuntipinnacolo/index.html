@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#174f3b" />
+  <title>Segnapunti Pinnacolo</title>
+  <style>
+    :root {
+      --bg: #0f2e25;
+      --panel: #173d31;
+      --panel-2: #1f4b3d;
+      --text: #f6fbf8;
+      --muted: #bcd1c8;
+      --accent: #f3c969;
+      --danger: #e98080;
+      --ok: #7ed9a8;
+      --border: rgba(255, 255, 255, 0.13);
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(243, 201, 105, 0.12), transparent 34%),
+        var(--bg);
+    }
+
+    button, input { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .app {
+      width: min(100%, 920px);
+      margin: 0 auto;
+      padding: 20px 14px 40px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.75rem, 7vw, 2.7rem);
+    }
+
+    .subtitle {
+      margin: 7px 0 0;
+      color: var(--muted);
+    }
+
+    .panel {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(23, 61, 49, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .hidden { display: none !important; }
+
+    .setup-title {
+      margin: 0 0 14px;
+      text-align: center;
+      font-size: 1.25rem;
+    }
+
+    .player-count {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .count-btn {
+      min-height: 64px;
+      border-radius: 14px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 1.25rem;
+      font-weight: 800;
+      border: 2px solid transparent;
+    }
+
+    .count-btn.selected {
+      color: #2b2414;
+      background: var(--accent);
+      border-color: #fff0b7;
+    }
+
+    .name-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px;
+      color: var(--text);
+      background: #0f2f26;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(243, 201, 105, 0.15);
+    }
+
+    .hint {
+      margin: 10px 0 15px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.45;
+    }
+
+    .primary {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 13px;
+      color: #2b2414;
+      background: var(--accent);
+      font-weight: 900;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .goal {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .goal strong { color: var(--accent); }
+
+    .small-btn {
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 11px;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+
+    .dealer-box {
+      margin-bottom: 14px;
+      padding: 14px;
+      border-radius: 15px;
+      background: rgba(243, 201, 105, 0.13);
+      border: 1px solid rgba(243, 201, 105, 0.34);
+      text-align: center;
+    }
+
+    .dealer-box span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .dealer-name {
+      display: block;
+      margin-top: 3px;
+      color: var(--accent);
+      font-size: 1.45rem;
+      font-weight: 900;
+    }
+
+    .dealer-controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .dealer-chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #0f2f26;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .dealer-chip.active {
+      color: #2b2414;
+      background: var(--accent);
+      font-weight: 800;
+    }
+
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .score-card {
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: var(--panel-2);
+      text-align: center;
+    }
+
+    .score-card.winner {
+      border-color: var(--ok);
+      box-shadow: 0 0 0 3px rgba(126, 217, 168, 0.13);
+    }
+
+    .score-card h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .team-members {
+      min-height: 20px;
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .total {
+      margin: 12px 0 7px;
+      font-size: 2.65rem;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .remaining {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .round-panel {
+      margin-bottom: 14px;
+    }
+
+    .round-panel h2,
+    .history h2 {
+      margin: 0 0 12px;
+      font-size: 1.1rem;
+    }
+
+    .round-inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary {
+      min-height: 50px;
+      border-radius: 13px;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 800;
+    }
+
+    .danger {
+      color: #2c1111;
+      background: var(--danger);
+      border: 0;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #0f2f26;
+      border: 1px solid var(--border);
+    }
+
+    .round-number {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .history-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      color: var(--muted);
+    }
+
+    .history-points strong { color: var(--text); }
+
+    .empty-history {
+      color: var(--muted);
+      text-align: center;
+      padding: 8px;
+    }
+
+    .winner-banner {
+      margin-bottom: 14px;
+      padding: 16px;
+      border-radius: 15px;
+      color: #123323;
+      background: var(--ok);
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 950;
+    }
+
+    @media (max-width: 520px) {
+      .app { padding-inline: 10px; }
+      .panel { padding: 14px; }
+      .actions { grid-template-columns: 1fr; }
+      .topbar { grid-template-columns: 1fr; }
+      .small-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Segnapunti Pinnacolo</h1>
+      <p class="subtitle">Punteggi, coppie e turno di chi dà fuori</p>
+    </header>
+
+    <section id="setupScreen" class="panel">
+      <h2 class="setup-title">Quanti giocatori siete?</h2>
+
+      <div class="player-count" aria-label="Numero di giocatori">
+        <button class="count-btn" data-count="2">2</button>
+        <button class="count-btn" data-count="3">3</button>
+        <button class="count-btn" data-count="4">4</button>
+      </div>
+
+      <div id="nameFields" class="name-grid"></div>
+      <p id="setupHint" class="hint">Seleziona il numero di giocatori.</p>
+      <button id="startGame" class="primary" disabled>Inizia partita</button>
+    </section>
+
+    <section id="gameScreen" class="hidden">
+      <div class="topbar">
+        <div class="goal">Obiettivo partita: <strong id="goalPoints">1505</strong> punti</div>
+        <button id="newGame" class="small-btn">Nuova partita</button>
+      </div>
+
+      <div id="winnerBanner" class="winner-banner hidden"></div>
+
+      <section class="dealer-box">
+        <span>Sta dando fuori</span>
+        <strong id="dealerName" class="dealer-name"></strong>
+        <div id="dealerControls" class="dealer-controls"></div>
+      </section>
+
+      <section id="scoreCards" class="scores"></section>
+
+      <section class="panel round-panel">
+        <h2>Aggiungi i punti della mano</h2>
+        <div id="roundInputs" class="round-inputs"></div>
+        <div class="actions">
+          <button id="addRound" class="primary">Aggiungi mano</button>
+          <button id="nextDealer" class="secondary">Passa chi dà fuori</button>
+        </div>
+      </section>
+
+      <section class="panel history">
+        <h2>Storico mani</h2>
+        <div id="historyList" class="history-list"></div>
+        <div class="actions" style="margin-top: 12px;">
+          <button id="undoRound" class="secondary">Annulla ultima mano</button>
+          <button id="resetScores" class="secondary danger">Azzera punteggi</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "pinnacolo_scorekeeper_v1";
+
+    const setupScreen = document.getElementById("setupScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const nameFields = document.getElementById("nameFields");
+    const setupHint = document.getElementById("setupHint");
+    const startGameButton = document.getElementById("startGame");
+    const countButtons = [...document.querySelectorAll(".count-btn")];
+
+    const goalPoints = document.getElementById("goalPoints");
+    const dealerName = document.getElementById("dealerName");
+    const dealerControls = document.getElementById("dealerControls");
+    const scoreCards = document.getElementById("scoreCards");
+    const roundInputs = document.getElementById("roundInputs");
+    const historyList = document.getElementById("historyList");
+    const winnerBanner = document.getElementById("winnerBanner");
+
+    let selectedCount = 0;
+    let state = null;
+
+    function getTarget(count) {
+      return count === 4 ? 2105 : 1505;
+    }
+
+    function defaultPlayerName(index) {
+      return `Giocatore ${index + 1}`;
+    }
+
+    function renderNameFields(count) {
+      nameFields.innerHTML = "";
+
+      for (let i = 0; i < count; i += 1) {
+        const label = document.createElement("label");
+        label.textContent = `Nome giocatore ${i + 1}`;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 24;
+        input.placeholder = defaultPlayerName(i);
+        input.dataset.playerName = String(i);
+
+        label.appendChild(input);
+        nameFields.appendChild(label);
+      }
+
+      setupHint.textContent = count === 4
+        ? "In 4 si gioca a coppie: Giocatori 1 e 3 contro Giocatori 2 e 4. Obiettivo 2105 punti."
+        : `Partita individuale. Obiettivo ${getTarget(count)} punti.`;
+
+      startGameButton.disabled = false;
+    }
+
+    function selectPlayerCount(count) {
+      selectedCount = count;
+      countButtons.forEach(button => {
+        button.classList.toggle("selected", Number(button.dataset.count) === count);
+      });
+      renderNameFields(count);
+    }
+
+    function buildGameState(count, names) {
+      const players = names.map((name, index) => ({
+        id: index,
+        name: name.trim() || defaultPlayerName(index)
+      }));
+
+      const scoringUnits = count === 4
+        ? [
+            { id: 0, name: "Coppia 1", members: [0, 2], score: 0 },
+            { id: 1, name: "Coppia 2", members: [1, 3], score: 0 }
+          ]
+        : players.map(player => ({
+            id: player.id,
+            name: player.name,
+            members: [player.id],
+            score: 0
+          }));
+
+      return {
+        playerCount: count,
+        target: getTarget(count),
+        players,
+        scoringUnits,
+        dealerIndex: 0,
+        history: []
+      };
+    }
+
+    function saveState() {
+      if (state) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+    }
+
+    function clearSavedState() {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    function startGame() {
+      if (!selectedCount) return;
+
+      const names = [...document.querySelectorAll("[data-player-name]")]
+        .map(input => input.value);
+
+      state = buildGameState(selectedCount, names);
+      saveState();
+      showGame();
+    }
+
+    function showGame() {
+      setupScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+      renderGame();
+    }
+
+    function showSetup() {
+      gameScreen.classList.add("hidden");
+      setupScreen.classList.remove("hidden");
+      state = null;
+      selectedCount = 0;
+      nameFields.innerHTML = "";
+      setupHint.textContent = "Seleziona il numero di giocatori.";
+      startGameButton.disabled = true;
+      countButtons.forEach(button => button.classList.remove("selected"));
+    }
+
+    function unitDisplayName(unit) {
+      if (state.playerCount !== 4) return unit.name;
+      const memberNames = unit.members.map(index => state.players[index].name).join(" + ");
+      return `${unit.name} (${memberNames})`;
+    }
+
+    function renderDealer() {
+      const dealer = state.players[state.dealerIndex];
+      dealerName.textContent = dealer.name;
+      dealerControls.innerHTML = "";
+
+      state.players.forEach((player, index) => {
+        const button = document.createElement("button");
+        button.className = "dealer-chip";
+        button.classList.toggle("active", index === state.dealerIndex);
+        button.textContent = player.name;
+        button.addEventListener("click", () => {
+          state.dealerIndex = index;
+          saveState();
+          renderDealer();
+        });
+        dealerControls.appendChild(button);
+      });
+    }
+
+    function getWinner() {
+      const candidates = state.scoringUnits.filter(unit => unit.score >= state.target);
+      if (!candidates.length) return null;
+      return [...candidates].sort((a, b) => b.score - a.score)[0];
+    }
+
+    function renderScores() {
+      scoreCards.innerHTML = "";
+      const winner = getWinner();
+
+      state.scoringUnits.forEach(unit => {
+        const card = document.createElement("article");
+        card.className = "score-card";
+        if (winner && winner.id === unit.id) card.classList.add("winner");
+
+        const title = document.createElement("h2");
+        title.textContent = state.playerCount === 4 ? unit.name : unitDisplayName(unit);
+
+        const members = document.createElement("p");
+        members.className = "team-members";
+        members.textContent = state.playerCount === 4
+          ? unit.members.map(index => state.players[index].name).join(" + ")
+          : "";
+
+        const total = document.createElement("div");
+        total.className = "total";
+        total.textContent = unit.score.toLocaleString("it-IT");
+
+        const remaining = document.createElement("div");
+        remaining.className = "remaining";
+        const difference = state.target - unit.score;
+        remaining.textContent = difference > 0
+          ? `Mancano ${difference.toLocaleString("it-IT")} punti`
+          : `Obiettivo superato di ${Math.abs(difference).toLocaleString("it-IT")} punti`;
+
+        card.append(title, members, total, remaining);
+        scoreCards.appendChild(card);
+      });
+
+      if (winner) {
+        winnerBanner.textContent = `🏆 Ha vinto ${unitDisplayName(winner)} con ${winner.score.toLocaleString("it-IT")} punti!`;
+        winnerBanner.classList.remove("hidden");
+      } else {
+        winnerBanner.classList.add("hidden");
+        winnerBanner.textContent = "";
+      }
+    }
+
+    function renderRoundInputs() {
+      roundInputs.innerHTML = "";
+
+      state.scoringUnits.forEach(unit => {
+        const label = document.createElement("label");
+        label.textContent = unitDisplayName(unit);
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.inputMode = "numeric";
+        input.step = "1";
+        input.placeholder = "0";
+        input.dataset.unitId = String(unit.id);
+
+        label.appendChild(input);
+        roundInputs.appendChild(label);
+      });
+    }
+
+    function renderHistory() {
+      historyList.innerHTML = "";
+
+      if (!state.history.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-history";
+        empty.textContent = "Nessuna mano registrata.";
+        historyList.appendChild(empty);
+        return;
+      }
+
+      [...state.history].reverse().forEach((round, reverseIndex) => {
+        const actualIndex = state.history.length - reverseIndex;
+        const row = document.createElement("div");
+        row.className = "history-row";
+
+        const roundNumber = document.createElement("div");
+        roundNumber.className = "round-number";
+        roundNumber.textContent = `Mano ${actualIndex}`;
+
+        const points = document.createElement("div");
+        points.className = "history-points";
+
+        round.points.forEach((value, unitIndex) => {
+          const item = document.createElement("span");
+          item.innerHTML = `<strong>${state.scoringUnits[unitIndex].name}:</strong> ${Number(value).toLocaleString("it-IT")}`;
+          points.appendChild(item);
+        });
+
+        const dealer = document.createElement("span");
+        dealer.textContent = `Dava fuori: ${state.players[round.dealerIndex].name}`;
+        points.appendChild(dealer);
+
+        row.append(roundNumber, points);
+        historyList.appendChild(row);
+      });
+    }
+
+    function renderGame() {
+      goalPoints.textContent = state.target.toLocaleString("it-IT");
+      renderDealer();
+      renderScores();
+      renderRoundInputs();
+      renderHistory();
+    }
+
+    function advanceDealer() {
+      state.dealerIndex = (state.dealerIndex + 1) % state.players.length;
+      saveState();
+      renderDealer();
+    }
+
+    function addRound() {
+      const inputs = [...document.querySelectorAll("[data-unit-id]")];
+      const points = inputs.map(input => {
+        const parsed = Number.parseInt(input.value, 10);
+        return Number.isFinite(parsed) ? parsed : 0;
+      });
+
+      if (points.every(value => value === 0)) {
+        alert("Inserisci almeno un punteggio diverso da zero.");
+        return;
+      }
+
+      const dealerBeforeAdvance = state.dealerIndex;
+
+      points.forEach((value, index) => {
+        state.scoringUnits[index].score += value;
+      });
+
+      state.history.push({
+        dealerIndex: dealerBeforeAdvance,
+        points
+      });
+
+      state.dealerIndex = (state.dealerIndex + 1) % state.players.length;
+      saveState();
+      renderGame();
+    }
+
+    function undoLastRound() {
+      const lastRound = state.history.pop();
+      if (!lastRound) return;
+
+      lastRound.points.forEach((value, index) => {
+        state.scoringUnits[index].score -= value;
+      });
+
+      state.dealerIndex = lastRound.dealerIndex;
+      saveState();
+      renderGame();
+    }
+
+    function resetScores() {
+      if (!confirm("Vuoi azzerare tutti i punteggi e lo storico?")) return;
+
+      state.scoringUnits.forEach(unit => { unit.score = 0; });
+      state.history = [];
+      state.dealerIndex = 0;
+      saveState();
+      renderGame();
+    }
+
+    function startNewGame() {
+      if (!confirm("Vuoi chiudere questa partita e tornare alla scelta dei giocatori?")) return;
+      clearSavedState();
+      showSetup();
+    }
+
+    countButtons.forEach(button => {
+      button.addEventListener("click", () => selectPlayerCount(Number(button.dataset.count)));
+    });
+
+    startGameButton.addEventListener("click", startGame);
+    document.getElementById("addRound").addEventListener("click", addRound);
+    document.getElementById("nextDealer").addEventListener("click", advanceDealer);
+    document.getElementById("undoRound").addEventListener("click", undoLastRound);
+    document.getElementById("resetScores").addEventListener("click", resetScores);
+    document.getElementById("newGame").addEventListener("click", startNewGame);
+
+    (function restoreSavedGame() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        state = JSON.parse(saved);
+        if (!state || !Array.isArray(state.players) || !Array.isArray(state.scoringUnits)) {
+          throw new Error("Salvataggio non valido");
+        }
+        showGame();
+      } catch (error) {
+        console.error(error);
+        clearSavedState();
+        showSetup();
+      }
+    })();
+  </script>
+</body>
+</html>
