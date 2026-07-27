@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Segnapunti Bestia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #0f172a;
+      color: #e5e7eb;
+    }
+
+    body {
+      margin: 0;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      background: #020617;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      border: 1px solid #1f2937;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p.helper {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    label {
+      display: inline-block;
+      margin-bottom: 0.25rem;
+      font-size: 0.95rem;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      max-width: 300px;
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      box-sizing: border-box;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
+    }
+
+    .field-row {
+      margin-bottom: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid #22c55e;
+      background: #16a34a;
+      color: #f9fafb;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .btn.secondary {
+      border-color: #4b5563;
+      background: #111827;
+    }
+
+    .btn.danger {
+      border-color: #f97316;
+      background: #b91c1c;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn + .btn {
+      margin-left: 0.4rem;
+    }
+
+    .btn-row {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .small {
+      font-size: 0.8rem;
+    }
+
+    .error {
+      color: #f97316;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      min-height: 1rem;
+    }
+
+    .warning {
+      color: #eab308;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      min-height: 1rem;
+    }
+
+    #playerNamesContainer .player-name-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    #playerNamesContainer .player-name-row label {
+      min-width: 90px;
+    }
+
+    /* Game screen */
+
+    #game-screen {
+      margin-top: 0.5rem;
+    }
+
+    .info-bar {
+      font-size: 2 rem;
+      margin-bottom: 0.75rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .info-bar div {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .info-bar span.label {
+      color: #9ca3af;
+      margin-right: 0.1rem;
+      font-size: 0.8rem;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 720px; /* su mobile scroll orizzontale, non si schiaccia tutto */
+    }
+
+    thead {
+      background: #020617;
+    }
+
+    th, td {
+      border: 1px solid #1f2937;
+      padding: 0.3rem 0.4rem;
+      vertical-align: top;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 600;
+      color: #9ca3af;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    td.player-cell {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    tr.dealer-row {
+      background: radial-gradient(circle at left, rgba(34, 197, 94, 0.18), transparent);
+    }
+
+    .dealer-badge {
+      display: inline-block;
+      background: #22c55e;
+      color: #022c22;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 999px;
+      margin-left: 0.35rem;
+    }
+
+    .money-value {
+      font-weight: 600;
+    }
+
+    .money-positive {
+      color: #22c55e;
+    }
+
+    .money-negative {
+      color: #f97316;
+    }
+
+    .status-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.75rem;
+      max-width: 330px;
+    }
+
+    .status-group label {
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .soc-label {
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    #handsLog {
+      list-style: none;
+      padding-left: 1rem;
+      max-height: 180px;
+      overflow-y: auto;
+      margin: 0.25rem 0 0;
+      font-size: 0.8rem;
+    }
+
+    #handsLog li {
+      margin-bottom: 0.25rem;
+      color: #9ca3af;
+    }
+
+    #trendWrapper {
+      margin-top: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      padding: 0.5rem;
+      background: #020617;
+    }
+
+    #trendCanvas {
+      width: 100%;
+      max-height: 260px;
+      display: block;
+    }
+
+    #trendLegend {
+      margin-top: 0.35rem;
+    }
+
+    /* MOBILE STYLES */
+    @media (max-width: 640px) {
+      body {
+        padding: 0.75rem;
+      }
+
+      .container {
+        padding: 0.9rem;
+        border-radius: 10px;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+      }
+
+      h2 {
+        font-size: 1.15rem;
+      }
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      p.helper {
+        font-size: 0.8rem;
+      }
+
+      label {
+        font-size: 0.85rem;
+      }
+
+      input[type="number"],
+      input[type="text"] {
+        max-width: 100%;
+      }
+
+      .info-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: 0.8rem;
+      }
+
+      .info-bar div {
+        width: 100%;
+      }
+
+      .btn-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.9rem;
+      }
+
+      table {
+        font-size: 0.78rem;
+        min-width: 640px;
+      }
+
+      th {
+        font-size: 0.75rem;
+      }
+
+      #trendCanvas {
+        max-height: 220px;
+      }
+
+      #handsLog {
+        max-height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- SETUP -->
+    <div id="setup-screen">
+      <h1>Segnapunti Bestia</h1>
+      <p class="helper">
+        Imposta giocatori e posta.<br />
+        La posta deve essere divisibile per 3 (così il piatto è sempre divisibile sulle 3 prese).
+      </p>
+
+      <div class="field-row">
+        <label for="numPlayers">Numero giocatori</label><br />
+        <input type="number" id="numPlayers" min="3" max="10" value="5" />
+      </div>
+
+      <div class="field-row">
+        <button id="generateNamesBtn" class="btn secondary small">
+          Genera campi nome
+        </button>
+      </div>
+
+      <div id="playerNamesContainer" class="field-row"></div>
+
+      <div class="field-row">
+        <label for="posta">Posta (intera, divisibile per 3)</label><br />
+        <input type="number" id="posta" min="3" step="1" value="6" />
+        <div id="postaError" class="error"></div>
+      </div>
+
+      <div class="btn-row">
+        <button id="startGameBtn" class="btn">
+          Inizia partita
+        </button>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="game-screen" style="display: none;">
+      <h2>Partita in corso</h2>
+      <p class="helper">
+        Prima mano: tutti mettono la posta.<br />
+        Dalla seconda mano: solo il mazziere aggiunge la posta base,
+        <strong>tranne</strong> quando non c'è nessuna Bestia: allora il giro riparte e alla mano successiva tutti rimettono la posta.<br />
+        Ogni Bestia paga l’intero piatto per la mano successiva (ed è conteggiata).<br />
+        Usa le colonne Società 1/2/3 per segnare i gruppi di prete/società:<br />
+        i giocatori spuntati nella stessa colonna si dividono tra loro vincite e Bestie della mano.<br />
+        Un giocatore non può essere in più di una società contemporaneamente.<br />
+        Con "Fine partita" la partita finirà alla prima mano senza Bestia.
+      </p>
+
+      <div class="info-bar">
+        <div>
+          <span class="label">Mano:</span>
+          <span id="handNumber">1</span>
+        </div>
+        <div>
+          <span class="label">Mazziere:</span>
+          <span id="dealerName"></span>
+        </div>
+        <div>
+          <span class="label">Posta base:</span>
+          <span id="postaInfo"></span>
+        </div>
+        <div>
+          <span class="label">Piatto attuale:</span>
+          <span id="potInfo"></span>
+        </div>
+        <div>
+          <span class="label">Quota per presa (piatto / 3):</span>
+          <span id="presaValue"></span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Giocatore</th>
+              <th>Saldo</th>
+              <th>Bestie</th>
+              <th>Esito mano</th>
+              <th>Società 1</th>
+              <th>Società 2</th>
+              <th>Società 3</th>
+            </tr>
+          </thead>
+          <tbody id="playersTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="handError" class="error"></div>
+      <div id="handWarning" class="warning"></div>
+
+      <div class="btn-row">
+        <button id="confirmHandBtn" class="btn">
+          Conferma mano
+        </button>
+        <button id="undoBtn" class="btn secondary">
+          Undo
+        </button>
+        <button id="finishBtn" class="btn secondary">
+          Fine partita
+        </button>
+        <button id="resetGameBtn" class="btn danger secondary">
+          Nuova partita
+        </button>
+      </div>
+
+      <h3>Grafico andamento</h3>
+      <div id="trendWrapper">
+        <canvas id="trendCanvas"></canvas>
+        <div id="trendLegend"></div>
+      </div>
+
+      <h3>Storico mani</h3>
+      <ul id="handsLog"></ul>
+
+      <h3>Rimborsi finali</h3>
+      <div id="settlementOutput" class="helper" style="text-align:left;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Stato di gioco
+    let players = [];        // { name, money, bestie }
+    let basePosta = 0;
+    let handNumber = 1;
+    let currentDealerIndex = 0;
+    let currentPot = 0;      // piatto della mano corrente
+
+    // Andamento per grafico
+    let moneyHistory = [];   // moneyHistory[i] = array di saldi per il giocatore i
+    let handLabels = [];     // etichette asse X (Start, 1, 2, ...)
+
+    // Stack per undo infinito
+    let historyStack = [];
+
+    // Fine partita
+    let endGameArmed = false;  // Fine partita impostata
+    let gameFinished = false;  // Partita effettivamente terminata
+
+    // Utility
+    function qs(sel) {
+      return document.querySelector(sel);
+    }
+    function qsa(sel) {
+      return Array.from(document.querySelectorAll(sel));
+    }
+
+    // Anti-refresh accidentale
+    function setBeforeUnload(active) {
+      if (active) {
+        window.onbeforeunload = function (e) {
+          e.preventDefault();
+          const message = 'La partita è in corso. Se esci perderai tutti i dati della sessione.';
+          e.returnValue = message;
+          return message;
+        };
+      } else {
+        window.onbeforeunload = null;
+      }
+    }
+
+    function clearHandMessages() {
+      qs('#handError').textContent = '';
+      qs('#handWarning').textContent = '';
+    }
+
+    function statusLabelFromValue(value) {
+      switch (value) {
+        case 'no_play': return 'Non gioco';
+        case '1': return '1 presa';
+        case '2': return '2 prese';
+        case '3': return '3 prese';
+        case 'bestia': return 'Bestia';
+        default: return value;
+      }
+    }
+
+    function moneyClass(value) {
+      if (value > 0) return 'money-value money-positive';
+      if (value < 0) return 'money-value money-negative';
+      return 'money-value';
+    }
+
+    // Genera i campi nome in base al numero giocatori
+    function generateNameFields() {
+      const num = parseInt(qs('#numPlayers').value, 10) || 0;
+      const container = qs('#playerNamesContainer');
+      container.innerHTML = '';
+
+      for (let i = 0; i < num; i++) {
+        const row = document.createElement('div');
+        row.className = 'player-name-row';
+
+        const label = document.createElement('label');
+        label.textContent = 'Giocatore ' + (i + 1) + ':';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'playerName_' + i;
+        input.value = 'Giocatore ' + (i + 1);
+
+        row.appendChild(label);
+        row.appendChild(input);
+        container.appendChild(row);
+      }
+    }
+
+    // Salva stato corrente (per undo)
+    function pushHistory() {
+      const uiStatuses = [];
+      const uiSoc = [];
+
+      players.forEach((p, idx) => {
+        // stato radio
+        let st = 'no_play';
+        const radios = qsa('input[name="status_' + idx + '"]');
+        radios.forEach(r => {
+          if (r.checked) st = r.value;
+        });
+        uiStatuses[idx] = st;
+
+        // società 1-2-3
+        const socFlags = [];
+        for (let g = 1; g <= 3; g++) {
+          const cb = qs('#soc' + g + '_' + idx);
+          socFlags.push(cb ? !!cb.checked : false);
+        }
+        uiSoc[idx] = socFlags;
+      });
+
+      const snapshot = {
+        players: players.map(p => ({ name: p.name, money: p.money, bestie: p.bestie || 0 })),
+        basePosta,
+        handNumber,
+        currentDealerIndex,
+        currentPot,
+        handsLogHTML: qs('#handsLog').innerHTML,
+        uiStatuses,
+        uiSoc,
+        moneyHistory: moneyHistory.map(arr => arr.slice()),
+        handLabels: handLabels.slice(),
+        endGameArmed,
+        gameFinished
+      };
+
+      historyStack.push(snapshot);
+    }
+
+    function restoreFromSnapshot(snapshot) {
+      players = snapshot.players.map(p => ({
+        name: p.name,
+        money: p.money,
+        bestie: p.bestie || 0
+      }));
+      basePosta = snapshot.basePosta;
+      handNumber = snapshot.handNumber;
+      currentDealerIndex = snapshot.currentDealerIndex;
+      currentPot = snapshot.currentPot;
+      qs('#handsLog').innerHTML = snapshot.handsLogHTML;
+      moneyHistory = snapshot.moneyHistory.map(arr => arr.slice());
+      handLabels = snapshot.handLabels.slice();
+      endGameArmed = !!snapshot.endGameArmed;
+      gameFinished = !!snapshot.gameFinished;
+
+      renderPlayersTable();
+
+      // ripristina radio & società
+      players.forEach((p, idx) => {
+        const wantedSt = snapshot.uiStatuses[idx] || 'no_play';
+        const radios = qsa('input[name="status_' + idx + '"]');
+        radios.forEach(r => {
+          r.checked = (r.value === wantedSt);
+        });
+
+        const socFlags = snapshot.uiSoc[idx] || [];
+        for (let g = 1; g <= 3; g++) {
+          const cb = qs('#soc' + g + '_' + idx);
+          if (cb) cb.checked = !!socFlags[g - 1];
+        }
+      });
+
+      updateGameInfo();
+      renderTrendChart();
+      const out = qs('#settlementOutput');
+      if (out) out.innerHTML = '';
+    }
+
+    function undoLast() {
+      if (!historyStack.length) {
+        qs('#handError').textContent = 'Nessuna mano da annullare.';
+        return;
+      }
+      clearHandMessages();
+      const snap = historyStack.pop();
+      restoreFromSnapshot(snap);
+    }
+
+    // Setup iniziale della partita
+    function setupGame(names, posta) {
+      players = names.map(n => ({
+        name: n,
+        money: 0,
+        bestie: 0
+      }));
+      basePosta = posta;
+      handNumber = 1;
+      currentDealerIndex = 0;
+      currentPot = 0;
+      historyStack = [];
+      moneyHistory = [];
+      handLabels = [];
+      endGameArmed = false;
+      gameFinished = false;
+
+      const out = qs('#settlementOutput');
+      if (out) out.innerHTML = '';
+
+      // Mazziere della prima mano scelto a caso
+      if (players.length > 0) {
+        currentDealerIndex = Math.floor(Math.random() * players.length);
+      }
+
+      // Costruisce la tabella dei giocatori
+      renderPlayersTable();
+
+      // Prima mano: tutti mettono la posta subito
+      currentPot = 0;
+      players.forEach(p => {
+        p.money -= basePosta;
+        currentPot += basePosta;
+      });
+
+      // Aggiorna UI
+      qs('#handsLog').innerHTML = '';
+      clearHandMessages();
+      updateGameInfo();
+
+      // Inizializza grafico (stato dopo l'entrata)
+      initHistory();
+    }
+
+    function initHistory() {
+      moneyHistory = players.map(p => [p.money]);
+      handLabels = ['Start'];
+      renderTrendChart();
+    }
+
+    // Costruisce la tabella dei giocatori
+    function renderPlayersTable() {
+      const tbody = qs('#playersTableBody');
+      tbody.innerHTML = '';
+
+      players.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        tr.dataset.index = String(idx);
+
+        // Colonna giocatore
+        const tdPlayer = document.createElement('td');
+        tdPlayer.className = 'player-cell';
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = p.name;
+        tdPlayer.appendChild(nameSpan);
+
+        const dealerBadge = document.createElement('span');
+        dealerBadge.className = 'dealer-badge';
+        dealerBadge.textContent = 'Mazziere';
+        dealerBadge.style.display = idx === currentDealerIndex ? 'inline-block' : 'none';
+        dealerBadge.id = 'dealerBadge_' + idx;
+        tdPlayer.appendChild(dealerBadge);
+
+        // Colonna saldo
+        const tdMoney = document.createElement('td');
+        const moneySpan = document.createElement('span');
+        moneySpan.id = 'money_' + idx;
+        moneySpan.textContent = '0';
+        moneySpan.className = moneyClass(0);
+        tdMoney.appendChild(moneySpan);
+
+        // Colonna bestie
+        const tdBestie = document.createElement('td');
+        const bestieSpan = document.createElement('span');
+        bestieSpan.id = 'bestie_' + idx;
+        bestieSpan.textContent = '0';
+        tdBestie.appendChild(bestieSpan);
+
+        // Colonna esito mano (radio)
+        const tdStatus = document.createElement('td');
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'status-group';
+
+        const options = [
+          { value: 'no_play', label: 'Non gioco' },
+          { value: '1', label: '1 presa' },
+          { value: '2', label: '2 prese' },
+          { value: '3', label: '3 prese' },
+          { value: 'bestia', label: 'Bestia' }
+        ];
+
+        options.forEach(opt => {
+          const lbl = document.createElement('label');
+          const inp = document.createElement('input');
+          inp.type = 'radio';
+          inp.name = 'status_' + idx;
+          inp.value = opt.value;
+          if (opt.value === 'no_play') inp.checked = true;
+          lbl.appendChild(inp);
+          lbl.appendChild(document.createTextNode(opt.label));
+          statusDiv.appendChild(lbl);
+        });
+
+        tdStatus.appendChild(statusDiv);
+
+        tr.appendChild(tdPlayer);
+        tr.appendChild(tdMoney);
+        tr.appendChild(tdBestie);
+        tr.appendChild(tdStatus);
+
+        // Colonne Società 1-2-3
+        for (let g = 1; g <= 3; g++) {
+          const tdSoc = document.createElement('td');
+          const socLabel = document.createElement('label');
+          socLabel.className = 'soc-label';
+          const socInput = document.createElement('input');
+          socInput.type = 'checkbox';
+          socInput.id = 'soc' + g + '_' + idx;
+          socInput.className = 'soc-checkbox soc-group' + g;
+          socLabel.appendChild(socInput);
+          socLabel.appendChild(document.createTextNode(' S' + g));
+          tdSoc.appendChild(socLabel);
+          tr.appendChild(tdSoc);
+        }
+
+        tbody.appendChild(tr);
+      });
+
+      updateDealerRowHighlight();
+    }
+
+    function updateDealerRowHighlight() {
+      players.forEach((p, idx) => {
+        const tr = qs('tr[data-index="' + idx + '"]');
+        const badge = qs('#dealerBadge_' + idx);
+        if (!tr || !badge) return;
+        if (idx === currentDealerIndex) {
+          tr.classList.add('dealer-row');
+          badge.style.display = 'inline-block';
+        } else {
+          tr.classList.remove('dealer-row');
+          badge.style.display = 'none';
+        }
+      });
+    }
+
+    // Aggiorna info di partita (testata e saldi)
+    function updateGameInfo() {
+      qs('#handNumber').textContent = String(handNumber);
+      qs('#dealerName').textContent = players[currentDealerIndex]?.name || '-';
+      qs('#postaInfo').textContent = String(basePosta);
+      qs('#potInfo').textContent = String(currentPot);
+
+      let presaVal = 0;
+      if (currentPot > 0) {
+        presaVal = currentPot / 3;
+      }
+      qs('#presaValue').textContent = String(presaVal);
+
+      players.forEach((p, idx) => {
+        const moneySpan = qs('#money_' + idx);
+        if (moneySpan) {
+          moneySpan.textContent = String(p.money);
+          moneySpan.className = moneyClass(p.money);
+        }
+        const bestieSpan = qs('#bestie_' + idx);
+        if (bestieSpan) {
+          bestieSpan.textContent = String(p.bestie || 0);
+        }
+      });
+
+      updateDealerRowHighlight();
+    }
+
+    // Registra un nuovo punto nel grafico dopo una mano
+    function recordHistoryPoint() {
+      if (!players.length) return;
+      players.forEach((p, idx) => {
+        if (!moneyHistory[idx]) {
+          moneyHistory[idx] = [];
+        }
+        moneyHistory[idx].push(p.money);
+      });
+      const label = String(handNumber - 1 > 0 ? handNumber - 1 : 0);
+      handLabels.push(label);
+    }
+
+    // Disegna il grafico su canvas
+    function renderTrendChart() {
+      const canvas = qs('#trendCanvas');
+      const legend = qs('#trendLegend');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      if (!players.length || !moneyHistory.length) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (legend) legend.innerHTML = '';
+        return;
+      }
+
+      const maxLen = moneyHistory.reduce((m, arr) => Math.max(m, arr ? arr.length : 0), 0);
+      if (!maxLen) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (legend) legend.innerHTML = '';
+        return;
+      }
+
+      let minVal = Infinity;
+      let maxVal = -Infinity;
+      moneyHistory.forEach(arr => {
+        if (!arr) return;
+        arr.forEach(v => {
+          if (v < minVal) minVal = v;
+          if (v > maxVal) maxVal = v;
+        });
+      });
+
+      if (minVal === Infinity) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (legend) legend.innerHTML = '';
+        return;
+      }
+
+      if (minVal === maxVal) {
+        minVal -= 1;
+        maxVal += 1;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      let width = rect.width || 600;
+      let height = rect.height || 220;
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      const marginLeft = 40;
+      const marginRight = 16;
+      const marginTop = 10;
+      const marginBottom = 26;
+      const innerW = width - marginLeft - marginRight;
+      const innerH = height - marginTop - marginBottom;
+
+      // Assi
+      ctx.strokeStyle = '#4b5563';
+      ctx.lineWidth = 1;
+
+      // Asse X
+      ctx.beginPath();
+      ctx.moveTo(marginLeft, height - marginBottom);
+      ctx.lineTo(width - marginRight, height - marginBottom);
+      ctx.stroke();
+
+      // Asse Y
+      ctx.beginPath();
+      ctx.moveTo(marginLeft, marginTop);
+      ctx.lineTo(marginLeft, height - marginBottom);
+      ctx.stroke();
+
+      // Griglia orizzontale + etichette valori
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '10px system-ui';
+      const steps = 4;
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const val = minVal + (maxVal - minVal) * (steps - i) / steps;
+        const y = marginTop + t * innerH;
+
+        ctx.strokeStyle = '#1f2937';
+        ctx.beginPath();
+        ctx.moveTo(marginLeft, y);
+        ctx.lineTo(width - marginRight, y);
+        ctx.stroke();
+
+        ctx.fillText(val.toFixed(0), 5, y + 3);
+      }
+
+      // Linea dello zero se serve
+      if (minVal < 0 && maxVal > 0) {
+        const zT = (0 - minVal) / (maxVal - minVal);
+        const zY = marginTop + (1 - zT) * innerH;
+        if (ctx.setLineDash) ctx.setLineDash([4, 3]);
+        ctx.strokeStyle = '#6b7280';
+        ctx.beginPath();
+        ctx.moveTo(marginLeft, zY);
+        ctx.lineTo(width - marginRight, zY);
+        ctx.stroke();
+        if (ctx.setLineDash) ctx.setLineDash([]);
+      }
+
+      const colors = ['#f97316', '#22c55e', '#3b82f6', '#e11d48', '#a855f7', '#06b6d4', '#facc15', '#fb7185', '#4ade80', '#94a3b8'];
+
+      // Linee per giocatore
+      players.forEach((p, idx) => {
+        const arr = moneyHistory[idx] || [];
+        if (!arr.length) return;
+
+        ctx.strokeStyle = colors[idx % colors.length];
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+
+        arr.forEach((val, i) => {
+          const x = marginLeft + (maxLen === 1 ? innerW / 2 : (i * (innerW / (maxLen - 1))));
+          const t = (val - minVal) / (maxVal - minVal);
+          const y = marginTop + (1 - t) * innerH;
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.stroke();
+
+        // Punto finale
+        const lastVal = arr[arr.length - 1];
+        const lastIdx = arr.length - 1;
+        const xLast = marginLeft + (maxLen === 1 ? innerW / 2 : (lastIdx * (innerW / (maxLen - 1))));
+        const tLast = (lastVal - minVal) / (maxVal - minVal);
+        const yLast = marginTop + (1 - tLast) * innerH;
+        ctx.fillStyle = colors[idx % colors.length];
+        ctx.beginPath();
+        ctx.arc(xLast, yLast, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Etichette X (prima e ultima mano)
+      if (handLabels.length) {
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '10px system-ui';
+        const baseY = height - 8;
+        const firstLabel = handLabels[0];
+        const lastLabel = handLabels[handLabels.length - 1];
+
+        ctx.fillText(firstLabel, marginLeft, baseY);
+        if (handLabels.length > 1) {
+          const lastX = width - marginRight - 16;
+          ctx.fillText(lastLabel, lastX, baseY);
+        }
+      }
+
+      // Legenda
+      if (legend) {
+        legend.innerHTML = players.map((p, idx) => {
+          const color = colors[idx % colors.length];
+          return `<span style="display:inline-flex;align-items:center;margin-right:0.75rem;font-size:0.8rem;">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:999px;background:${color};margin-right:4px;"></span>${p.name}
+            </span>`;
+        }).join('');
+      }
+    }
+
+    // Conferma la mano
+    function confirmHand() {
+      clearHandMessages();
+
+      if (gameFinished) {
+        qs('#handError').textContent = 'La partita è già terminata. Premi "Nuova partita" per ricominciare.';
+        return;
+      }
+
+      if (!players.length) return;
+
+      const potBefore = currentPot;
+      const preMoney = players.map(p => p.money);
+
+      const statuses = [];
+      let totalPrese = 0;
+      let someonePlayed = false;
+      let nBestia = 0;
+
+      // Leggi esiti
+      players.forEach((p, idx) => {
+        const radios = qsa('input[name="status_' + idx + '"]');
+        let chosen = 'no_play';
+        radios.forEach(r => {
+          if (r.checked) chosen = r.value;
+        });
+        statuses[idx] = chosen;
+
+        if (chosen !== 'no_play') {
+          someonePlayed = true;
+        }
+        if (chosen === '1' || chosen === '2' || chosen === '3') {
+          totalPrese += parseInt(chosen, 10);
+        }
+        if (chosen === 'bestia') {
+          nBestia++;
+        }
+      });
+
+      if (!someonePlayed) {
+        qs('#handError').textContent = 'Seleziona almeno un giocatore che ha partecipato alla mano.';
+        return;
+      }
+
+      if (totalPrese > 3) {
+        qs('#handError').textContent =
+          'Hai segnato ' + totalPrese + ' prese (il massimo è 3). Correggi prima di registrare.';
+        return;
+      }
+
+      if (totalPrese !== 3) {
+        qs('#handWarning').textContent =
+          'Attenzione: hai segnato ' + totalPrese +
+          ' prese totali (in teoria dovrebbero essere 3). La mano viene comunque registrata.';
+      }
+
+      // Verifica se questa mano chiude la partita
+      const endTriggered = endGameArmed && nBestia === 0;
+
+      // Società 1-2-3
+      const socGroups = [[], [], []];
+      players.forEach((p, idx) => {
+        for (let g = 1; g <= 3; g++) {
+          const cb = qs('#soc' + g + '_' + idx);
+          if (cb && cb.checked) {
+            socGroups[g - 1].push(idx);
+          }
+        }
+      });
+
+      // Controllo overlap: un giocatore non può essere in più di una società
+      const membershipCounts = new Array(players.length).fill(0);
+      socGroups.forEach(group => {
+        group.forEach(idx => {
+          membershipCounts[idx]++;
+        });
+      });
+      const overlap = membershipCounts.some(c => c > 1);
+      if (overlap) {
+        qs('#handError').textContent =
+          'Un giocatore è in più di una società: togli le spunte in eccesso.';
+        return;
+      }
+
+      // Tutto ok: salvo stato per undo
+      pushHistory();
+
+      // Calcolo delta soldi per giocatore (prese + Bestie)
+      const delta = new Array(players.length).fill(0);
+      let potPerPresa = 0;
+      if (totalPrese > 0) {
+        potPerPresa = potBefore / totalPrese;
+      }
+
+      // Vincite per prese
+      players.forEach((p, idx) => {
+        const st = statuses[idx];
+        if (st === '1' || st === '2' || st === '3') {
+          const prese = parseInt(st, 10);
+          delta[idx] += potPerPresa * prese;
+        }
+      });
+
+      // Bestie: ognuno paga l'intero piatto e incrementa contatore
+      players.forEach((p, idx) => {
+        const st = statuses[idx];
+        if (st === 'bestia') {
+          delta[idx] -= potBefore;
+          p.bestie = (p.bestie || 0) + 1;
+        }
+      });
+
+      // Società: per ogni gruppo, i giocatori si dividono tra loro le delta
+      socGroups.forEach(group => {
+        if (group.length >= 2) {
+          let sumDelta = 0;
+          group.forEach(idx => {
+            sumDelta += delta[idx];
+          });
+          const shared = sumDelta / group.length;
+          group.forEach(idx => {
+            delta[idx] = shared;
+          });
+        }
+      });
+
+      // Applica delta
+      players.forEach((p, idx) => {
+        p.money = preMoney[idx] + delta[idx];
+      });
+
+      // Piatto che si porta avanti con le Bestie
+      const potCarry = potBefore * nBestia;
+
+      // Log della mano
+      logHand(statuses, potBefore, potCarry, nBestia, socGroups);
+
+      // Reset esiti e società per la prossima mano (se ci sarà)
+      players.forEach((p, idx) => {
+        const noPlayRadio = qs('input[name="status_' + idx + '"][value="no_play"]');
+        if (noPlayRadio) noPlayRadio.checked = true;
+
+        for (let g = 1; g <= 3; g++) {
+          const cb = qs('#soc' + g + '_' + idx);
+          if (cb) cb.checked = false;
+        }
+      });
+
+      // Preparazione per dopo mano
+      handNumber += 1;
+      currentDealerIndex = (currentDealerIndex + 1) % players.length;
+
+      if (endTriggered) {
+        // La partita finisce: niente nuovo giro, niente nuova posta
+        currentPot = 0;
+        gameFinished = true;
+        endGameArmed = false;
+      } else {
+        // Partita continua
+        if (nBestia === 0) {
+          // Nessuna Bestia: si riparte da un "primo giro": tutti rimettono la posta
+          currentPot = 0;
+          players.forEach(p => {
+            p.money -= basePosta;
+            currentPot += basePosta;
+          });
+        } else {
+          // Ci sono Bestie: il piatto successivo parte da potCarry, più la posta del nuovo mazziere
+          currentPot = potCarry;
+          const dealer = players[currentDealerIndex];
+          dealer.money -= basePosta;
+          currentPot += basePosta;
+        }
+      }
+
+      updateGameInfo();
+      recordHistoryPoint();
+      renderTrendChart();
+
+      const out = qs('#settlementOutput');
+      if (out) out.innerHTML = '';
+
+      if (endTriggered) {
+        showFinalSettlementPopup();
+      }
+    }
+
+    function logHand(statuses, potBefore, potCarry, nBestia, socGroups) {
+      const ul = qs('#handsLog');
+      const li = document.createElement('li');
+
+      const parts = statuses.map((st, idx) => {
+        return players[idx].name + ': ' + statusLabelFromValue(st);
+      });
+
+      let socText = '';
+      socGroups.forEach((group, gIdx) => {
+        if (group.length >= 1) {
+          const names = group.map(i => players[i].name).join(', ');
+          socText += (socText ? ' | ' : '') + 'S' + (gIdx + 1) + ': ' + names;
+        }
+      });
+
+      li.textContent =
+        'Mano ' + handNumber +
+        ' [Piatto: ' + potBefore + ', Bestie: ' + nBestia + ']' +
+        (socText ? ' | Società: ' + socText : '') +
+        ' | Mazziere: ' + (players[currentDealerIndex]?.name || '-') +
+        ' → ' + parts.join(' | ');
+
+      if (ul.firstChild) {
+        ul.insertBefore(li, ul.firstChild);
+      } else {
+        ul.appendChild(li);
+      }
+    }
+
+    function formatAmount(value) {
+      const rounded = Math.round(value * 100) / 100;
+      if (Math.abs(rounded - Math.round(rounded)) < 1e-6) {
+        return String(Math.round(rounded));
+      }
+      return rounded.toFixed(2);
+    }
+
+    // Calcolo rimborsi finali (greedy: pochi scambi, sempre corretti)
+    function computeSettlement() {
+      const creditors = [];
+      const debtors = [];
+      players.forEach(p => {
+        const val = Math.round(p.money * 100) / 100;
+        if (val > 0.00001) {
+          creditors.push({ name: p.name, amount: val });
+        } else if (val < -0.00001) {
+          debtors.push({ name: p.name, amount: -val }); // importo da pagare
+        }
+      });
+
+      creditors.sort((a, b) => b.amount - a.amount); // creditori grandi prima
+      debtors.sort((a, b) => b.amount - a.amount);   // debitori grandi prima
+
+      const transfers = [];
+      let iCred = 0;
+      let iDebt = 0;
+
+      while (iCred < creditors.length && iDebt < debtors.length) {
+        const cred = creditors[iCred];
+        const debt = debtors[iDebt];
+        const amt = Math.min(cred.amount, debt.amount);
+
+        if (amt <= 0.00001) {
+          if (cred.amount <= 0.00001) iCred++;
+          if (debt.amount <= 0.00001) iDebt++;
+          continue;
+        }
+
+        transfers.push({
+          from: debt.name,
+          to: cred.name,
+          amount: amt
+        });
+
+        cred.amount -= amt;
+        debt.amount -= amt;
+
+        if (cred.amount <= 0.00001) iCred++;
+        if (debt.amount <= 0.00001) iDebt++;
+      }
+
+      return transfers;
+    }
+
+    function showFinalSettlementPopup() {
+      const total = players.reduce((sum, p) => sum + p.money, 0);
+      const totalRounded = Math.round(total * 100) / 100;
+
+      let warn = '';
+      if (Math.abs(totalRounded) > 0.01) {
+        warn =
+          'ATTENZIONE: il totale non è esattamente zero (somma=' +
+          formatAmount(totalRounded) +
+          '). Possibili arrotondamenti.\n\n';
+      }
+
+      const transfers = computeSettlement();
+
+      let text = warn + 'Saldi finali:\n';
+      players.forEach(p => {
+        text += `${p.name}: ${formatAmount(p.money)}\n`;
+      });
+
+      if (!transfers.length) {
+        text += '\nNessun rimborso necessario.';
+      } else {
+        text += '\nRimborsi suggeriti:\n';
+        transfers.forEach(t => {
+          text += `${t.from} deve dare ${formatAmount(t.amount)} a ${t.to}\n`;
+        });
+      }
+
+      alert(text);
+
+      // partita finita -> possiamo togliere l'anti-refresh
+      setBeforeUnload(false);
+
+      const out = qs('#settlementOutput');
+      if (out) {
+        let html = '<strong>Saldi finali:</strong><br>';
+        players.forEach(p => {
+          html += `${p.name}: <strong>${formatAmount(p.money)}</strong><br>`;
+        });
+
+        if (!transfers.length) {
+          html += '<br><strong>Nessun rimborso necessario.</strong>';
+        } else {
+          html += '<br><strong>Rimborsi suggeriti (minimizzando gli scambi):</strong><br>';
+          transfers.forEach(t => {
+            html += `${t.from} deve dare <strong>${formatAmount(t.amount)}</strong> a ${t.to}<br>`;
+          });
+        }
+
+        out.innerHTML = html;
+      }
+    }
+
+    // Arma la fine partita
+    function armEndGame() {
+      clearHandMessages();
+      if (!players.length) return;
+      if (gameFinished) {
+        qs('#handError').textContent = 'La partita è già terminata.';
+        return;
+      }
+
+      const ok = window.confirm('La partita finirà quando non ci sarà nessuna bestia. Confermi?');
+      if (!ok) return;
+
+      endGameArmed = true;
+      qs('#handWarning').textContent =
+        'Fine partita impostata: la partita terminerà alla prossima mano senza Bestia.';
+    }
+
+    // Reset completa partita
+    function resetGame() {
+      const sure = window.confirm('Vuoi davvero azzerare la partita e tornare al setup?');
+      if (!sure) return;
+
+      players = [];
+      basePosta = 0;
+      handNumber = 1;
+      currentDealerIndex = 0;
+      currentPot = 0;
+      historyStack = [];
+      moneyHistory = [];
+      handLabels = [];
+      endGameArmed = false;
+      gameFinished = false;
+
+      qs('#handsLog').innerHTML = '';
+      qs('#game-screen').style.display = 'none';
+      qs('#setup-screen').style.display = 'block';
+      qs('#handError').textContent = '';
+      qs('#handWarning').textContent = '';
+
+      const canvas = qs('#trendCanvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      const legend = qs('#trendLegend');
+      if (legend) legend.innerHTML = '';
+      const out = qs('#settlementOutput');
+      if (out) out.innerHTML = '';
+
+      // niente partita in corso -> disattiva anti-refresh
+      setBeforeUnload(false);
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // all'inizio niente blocco
+      setBeforeUnload(false);
+
+      qs('#generateNamesBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        generateNameFields();
+      });
+
+      qs('#startGameBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        clearHandMessages();
+        qs('#postaError').textContent = '';
+
+        const num = parseInt(qs('#numPlayers').value, 10);
+        const posta = parseInt(qs('#posta').value, 10);
+
+        if (!num || num < 2) {
+          qs('#postaError').textContent = 'Imposta un numero di giocatori valido (almeno 3 consigliato).';
+          return;
+        }
+        if (!posta || posta <= 0 || posta % 3 !== 0) {
+          qs('#postaError').textContent = 'La posta deve essere un intero positivo divisibile per 3.';
+          return;
+        }
+
+        const nameInputs = qsa('#playerNamesContainer input[type="text"]');
+        let names = [];
+
+        if (nameInputs.length === num) {
+          names = nameInputs.map((inp, i) => {
+            const val = inp.value.trim();
+            return val || ('Giocatore ' + (i + 1));
+          });
+        } else {
+          for (let i = 0; i < num; i++) {
+            names.push('Giocatore ' + (i + 1));
+          }
+        }
+
+        setupGame(names, posta);
+
+        qs('#setup-screen').style.display = 'none';
+        qs('#game-screen').style.display = 'block';
+
+        // partita avviata -> attiva anti-refresh
+        setBeforeUnload(true);
+      });
+
+      qs('#confirmHandBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        confirmHand();
+      });
+
+      qs('#undoBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        undoLast();
+      });
+
+      qs('#finishBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        armEndGame();
+      });
+
+      qs('#resetGameBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        resetGame();
+      });
+
+      // ridisegna il grafico se la finestra cambia dimensione
+      window.addEventListener('resize', () => {
+        renderTrendChart();
+      });
+    });
+  </script>
+</body>
+</html>
