@@ -623,8 +623,8 @@
         const input = document.createElement("input");
         input.type = "number";
         input.inputMode = "numeric";
-        input.step = "1";
-        input.placeholder = "0";
+        input.step = "5";
+        input.placeholder = "0 (multipli di 5)";
         input.dataset.unitId = String(unit.id);
 
         label.appendChild(input);
@@ -687,9 +687,18 @@
     function addRound() {
       const inputs = [...document.querySelectorAll("[data-unit-id]")];
       const points = inputs.map(input => {
-        const parsed = Number.parseInt(input.value, 10);
-        return Number.isFinite(parsed) ? parsed : 0;
+        if (input.value.trim() === "") return 0;
+        return Number(input.value);
       });
+
+      const hasInvalidPoints = points.some(value =>
+        !Number.isFinite(value) || !Number.isInteger(value) || value % 5 !== 0
+      );
+
+      if (hasInvalidPoints) {
+        alert("I punteggi devono essere numeri interi multipli di 5, anche negativi.");
+        return;
+      }
 
       if (points.every(value => value === 0)) {
         alert("Inserisci almeno un punteggio diverso da zero.");
