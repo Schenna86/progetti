@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>I miei progetti</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 30px;
+      font-family: Arial, sans-serif;
+      background: #202124;
+      color: #ffffff;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 35px;
+      text-align: center;
+    }
+
+    .progetti {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .progetto {
+      display: block;
+      padding: 25px;
+      border: 1px solid #555;
+      border-radius: 15px;
+      background: #303134;
+      color: #ffffff;
+      text-decoration: none;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .progetto:hover {
+      background: #3c4043;
+      transform: translateY(-4px);
+    }
+
+    .progetto h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .progetto p {
+      margin-bottom: 0;
+      color: #bdc1c6;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <h1>I miei progetti</h1>
+
+    <div class="progetti">
+
+      <a class="progetto" href="./hanabitracker/">
+        <h2>Hanabi Tracker</h2>
+        <p>Tracker per la gestione delle carte di Hanabi.</p>
+      </a>
+
+      <a class="progetto" href="./segnapuntibestia/">
+        <h2>Segnapunti Bestia</h2>
+        <p>Applicazione per tenere i punteggi durante le partite.</p>
+      </a>
+
+    </div>
+
+  </main>
+
+</body>
+</html>
