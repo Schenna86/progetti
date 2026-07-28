@@ -43,8 +43,11 @@
       color: white;
       cursor: pointer;
       touch-action: manipulation;
+      user-select: none;
+      transition: transform .055s ease, filter .07s ease;
     }
     button:hover { filter: brightness(1.08); }
+    button:active { transform: scale(.97); filter: brightness(1.16); }
     button:disabled { opacity: .45; cursor: not-allowed; }
     button.primary { background: #1976d2; }
     button.success { background: #2e7d32; }
@@ -131,7 +134,9 @@
       user-select: none;
       touch-action: manipulation;
       box-shadow: 0 8px 18px rgba(0,0,0,.2);
+      transition: transform .06s ease, border-color .08s ease, box-shadow .08s ease;
     }
+    .card.pressing { transform: scale(.992); }
     .card.selected {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(66,165,245,.22), 0 8px 18px rgba(0,0,0,.25);
@@ -488,15 +493,7 @@
       <div class="cards" id="cards"></div>
     </section>
 
-    <section class="panel">
-      <div class="topbar" style="margin-bottom:8px">
-        <div>
-          <h2>Mani degli altri giocatori</h2>
-          <div class="subtle">Trascina qui le carte dalle residue. Quando una carta esce, trascinala negli scarti o sul fuoco.</div>
-        </div>
-      </div>
-      <div class="opponents-grid" id="opponents"></div>
-    </section>
+
 
     <section class="panel">
       <h2>Indizi ricevuti</h2>
@@ -516,7 +513,15 @@
       <h2>Assistente</h2>
       <div class="assistant" id="assistant"></div>
     </section>
-
+    <section class="panel">
+      <div class="topbar" style="margin-bottom:8px">
+        <div>
+          <h2>Mani degli altri giocatori</h2>
+          <div class="subtle">Trascina qui le carte dalle residue. Quando una carta esce, trascinala negli scarti o sul fuoco.</div>
+        </div>
+      </div>
+      <div class="opponents-grid" id="opponents"></div>
+    </section>
     <section class="panel">
       <div class="topbar" style="margin-bottom:10px">
         <div>
@@ -558,7 +563,7 @@
       </label>
     </section>
 
-    <div class="version">Versione prova 3.0 · tavolo completo</div>
+    <div class="version">Versione prova 2.1 · tavolo completo · arcobaleno corretto</div>
   </main>
 
   <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
@@ -641,14 +646,19 @@
   let actionDraft = { type: null, handIndex: null, color: null, number: null };
   let toastTimer = null;
   let wakeLock = null;
+  let saveTimer = null;
+  let probabilityCacheKey = "";
+  let controlsRendered = false;
 
   let pressTimer = null;
   let pressTriggered = false;
-  const LONG_PRESS_MS = 800;
+  const LONG_PRESS_MS = 500;
 
   let dragState = null;
   let activeDropZone = null;
-  const DRAG_THRESHOLD = 7;
+  let dragFrame = null;
+  const DRAG_THRESHOLD = 5;
+  const SAVE_DELAY_MS = 90;
 
   function emptyManualSeen() {
     const result = {};
@@ -717,7 +727,10 @@
     return `${color}-${number}-${copy}`;
   }
 
+  let physicalCardsCache = null;
+
   function allPhysicalCards() {
+    if (physicalCardsCache) return physicalCardsCache;
     const cards = [];
     COLORI.forEach(color => {
       NUMERI.forEach(number => {
@@ -726,7 +739,8 @@
         }
       });
     });
-    return cards;
+    physicalCardsCache = cards;
+    return physicalCardsCache;
   }
 
   function cardFromId(id) {
@@ -761,12 +775,14 @@
   }
 
   function clone(value) {
-    return JSON.parse(JSON.stringify(value));
+    return typeof structuredClone === "function"
+      ? structuredClone(value)
+      : JSON.parse(JSON.stringify(value));
   }
 
   function pushHistory() {
     historyStack.push(clone(state));
-    if (historyStack.length > 100) historyStack.shift();
+    if (historyStack.length > 40) historyStack.shift();
   }
 
   function undo() {
@@ -898,8 +914,22 @@
     });
   }
 
+  function persistStateNow() {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+    try {
+      // La cronologia resta in memoria: salvare decine di copie complete rallentava ogni tasto.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ state }));
+    } catch (error) {
+      console.error("Impossibile salvare la partita:", error);
+    }
+  }
+
   function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, historyStack }));
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(persistStateNow, SAVE_DELAY_MS);
   }
 
   function loadState() {
@@ -908,7 +938,7 @@
       if (!raw) return false;
       const parsed = JSON.parse(raw);
       state = parsed.state || parsed;
-      historyStack = Array.isArray(parsed.historyStack) ? parsed.historyStack : [];
+      historyStack = Array.isArray(parsed.historyStack) ? parsed.historyStack.slice(-20) : [];
       normalizeState();
       saveState();
       return true;
@@ -977,6 +1007,28 @@
       });
     });
     return result;
+  }
+
+  function probabilitySignature() {
+    const hand = state.hand.map(card => ({
+      colors: card.colors,
+      excludedColors: card.excludedColors,
+      number: card.number,
+      excludedNumbers: card.excludedNumbers
+    }));
+    const counts = COLORI.flatMap(color =>
+      NUMERI.map(number => availableCount(color, number))
+    );
+    return JSON.stringify([hand, counts]);
+  }
+
+  function ensureProbabilityCache() {
+    const key = probabilitySignature();
+    if (key !== probabilityCacheKey) {
+      probabilityCache = calculateProbabilities();
+      probabilityCacheKey = key;
+    }
+    return probabilityCache;
   }
 
   function calculateProbabilities() {
@@ -1107,7 +1159,11 @@
   }
 
   function mainCardLabel(card) {
-    const color = card.colors.length === 1 ? colorText(card.colors[0]) : "?";
+    const color = card.colors.length === 1
+      ? colorText(card.colors[0])
+      : card.colors.length > 1
+        ? card.colors.map(colorText).join(" / ")
+        : "?";
     const number = card.number || "?";
     return `${color} ${number}`;
   }
@@ -1125,7 +1181,7 @@
 
   function renderCards() {
     const container = document.getElementById("cards");
-    probabilityCache = calculateProbabilities();
+    probabilityCache = ensureProbabilityCache();
 
     if (!state.hand.length) {
       container.innerHTML = `<div class="assistant">Il mazzo è terminato e non hai più carte in mano.</div>`;
@@ -1184,7 +1240,10 @@
   }
 
   function renderControls() {
-    document.getElementById("color-controls").innerHTML = COLORI.map(color => `
+    if (controlsRendered) return;
+    // L'Arcobaleno reagisce a tutti gli indizi colore, ma non è un indizio
+    // direttamente dichiarabile.
+    document.getElementById("color-controls").innerHTML = COLORI_BASE.map(color => `
       <button
         class="color-button ${colorClass(color)}"
         title="${colorText(color)}"
@@ -1197,6 +1256,7 @@
     document.getElementById("number-controls").innerHTML = NUMERI.map(number => `
       <button class="number-button" onclick="giveNumberClue('${number}')">${number}</button>
     `).join("");
+    controlsRendered = true;
   }
 
   function renderFireworks() {
@@ -1282,8 +1342,9 @@
     if (!player) return;
     player.name = String(value || "").trim() || player.name;
     state.started = true;
-    saveState();
     renderOpponents();
+    renderAssistant();
+    saveState();
   }
 
   function escapeHtml(value) {
@@ -1463,6 +1524,11 @@
     `;
   }
 
+  function renderAnalysis() {
+    renderCards();
+    renderAssistant();
+  }
+
   function render() {
     renderStatus();
     renderFireworks();
@@ -1479,23 +1545,26 @@
     if (!card) return;
     card.selected = !card.selected;
     state.started = true;
+    document.getElementById(`card-${index}`)?.classList.toggle("selected", card.selected);
     saveState();
-    renderCards();
   }
 
   function startCardPress(event, index) {
     if (event.target.closest("button")) return;
     cancelCardPress();
+    event.currentTarget.classList.add("pressing");
     pressTriggered = false;
     pressTimer = setTimeout(() => {
       pressTimer = null;
       pressTriggered = true;
+      event.currentTarget.classList.remove("pressing");
       openQuickModal(index);
     }, LONG_PRESS_MS);
   }
 
   function endCardPress(event, index) {
     if (event.target.closest("button")) return;
+    event.currentTarget.classList.remove("pressing");
     if (pressTimer) {
       clearTimeout(pressTimer);
       pressTimer = null;
@@ -1511,6 +1580,7 @@
       clearTimeout(pressTimer);
       pressTimer = null;
     }
+    document.querySelectorAll(".card.pressing").forEach(card => card.classList.remove("pressing"));
   }
 
   function findOpponent(playerId) {
@@ -1565,22 +1635,29 @@
     if (!dragState.dragging) return;
 
     event.preventDefault();
-    dragState.preview.style.left = `${event.clientX - 29}px`;
-    dragState.preview.style.top = `${event.clientY - 38}px`;
+    if (dragFrame) return;
+    dragFrame = requestAnimationFrame(() => {
+      dragFrame = null;
+      if (!dragState?.dragging) return;
+      const x = dragState.x;
+      const y = dragState.y;
+      dragState.preview.style.left = `${x - 29}px`;
+      dragState.preview.style.top = `${y - 38}px`;
 
-    const edge = 72;
-    if (typeof window.scrollBy === "function") {
-      if (event.clientY < edge) window.scrollBy(0, -14);
-      else if (event.clientY > window.innerHeight - edge) window.scrollBy(0, 14);
-    }
+      const edge = 72;
+      if (typeof window.scrollBy === "function") {
+        if (y < edge) window.scrollBy(0, -14);
+        else if (y > window.innerHeight - edge) window.scrollBy(0, 14);
+      }
 
-    const below = document.elementFromPoint(event.clientX, event.clientY);
-    const zone = below?.closest?.("[data-drop-type]") || null;
-    if (zone !== activeDropZone) {
-      activeDropZone?.classList.remove("drop-active");
-      activeDropZone = zone;
-      activeDropZone?.classList.add("drop-active");
-    }
+      const below = document.elementFromPoint(x, y);
+      const zone = below?.closest?.("[data-drop-type]") || null;
+      if (zone !== activeDropZone) {
+        activeDropZone?.classList.remove("drop-active");
+        activeDropZone = zone;
+        activeDropZone?.classList.add("drop-active");
+      }
+    });
   }
 
   function finishPhysicalDrag(event) {
@@ -1611,6 +1688,8 @@
     document.removeEventListener("pointermove", handlePhysicalDragMove);
     document.removeEventListener("pointerup", finishPhysicalDrag);
     document.removeEventListener("pointercancel", cancelPhysicalDrag);
+    if (dragFrame) cancelAnimationFrame(dragFrame);
+    dragFrame = null;
     dragState?.preview?.remove();
     activeDropZone?.classList.remove("drop-active");
     activeDropZone = null;
@@ -1737,6 +1816,14 @@
     render();
   }
 
+  function colorsTouchedByClue(color) {
+    // Con la variante Arcobaleno, una carta Arcobaleno viene toccata da ogni
+    // normale indizio colore. Un indizio Rosso significa quindi
+    // "Rosso oppure Arcobaleno" finché un altro indizio non restringe il caso.
+    if (!arcobalenoAttivo || color === "Arcobaleno") return [color];
+    return [color, "Arcobaleno"];
+  }
+
   function giveColorClue(color) {
     const selected = state.hand.filter(card => card.selected);
     if (!selected.length) {
@@ -1745,22 +1832,37 @@
     }
 
     pushHistory();
+    const touchedColors = colorsTouchedByClue(color);
+
     state.hand.forEach(card => {
+      const currentlyPossible = card.colors.length
+        ? [...card.colors]
+        : COLORI.filter(candidate => !card.excludedColors.includes(candidate));
+
       if (card.selected) {
-        if (!card.colors.includes(color)) card.colors.push(color);
-        if (arcobalenoAttivo && card.colors.length > 1) card.colors = ["Arcobaleno"];
+        const narrowed = currentlyPossible.filter(candidate => touchedColors.includes(candidate));
+        card.colors = narrowed;
+        card.excludedColors = COLORI.filter(candidate => !narrowed.includes(candidate));
       } else {
-        if (!card.excludedColors.includes(color)) card.excludedColors.push(color);
-        if (arcobalenoAttivo && color !== "Arcobaleno" && !card.excludedColors.includes("Arcobaleno")) {
-          card.excludedColors.push("Arcobaleno");
+        // Una carta non toccata non può essere né il colore indicato né,
+        // con Arcobaleno attivo, una carta Arcobaleno.
+        touchedColors.forEach(candidate => {
+          if (!card.excludedColors.includes(candidate)) card.excludedColors.push(candidate);
+        });
+
+        if (card.colors.length) {
+          card.colors = card.colors.filter(candidate => !touchedColors.includes(candidate));
+          if (card.colors.length === 1) {
+            card.excludedColors = COLORI.filter(candidate => candidate !== card.colors[0]);
+          }
         }
       }
       card.selected = false;
     });
 
     state.started = true;
+    renderAnalysis();
     saveState();
-    render();
   }
 
   function giveNumberClue(number) {
@@ -1777,8 +1879,8 @@
     });
 
     state.started = true;
+    renderAnalysis();
     saveState();
-    render();
   }
 
   function openQuickModal(index) {
@@ -1816,8 +1918,8 @@
     card.colors = [color];
     card.excludedColors = COLORI.filter(x => x !== color);
     state.started = true;
+    renderAnalysis();
     saveState();
-    render();
     openQuickModal(quickIndex);
   }
 
@@ -1828,8 +1930,8 @@
     card.number = String(number);
     card.excludedNumbers = NUMERI.filter(x => x !== String(number));
     state.started = true;
+    renderAnalysis();
     saveState();
-    render();
     openQuickModal(quickIndex);
   }
 
@@ -1838,8 +1940,8 @@
     pushHistory();
     state.hand[quickIndex].colors = [];
     state.hand[quickIndex].excludedColors = [];
+    renderAnalysis();
     saveState();
-    render();
     openQuickModal(quickIndex);
   }
 
@@ -1848,8 +1950,8 @@
     pushHistory();
     state.hand[quickIndex].number = null;
     state.hand[quickIndex].excludedNumbers = [];
+    renderAnalysis();
     saveState();
-    render();
     openQuickModal(quickIndex);
   }
 
@@ -1996,8 +2098,9 @@
     pushHistory();
     state.clues = next;
     state.started = true;
+    renderStatus();
+    renderAssistant();
     saveState();
-    render();
   }
 
   function adjustStrikes(delta) {
@@ -2006,16 +2109,17 @@
     pushHistory();
     state.strikes = next;
     state.started = true;
+    renderStatus();
     saveState();
-    render();
   }
 
   function resetPartita() {
     if (!confirm("Vuoi cancellare completamente la partita corrente?")) return;
     state = initialState();
     historyStack = [];
-    saveState();
+    probabilityCacheKey = "";
     render();
+    saveState();
   }
 
   function tornaAllaHome() {
@@ -2059,8 +2163,10 @@
     }
   });
 
+  window.addEventListener("pagehide", persistStateNow);
+
   window.addEventListener("beforeunload", event => {
-    saveState();
+    persistStateNow();
     if (!state.started) return;
     event.preventDefault();
     event.returnValue = "";
