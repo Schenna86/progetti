@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#303030" />
-  <title>Hanabi Tracker Tavolo</title>
+  <title>Hanabi Tracker 2.2 Mobile</title>
   <style>
     :root {
       --bg: #303030;
@@ -424,14 +424,246 @@
 
     .version { text-align: right; color: #aaa; font-size: .78rem; margin-top: 14px; }
 
-    @media (max-width: 700px) {
-      body { padding: 9px; }
-      .status-grid { grid-template-columns: repeat(2, 1fr); }
-      .zone-grid { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-      .card { min-height: 265px; }
-      .residue-row { grid-template-columns: 74px 1fr; }
+
+    .mobile-nav, .mobile-only { display: none; }
+    .residue-filter {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 2px 1px 10px;
+      scrollbar-width: none;
+    }
+    .residue-filter::-webkit-scrollbar { display: none; }
+    .residue-filter button {
+      flex: 0 0 auto;
+      min-height: 40px;
+      border: 2px solid transparent;
+    }
+    .residue-filter button.active {
+      border-color: white;
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .move-card-preview { display: grid; place-items: center; margin: 12px 0; }
+    .move-card-preview .physical-card { width: 74px; height: 98px; font-size: 2rem; cursor: default; }
+    .move-instruction { text-align: center; margin-bottom: 12px; }
+    .move-destinations { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+    .move-destinations button { min-height: 54px; font-weight: 800; }
+    .sheet-handle { display: none; }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 8px 8px calc(88px + env(safe-area-inset-bottom));
+        background: var(--bg);
+      }
+      button { min-height: 44px; }
+      .app { width: 100%; }
+      .topbar {
+        align-items: stretch;
+        margin-bottom: 8px;
+      }
+      .topbar > div:first-child { flex: 1 1 100%; }
+      .topbar h1 { font-size: 1.38rem; }
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.35fr;
+        gap: 6px;
+      }
+      .top-actions button { padding: 8px 6px; min-width: 0; }
+      .panel {
+        padding: 11px;
+        margin-bottom: 10px;
+        border-radius: 13px;
+        box-shadow: 0 5px 15px rgba(0,0,0,.22);
+      }
+      .panel h2 { font-size: 1.12rem; }
+      .mobile-page { display: none; }
+      .mobile-page.mobile-page-active { display: block; }
+      .mobile-always { display: block; }
+      .mobile-only { display: inline-flex; }
+
+      .status-panel {
+        position: sticky;
+        top: 0;
+        z-index: 80;
+        padding: 6px;
+        background: rgba(48,48,48,.96);
+        backdrop-filter: blur(8px);
+      }
+      .status-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+      }
+      .status-box {
+        padding: 5px 2px;
+        border-radius: 9px;
+        min-width: 0;
+      }
+      .status-box .subtle { font-size: .68rem; }
+      .status-box .value { font-size: 1rem; line-height: 1.15; }
+      .inline-adjust { gap: 2px; margin-top: 3px; }
+      .inline-adjust button {
+        min-height: 28px;
+        width: 30px;
+        padding: 1px;
+        font-size: .9rem;
+      }
+
+      .cards {
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        scroll-snap-type: x mandatory;
+        scroll-padding: 1px;
+        padding: 2px 1px 8px;
+        scrollbar-width: none;
+      }
+      .cards::-webkit-scrollbar { display: none; }
+      .card {
+        flex: 0 0 calc(100vw - 38px);
+        max-width: 420px;
+        min-height: 205px;
+        scroll-snap-align: center;
+        padding: 11px;
+      }
+      .card-main { font-size: 1.62rem; min-height: 39px; }
+      .card-details { display: none; }
+      .card.details-open .card-details { display: block; }
+      .detail-toggle {
+        width: 100%;
+        justify-content: center;
+        margin-top: 7px;
+        background: rgba(0,0,0,.16);
+        color: #111;
+        border: 1px solid rgba(0,0,0,.22);
+      }
+      .card-actions button { min-height: 48px; font-size: .92rem; }
+      .card-evaluation { margin-top: 7px; }
+      .eval { padding: 7px 4px; font-size: .8rem; }
+      .prob-columns { grid-template-columns: 1fr 1fr; }
+
+      .controls { gap: 12px; }
+      .control-row { gap: 9px; }
       .control-label { width: 100%; min-width: 0; }
+      .color-button, .number-button { width: 50px; min-width: 50px; height: 50px; }
+
+      .fireworks {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        scroll-snap-type: x proximity;
+        padding-bottom: 6px;
+        scrollbar-width: none;
+      }
+      .fireworks::-webkit-scrollbar { display: none; }
+      .firework {
+        flex: 0 0 102px;
+        min-height: 92px;
+        scroll-snap-align: start;
+      }
+
+      .opponents-grid { gap: 9px; }
+      .player-board { padding: 9px; }
+      .player-header { align-items: stretch; }
+      .player-name { width: 100%; min-height: 44px; }
+      .visible-hand {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        min-height: 98px;
+        padding: 3px 1px 7px;
+        scrollbar-width: none;
+      }
+      .visible-hand::-webkit-scrollbar { display: none; }
+      .physical-card {
+        flex: 0 0 66px;
+        width: 66px;
+        height: 88px;
+        font-size: 1.85rem;
+      }
+      .residue-row {
+        display: block;
+        padding-bottom: 9px;
+        border-bottom: 1px solid #555;
+      }
+      .residue-row:last-child { border-bottom: 0; }
+      .residue-name { padding: 1px 0 7px; }
+      .residue-cards {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 7px;
+      }
+      .residue-cards .physical-card {
+        width: 100%;
+        height: 62px;
+        min-width: 0;
+        font-size: 1.35rem;
+      }
+      .zone-grid { grid-template-columns: 1fr; gap: 9px; }
+      .zone { min-height: 106px; }
+      .zone-card-list { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; }
+      .assistant-details { grid-template-columns: 1fr; }
+      .legend { gap: 5px; display: grid; }
+
+      .modal-overlay {
+        align-items: end;
+        padding: 0;
+      }
+      .modal {
+        width: 100%;
+        max-height: 88dvh;
+        border-radius: 20px 20px 0 0;
+        padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+      }
+      .sheet-handle {
+        display: block;
+        width: 44px;
+        height: 5px;
+        border-radius: 999px;
+        background: #777;
+        margin: -3px auto 12px;
+      }
+      .move-destinations { grid-template-columns: 1fr; }
+      .move-destinations button { min-height: 56px; font-size: 1rem; }
+      .modal-footer button { min-height: 48px; }
+
+      .mobile-nav {
+        position: fixed;
+        z-index: 500;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2px;
+        padding: 6px 5px calc(6px + env(safe-area-inset-bottom));
+        background: rgba(25,25,25,.97);
+        border-top: 1px solid #606060;
+        backdrop-filter: blur(10px);
+      }
+      .mobile-nav button {
+        display: grid;
+        place-items: center;
+        gap: 1px;
+        min-width: 0;
+        min-height: 54px;
+        padding: 4px 2px;
+        background: transparent;
+        border-radius: 10px;
+        color: #bbb;
+      }
+      .mobile-nav button span { font-size: 1.18rem; line-height: 1; }
+      .mobile-nav button small { font-size: .66rem; white-space: nowrap; }
+      .mobile-nav button.active {
+        color: white;
+        background: rgba(66,165,245,.23);
+      }
+      .version { margin-bottom: 2px; text-align: center; }
+      .toast { bottom: calc(78px + env(safe-area-inset-bottom)); }
+      .drag-banner { top: auto; bottom: calc(80px + env(safe-area-inset-bottom)); }
+    }
+
+    @media (min-width: 761px) {
+      .mobile-page { display: block !important; }
     }
   </style>
 </head>
@@ -440,8 +672,8 @@
   <main class="app">
     <div class="topbar">
       <div>
-        <h1>Hanabi Tracker Tavolo</h1>
-        <div class="subtle">Tutte le mani, carte fisiche e assistente probabilistico</div>
+        <h1>Hanabi Tracker</h1>
+        <div class="subtle">Tavolo completo · ottimizzato per smartphone</div>
       </div>
       <div class="top-actions">
         <button class="ghost" onclick="tornaAllaHome()">Home</button>
@@ -450,7 +682,7 @@
       </div>
     </div>
 
-    <section class="panel">
+    <section class="panel status-panel mobile-always">
       <div class="status-grid">
         <div class="status-box">
           <span class="subtle">Mazzo</span>
@@ -479,13 +711,13 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel mobile-page" data-mobile-page="table">
       <h2>Fuochi d'artificio</h2>
       <div class="subtle" style="margin-bottom:10px">Trascina una carta sul fuoco dello stesso colore.</div>
       <div class="fireworks" id="fireworks"></div>
     </section>
 
-    <section class="panel">
+    <section class="panel mobile-page" data-mobile-page="hand">
       <h2>La tua mano</h2>
       <div class="subtle" style="margin-bottom:10px">
         Tocca le carte interessate da un indizio. Pressione lunga per impostare rapidamente ciò che sai.
@@ -493,9 +725,17 @@
       <div class="cards" id="cards"></div>
     </section>
 
+    <section class="panel mobile-page" data-mobile-page="players">
+      <div class="topbar" style="margin-bottom:8px">
+        <div>
+          <h2>Mani degli altri giocatori</h2>
+          <div class="subtle">Trascina qui le carte dalle residue. Quando una carta esce, trascinala negli scarti o sul fuoco.</div>
+        </div>
+      </div>
+      <div class="opponents-grid" id="opponents"></div>
+    </section>
 
-
-    <section class="panel">
+    <section class="panel mobile-page" data-mobile-page="hand">
       <h2>Indizi ricevuti</h2>
       <div class="controls">
         <div class="control-row">
@@ -509,20 +749,12 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel mobile-page" data-mobile-page="assistant">
       <h2>Assistente</h2>
       <div class="assistant" id="assistant"></div>
     </section>
-    <section class="panel">
-      <div class="topbar" style="margin-bottom:8px">
-        <div>
-          <h2>Mani degli altri giocatori</h2>
-          <div class="subtle">Trascina qui le carte dalle residue. Quando una carta esce, trascinala negli scarti o sul fuoco.</div>
-        </div>
-      </div>
-      <div class="opponents-grid" id="opponents"></div>
-    </section>
-    <section class="panel">
+
+    <section class="panel mobile-page" data-mobile-page="table">
       <div class="topbar" style="margin-bottom:10px">
         <div>
           <h2>Carte giocate e scartate</h2>
@@ -547,23 +779,32 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel mobile-page" data-mobile-page="residue">
       <h2>Carte residue</h2>
       <div class="legend">
         <span>Ogni rettangolo è una copia fisica distinta</span>
-        <span>Trascina nelle mani, negli scarti o sui fuochi; vicino ai bordi la pagina scorre</span>
+        <span><strong>Tocca</strong> una carta per scegliere la destinazione oppure trascinala.</span>
       </div>
+      <div class="residue-filter" id="residue-filters" aria-label="Filtra carte residue"></div>
       <div class="residue-grid drop-zone" data-drop-type="residue" id="residue-tracker"></div>
     </section>
 
-    <section class="panel">
+    <section class="panel mobile-page" data-mobile-page="assistant">
       <label>
         <input type="checkbox" id="wakelock-toggle" />
         Mantieni lo schermo attivo
       </label>
     </section>
 
-    <div class="version">Versione prova 2.1 · tavolo completo · arcobaleno corretto</div>
+    <div class="version">Versione 2.2 · mobile · tavolo completo · arcobaleno corretto</div>
+
+    <nav class="mobile-nav" aria-label="Navigazione principale">
+      <button data-mobile-target="hand" onclick="setMobilePage('hand')"><span>✋</span><small>Mano</small></button>
+      <button data-mobile-target="players" onclick="setMobilePage('players')"><span>👥</span><small>Altri</small></button>
+      <button data-mobile-target="table" onclick="setMobilePage('table')"><span>🎆</span><small>Tavolo</small></button>
+      <button data-mobile-target="residue" onclick="setMobilePage('residue')"><span>🃏</span><small>Residue</small></button>
+      <button data-mobile-target="assistant" onclick="setMobilePage('assistant')"><span>💡</span><small>Aiuto</small></button>
+    </nav>
   </main>
 
   <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
@@ -609,6 +850,19 @@
     </div>
   </div>
 
+  <div id="move-overlay" class="modal-overlay" onclick="if(event.target===this) closeMoveModal()">
+    <div class="modal move-sheet">
+      <div class="sheet-handle"></div>
+      <h3 id="move-title">Sposta carta</h3>
+      <div class="move-card-preview" id="move-card-preview"></div>
+      <div class="subtle move-instruction">Scegli dove spostarla. Puoi continuare a usare anche il trascinamento.</div>
+      <div class="move-destinations" id="move-destinations"></div>
+      <div class="modal-footer">
+        <button class="ghost" onclick="closeMoveModal()">Annulla</button>
+      </div>
+    </div>
+  </div>
+
   <div id="drag-banner" class="drag-banner">Rilascia nella zona desiderata</div>
   <div id="toast" class="toast"></div>
 
@@ -649,6 +903,9 @@
   let saveTimer = null;
   let probabilityCacheKey = "";
   let controlsRendered = false;
+  let mobilePage = localStorage.getItem("hanabiMobilePage") || "hand";
+  let residueFilter = "all";
+  let moveDraft = null;
 
   let pressTimer = null;
   let pressTriggered = false;
@@ -1041,71 +1298,93 @@
     const baseCountObject = Object.fromEntries(keys.map((key, index) => [key, baseCounts[index]]));
     const candidates = state.hand.map(card => candidatesForCard(card, baseCountObject));
 
-    return state.hand.map((card, targetIndex) => {
-      if (!candidates[targetIndex].length) return { total: 0, byIdentity: {}, byColor: {}, byNumber: {} };
+    const emptyResult = () => ({
+      total: 0,
+      byIdentity: {},
+      byColor: Object.fromEntries(COLORI.map(color => [color, 0])),
+      byNumber: Object.fromEntries(NUMERI.map(number => [number, 0]))
+    });
 
-      const numerators = {};
-      let total = 0;
+    if (!state.hand.length) return [];
+    if (candidates.some(list => !list.length)) return state.hand.map(emptyResult);
 
-      const others = state.hand
-        .map((_, index) => index)
-        .filter(index => index !== targetIndex)
-        .sort((a, b) => candidates[a].length - candidates[b].length);
+    // Si calcola una sola volta l'insieme completo delle assegnazioni possibili
+    // della mano. L'algoritmo resta esatto e rispetta il numero di copie, ma
+    // condivide gli stati intermedi tra tutte le carte invece di ricominciare
+    // il calcolo per ciascuna carta.
+    const order = state.hand
+      .map((_, index) => index)
+      .sort((a, b) => candidates[a].length - candidates[b].length);
 
-      // La cache è condivisa tra tutte le identità possibili della carta bersaglio.
-      // In questo modo il calcolo resta esatto, ma non ripete migliaia di stati uguali.
-      const memo = new Map();
+    const suffixMemo = new Map();
+    const countsKey = counts => counts.join("");
 
-      function countAssignments(position, counts) {
-        if (position >= others.length) return 1;
+    function suffixWays(position, counts) {
+      if (position >= order.length) return 1;
+      const memoKey = `${position}|${countsKey(counts)}`;
+      if (suffixMemo.has(memoKey)) return suffixMemo.get(memoKey);
 
-        const memoKey = `${position}:${counts.join(",")}`;
-        if (memo.has(memoKey)) return memo.get(memoKey);
+      const cardIndex = order[position];
+      let ways = 0;
+      for (const identity of candidates[cardIndex]) {
+        const id = keyIndex[identity];
+        const remaining = counts[id];
+        if (remaining <= 0) continue;
+        counts[id]--;
+        ways += remaining * suffixWays(position + 1, counts);
+        counts[id]++;
+      }
+      suffixMemo.set(memoKey, ways);
+      return ways;
+    }
 
-        const cardIndex = others[position];
-        let ways = 0;
+    const total = suffixWays(0, baseCounts.slice());
+    if (!total) return state.hand.map(emptyResult);
 
-        for (const key of candidates[cardIndex]) {
-          const id = keyIndex[key];
+    const numerators = state.hand.map(() => ({}));
+    let frontier = new Map();
+    frontier.set(countsKey(baseCounts), { counts: baseCounts.slice(), weight: 1 });
+
+    for (let position = 0; position < order.length; position++) {
+      const cardIndex = order[position];
+      const nextFrontier = new Map();
+
+      for (const { counts, weight: prefixWeight } of frontier.values()) {
+        for (const identity of candidates[cardIndex]) {
+          const id = keyIndex[identity];
           const remaining = counts[id];
           if (remaining <= 0) continue;
-          counts[id]--;
-          ways += remaining * countAssignments(position + 1, counts);
-          counts[id]++;
-        }
 
-        memo.set(memoKey, ways);
-        return ways;
-      }
+          const nextCounts = counts.slice();
+          nextCounts[id]--;
+          const suffix = suffixWays(position + 1, nextCounts);
+          if (!suffix) continue;
 
-      for (const targetKey of candidates[targetIndex]) {
-        const targetId = keyIndex[targetKey];
-        const copies = baseCounts[targetId];
-        if (copies <= 0) continue;
+          numerators[cardIndex][identity] =
+            (numerators[cardIndex][identity] || 0) + prefixWeight * remaining * suffix;
 
-        const counts = baseCounts.slice();
-        counts[targetId]--;
-        const weightedWays = copies * countAssignments(0, counts);
-
-        if (weightedWays > 0) {
-          numerators[targetKey] = weightedWays;
-          total += weightedWays;
+          const nextWeight = prefixWeight * remaining;
+          const nextKey = countsKey(nextCounts);
+          const existing = nextFrontier.get(nextKey);
+          if (existing) existing.weight += nextWeight;
+          else nextFrontier.set(nextKey, { counts: nextCounts, weight: nextWeight });
         }
       }
+      frontier = nextFrontier;
+    }
 
+    return state.hand.map((_, cardIndex) => {
       const byIdentity = {};
       const byColor = Object.fromEntries(COLORI.map(color => [color, 0]));
       const byNumber = Object.fromEntries(NUMERI.map(number => [number, 0]));
 
-      if (total > 0) {
-        Object.entries(numerators).forEach(([key, numerator]) => {
-          const probability = numerator / total;
-          const { color, number } = splitIdentity(key);
-          byIdentity[key] = probability;
-          byColor[color] += probability;
-          byNumber[number] += probability;
-        });
-      }
+      Object.entries(numerators[cardIndex]).forEach(([identity, numerator]) => {
+        const probability = numerator / total;
+        const { color, number } = splitIdentity(identity);
+        byIdentity[identity] = probability;
+        byColor[color] += probability;
+        byNumber[number] += probability;
+      });
 
       return { total, byIdentity, byColor, byNumber };
     });
@@ -1179,6 +1458,55 @@
     return pieces.length ? pieces.join("<br>") : "Nessuna esclusione";
   }
 
+  function isMobileLayout() {
+    return window.matchMedia("(max-width: 760px)").matches;
+  }
+
+  function applyMobilePage() {
+    const validPages = new Set(["hand", "players", "table", "residue", "assistant"]);
+    if (!validPages.has(mobilePage)) mobilePage = "hand";
+    document.querySelectorAll(".mobile-page").forEach(panel => {
+      panel.classList.toggle("mobile-page-active", panel.dataset.mobilePage === mobilePage);
+    });
+    document.querySelectorAll("[data-mobile-target]").forEach(button => {
+      button.classList.toggle("active", button.dataset.mobileTarget === mobilePage);
+    });
+  }
+
+  function setMobilePage(page) {
+    mobilePage = page;
+    localStorage.setItem("hanabiMobilePage", page);
+    applyMobilePage();
+    if (isMobileLayout()) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function toggleCardDetails(event, index) {
+    event.stopPropagation();
+    const cardElement = document.getElementById(`card-${index}`);
+    if (!cardElement) return;
+    const open = cardElement.classList.toggle("details-open");
+    event.currentTarget.textContent = open ? "Nascondi dettagli" : "Mostra dettagli e probabilità";
+  }
+
+  function setResidueFilter(filter) {
+    residueFilter = filter;
+    renderResidue();
+    renderResidueFilters();
+  }
+
+  function renderResidueFilters() {
+    const container = document.getElementById("residue-filters");
+    if (!container) return;
+    const options = [{ value: "all", label: "Tutte" }, ...COLORI.map(color => ({ value: color, label: colorText(color) }))];
+    container.innerHTML = options.map(option => `
+      <button
+        class="${residueFilter === option.value ? "active" : ""}"
+        style="${option.value === "all" ? "" : backgroundStyle(option.value)} color:${option.value === "all" ? "white" : textColorFor(option.value)}"
+        onclick="setResidueFilter('${option.value}')"
+      >${option.label}</button>
+    `).join("");
+  }
+
   function renderCards() {
     const container = document.getElementById("cards");
     probabilityCache = ensureProbabilityCache();
@@ -1218,11 +1546,12 @@
         >
           <div class="draw-label">${drawLabel(card)}</div>
           <div class="card-main">${mainCardLabel(card)}</div>
-          <div class="knowns">${knownExclusions(card)}</div>
-
-          <div class="prob-columns">
-            <div class="prob-group">${colorsHtml}</div>
-            <div class="prob-group">${numbersHtml}</div>
+          <div class="card-details">
+            <div class="knowns">${knownExclusions(card)}</div>
+            <div class="prob-columns">
+              <div class="prob-group">${colorsHtml}</div>
+              <div class="prob-group">${numbersHtml}</div>
+            </div>
           </div>
 
           <div class="card-evaluation">
@@ -1230,6 +1559,7 @@
             <div class="eval">Scarto sicuro<br><strong>${formatPercent(evaluation.safeDiscard)}</strong></div>
           </div>
 
+          <button class="detail-toggle mobile-only" onclick="toggleCardDetails(event, ${index})">Mostra dettagli e probabilità</button>
           <div class="card-actions">
             <button class="success" onclick="event.stopPropagation(); openActionModal('play', ${index})">Gioca</button>
             <button class="warning" onclick="event.stopPropagation(); openActionModal('discard', ${index})">Scarta</button>
@@ -1381,7 +1711,8 @@
     const container = document.getElementById("residue-tracker");
     const residue = residueCards();
 
-    container.innerHTML = COLORI.map(color => {
+    const visibleColors = residueFilter === "all" ? COLORI : COLORI.filter(color => color === residueFilter);
+    container.innerHTML = visibleColors.map(color => {
       const cards = residue.filter(card => card.color === color);
       return `
         <div class="residue-row">
@@ -1537,7 +1868,9 @@
     renderControls();
     renderAssistant();
     renderZones();
+    renderResidueFilters();
     renderResidue();
+    applyMobilePage();
   }
 
   function toggleCardSelection(index) {
@@ -1672,7 +2005,13 @@
     const zone = activeDropZone;
     clearPhysicalDrag();
 
-    if (!wasDragging || !zone) return;
+    if (!wasDragging) {
+      // Si apre al tick successivo per evitare che il click generato dal tap
+      // chiuda immediatamente il pannello appena comparso.
+      setTimeout(() => openMoveModal(payload), 90);
+      return;
+    }
+    if (!zone) return;
     movePhysicalCard(payload, {
       type: zone.dataset.dropType,
       playerId: zone.dataset.playerId || "",
@@ -1696,6 +2035,54 @@
     dragState = null;
     document.body.classList.remove("dragging");
     document.getElementById("drag-banner").classList.remove("show");
+  }
+
+  function openMoveModal(payload) {
+    moveDraft = clone(payload);
+    const card = moveDraft.card;
+    document.getElementById("move-title").textContent = `${colorText(card.color)} ${card.number}`;
+    document.getElementById("move-card-preview").innerHTML = staticCardHtml(card, false);
+
+    const destinations = [];
+    if (payload.source === "residue") {
+      state.opponents.forEach(player => {
+        const hasSpace = player.hand.length < cartePerGiocatore &&
+          (player.setupSlotsRemaining > 0 || player.drawSlotsPending > 0);
+        destinations.push({
+          label: `Metti nella mano di ${player.name}`,
+          type: "hand",
+          playerId: player.id,
+          disabled: !hasSpace,
+          className: "primary"
+        });
+      });
+    }
+    destinations.push({ label: "Gioca la carta", type: "played", className: "success" });
+    destinations.push({ label: "Scarta la carta", type: "discard", className: "warning" });
+    if (payload.source === "opponent") {
+      destinations.push({ label: "Riporta alle residue", type: "residue", className: "ghost" });
+    }
+
+    document.getElementById("move-destinations").innerHTML = destinations.map(item => `
+      <button
+        class="${item.className || ""}"
+        ${item.disabled ? "disabled" : ""}
+        onclick="confirmMoveTarget('${item.type}', '${item.playerId || ""}')"
+      >${escapeHtml(item.label)}</button>
+    `).join("");
+    document.getElementById("move-overlay").classList.add("open");
+  }
+
+  function closeMoveModal() {
+    document.getElementById("move-overlay").classList.remove("open");
+    moveDraft = null;
+  }
+
+  function confirmMoveTarget(type, playerId = "") {
+    if (!moveDraft) return;
+    const payload = clone(moveDraft);
+    closeMoveModal();
+    movePhysicalCard(payload, { type, playerId, color: payload.card.color });
   }
 
   function removeFromOpponent(player, cardId) {
@@ -2163,6 +2550,8 @@
     }
   });
 
+  window.addEventListener("resize", applyMobilePage, { passive: true });
+
   window.addEventListener("pagehide", persistStateNow);
 
   window.addEventListener("beforeunload", event => {
@@ -2182,6 +2571,12 @@
     endCardPress,
     cancelCardPress,
     startPhysicalDrag,
+    setMobilePage,
+    toggleCardDetails,
+    setResidueFilter,
+    openMoveModal,
+    closeMoveModal,
+    confirmMoveTarget,
     updatePlayerName,
     giveColorClue,
     giveNumberClue,
