@@ -116,12 +116,12 @@
       font-weight: 800;
     }
     .firework .level { font-size: 2rem; line-height: 1; }
-    .firework.rainbow { color: white; }
+    .firework.rainbow { color: black; }
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap:5px;
     }
     .card {
       position: relative;
@@ -144,42 +144,158 @@
     .draw-label { font-size: .78rem; font-weight: 800; opacity: .76; text-align: center; }
     .card-main {
       font-size: 2rem;
-      font-weight: 900;
+      font-weight: bold;
       text-align: center;
-      min-height: 48px;
-      display: grid;
+      max-height: 20px;
+      min-height: 20px;
+      display: flex;
+	        justify-content: center;
       place-items: center;
       margin: 4px 0 7px;
+      color: #eee;
     }
-    .knowns { font-size: .82rem; min-height: 35px; text-align: center; }
+    .card-main.certain-Gia { color: gold; }
+    .card-main.certain-Ros { color: #ef5350; }
+    .card-main.certain-Blu { color: #42a5f5; }
+    .card-main.certain-Ver { color: #43a047; }
+    .card-main.certain-Bia {
+      color: #fff;
+      text-shadow: 0 1px 2px #000, 0 0 2px #000;
+    }
+    .card-main.certain-Arcobaleno {
+      color: transparent;
+      background: linear-gradient(90deg,#ef5350,#ffb300,#ffee58,#43a047,#42a5f5,#ab47bc);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    /* Probabilità compatte: pallini colore, quadratini numero e percentuale */
     .prob-columns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 7px;
-      margin-top: 8px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      margin-top: 2px;
     }
     .prob-group {
-      background: rgba(0,0,0,.14);
-      border-radius: 9px;
-      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      min-width: 58px;
+      max-width: 72px;
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
     }
     .prob-row {
       display: flex;
-      justify-content: space-between;
-      gap: 5px;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 3px;
+      width: 100%;
+      min-height: 21px;
       font-size: .78rem;
-      line-height: 1.45;
+      line-height: 1.25;
+      opacity: 1;
     }
-    .prob-row.zero { opacity: .22; }
+
+    /* Equivalente di .color-dot */
+    .prob-group:first-child .prob-row span {
+      flex: 0 0 18px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 3px;
+      font-size: 0;
+      opacity: 1;
+      box-sizing: border-box;
+    }
+    .prob-group:first-child .prob-row:nth-child(1) span { background: gold; }
+    .prob-group:first-child .prob-row:nth-child(2) span { background: red; }
+    .prob-group:first-child .prob-row:nth-child(3) span { background: blue; }
+    .prob-group:first-child .prob-row:nth-child(4) span { background: green; }
+    .prob-group:first-child .prob-row:nth-child(5) span {
+      background: white;
+      border: 1px solid #ccc;
+    }
+    .prob-group:first-child .prob-row:nth-child(6) span {
+      background: linear-gradient(to right, red, orange, yellow, green, blue, violet);
+    }
+
+    /* Equivalente di .number-hint */
+    .prob-group:nth-child(2) .prob-row span {
+      flex: 0 0 18px;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 3px;
+      background: #1c1c1c66;
+      border-radius: 7px;
+      color: #fff;
+      text-align: center;
+      font-size: 1em;
+      font-weight: bold;
+      line-height: 18px;
+      box-sizing: border-box;
+    }
+
+    /* Equivalente di .probability-value */
+    .prob-row strong {
+      flex: 0 0 auto;
+      font-size: .89em;
+      color: #eee;
+      min-width: 29px;
+      text-align: left;
+      margin: 0 2px 0 0;
+    }
+    .prob-row.zero span {
+      opacity: .09;
+      filter: grayscale(100%);
+    }
+    .prob-row.zero strong { opacity: .15; }
+
+    /* Contenitore della singola carta: il riquadro finisce prima delle probabilità */
+    .card-wrap {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .card-wrap > .card {
+      min-height: 0;
+    }
+    .card-wrap > .prob-columns {
+      margin-top: 7px;
+      padding: 3px 0 5px;
+    }
+    .card-wrap.impossible > .card {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(239,83,80,.24), 0 8px 18px rgba(0,0,0,.25);
+    }
+    .card-wrap.impossible > .prob-columns {
+      border-radius: 9px;
+      background: rgba(183,28,28,.16);
+    }
+
+    @media (max-width: 600px) {
+      .prob-columns { gap: 8px; }
+      .prob-group { min-width: 50px; max-width: 60px; }
+    }
     .card-evaluation {
-      display: grid;
+      display: flex;
+	  justify-content: center; 
       grid-template-columns: 1fr 1fr;
       gap: 6px;
       margin-top: 8px;
     }
     .eval {
-      background: #333;
-      color: white;
+           color: black;
       border-radius: 8px;
       padding: 6px;
       text-align: center;
@@ -193,8 +309,29 @@
     }
     .card-actions button { padding: 8px 5px; font-size: .8rem; }
 
-    .controls { display: grid; gap: 9px; }
-    .control-row { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.controls .control-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+#color-controls,
+#number-controls {
+  justify-content: center;
+}
     .control-label { min-width: 110px; font-weight: 800; }
     .color-button {
       width: 42px;
@@ -244,7 +381,7 @@
       color: #111;
       border: 1px solid rgba(255,255,255,.3);
     }
-    .chip.rainbow { color: white; }
+    .chip.rainbow { color: black; }
 
     .residue-grid { display: grid; gap: 8px; }
     .residue-row {
@@ -269,24 +406,31 @@
     .copy-button.discarded { opacity: .28; text-decoration: line-through; cursor: not-allowed; }
     .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); margin-bottom: 10px; }
 
-.opponents-grid {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(260px, 1fr);
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scroll-snap-type: x proximity;
-}
-
-.player-board {
-  background: #353535;
-  border: 2px solid #5d5d5d;
-  border-radius: 14px;
-  padding: 11px;
-  transition: border-color .15s, background .15s, box-shadow .15s;
-  scroll-snap-align: start;
-}
+    /* Tutte le mani avversarie su una sola riga */
+    .opponents-grid {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(260px, 1fr);
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x proximity;
+      overscroll-behavior-inline: contain;
+    }
+    .player-board {
+      min-width: 0;
+      background: #353535;
+      border: 2px solid #5d5d5d;
+      border-radius: 14px;
+      padding: 11px;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+      scroll-snap-align: start;
+    }
+    .player-board.drop-active, .drop-zone.drop-active {
+      border-color: var(--accent);
+      background: rgba(25,118,210,.18);
+      box-shadow: 0 0 0 3px rgba(66,165,245,.18);
+    }
     .player-header {
       display: flex;
       justify-content: space-between;
@@ -296,7 +440,7 @@
       flex-wrap: wrap;
     }
     .player-name {
-      width: min(240px, 100%);
+      width: min(120px, 100%);
       border: 1px solid #6f6f6f;
       background: #292929;
       color: white;
@@ -306,15 +450,17 @@
     }
     .visible-hand {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 8px;
       min-height: 82px;
       align-items: center;
+      overflow-x: auto;
+      padding-bottom: 3px;
     }
     .empty-hand { color: var(--muted); font-size: .88rem; padding: 8px; }
     .physical-card {
-      width: 58px;
-      height: 76px;
+      width: 40px;
+      height: 50px;
       border-radius: 10px;
       border: 3px solid rgba(255,255,255,.5);
       display: grid;
@@ -342,7 +488,10 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .residue-cards .physical-card { width: 42px; height: 52px; font-size: 1.15rem; border-width: 2px; }
+	.zone-card-list .physical-card { width: 30px; height: 40px;font-size: 0.75rem;}
+	.zone-card-list .physical-card .mini-color { display: none;}
+    .visible-hand .physical-card .mini-color { display: none; }
+    .residue-cards .physical-card { width: 40px; height: 50px; font-size: 1.15rem; border-width: 2px; }
     .residue-cards .physical-card .mini-color { display: none; }
     .drag-preview {
       position: fixed;
@@ -433,10 +582,10 @@
       body { padding: 9px; }
       .status-grid { grid-template-columns: repeat(2, 1fr); }
       .zone-grid { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-      .card { min-height: 265px; }
+      .cards { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+      .card { min-height: 130px; }
       .residue-row { grid-template-columns: 74px 1fr; }
-      .control-label { width: 100%; min-width: 0; }
+      .control-label { width: 100%; min-width: 0; align-items:center; }
     }
   </style>
 </head>
@@ -490,29 +639,18 @@
       <div class="fireworks" id="fireworks"></div>
     </section>
 
-    <section class="panel">
-      <h2>La tua mano</h2>
-      <div class="subtle" style="margin-bottom:10px">
-        Tocca le carte interessate da un indizio. Pressione lunga per impostare rapidamente ciò che sai.
-      </div>
-      <div class="cards" id="cards"></div>
-    </section>
+<section class="panel">
+  <h2 style="text-align: center;">La tua mano</h2>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="controls">
+    <div id="color-controls" class="control-row"></div>
+    <div id="number-controls" class="control-row"></div>
+  </div>
+</section>
 
 
-
-    <section class="panel">
-      <h2>Indizi ricevuti</h2>
-      <div class="controls">
-        <div class="control-row">
-          <span class="control-label">Colore</span>
-          <div id="color-controls" class="control-row"></div>
-        </div>
-        <div class="control-row">
-          <span class="control-label">Numero</span>
-          <div id="number-controls" class="control-row"></div>
-        </div>
-      </div>
-    </section>
 
     <section class="panel">
       <h2>Assistente</h2>
@@ -543,7 +681,7 @@
         </div>
       </div>
     </section>
-    <section class="panel">
+ <section class="panel">
       <div class="topbar" style="margin-bottom:8px">
         <div>
           <h2>Mani degli altri giocatori</h2>
@@ -552,6 +690,7 @@
       </div>
       <div class="opponents-grid" id="opponents"></div>
     </section>
+
     <section class="panel">
       <h2>Carte residue</h2>
       <div class="legend">
@@ -568,7 +707,7 @@
       </label>
     </section>
 
-    <div class="version">Versione prova 2.1 · tavolo completo · arcobaleno corretto</div>
+    <div class="version">Versione prova 2.2 · probabilità sotto carta · avviso indizi impossibili</div>
   </main>
 
   <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
@@ -769,7 +908,7 @@
   }
 
   function textColorFor(color) {
-    return color === "Ros" || color === "Blu" || color === "Ver" || color === "Arcobaleno"
+    return color === "Ros" || color === "Blu" || color === "Ver" <!-- || color === "Arcobaleno"-->
       ? "white"
       : "#111";
   }
@@ -1164,13 +1303,17 @@
   }
 
   function mainCardLabel(card) {
-    const color = card.colors.length === 1
-      ? colorText(card.colors[0])
-      : card.colors.length > 1
-        ? card.colors.map(colorText).join(" / ")
-        : "?";
-    const number = card.number || "?";
-    return `${color} ${number}`;
+    return card.number || "?";
+  }
+
+  function certainColorClass(probabilities) {
+    if (!probabilities?.byColor) return "";
+
+    const certainColors = COLORI.filter(color =>
+      (probabilities.byColor[color] || 0) >= 0.999999
+    );
+
+    return certainColors.length === 1 ? `certain-${certainColors[0]}` : "";
   }
 
   function knownExclusions(card) {
@@ -1182,6 +1325,54 @@
       pieces.push(`Non: ${card.excludedNumbers.join(", ")}`);
     }
     return pieces.length ? pieces.join("<br>") : "Nessuna esclusione";
+  }
+
+  function currentAvailableCounts() {
+    const counts = {};
+    COLORI.forEach(color => {
+      NUMERI.forEach(number => {
+        counts[identityKey(color, number)] = availableCount(color, number);
+      });
+    });
+    return counts;
+  }
+
+  function isCardDirectlyImpossible(card) {
+    return candidatesForCard(card, currentAvailableCounts()).length === 0;
+  }
+
+  function impossibleClueResult() {
+    const directIndexes = state.hand
+      .map((card, index) => isCardDirectlyImpossible(card) ? index : -1)
+      .filter(index => index >= 0);
+
+    if (directIndexes.length) {
+      return { indexes: directIndexes, globalConflict: false };
+    }
+
+    const probabilities = ensureProbabilityCache();
+    const hasAnyValidAssignment = probabilities.some(result => result?.total > 0);
+
+    if (state.hand.length && !hasAnyValidAssignment) {
+      return {
+        indexes: state.hand.map((_, index) => index),
+        globalConflict: true
+      };
+    }
+
+    return { indexes: [], globalConflict: false };
+  }
+
+  function notifyImpossibleClue() {
+    const result = impossibleClueResult();
+    if (!result.indexes.length) return;
+
+    const positions = result.indexes.map(index => index + 1).join(", ");
+    const message = result.globalConflict
+      ? "⚠️ Questa combinazione di indizi è impossibile: non esiste una distribuzione valida per l’intera mano."
+      : `⚠️ Indizio impossibile sulla carta ${positions}: non è rimasto nessun colore/numero compatibile.`;
+
+    toast(message, 5200);
   }
 
   function renderCards() {
@@ -1211,35 +1402,38 @@
         </div>`;
       }).join("");
 
+      const directlyImpossible = isCardDirectlyImpossible(card);
+
       return `
-        <article
-          class="card ${card.selected ? "selected" : ""}"
-          id="card-${index}"
-          onpointerdown="startCardPress(event, ${index})"
-          onpointerup="endCardPress(event, ${index})"
-          onpointercancel="cancelCardPress()"
-          onpointerleave="cancelCardPress()"
-          oncontextmenu="event.preventDefault()"
-        >
-          <div class="draw-label">${drawLabel(card)}</div>
-          <div class="card-main">${mainCardLabel(card)}</div>
-          <div class="knowns">${knownExclusions(card)}</div>
+        <div class="card-wrap ${directlyImpossible ? "impossible" : ""}">
+          <article
+            class="card ${card.selected ? "selected" : ""}"
+            id="card-${index}"
+            onpointerdown="startCardPress(event, ${index})"
+            onpointerup="endCardPress(event, ${index})"
+            onpointercancel="cancelCardPress()"
+            onpointerleave="cancelCardPress()"
+            oncontextmenu="event.preventDefault()"
+          >
+            <div class="draw-label">${drawLabel(card)}</div>
+            <div class="card-main ${certainColorClass(probs)}">${mainCardLabel(card)}</div>
+
+            <div class="card-evaluation">
+              <div class="eval">Giocabile<br><strong>${formatPercent(evaluation.play)}</strong></div>
+              <div class="eval">Scarto sicuro<br><strong>${formatPercent(evaluation.safeDiscard)}</strong></div>
+            </div>
+
+            <div class="card-actions">
+              <button class="success" onclick="event.stopPropagation(); openActionModal('play', ${index})">Gioca</button>
+              <button class="warning" onclick="event.stopPropagation(); openActionModal('discard', ${index})">Scarta</button>
+            </div>
+          </article>
 
           <div class="prob-columns">
             <div class="prob-group">${colorsHtml}</div>
             <div class="prob-group">${numbersHtml}</div>
           </div>
-
-          <div class="card-evaluation">
-            <div class="eval">Giocabile<br><strong>${formatPercent(evaluation.play)}</strong></div>
-            <div class="eval">Scarto sicuro<br><strong>${formatPercent(evaluation.safeDiscard)}</strong></div>
-          </div>
-
-          <div class="card-actions">
-            <button class="success" onclick="event.stopPropagation(); openActionModal('play', ${index})">Gioca</button>
-            <button class="warning" onclick="event.stopPropagation(); openActionModal('discard', ${index})">Scarta</button>
-          </div>
-        </article>
+        </div>
       `;
     }).join("");
   }
@@ -1330,7 +1524,7 @@
               aria-label="Nome ${escapeHtml(player.name)}"
               onchange="updatePlayerName('${player.id}', this.value)"
             />
-            <span class="subtle">${status}</span>
+        <span class="subtle">${status}</span>
           </div>
           <div class="visible-hand">
             ${player.hand.length
@@ -1867,6 +2061,7 @@
 
     state.started = true;
     renderAnalysis();
+    notifyImpossibleClue();
     saveState();
   }
 
@@ -1885,6 +2080,7 @@
 
     state.started = true;
     renderAnalysis();
+    notifyImpossibleClue();
     saveState();
   }
 
@@ -2132,12 +2328,12 @@
     location.href = "index.html";
   }
 
-  function toast(message) {
+  function toast(message, duration = 2600) {
     const element = document.getElementById("toast");
     element.textContent = message;
     element.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => element.classList.remove("show"), 2600);
+    toastTimer = setTimeout(() => element.classList.remove("show"), duration);
   }
 
   async function requestWakeLock() {
