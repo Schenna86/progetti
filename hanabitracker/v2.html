@@ -79,11 +79,11 @@
     .panel h2, .panel h3 { margin: 0 0 10px; }
     .subtle { color: var(--muted); font-size: .9rem; }
 
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(110px, 1fr));
-      gap: 9px;
-    }
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(90px, 1fr));
+  gap: 9px;
+}
     .status-box {
       background: #353535;
       border: 1px solid #666;
@@ -91,7 +91,7 @@
       padding: 10px;
       text-align: center;
     }
-    .status-box .value { display: block; font-size: 1.35rem; font-weight: 800; }
+    .status-box .value { display: block; font-size: 1.05rem; font-weight: 800; }
     .inline-adjust {
       display: flex;
       justify-content: center;
@@ -101,7 +101,7 @@
 
     .fireworks {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
       gap: 9px;
     }
     .firework {
@@ -351,7 +351,7 @@
     .assistant strong { color: #90caf9; }
     .assistant-details {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
       gap: 7px;
       margin-top: 9px;
     }
@@ -410,7 +410,7 @@
     .opponents-grid {
       display: grid;
       grid-auto-flow: column;
-      grid-auto-columns: minmax(260px, 1fr);
+      grid-auto-columns: minmax(140px, 1fr);
       gap: 12px;
       overflow-x: auto;
       padding-bottom: 8px;
@@ -491,7 +491,7 @@
 	.zone-card-list .physical-card { width: 30px; height: 40px;font-size: 0.75rem;}
 	.zone-card-list .physical-card .mini-color { display: none;}
     .visible-hand .physical-card .mini-color { display: none; }
-    .residue-cards .physical-card { width: 40px; height: 50px; font-size: 1.15rem; border-width: 2px; }
+    .residue-cards .physical-card { width: 30px; height: 40px;font-size: 0.75rem;; border-width: 1px; }
     .residue-cards .physical-card .mini-color { display: none; }
     .drag-preview {
       position: fixed;
@@ -580,12 +580,17 @@
 
     @media (max-width: 700px) {
       body { padding: 9px; }
-      .status-grid { grid-template-columns: repeat(2, 1fr); }
+        .status-grid {    grid-template-columns: repeat(4, minmax(82px, 1fr)); gap: 5px;}
       .zone-grid { grid-template-columns: 1fr; }
       .cards { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
       .card { min-height: 130px; }
       .residue-row { grid-template-columns: 74px 1fr; }
       .control-label { width: 100%; min-width: 0; align-items:center; }
+	  .status-box {padding: 6px 3px;}
+	  .status-box .value {font-size: 1.05rem;}
+      .status-box .subtle {font-size: .72rem;}
+      .inline-adjust {gap: 3px;}
+      .inline-adjust button {padding: 4px 7px;}
     }
   </style>
 </head>
@@ -635,7 +640,6 @@
 
     <section class="panel">
       <h2>Fuochi d'artificio</h2>
-      <div class="subtle" style="margin-bottom:10px">Trascina una carta sul fuoco dello stesso colore.</div>
       <div class="fireworks" id="fireworks"></div>
     </section>
 
@@ -661,7 +665,6 @@
       <div class="topbar" style="margin-bottom:10px">
         <div>
           <h2>Carte giocate e scartate</h2>
-          <div class="subtle">Registra qui anche le mosse degli altri giocatori.</div>
         </div>
         <div class="top-actions">
           <button class="success" onclick="openActionModal('play', null)">Registra giocata</button>
@@ -685,18 +688,13 @@
       <div class="topbar" style="margin-bottom:8px">
         <div>
           <h2>Mani degli altri giocatori</h2>
-          <div class="subtle">Trascina qui le carte dalle residue. Quando una carta esce, trascinala negli scarti o sul fuoco.</div>
-        </div>
+         </div>
       </div>
       <div class="opponents-grid" id="opponents"></div>
     </section>
 
     <section class="panel">
       <h2>Carte residue</h2>
-      <div class="legend">
-        <span>Ogni rettangolo è una copia fisica distinta</span>
-        <span>Trascina nelle mani, negli scarti o sui fuochi; vicino ai bordi la pagina scorre</span>
-      </div>
       <div class="residue-grid drop-zone" data-drop-type="residue" id="residue-tracker"></div>
     </section>
 
@@ -1466,9 +1464,9 @@
         data-drop-color="${color}"
         style="${backgroundStyle(color)} color:${textColorFor(color)}"
       >
-        <div>${colorText(color)}</div>
+<!--        <div>${colorText(color)}</div>  -->
         <div class="level">${state.fireworks[color] || 0}</div>
-        <div style="font-size:.72rem">Prossima: ${Math.min(5, Number(state.fireworks[color] || 0) + 1)}</div>
+        <div style="font-size:.72rem">Next: ${Math.min(5, Number(state.fireworks[color] || 0) + 1)}</div>
       </div>
     `).join("");
   }
