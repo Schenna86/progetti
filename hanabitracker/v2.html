@@ -1,2405 +1,2479 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#303030" />
-  <title>Hanabi Tracker Tavolo</title>
-  <style>
-    :root {
-      --bg: #303030;
-      --panel: #424242;
-      --panel-2: #505050;
-      --card: #747474;
-      --text: #f4f4f4;
-      --muted: #c8c8c8;
-      --border: #707070;
-      --accent: #42a5f5;
-      --ok: #66bb6a;
-      --warning: #ffb74d;
-      --danger: #ef5350;
-      --shadow: 0 10px 26px rgba(0,0,0,.28);
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html { color-scheme: dark; }
-    body {
-      margin: 0;
-      padding: 14px;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at top, rgba(66,165,245,.12), transparent 32%),
-        var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    button, input { font: inherit; }
-    button {
-      border: 0;
-      border-radius: 9px;
-      padding: 9px 12px;
-      background: #616161;
-      color: white;
-      cursor: pointer;
-      touch-action: manipulation;
-      user-select: none;
-      transition: transform .055s ease, filter .07s ease;
-    }
-    button:hover { filter: brightness(1.08); }
-    button:active { transform: scale(.97); filter: brightness(1.16); }
-    button:disabled { opacity: .45; cursor: not-allowed; }
-    button.primary { background: #1976d2; }
-    button.success { background: #2e7d32; }
-    button.warning { background: #ef6c00; }
-    button.danger { background: #b71c1c; }
-    button.ghost { background: transparent; border: 1px solid var(--border); }
-    button.small { padding: 6px 8px; font-size: .83rem; }
-
-    .app { width: min(1180px, 100%); margin: 0 auto; }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .topbar h1 { margin: 0; font-size: clamp(1.35rem, 4vw, 2rem); }
-    .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-    .panel {
-      background: rgba(66,66,66,.94);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow);
-    }
-    .panel h2, .panel h3 { margin: 0 0 10px; }
-    .subtle { color: var(--muted); font-size: .9rem; }
-
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(90px, 1fr));
-  gap: 9px;
-}
-    .status-box {
-      background: #353535;
-      border: 1px solid #666;
-      border-radius: 12px;
-      padding: 10px;
-      text-align: center;
-    }
-    .status-box .value { display: block; font-size: 1.05rem; font-weight: 800; }
-    .inline-adjust {
-      display: flex;
-      justify-content: center;
-      gap: 5px;
-      margin-top: 6px;
-    }
-
-    .fireworks {
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#303030" />
+    <title>Hanabi Tracker Tavolo</title>
+    <style>
+        :root {
+          --bg: #303030;
+          --panel: #424242;
+          --panel-2: #505050;
+          --card: #747474;
+          --text: #f4f4f4;
+          --muted: #c8c8c8;
+          --border: #707070;
+          --accent: #42a5f5;
+          --ok: #66bb6a;
+          --warning: #ffb74d;
+          --danger: #ef5350;
+          --shadow: 0 10px 26px rgba(0,0,0,.28);
+        }
+    
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { color-scheme: dark; }
+        body {
+          margin: 0;
+          padding: 14px;
+          min-height: 100vh;
+          background:
+            radial-gradient(circle at top, rgba(66,165,245,.12), transparent 32%),
+            var(--bg);
+          color: var(--text);
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+    
+        button, input { font: inherit; }
+        button {
+          border: 0;
+          border-radius: 9px;
+          padding: 9px 12px;
+          background: #616161;
+          color: white;
+          cursor: pointer;
+          touch-action: manipulation;
+          user-select: none;
+          transition: transform .055s ease, filter .07s ease;
+        }
+        button:hover { filter: brightness(1.08); }
+        button:active { transform: scale(.97); filter: brightness(1.16); }
+        button:disabled { opacity: .45; cursor: not-allowed; }
+        button.primary { background: #1976d2; }
+        button.success { background: #2e7d32; }
+        button.warning { background: #ef6c00; }
+        button.danger { background: #b71c1c; }
+        button.ghost { background: transparent; border: 1px solid var(--border); }
+        button.small { padding: 6px 8px; font-size: .83rem; }
+    
+        .app { width: min(1180px, 100%); margin: 0 auto; }
+        .topbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+        .topbar h1 { margin: 0; font-size: clamp(1.35rem, 4vw, 2rem); }
+        .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    
+        .panel {
+          background: rgba(66,66,66,.94);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 14px;
+          margin-bottom: 14px;
+          box-shadow: var(--shadow);
+        }
+        .panel h2, .panel h3 { margin: 0 0 10px; }
+        .subtle { color: var(--muted); font-size: .9rem; }
+    
+    .status-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      grid-template-columns: repeat(4, minmax(90px, 1fr));
       gap: 9px;
     }
-    .firework {
-      min-height: 82px;
-      border-radius: 13px;
-      padding: 10px;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      border: 2px solid rgba(255,255,255,.25);
-      color: #111;
-      font-weight: 800;
-    }
-    .firework .level { font-size: 2rem; line-height: 1; }
-    .firework.rainbow { color: black; }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap:5px;
-    }
-    .card {
-      position: relative;
-      background: var(--card);
-      color: #111;
-      border: 3px solid #aaa;
-      border-radius: 15px;
-      padding: 10px;
-      min-height: 250px;
-      user-select: none;
-      touch-action: manipulation;
-      box-shadow: 0 8px 18px rgba(0,0,0,.2);
-      transition: transform .06s ease, border-color .08s ease, box-shadow .08s ease;
-    }
-    .card.pressing { transform: scale(.992); }
-    .card.selected {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(66,165,245,.22), 0 8px 18px rgba(0,0,0,.25);
-    }
-    .draw-label { font-size: .78rem; font-weight: 800; opacity: .76; text-align: center; }
-    .card-main {
-      font-size: 2rem;
-      font-weight: bold;
-      text-align: center;
-      max-height: 20px;
-      min-height: 20px;
-      display: flex;
-	        justify-content: center;
-      place-items: center;
-      margin: 4px 0 7px;
-      color: #eee;
-    }
-    .card-main.certain-Gia { color: gold; }
-    .card-main.certain-Ros { color: #ef5350; }
-    .card-main.certain-Blu { color: #42a5f5; }
-    .card-main.certain-Ver { color: #43a047; }
-    .card-main.certain-Bia {
-      color: #fff;
-      text-shadow: 0 1px 2px #000, 0 0 2px #000;
-    }
-    .card-main.certain-Arcobaleno {
-      color: transparent;
-      background: linear-gradient(90deg,#ef5350,#ffb300,#ffee58,#43a047,#42a5f5,#ab47bc);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    /* Probabilità compatte: pallini colore, quadratini numero e percentuale */
-    .prob-columns {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
+        .status-box {
+          background: #353535;
+          border: 1px solid #666;
+          border-radius: 12px;
+          padding: 10px;
+          text-align: center;
+        }
+        .status-box .value { display: block; font-size: 1.05rem; font-weight: 800; }
+        .inline-adjust {
+          display: flex;
+          justify-content: center;
+          gap: 5px;
+          margin-top: 6px;
+        }
+    
+        .fireworks {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+          gap: 9px;
+        }
+        .firework {
+          min-height: 82px;
+          border-radius: 13px;
+          padding: 10px;
+          display: grid;
+          place-items: center;
+          text-align: center;
+          border: 2px solid rgba(255,255,255,.25);
+          color: #111;
+          font-weight: 800;
+        }
+        .firework .level { font-size: 2rem; line-height: 1; }
+        .firework.rainbow { color: black; }
+    
+        .cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap:5px;
+        }
+        .card {
+          position: relative;
+          background: var(--card);
+          color: #111;
+          border: 3px solid #aaa;
+          border-radius: 15px;
+          padding: 10px;
+          min-height: 250px;
+          user-select: none;
+          touch-action: manipulation;
+          box-shadow: 0 8px 18px rgba(0,0,0,.2);
+          transition: transform .06s ease, border-color .08s ease, box-shadow .08s ease;
+        }
+        .card.pressing { transform: scale(.992); }
+        .card.selected {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(66,165,245,.22), 0 8px 18px rgba(0,0,0,.25);
+        }
+        .draw-label { font-size: .78rem; font-weight: 800; opacity: .76; text-align: center; }
+        .card-main {
+          font-size: 2rem;
+          font-weight: bold;
+          text-align: center;
+          max-height: 20px;
+          min-height: 20px;
+          display: flex;
+    	        justify-content: center;
+          place-items: center;
+          margin: 4px 0 7px;
+          color: #111;
+        }
+        .card-main.certain-Gia { color: gold; }
+        .card-main.certain-Ros { color: #ef5350; }
+        .card-main.certain-Blu { color: #42a5f5; }
+        .card-main.certain-Ver { color: #43a047; }
+        .card-main.certain-Bia {
+          color: #fff;
+          text-shadow: 0 1px 2px #000, 0 0 2px #000;
+        }
+        .card-main.certain-Arcobaleno {
+          color: transparent;
+          background: linear-gradient(90deg,#ef5350,#ffb300,#ffee58,#43a047,#42a5f5,#ab47bc);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        /* Probabilità compatte: pallini colore, quadratini numero e percentuale */
+        .prob-columns {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+          margin-top: 2px;
+        }
+        .prob-group {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2px;
+          min-width: 58px;
+          max-width: 72px;
+          padding: 0;
+          background: transparent;
+          border-radius: 0;
+        }
+        .prob-row {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 3px;
+          width: 100%;
+          min-height: 21px;
+          font-size: .78rem;
+          line-height: 1.25;
+          opacity: 1;
+        }
+    
+        /* Equivalente di .color-dot */
+        .prob-group:first-child .prob-row span {
+          flex: 0 0 18px;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 3px;
+          font-size: 0;
+          opacity: 1;
+          box-sizing: border-box;
+        }
+        .prob-group:first-child .prob-row:nth-child(1) span { background: gold; }
+        .prob-group:first-child .prob-row:nth-child(2) span { background: red; }
+        .prob-group:first-child .prob-row:nth-child(3) span { background: blue; }
+        .prob-group:first-child .prob-row:nth-child(4) span { background: green; }
+        .prob-group:first-child .prob-row:nth-child(5) span {
+          background: white;
+          border: 1px solid #ccc;
+        }
+        .prob-group:first-child .prob-row:nth-child(6) span {
+          background: linear-gradient(to right, red, orange, yellow, green, blue, violet);
+        }
+    
+        /* Equivalente di .number-hint */
+        .prob-group:nth-child(2) .prob-row span {
+          flex: 0 0 18px;
+          width: 18px;
+          height: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 3px;
+          background: #1c1c1c66;
+          border-radius: 7px;
+          color: #fff;
+          text-align: center;
+          font-size: 1em;
+          font-weight: bold;
+          line-height: 18px;
+          box-sizing: border-box;
+        }
+    
+        /* Equivalente di .probability-value */
+        .prob-row strong {
+          flex: 0 0 auto;
+          font-size: .89em;
+          color: #eee;
+          min-width: 29px;
+          text-align: left;
+          margin: 0 2px 0 0;
+        }
+        .prob-row.zero span {
+          opacity: .09;
+          filter: grayscale(100%);
+        }
+        .prob-row.zero strong { opacity: .15; }
+    
+        /* Contenitore della singola carta: il riquadro finisce prima delle probabilità */
+        .card-wrap {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .card-wrap > .card {
+          min-height: 0;
+        }
+        .card-wrap > .prob-columns {
+          margin-top: 7px;
+          padding: 3px 0 5px;
+        }
+        .card-wrap.impossible > .card {
+          border-color: var(--danger);
+          box-shadow: 0 0 0 3px rgba(239,83,80,.24), 0 8px 18px rgba(0,0,0,.25);
+        }
+        .card-wrap.impossible > .prob-columns {
+          border-radius: 9px;
+          background: rgba(183,28,28,.16);
+        }
+    
+        @media (max-width: 600px) {
+          .prob-columns { gap: 8px; }
+          .prob-group { min-width: 50px; max-width: 60px; }
+        }
+        .card-evaluation {
+          display: flex;
+    	  justify-content: center; 
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+          margin-top: 8px;
+        }
+        .eval {
+               color: black;
+          border-radius: 8px;
+          padding: 6px;
+          text-align: center;
+          font-size: .77rem;
+        }
+        .card-actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+          margin-top: 8px;
+        }
+        .card-actions button { padding: 8px 5px; font-size: .8rem; }
+    
+    .controls {
       width: 100%;
-      margin-top: 2px;
-    }
-    .prob-group {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-      min-width: 58px;
-      max-width: 72px;
-      padding: 0;
-      background: transparent;
-      border-radius: 0;
-    }
-    .prob-row {
-      display: flex;
       align-items: center;
-      justify-content: flex-start;
-      gap: 3px;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    
+    .controls .control-row {
       width: 100%;
-      min-height: 21px;
-      font-size: .78rem;
-      line-height: 1.25;
-      opacity: 1;
-    }
-
-    /* Equivalente di .color-dot */
-    .prob-group:first-child .prob-row span {
-      flex: 0 0 18px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 3px;
-      font-size: 0;
-      opacity: 1;
-      box-sizing: border-box;
-    }
-    .prob-group:first-child .prob-row:nth-child(1) span { background: gold; }
-    .prob-group:first-child .prob-row:nth-child(2) span { background: red; }
-    .prob-group:first-child .prob-row:nth-child(3) span { background: blue; }
-    .prob-group:first-child .prob-row:nth-child(4) span { background: green; }
-    .prob-group:first-child .prob-row:nth-child(5) span {
-      background: white;
-      border: 1px solid #ccc;
-    }
-    .prob-group:first-child .prob-row:nth-child(6) span {
-      background: linear-gradient(to right, red, orange, yellow, green, blue, violet);
-    }
-
-    /* Equivalente di .number-hint */
-    .prob-group:nth-child(2) .prob-row span {
-      flex: 0 0 18px;
-      width: 18px;
-      height: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 3px;
-      background: #1c1c1c66;
-      border-radius: 7px;
-      color: #fff;
-      text-align: center;
-      font-size: 1em;
-      font-weight: bold;
-      line-height: 18px;
-      box-sizing: border-box;
-    }
-
-    /* Equivalente di .probability-value */
-    .prob-row strong {
-      flex: 0 0 auto;
-      font-size: .89em;
-      color: #eee;
-      min-width: 29px;
-      text-align: left;
-      margin: 0 2px 0 0;
-    }
-    .prob-row.zero span {
-      opacity: .09;
-      filter: grayscale(100%);
-    }
-    .prob-row.zero strong { opacity: .15; }
-
-    /* Contenitore della singola carta: il riquadro finisce prima delle probabilità */
-    .card-wrap {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .card-wrap > .card {
-      min-height: 0;
-    }
-    .card-wrap > .prob-columns {
-      margin-top: 7px;
-      padding: 3px 0 5px;
-    }
-    .card-wrap.impossible > .card {
-      border-color: var(--danger);
-      box-shadow: 0 0 0 3px rgba(239,83,80,.24), 0 8px 18px rgba(0,0,0,.25);
-    }
-    .card-wrap.impossible > .prob-columns {
-      border-radius: 9px;
-      background: rgba(183,28,28,.16);
-    }
-
-    @media (max-width: 600px) {
-      .prob-columns { gap: 8px; }
-      .prob-group { min-width: 50px; max-width: 60px; }
-    }
-    .card-evaluation {
-      display: flex;
-	  justify-content: center; 
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .eval {
-           color: black;
-      border-radius: 8px;
-      padding: 6px;
-      text-align: center;
-      font-size: .77rem;
-    }
-    .card-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .card-actions button { padding: 8px 5px; font-size: .8rem; }
-
-.controls {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.controls .control-row {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
-#color-controls,
-#number-controls {
-  justify-content: center;
-}
-    .control-label { min-width: 110px; font-weight: 800; }
-    .color-button {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,.45);
-      padding: 0;
-    }
-    .number-button { min-width: 42px; height: 42px; font-weight: 900; }
-
-    .assistant {
-      border-left: 5px solid var(--accent);
-      background: #353535;
-      border-radius: 10px;
-      padding: 12px;
-    }
-    .assistant strong { color: #90caf9; }
-    .assistant-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-      gap: 7px;
-      margin-top: 9px;
-    }
-    .assistant-card {
-      background: #484848;
-      border-radius: 9px;
-      padding: 8px;
-      font-size: .84rem;
-    }
-
-    .zone-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .zone {
-      background: #353535;
-      border-radius: 12px;
-      padding: 10px;
-      min-height: 90px;
-    }
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip {
-      border-radius: 8px;
-      padding: 6px 8px;
-      font-weight: 800;
-      color: #111;
-      border: 1px solid rgba(255,255,255,.3);
-    }
-    .chip.rainbow { color: black; }
-
-    .residue-grid { display: grid; gap: 8px; }
-    .residue-row {
-      display: grid;
-      grid-template-columns: 100px 1fr;
-      gap: 8px;
-      align-items: start;
-    }
-    .residue-name { font-weight: 900; padding-top: 5px; }
-    .residue-cards { display: flex; flex-wrap: wrap; gap: 5px; }
-    .copy-button {
-      min-width: 34px;
-      height: 34px;
-      padding: 0 6px;
-      border-radius: 8px;
-      color: #111;
-      font-weight: 900;
-      border: 2px solid rgba(255,255,255,.2);
-    }
-    .copy-button.manual { opacity: .2; filter: grayscale(1); outline: 2px dashed white; }
-    .copy-button.played { opacity: .28; text-decoration: line-through; cursor: not-allowed; }
-    .copy-button.discarded { opacity: .28; text-decoration: line-through; cursor: not-allowed; }
-    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); margin-bottom: 10px; }
-
-    /* Tutte le mani avversarie su una sola riga */
-    .opponents-grid {
-      display: grid;
-      grid-auto-flow: column;
-      grid-auto-columns: minmax(140px, 1fr);
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      scroll-snap-type: x proximity;
-      overscroll-behavior-inline: contain;
-    }
-    .player-board {
-      min-width: 0;
-      background: #353535;
-      border: 2px solid #5d5d5d;
-      border-radius: 14px;
-      padding: 11px;
-      transition: border-color .15s, background .15s, box-shadow .15s;
-      scroll-snap-align: start;
-    }
-    .player-board.drop-active, .drop-zone.drop-active {
-      border-color: var(--accent);
-      background: rgba(25,118,210,.18);
-      box-shadow: 0 0 0 3px rgba(66,165,245,.18);
-    }
-    .player-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 9px;
       flex-wrap: wrap;
+      gap: 7px;
     }
-    .player-name {
-      width: min(120px, 100%);
-      border: 1px solid #6f6f6f;
-      background: #292929;
-      color: white;
-      border-radius: 8px;
-      padding: 7px 9px;
-      font-weight: 800;
+    
+    #color-controls,
+    #number-controls {
+      justify-content: center;
     }
-    .visible-hand {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 8px;
-      min-height: 82px;
-      align-items: center;
-      overflow-x: auto;
-      padding-bottom: 3px;
-    }
-    .empty-hand { color: var(--muted); font-size: .88rem; padding: 8px; }
-    .physical-card {
-      width: 40px;
-      height: 50px;
-      border-radius: 10px;
-      border: 3px solid rgba(255,255,255,.5);
-      display: grid;
-      place-items: center;
-      font-size: 1.65rem;
-      font-weight: 950;
-      color: #111;
-      user-select: none;
-      touch-action: none;
-      cursor: grab;
-      box-shadow: 0 5px 12px rgba(0,0,0,.3);
-      position: relative;
-      padding: 0;
-    }
-    .physical-card:active { cursor: grabbing; }
-    .physical-card .mini-color {
-      position: absolute;
-      left: 4px;
-      right: 4px;
-      bottom: 3px;
-      font-size: .57rem;
-      line-height: 1;
-      text-align: center;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-	.zone-card-list .physical-card { width: 30px; height: 40px;font-size: 0.75rem;}
-	.zone-card-list .physical-card .mini-color { display: none;}
-    .visible-hand .physical-card .mini-color { display: none; }
-    .residue-cards .physical-card { width: 30px; height: 40px;font-size: 0.75rem;; border-width: 1px; }
-    .residue-cards .physical-card .mini-color { display: none; }
-    .drag-preview {
-      position: fixed;
-      z-index: 5000;
-      pointer-events: none;
-      opacity: .9;
-      transform: rotate(4deg) scale(1.08);
-      box-shadow: 0 15px 35px rgba(0,0,0,.55);
-    }
-    body.dragging { user-select: none; }
-    .drop-zone {
-      border: 2px dashed #707070;
-      transition: border-color .15s, background .15s, box-shadow .15s;
-    }
-    .firework.drop-zone { border-style: dashed; }
-    .zone-card-list { display: flex; flex-wrap: wrap; gap: 7px; min-height: 65px; align-items: center; }
-    .drop-help { color: var(--muted); font-size: .8rem; margin-top: 7px; }
-    .drag-banner {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 4500;
-      background: #111;
-      color: white;
-      border: 1px solid #777;
-      border-radius: 999px;
-      padding: 8px 14px;
-      display: none;
-      pointer-events: none;
-    }
-    .drag-banner.show { display: block; }
-
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: none;
-      place-items: center;
-      background: rgba(0,0,0,.68);
-      padding: 14px;
-    }
-    .modal-overlay.open { display: grid; }
-    .modal {
-      width: min(560px, 100%);
-      max-height: 92vh;
-      overflow: auto;
-      background: #292929;
-      border: 1px solid #666;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 18px 50px rgba(0,0,0,.55);
-    }
-    .modal h3 { margin-top: 0; }
-    .modal-section { margin: 14px 0; }
-    .choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
-    .choice {
-      min-width: 48px;
-      min-height: 46px;
-      border: 3px solid transparent;
-      font-weight: 900;
-    }
-    .choice.active { border-color: white; box-shadow: 0 0 0 2px var(--accent); }
-    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 20px;
-      transform: translateX(-50%);
-      background: #111;
-      color: white;
-      border: 1px solid #777;
-      border-radius: 10px;
-      padding: 10px 14px;
-      z-index: 3000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .2s;
-      max-width: 90vw;
-      text-align: center;
-    }
-    .toast.show { opacity: 1; }
-
-    .version { text-align: right; color: #aaa; font-size: .78rem; margin-top: 14px; }
-
-    @media (max-width: 700px) {
-      body { padding: 9px; }
-        .status-grid {    grid-template-columns: repeat(4, minmax(82px, 1fr)); gap: 5px;}
-      .zone-grid { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
-      .card { min-height: 130px; }
-      .residue-row { grid-template-columns: 74px 1fr; }
-      .control-label { width: 100%; min-width: 0; align-items:center; }
-	  .status-box {padding: 6px 3px;}
-	  .status-box .value {font-size: 1.05rem;}
-      .status-box .subtle {font-size: .72rem;}
-      .inline-adjust {gap: 3px;}
-      .inline-adjust button {padding: 4px 7px;}
-    }
-  </style>
+        .control-label { min-width: 110px; font-weight: 800; }
+        .color-button {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          border: 2px solid rgba(255,255,255,.45);
+          padding: 0;
+        }
+        .number-button { min-width: 42px; height: 42px; font-weight: 900; }
+    
+        .assistant {
+          border-left: 5px solid var(--accent);
+          background: #353535;
+          border-radius: 10px;
+          padding: 12px;
+        }
+        .assistant strong { color: #90caf9; }
+        .assistant-details {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+          gap: 7px;
+          margin-top: 9px;
+        }
+        .assistant-card {
+          background: #484848;
+          border-radius: 9px;
+          padding: 8px;
+          font-size: .84rem;
+        }
+    
+        .zone-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        .zone {
+          background: #353535;
+          border-radius: 12px;
+          padding: 10px;
+          min-height: 90px;
+        }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip {
+          border-radius: 8px;
+          padding: 6px 8px;
+          font-weight: 800;
+          color: #111;
+          border: 1px solid rgba(255,255,255,.3);
+        }
+        .chip.rainbow { color: black; }
+    
+        .residue-grid { display: grid; gap: 8px; }
+        .residue-row {
+          display: grid;
+          grid-template-columns: 100px 1fr;
+          gap: 8px;
+          align-items: start;
+        }
+        .residue-name { font-weight: 900; padding-top: 5px; }
+        .residue-cards { display: flex; flex-wrap: wrap; gap: 5px; }
+        .copy-button {
+          min-width: 34px;
+          height: 34px;
+          padding: 0 6px;
+          border-radius: 8px;
+          color: #111;
+          font-weight: 900;
+          border: 2px solid rgba(255,255,255,.2);
+        }
+        .copy-button.manual { opacity: .2; filter: grayscale(1); outline: 2px dashed white; }
+        .copy-button.played { opacity: .28; text-decoration: line-through; cursor: not-allowed; }
+        .copy-button.discarded { opacity: .28; text-decoration: line-through; cursor: not-allowed; }
+        .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); margin-bottom: 10px; }
+    
+        /* Tutte le mani avversarie su una sola riga */
+        .opponents-grid {
+          display: grid;
+          grid-auto-flow: column;
+          grid-auto-columns: minmax(140px, 1fr);
+          gap: 12px;
+          overflow-x: auto;
+          padding-bottom: 8px;
+          scroll-snap-type: x proximity;
+          overscroll-behavior-inline: contain;
+        }
+        .player-board {
+          min-width: 0;
+          background: #353535;
+          border: 2px solid #5d5d5d;
+          border-radius: 14px;
+          padding: 11px;
+          transition: border-color .15s, background .15s, box-shadow .15s;
+          scroll-snap-align: start;
+        }
+        .player-board.drop-active, .drop-zone.drop-active {
+          border-color: var(--accent);
+          background: rgba(25,118,210,.18);
+          box-shadow: 0 0 0 3px rgba(66,165,245,.18);
+        }
+        .player-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 9px;
+          flex-wrap: wrap;
+        }
+        .player-name {
+          width: min(120px, 100%);
+          border: 1px solid #6f6f6f;
+          background: #292929;
+          color: white;
+          border-radius: 8px;
+          padding: 7px 9px;
+          font-weight: 800;
+        }
+        .visible-hand {
+          display: flex;
+          flex-wrap: nowrap;
+          gap: 8px;
+          min-height: 82px;
+          align-items: center;
+          overflow-x: auto;
+          padding-bottom: 3px;
+        }
+        .empty-hand { color: var(--muted); font-size: .88rem; padding: 8px; }
+        .physical-card {
+          width: 40px;
+          height: 50px;
+          border-radius: 10px;
+          border: 3px solid rgba(255,255,255,.5);
+          display: grid;
+          place-items: center;
+          font-size: 1.65rem;
+          font-weight: 950;
+          color: #111;
+          user-select: none;
+          touch-action: none;
+          cursor: grab;
+          box-shadow: 0 5px 12px rgba(0,0,0,.3);
+          position: relative;
+          padding: 0;
+        }
+        .physical-card:active { cursor: grabbing; }
+        .physical-card .mini-color {
+          position: absolute;
+          left: 4px;
+          right: 4px;
+          bottom: 3px;
+          font-size: .57rem;
+          line-height: 1;
+          text-align: center;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+    	.zone-card-list .physical-card { width: 30px; height: 40px;font-size: 0.75rem;}
+    	.zone-card-list .physical-card .mini-color { display: none;}
+        .visible-hand .physical-card .mini-color { display: none; }
+        .residue-cards .physical-card { width: 30px; height: 40px;font-size: 0.75rem;; border-width: 1px; }
+        .residue-cards .physical-card .mini-color { display: none; }
+    
+    	.drag-preview {
+          position: fixed;
+          z-index: 5000;
+          pointer-events: none;
+          opacity: .9;
+          transform: rotate(4deg) scale(1.08);
+          box-shadow: 0 15px 35px rgba(0,0,0,.55);
+    	     }
+       .physical-card.drag-preview  .mini-color { display: none; }
+        body.dragging { user-select: none; }
+        .drop-zone {
+          border: 2px dashed #707070;
+          transition: border-color .15s, background .15s, box-shadow .15s;
+        }
+        .firework.drop-zone { border-style: dashed; }
+        .zone-card-list { display: flex; flex-wrap: wrap; gap: 7px; min-height: 65px; align-items: center; }
+        .drop-help { color: var(--muted); font-size: .8rem; margin-top: 7px; }
+        .drag-banner {
+          position: fixed;
+          top: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 4500;
+          background: #111;
+          color: white;
+          border: 1px solid #777;
+          border-radius: 999px;
+          padding: 8px 14px;
+          display: none;
+          pointer-events: none;
+        }
+        .drag-banner.show { display: block; }
+    
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          display: none;
+          place-items: center;
+          background: rgba(0,0,0,.68);
+          padding: 14px;
+        }
+        .modal-overlay.open { display: grid; }
+        .modal {
+          width: min(560px, 100%);
+          max-height: 92vh;
+          overflow: auto;
+          background: #292929;
+          border: 1px solid #666;
+          border-radius: 16px;
+          padding: 16px;
+          box-shadow: 0 18px 50px rgba(0,0,0,.55);
+        }
+        .modal h3 { margin-top: 0; }
+        .modal-section { margin: 14px 0; }
+        .choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .choice {
+          min-width: 48px;
+          min-height: 46px;
+          border: 3px solid transparent;
+          font-weight: 900;
+        }
+        .choice.active { border-color: white; box-shadow: 0 0 0 2px var(--accent); }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    
+        .toast {
+          position: fixed;
+          left: 50%;
+          bottom: 20px;
+          transform: translateX(-50%);
+          background: #111;
+          color: white;
+          border: 1px solid #777;
+          border-radius: 10px;
+          padding: 10px 14px;
+          z-index: 3000;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity .2s;
+          max-width: 90vw;
+          text-align: center;
+        }
+        .toast.show { opacity: 1; }
+    
+        .version { text-align: right; color: #aaa; font-size: .78rem; margin-top: 14px; }
+    
+        @media (max-width: 700px) {
+          body { padding: 9px; }
+            .status-grid {    grid-template-columns: repeat(4, minmax(82px, 1fr)); gap: 5px;}
+          .zone-grid { grid-template-columns: 1fr; }
+          .cards { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+          .card { min-height: 130px; }
+          .residue-row { grid-template-columns: 74px 1fr; }
+          .control-label { width: 100%; min-width: 0; align-items:center; }
+    	  .status-box {padding: 6px 3px;}
+    	  .status-box .value {font-size: 1.05rem;}
+          .status-box .subtle {font-size: .72rem;}
+          .inline-adjust {gap: 3px;}
+          .inline-adjust button {padding: 4px 7px;}
+        }
+    </style>
 </head>
 
 <body>
-  <main class="app">
-    <div class="topbar">
-      <div>
-        <h1>Hanabi Tracker Tavolo</h1>
-        <div class="subtle">Tutte le mani, carte fisiche e assistente probabilistico</div>
-      </div>
-      <div class="top-actions">
-        <button class="ghost" onclick="tornaAllaHome()">Home</button>
-        <button onclick="undo()">Undo</button>
-        <button class="danger" onclick="resetPartita()">Nuova partita</button>
-      </div>
+    <main class="app">
+        <div class="topbar">
+            <div>
+                <h1>Hanabi Tracker Tavolo</h1>
+                <div class="subtle">Tutte le mani, carte fisiche e assistente probabilistico</div>
+            </div>
+            <div class="top-actions">
+                <button class="ghost" onclick="tornaAllaHome()">Home</button>
+                <button onclick="undo()">Undo</button>
+                <button class="danger" onclick="resetPartita()">Nuova partita</button>
+            </div>
+        </div>
+
+        <section class="panel">
+            <div class="status-grid">
+                <div class="status-box">
+                    <span class="subtle">Mazzo</span>
+                    <span class="value" id="deck-count">0</span>
+                </div>
+                <div class="status-box">
+                    <span class="subtle">Indizi</span>
+                    <span class="value" id="clue-count">8</span>
+                    <div class="inline-adjust">
+                        <button class="small" onclick="adjustClues(-1)">−</button>
+                        <button class="small" onclick="adjustClues(1)">+</button>
+                    </div>
+                </div>
+                <div class="status-box">
+                    <span class="subtle">Errori</span>
+                    <span class="value" id="strike-count">0 / 3</span>
+                    <div class="inline-adjust">
+                        <button class="small" onclick="adjustStrikes(-1)">−</button>
+                        <button class="small" onclick="adjustStrikes(1)">+</button>
+                    </div>
+                </div>
+                <div class="status-box">
+                    <span class="subtle">Punteggio</span>
+                    <span class="value" id="score-count">0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Fuochi d'artificio</h2>
+            <div class="fireworks" id="fireworks"></div>
+        </section>
+
+        <section class="panel">
+            <h2 style="text-align: center;">La tua mano</h2>
+
+            <div class="cards" id="cards"></div>
+
+            <div class="controls">
+                <div id="color-controls" class="control-row"></div>
+                <div id="number-controls" class="control-row"></div>
+            </div>
+        </section>
+
+
+
+        <section class="panel">
+            <h2>Assistente</h2>
+            <div class="assistant" id="assistant"></div>
+        </section>
+
+        <section class="panel">
+            <div class="topbar" style="margin-bottom:10px">
+                <div>
+                    <h2>Carte giocate e scartate</h2>
+                </div>
+                <div class="top-actions">
+                    <button class="success" onclick="openActionModal('play', null)">Registra giocata</button>
+                    <button class="warning" onclick="openActionModal('discard', null)">Registra scarto</button>
+                </div>
+            </div>
+            <div class="zone-grid">
+                <div class="zone drop-zone" data-drop-type="played">
+                    <h3>Giocate correttamente</h3>
+                    <div class="zone-card-list" id="played-zone"></div>
+                    <div class="drop-help">Rilascia qui oppure sul fuoco del colore corrispondente.</div>
+                </div>
+                <div class="zone drop-zone" data-drop-type="discard">
+                    <h3>Scarti ed errori</h3>
+                    <div class="zone-card-list" id="discard-zone"></div>
+                    <div class="drop-help">Rilascia qui una carta per scartarla.</div>
+                </div>
+            </div>
+        </section>
+        <section class="panel">
+            <div class="topbar" style="margin-bottom:8px">
+                <div>
+                    <h2>Mani degli altri giocatori</h2>
+                </div>
+            </div>
+            <div class="opponents-grid" id="opponents"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Carte residue</h2>
+            <div class="residue-grid drop-zone" data-drop-type="residue" id="residue-tracker"></div>
+        </section>
+
+        <section class="panel">
+            <label>
+                <input type="checkbox" id="wakelock-toggle" /> Mantieni lo schermo attivo
+            </label>
+        </section>
+
+        <div class="version">Versione prova 2.2 · probabilità sotto carta · avviso indizi impossibili</div>
+    </main>
+
+    <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
+        <div class="modal">
+            <h3>Imposta rapidamente la carta</h3>
+            <div class="modal-section">
+                <strong>Colore certo</strong>
+                <div class="choice-row" id="quick-colors" style="margin-top:8px"></div>
+                <button class="small ghost" style="margin-top:8px" onclick="quickRemoveColor()">Rimuovi colore</button>
+            </div>
+            <div class="modal-section">
+                <strong>Numero certo</strong>
+                <div class="choice-row" id="quick-numbers" style="margin-top:8px"></div>
+                <button class="small ghost" style="margin-top:8px" onclick="quickRemoveNumber()">Rimuovi numero</button>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeQuickModal()">Chiudi</button>
+            </div>
+        </div>
     </div>
 
-    <section class="panel">
-      <div class="status-grid">
-        <div class="status-box">
-          <span class="subtle">Mazzo</span>
-          <span class="value" id="deck-count">0</span>
+    <div id="action-overlay" class="modal-overlay" onclick="if(event.target===this) closeActionModal()">
+        <div class="modal">
+            <h3 id="action-title">Registra carta</h3>
+            <div class="subtle" id="action-subtitle"></div>
+
+            <div class="modal-section">
+                <strong>Colore reale</strong>
+                <div class="choice-row" id="action-colors" style="margin-top:8px"></div>
+            </div>
+
+            <div class="modal-section">
+                <strong>Numero reale</strong>
+                <div class="choice-row" id="action-numbers" style="margin-top:8px"></div>
+            </div>
+
+            <div id="action-preview" class="assistant"></div>
+
+            <div class="modal-footer">
+                <button onclick="closeActionModal()">Annulla</button>
+                <button class="primary" id="action-confirm" onclick="confirmAction()" disabled>Conferma</button>
+            </div>
         </div>
-        <div class="status-box">
-          <span class="subtle">Indizi</span>
-          <span class="value" id="clue-count">8</span>
-          <div class="inline-adjust">
-            <button class="small" onclick="adjustClues(-1)">−</button>
-            <button class="small" onclick="adjustClues(1)">+</button>
-          </div>
-        </div>
-        <div class="status-box">
-          <span class="subtle">Errori</span>
-          <span class="value" id="strike-count">0 / 3</span>
-          <div class="inline-adjust">
-            <button class="small" onclick="adjustStrikes(-1)">−</button>
-            <button class="small" onclick="adjustStrikes(1)">+</button>
-          </div>
-        </div>
-        <div class="status-box">
-          <span class="subtle">Punteggio</span>
-          <span class="value" id="score-count">0</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Fuochi d'artificio</h2>
-      <div class="fireworks" id="fireworks"></div>
-    </section>
-
-<section class="panel">
-  <h2 style="text-align: center;">La tua mano</h2>
-
-  <div class="cards" id="cards"></div>
-
-  <div class="controls">
-    <div id="color-controls" class="control-row"></div>
-    <div id="number-controls" class="control-row"></div>
-  </div>
-</section>
-
-
-
-    <section class="panel">
-      <h2>Assistente</h2>
-      <div class="assistant" id="assistant"></div>
-    </section>
-
-    <section class="panel">
-      <div class="topbar" style="margin-bottom:10px">
-        <div>
-          <h2>Carte giocate e scartate</h2>
-        </div>
-        <div class="top-actions">
-          <button class="success" onclick="openActionModal('play', null)">Registra giocata</button>
-          <button class="warning" onclick="openActionModal('discard', null)">Registra scarto</button>
-        </div>
-      </div>
-      <div class="zone-grid">
-        <div class="zone drop-zone" data-drop-type="played">
-          <h3>Giocate correttamente</h3>
-          <div class="zone-card-list" id="played-zone"></div>
-          <div class="drop-help">Rilascia qui oppure sul fuoco del colore corrispondente.</div>
-        </div>
-        <div class="zone drop-zone" data-drop-type="discard">
-          <h3>Scarti ed errori</h3>
-          <div class="zone-card-list" id="discard-zone"></div>
-          <div class="drop-help">Rilascia qui una carta per scartarla.</div>
-        </div>
-      </div>
-    </section>
- <section class="panel">
-      <div class="topbar" style="margin-bottom:8px">
-        <div>
-          <h2>Mani degli altri giocatori</h2>
-         </div>
-      </div>
-      <div class="opponents-grid" id="opponents"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Carte residue</h2>
-      <div class="residue-grid drop-zone" data-drop-type="residue" id="residue-tracker"></div>
-    </section>
-
-    <section class="panel">
-      <label>
-        <input type="checkbox" id="wakelock-toggle" />
-        Mantieni lo schermo attivo
-      </label>
-    </section>
-
-    <div class="version">Versione prova 2.2 · probabilità sotto carta · avviso indizi impossibili</div>
-  </main>
-
-  <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
-    <div class="modal">
-      <h3>Imposta rapidamente la carta</h3>
-      <div class="modal-section">
-        <strong>Colore certo</strong>
-        <div class="choice-row" id="quick-colors" style="margin-top:8px"></div>
-        <button class="small ghost" style="margin-top:8px" onclick="quickRemoveColor()">Rimuovi colore</button>
-      </div>
-      <div class="modal-section">
-        <strong>Numero certo</strong>
-        <div class="choice-row" id="quick-numbers" style="margin-top:8px"></div>
-        <button class="small ghost" style="margin-top:8px" onclick="quickRemoveNumber()">Rimuovi numero</button>
-      </div>
-      <div class="modal-footer">
-        <button onclick="closeQuickModal()">Chiudi</button>
-      </div>
     </div>
-  </div>
 
-  <div id="action-overlay" class="modal-overlay" onclick="if(event.target===this) closeActionModal()">
-    <div class="modal">
-      <h3 id="action-title">Registra carta</h3>
-      <div class="subtle" id="action-subtitle"></div>
+    <div id="drag-banner" class="drag-banner">Rilascia nella zona desiderata</div>
+    <div id="toast" class="toast"></div>
 
-      <div class="modal-section">
-        <strong>Colore reale</strong>
-        <div class="choice-row" id="action-colors" style="margin-top:8px"></div>
-      </div>
-
-      <div class="modal-section">
-        <strong>Numero reale</strong>
-        <div class="choice-row" id="action-numbers" style="margin-top:8px"></div>
-      </div>
-
-      <div id="action-preview" class="assistant"></div>
-
-      <div class="modal-footer">
-        <button onclick="closeActionModal()">Annulla</button>
-        <button class="primary" id="action-confirm" onclick="confirmAction()" disabled>Conferma</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="drag-banner" class="drag-banner">Rilascia nella zona desiderata</div>
-  <div id="toast" class="toast"></div>
-
-<script>
-(() => {
-  "use strict";
-
-  const params = new URLSearchParams(location.search);
-  const numGiocatori = Number.parseInt(params.get("giocatori"), 10) || 4;
-  const cartePerGiocatore = numGiocatori <= 3 ? 5 : 4;
-  const arcobalenoAttivo = ["on", "true", "1"].includes(params.get("arcobaleno"));
-  const resetMode = params.get("reset") || "sinistra";
-
-  const COLOR_META = {
-    Gia: { name: "Giallo", css: "gold" },
-    Ros: { name: "Rosso", css: "#ef5350" },
-    Blu: { name: "Blu", css: "#42a5f5" },
-    Ver: { name: "Verde", css: "#43a047" },
-    Bia: { name: "Bianco", css: "white" },
-    Arcobaleno: {
-      name: "Arcobaleno",
-      css: "linear-gradient(90deg,#ef5350,#ffb300,#ffee58,#43a047,#42a5f5,#ab47bc)"
-    }
-  };
-  const COLORI_BASE = ["Gia", "Ros", "Blu", "Ver", "Bia"];
-  const COLORI = arcobalenoAttivo ? [...COLORI_BASE, "Arcobaleno"] : [...COLORI_BASE];
-  const NUMERI = ["1", "2", "3", "4", "5"];
-  const COPIE = { "1": 3, "2": 2, "3": 2, "4": 2, "5": 1 };
-  const STORAGE_KEY = `hanabiTrackerTableV3:${numGiocatori}:${arcobalenoAttivo}:${resetMode}`;
-  const LEGACY_STORAGE_KEY = `hanabiTrackerV2:${numGiocatori}:${arcobalenoAttivo}:${resetMode}`;
-
-  let historyStack = [];
-  let probabilityCache = [];
-  let quickIndex = null;
-  let actionDraft = { type: null, handIndex: null, color: null, number: null };
-  let toastTimer = null;
-  let wakeLock = null;
-  let saveTimer = null;
-  let probabilityCacheKey = "";
-  let controlsRendered = false;
-
-  let pressTimer = null;
-  let pressTriggered = false;
-  const LONG_PRESS_MS = 500;
-
-  let dragState = null;
-  let activeDropZone = null;
-  let dragFrame = null;
-  const DRAG_THRESHOLD = 5;
-  const SAVE_DELAY_MS = 90;
-
-  function emptyManualSeen() {
-    const result = {};
-    COLORI.forEach(color => {
-      NUMERI.forEach(number => result[identityKey(color, number)] = 0);
-    });
-    return result;
-  }
-
-  function emptyFireworks() {
-    return Object.fromEntries(COLORI.map(color => [color, 0]));
-  }
-
-  function newHandCard(drawId = 0) {
-    return {
-      colors: [],
-      excludedColors: [],
-      number: null,
-      excludedNumbers: [],
-      selected: false,
-      drawId
-    };
-  }
-
-  function createOpponents() {
-    return Array.from({ length: Math.max(0, numGiocatori - 1) }, (_, index) => ({
-      id: `player-${index + 2}`,
-      name: `Giocatore ${index + 2}`,
-      hand: [],
-      setupSlotsRemaining: cartePerGiocatore,
-      drawSlotsPending: 0
-    }));
-  }
-
-  function initialState() {
-    const deckSize = COLORI.length * 10;
-    const initialDeal = numGiocatori * cartePerGiocatore;
-    return {
-      version: 3,
-      hand: Array.from({ length: cartePerGiocatore }, () => newHandCard(0)),
-      opponents: createOpponents(),
-      manualSeen: emptyManualSeen(),
-      played: [],
-      discarded: [],
-      fireworks: emptyFireworks(),
-      clues: 8,
-      strikes: 0,
-      deckRemaining: Math.max(0, deckSize - initialDeal),
-      ownDrawCounter: 0,
-      started: false
-    };
-  }
-
-  let state = initialState();
-
-  function identityKey(color, number) {
-    return `${color}|${number}`;
-  }
-
-  function splitIdentity(key) {
-    const [color, number] = key.split("|");
-    return { color, number };
-  }
-
-  function makeCardId(color, number, copy) {
-    return `${color}-${number}-${copy}`;
-  }
-
-  let physicalCardsCache = null;
-
-  function allPhysicalCards() {
-    if (physicalCardsCache) return physicalCardsCache;
-    const cards = [];
-    COLORI.forEach(color => {
-      NUMERI.forEach(number => {
-        for (let copy = 1; copy <= initialCount(number); copy++) {
-          cards.push({ id: makeCardId(color, number, copy), color, number, copy });
-        }
-      });
-    });
-    physicalCardsCache = cards;
-    return physicalCardsCache;
-  }
-
-  function cardFromId(id) {
-    return allPhysicalCards().find(card => card.id === id) || null;
-  }
-
-  function initialCount(number) {
-    return COPIE[String(number)] || 0;
-  }
-
-  function colorStyle(color) {
-    return COLOR_META[color]?.css || "#777";
-  }
-
-  function colorClass(color) {
-    return color === "Arcobaleno" ? "rainbow" : "";
-  }
-
-  function colorText(color) {
-    return COLOR_META[color]?.name || color;
-  }
-
-  function textColorFor(color) {
-    return color === "Ros" || color === "Blu" || color === "Ver" <!-- || color === "Arcobaleno"-->
-      ? "white"
-      : "#111";
-  }
-
-  function backgroundStyle(color) {
-    const css = colorStyle(color);
-    return color === "Arcobaleno" ? `background:${css};` : `background:${css};`;
-  }
-
-  function clone(value) {
-    return typeof structuredClone === "function"
-      ? structuredClone(value)
-      : JSON.parse(JSON.stringify(value));
-  }
-
-  function pushHistory() {
-    historyStack.push(clone(state));
-    if (historyStack.length > 40) historyStack.shift();
-  }
-
-  function undo() {
-    if (!historyStack.length) {
-      toast("Niente da annullare.");
-      return;
-    }
-    state = historyStack.pop();
-    normalizeState();
-    saveState();
-    render();
-  }
-
-  function normalizeState() {
-    state.hand ??= [];
-    state.manualSeen ??= emptyManualSeen();
-    state.played ??= [];
-    state.discarded ??= [];
-    state.fireworks ??= emptyFireworks();
-    state.opponents ??= createOpponents();
-    state.clues = Number.isFinite(state.clues) ? state.clues : 8;
-    state.strikes = Number.isFinite(state.strikes) ? state.strikes : 0;
-    state.ownDrawCounter = Number.isFinite(state.ownDrawCounter) ? state.ownDrawCounter : 0;
-    state.started = Boolean(state.started);
-
-    while (state.opponents.length < Math.max(0, numGiocatori - 1)) {
-      const index = state.opponents.length;
-      state.opponents.push({
-        id: `player-${index + 2}`,
-        name: `Giocatore ${index + 2}`,
-        hand: [],
-        setupSlotsRemaining: cartePerGiocatore,
-        drawSlotsPending: 0
-      });
-    }
-    state.opponents = state.opponents.slice(0, Math.max(0, numGiocatori - 1));
-
-    COLORI.forEach(color => {
-      if (!Number.isFinite(state.fireworks[color])) state.fireworks[color] = 0;
-      NUMERI.forEach(number => {
-        const key = identityKey(color, number);
-        if (!Number.isFinite(state.manualSeen[key])) state.manualSeen[key] = 0;
-      });
-    });
-
-    state.hand.forEach(card => {
-      card.colors ??= [];
-      card.excludedColors ??= [];
-      card.number ??= null;
-      card.excludedNumbers ??= [];
-      card.selected = Boolean(card.selected);
-      card.drawId = Number.isFinite(card.drawId) ? card.drawId : 0;
-    });
-
-    state.opponents.forEach((player, index) => {
-      player.id ||= `player-${index + 2}`;
-      player.name ||= `Giocatore ${index + 2}`;
-      player.hand = Array.isArray(player.hand) ? player.hand : [];
-      player.drawSlotsPending = Number.isFinite(player.drawSlotsPending) ? player.drawSlotsPending : 0;
-      if (!Number.isFinite(player.setupSlotsRemaining)) {
-        player.setupSlotsRemaining = Math.max(0, cartePerGiocatore - player.hand.length);
-      }
-    });
-
-    if (!Number.isFinite(state.deckRemaining)) {
-      const deckSize = COLORI.length * 10;
-      state.deckRemaining = Math.max(0, deckSize - numGiocatori * cartePerGiocatore);
-    }
-
-    assignMissingCardIds();
-    migrateManualSeen();
-    state.version = 3;
-  }
-
-  function assignMissingCardIds() {
-    const used = new Set();
-
-    function assign(entry) {
-      if (!entry || !entry.color || !entry.number) return;
-      entry.number = String(entry.number);
-      if (entry.id && !used.has(entry.id)) {
-        used.add(entry.id);
-        return;
-      }
-      const candidate = allPhysicalCards().find(card =>
-        card.color === entry.color && card.number === entry.number && !used.has(card.id)
-      );
-      if (candidate) {
-        entry.id = candidate.id;
-        used.add(candidate.id);
-      }
-    }
-
-    state.played.forEach(assign);
-    state.discarded.forEach(assign);
-    state.opponents.forEach(player => player.hand.forEach(assign));
-  }
-
-  function migrateManualSeen() {
-    const totalManual = Object.values(state.manualSeen || {}).reduce((sum, value) => sum + Number(value || 0), 0);
-    if (!totalManual || !state.opponents.length) return;
-
-    const used = usedCardIds();
-    let playerIndex = 0;
-    COLORI.forEach(color => {
-      NUMERI.forEach(number => {
-        const key = identityKey(color, number);
-        let count = Number(state.manualSeen[key] || 0);
-        while (count > 0) {
-          const card = allPhysicalCards().find(item =>
-            item.color === color && item.number === number && !used.has(item.id)
-          );
-          if (!card) break;
-
-          let attempts = 0;
-          while (attempts < state.opponents.length && state.opponents[playerIndex].hand.length >= cartePerGiocatore) {
-            playerIndex = (playerIndex + 1) % state.opponents.length;
-            attempts++;
+    <script>
+        (() => {
+          "use strict";
+        
+          const params = new URLSearchParams(location.search);
+          const numGiocatori = Number.parseInt(params.get("giocatori"), 10) || 4;
+          const cartePerGiocatore = numGiocatori <= 3 ? 5 : 4;
+          const arcobalenoAttivo = ["on", "true", "1"].includes(params.get("arcobaleno"));
+          const resetMode = params.get("reset") || "sinistra";
+        
+          const COLOR_META = {
+            Gia: { name: "Giallo", css: "gold" },
+            Ros: { name: "Rosso", css: "#ef5350" },
+            Blu: { name: "Blu", css: "#42a5f5" },
+            Ver: { name: "Verde", css: "#43a047" },
+            Bia: { name: "Bianco", css: "white" },
+            Arcobaleno: {
+              name: "Arcobaleno",
+              css: "linear-gradient(90deg,#ef5350,#ffb300,#ffee58,#43a047,#42a5f5,#ab47bc)"
+            }
+          };
+          const COLORI_BASE = ["Gia", "Ros", "Blu", "Ver", "Bia"];
+          const COLORI = arcobalenoAttivo ? [...COLORI_BASE, "Arcobaleno"] : [...COLORI_BASE];
+          const NUMERI = ["1", "2", "3", "4", "5"];
+          const COPIE = { "1": 3, "2": 2, "3": 2, "4": 2, "5": 1 };
+          const STORAGE_KEY = `hanabiTrackerTableV3:${numGiocatori}:${arcobalenoAttivo}:${resetMode}`;
+          const LEGACY_STORAGE_KEY = `hanabiTrackerV2:${numGiocatori}:${arcobalenoAttivo}:${resetMode}`;
+        
+          let historyStack = [];
+          let probabilityCache = [];
+          let quickIndex = null;
+          let actionDraft = { type: null, handIndex: null, color: null, number: null };
+          let toastTimer = null;
+          let wakeLock = null;
+          let saveTimer = null;
+          let probabilityCacheKey = "";
+          let controlsRendered = false;
+        
+          let pressTimer = null;
+          let pressTriggered = false;
+          const LONG_PRESS_MS = 500;
+        
+          let dragState = null;
+          let activeDropZone = null;
+          let dragFrame = null;
+          const DRAG_THRESHOLD = 5;
+          const SAVE_DELAY_MS = 90;
+        
+          function emptyManualSeen() {
+            const result = {};
+            COLORI.forEach(color => {
+              NUMERI.forEach(number => result[identityKey(color, number)] = 0);
+            });
+            return result;
           }
-          const player = state.opponents[playerIndex];
-          player.hand.push({ ...card, dealSource: "initial" });
-          player.setupSlotsRemaining = Math.max(0, player.setupSlotsRemaining - 1);
-          used.add(card.id);
-          playerIndex = (playerIndex + 1) % state.opponents.length;
-          count--;
+        
+          function emptyFireworks() {
+            return Object.fromEntries(COLORI.map(color => [color, 0]));
+          }
+        
+          function newHandCard(drawId = 0) {
+            return {
+              colors: [],
+              excludedColors: [],
+              number: null,
+              excludedNumbers: [],
+              selected: false,
+              drawId
+            };
+          }
+        
+          function createOpponents() {
+            return Array.from({ length: Math.max(0, numGiocatori - 1) }, (_, index) => ({
+              id: `player-${index + 2}`,
+              name: `Giocatore ${index + 2}`,
+              hand: [],
+              setupSlotsRemaining: cartePerGiocatore,
+              drawSlotsPending: 0
+            }));
+          }
+        
+          function initialState() {
+            const deckSize = COLORI.length * 10;
+            const initialDeal = numGiocatori * cartePerGiocatore;
+            return {
+              version: 3,
+              hand: Array.from({ length: cartePerGiocatore }, () => newHandCard(0)),
+              opponents: createOpponents(),
+              manualSeen: emptyManualSeen(),
+              played: [],
+              discarded: [],
+              fireworks: emptyFireworks(),
+              clues: 8,
+              strikes: 0,
+              deckRemaining: Math.max(0, deckSize - initialDeal),
+              ownDrawCounter: 0,
+              started: false
+            };
+          }
+        
+          let state = initialState();
+        
+          function identityKey(color, number) {
+            return `${color}|${number}`;
+          }
+        
+          function splitIdentity(key) {
+            const [color, number] = key.split("|");
+            return { color, number };
+          }
+        
+          function makeCardId(color, number, copy) {
+            return `${color}-${number}-${copy}`;
+          }
+        
+          let physicalCardsCache = null;
+        
+          function allPhysicalCards() {
+            if (physicalCardsCache) return physicalCardsCache;
+            const cards = [];
+            COLORI.forEach(color => {
+              NUMERI.forEach(number => {
+                for (let copy = 1; copy <= initialCount(number); copy++) {
+                  cards.push({ id: makeCardId(color, number, copy), color, number, copy });
+                }
+              });
+            });
+            physicalCardsCache = cards;
+            return physicalCardsCache;
+          }
+        
+          function cardFromId(id) {
+            return allPhysicalCards().find(card => card.id === id) || null;
+          }
+        
+          function initialCount(number) {
+            return COPIE[String(number)] || 0;
+          }
+        
+          function colorStyle(color) {
+            return COLOR_META[color]?.css || "#777";
+          }
+        
+          function colorClass(color) {
+            return color === "Arcobaleno" ? "rainbow" : "";
+          }
+        
+          function colorText(color) {
+            return COLOR_META[color]?.name || color;
+          }
+        
+          function textColorFor(color) {
+            return color === "Ros" || color === "Blu" || color === "Ver" <!-- || color === "Arcobaleno"-->
+              ? "white"
+              : "#111";
+          }
+        
+          function backgroundStyle(color) {
+            const css = colorStyle(color);
+            return color === "Arcobaleno" ? `background:${css};` : `background:${css};`;
+          }
+        
+          function clone(value) {
+            return typeof structuredClone === "function"
+              ? structuredClone(value)
+              : JSON.parse(JSON.stringify(value));
+          }
+        
+          function pushHistory() {
+            historyStack.push(clone(state));
+            if (historyStack.length > 40) historyStack.shift();
+          }
+        
+          function undo() {
+            if (!historyStack.length) {
+              toast("Niente da annullare.");
+              return;
+            }
+            state = historyStack.pop();
+            normalizeState();
+            saveState();
+            render();
+          }
+        
+          function normalizeState() {
+            state.hand ??= [];
+            state.manualSeen ??= emptyManualSeen();
+            state.played ??= [];
+            state.discarded ??= [];
+            state.fireworks ??= emptyFireworks();
+            state.opponents ??= createOpponents();
+            state.clues = Number.isFinite(state.clues) ? state.clues : 8;
+            state.strikes = Number.isFinite(state.strikes) ? state.strikes : 0;
+            state.ownDrawCounter = Number.isFinite(state.ownDrawCounter) ? state.ownDrawCounter : 0;
+            state.started = Boolean(state.started);
+        
+            while (state.opponents.length < Math.max(0, numGiocatori - 1)) {
+              const index = state.opponents.length;
+              state.opponents.push({
+                id: `player-${index + 2}`,
+                name: `Giocatore ${index + 2}`,
+                hand: [],
+                setupSlotsRemaining: cartePerGiocatore,
+                drawSlotsPending: 0
+              });
+            }
+            state.opponents = state.opponents.slice(0, Math.max(0, numGiocatori - 1));
+        
+            COLORI.forEach(color => {
+              if (!Number.isFinite(state.fireworks[color])) state.fireworks[color] = 0;
+              NUMERI.forEach(number => {
+                const key = identityKey(color, number);
+                if (!Number.isFinite(state.manualSeen[key])) state.manualSeen[key] = 0;
+              });
+            });
+        
+            state.hand.forEach(card => {
+              card.colors ??= [];
+              card.excludedColors ??= [];
+              card.number ??= null;
+              card.excludedNumbers ??= [];
+              card.selected = Boolean(card.selected);
+              card.drawId = Number.isFinite(card.drawId) ? card.drawId : 0;
+            });
+        
+            state.opponents.forEach((player, index) => {
+              player.id ||= `player-${index + 2}`;
+              player.name ||= `Giocatore ${index + 2}`;
+              player.hand = Array.isArray(player.hand) ? player.hand : [];
+              player.drawSlotsPending = Number.isFinite(player.drawSlotsPending) ? player.drawSlotsPending : 0;
+              if (!Number.isFinite(player.setupSlotsRemaining)) {
+                player.setupSlotsRemaining = Math.max(0, cartePerGiocatore - player.hand.length);
+              }
+            });
+        
+            if (!Number.isFinite(state.deckRemaining)) {
+              const deckSize = COLORI.length * 10;
+              state.deckRemaining = Math.max(0, deckSize - numGiocatori * cartePerGiocatore);
+            }
+        
+            assignMissingCardIds();
+            migrateManualSeen();
+            state.version = 3;
+          }
+        
+          function assignMissingCardIds() {
+            const used = new Set();
+        
+            function assign(entry) {
+              if (!entry || !entry.color || !entry.number) return;
+              entry.number = String(entry.number);
+              if (entry.id && !used.has(entry.id)) {
+                used.add(entry.id);
+                return;
+              }
+              const candidate = allPhysicalCards().find(card =>
+                card.color === entry.color && card.number === entry.number && !used.has(card.id)
+              );
+              if (candidate) {
+                entry.id = candidate.id;
+                used.add(candidate.id);
+              }
+            }
+        
+            state.played.forEach(assign);
+            state.discarded.forEach(assign);
+            state.opponents.forEach(player => player.hand.forEach(assign));
+          }
+        
+          function migrateManualSeen() {
+            const totalManual = Object.values(state.manualSeen || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+            if (!totalManual || !state.opponents.length) return;
+        
+            const used = usedCardIds();
+            let playerIndex = 0;
+            COLORI.forEach(color => {
+              NUMERI.forEach(number => {
+                const key = identityKey(color, number);
+                let count = Number(state.manualSeen[key] || 0);
+                while (count > 0) {
+                  const card = allPhysicalCards().find(item =>
+                    item.color === color && item.number === number && !used.has(item.id)
+                  );
+                  if (!card) break;
+        
+                  let attempts = 0;
+                  while (attempts < state.opponents.length && state.opponents[playerIndex].hand.length >= cartePerGiocatore) {
+                    playerIndex = (playerIndex + 1) % state.opponents.length;
+                    attempts++;
+                  }
+                  const player = state.opponents[playerIndex];
+                  player.hand.push({ ...card, dealSource: "initial" });
+                  player.setupSlotsRemaining = Math.max(0, player.setupSlotsRemaining - 1);
+                  used.add(card.id);
+                  playerIndex = (playerIndex + 1) % state.opponents.length;
+                  count--;
+                }
+                state.manualSeen[key] = 0;
+              });
+            });
+          }
+        
+          function persistStateNow() {
+            if (saveTimer) {
+              clearTimeout(saveTimer);
+              saveTimer = null;
+            }
+            try {
+              // La cronologia resta in memoria: salvare decine di copie complete rallentava ogni tasto.
+              localStorage.setItem(STORAGE_KEY, JSON.stringify({ state }));
+            } catch (error) {
+              console.error("Impossibile salvare la partita:", error);
+            }
+          }
+        
+          function saveState() {
+            if (saveTimer) clearTimeout(saveTimer);
+            saveTimer = setTimeout(persistStateNow, SAVE_DELAY_MS);
+          }
+        
+          function loadState() {
+            try {
+              const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+              if (!raw) return false;
+              const parsed = JSON.parse(raw);
+              state = parsed.state || parsed;
+              historyStack = Array.isArray(parsed.historyStack) ? parsed.historyStack.slice(-20) : [];
+              normalizeState();
+              saveState();
+              return true;
+            } catch (error) {
+              console.error("Salvataggio non leggibile:", error);
+              return false;
+            }
+          }
+        
+          function usedCardIds() {
+            const ids = new Set();
+            state.played.forEach(card => card.id && ids.add(card.id));
+            state.discarded.forEach(card => card.id && ids.add(card.id));
+            state.opponents.forEach(player => player.hand.forEach(card => card.id && ids.add(card.id)));
+            return ids;
+          }
+        
+          function residueCards() {
+            const used = usedCardIds();
+            return allPhysicalCards().filter(card => !used.has(card.id));
+          }
+        
+          function firstResidueCard(color, number) {
+            return residueCards().find(card => card.color === color && card.number === String(number)) || null;
+          }
+        
+          function opponentVisibleCount(color, number) {
+            return state.opponents.reduce((sum, player) => sum + player.hand.filter(card =>
+              card.color === color && card.number === String(number)
+            ).length, 0);
+          }
+        
+          function physicalRemovedCount(color, number) {
+            return state.played.filter(x => x.color === color && x.number === String(number)).length +
+              state.discarded.filter(x => x.color === color && x.number === String(number)).length;
+          }
+        
+          function physicalRemainingCount(color, number) {
+            return Math.max(0, initialCount(number) - physicalRemovedCount(color, number));
+          }
+        
+          function availableCount(color, number) {
+            return Math.max(0, physicalRemainingCount(color, number) - opponentVisibleCount(color, number));
+          }
+        
+          function allIdentityKeys() {
+            const keys = [];
+            COLORI.forEach(color => NUMERI.forEach(number => keys.push(identityKey(color, number))));
+            return keys;
+          }
+        
+          function candidatesForCard(card, countsByKey) {
+            const allowedColors = card.colors.length
+              ? card.colors
+              : COLORI.filter(color => !card.excludedColors.includes(color));
+        
+            const allowedNumbers = card.number
+              ? [String(card.number)]
+              : NUMERI.filter(number => !card.excludedNumbers.includes(number));
+        
+            const result = [];
+            allowedColors.forEach(color => {
+              allowedNumbers.forEach(number => {
+                const key = identityKey(color, number);
+                if ((countsByKey[key] || 0) > 0) result.push(key);
+              });
+            });
+            return result;
+          }
+        
+          function probabilitySignature() {
+            const hand = state.hand.map(card => ({
+              colors: card.colors,
+              excludedColors: card.excludedColors,
+              number: card.number,
+              excludedNumbers: card.excludedNumbers
+            }));
+            const counts = COLORI.flatMap(color =>
+              NUMERI.map(number => availableCount(color, number))
+            );
+            return JSON.stringify([hand, counts]);
+          }
+        
+          function ensureProbabilityCache() {
+            const key = probabilitySignature();
+            if (key !== probabilityCacheKey) {
+              probabilityCache = calculateProbabilities();
+              probabilityCacheKey = key;
+            }
+            return probabilityCache;
+          }
+        
+          function calculateProbabilities() {
+            const keys = allIdentityKeys();
+            const keyIndex = Object.fromEntries(keys.map((key, index) => [key, index]));
+            const baseCounts = keys.map(key => {
+              const { color, number } = splitIdentity(key);
+              return availableCount(color, number);
+            });
+            const baseCountObject = Object.fromEntries(keys.map((key, index) => [key, baseCounts[index]]));
+            const candidates = state.hand.map(card => candidatesForCard(card, baseCountObject));
+        
+            return state.hand.map((card, targetIndex) => {
+              if (!candidates[targetIndex].length) return { total: 0, byIdentity: {}, byColor: {}, byNumber: {} };
+        
+              const numerators = {};
+              let total = 0;
+        
+              const others = state.hand
+                .map((_, index) => index)
+                .filter(index => index !== targetIndex)
+                .sort((a, b) => candidates[a].length - candidates[b].length);
+        
+              // La cache è condivisa tra tutte le identità possibili della carta bersaglio.
+              // In questo modo il calcolo resta esatto, ma non ripete migliaia di stati uguali.
+              const memo = new Map();
+        
+              function countAssignments(position, counts) {
+                if (position >= others.length) return 1;
+        
+                const memoKey = `${position}:${counts.join(",")}`;
+                if (memo.has(memoKey)) return memo.get(memoKey);
+        
+                const cardIndex = others[position];
+                let ways = 0;
+        
+                for (const key of candidates[cardIndex]) {
+                  const id = keyIndex[key];
+                  const remaining = counts[id];
+                  if (remaining <= 0) continue;
+                  counts[id]--;
+                  ways += remaining * countAssignments(position + 1, counts);
+                  counts[id]++;
+                }
+        
+                memo.set(memoKey, ways);
+                return ways;
+              }
+        
+              for (const targetKey of candidates[targetIndex]) {
+                const targetId = keyIndex[targetKey];
+                const copies = baseCounts[targetId];
+                if (copies <= 0) continue;
+        
+                const counts = baseCounts.slice();
+                counts[targetId]--;
+                const weightedWays = copies * countAssignments(0, counts);
+        
+                if (weightedWays > 0) {
+                  numerators[targetKey] = weightedWays;
+                  total += weightedWays;
+                }
+              }
+        
+              const byIdentity = {};
+              const byColor = Object.fromEntries(COLORI.map(color => [color, 0]));
+              const byNumber = Object.fromEntries(NUMERI.map(number => [number, 0]));
+        
+              if (total > 0) {
+                Object.entries(numerators).forEach(([key, numerator]) => {
+                  const probability = numerator / total;
+                  const { color, number } = splitIdentity(key);
+                  byIdentity[key] = probability;
+                  byColor[color] += probability;
+                  byNumber[number] += probability;
+                });
+              }
+        
+              return { total, byIdentity, byColor, byNumber };
+            });
+          }
+        
+          function isPlayable(color, number) {
+            return Number(number) === Number(state.fireworks[color] || 0) + 1;
+          }
+        
+          function isSafeDiscardIdentity(color, number) {
+            const level = Number(state.fireworks[color] || 0);
+            if (Number(number) <= level) return true;
+            return availableCount(color, number) > 1;
+          }
+        
+          function evaluateCard(index) {
+            const probs = probabilityCache[index];
+            if (!probs?.total) return { play: 0, safeDiscard: 0, critical: 0, useless: 0 };
+        
+            let play = 0;
+            let safeDiscard = 0;
+            let critical = 0;
+            let useless = 0;
+        
+            Object.entries(probs.byIdentity).forEach(([key, probability]) => {
+              const { color, number } = splitIdentity(key);
+              if (isPlayable(color, number)) play += probability;
+              if (isSafeDiscardIdentity(color, number)) safeDiscard += probability;
+        
+              const level = Number(state.fireworks[color] || 0);
+              if (Number(number) <= level) useless += probability;
+              if (Number(number) > level && availableCount(color, number) === 1) critical += probability;
+            });
+        
+            return { play, safeDiscard, critical, useless };
+          }
+        
+          function formatPercent(value) {
+            if (!Number.isFinite(value)) return "—";
+            const percent = value * 100;
+            if (percent > 0 && percent < 0.1) return "<0,1%";
+            return `${percent.toLocaleString("it-IT", { maximumFractionDigits: 1 })}%`;
+          }
+        
+          function drawLabel(card) {
+            if (!card.drawId) return "Carta iniziale";
+            const delta = state.ownDrawCounter - card.drawId;
+            if (delta <= 0) return "Ultima pescata";
+            if (delta === 1) return "Penultima pescata";
+            return `${delta + 1}ª pescata precedente`;
+          }
+        
+          function mainCardLabel(card) {
+            return card.number || "?";
+          }
+        
+          function certainColorClass(probabilities) {
+            if (!probabilities?.byColor) return "";
+        
+            const certainColors = COLORI.filter(color =>
+              (probabilities.byColor[color] || 0) >= 0.999999
+            );
+        
+            return certainColors.length === 1 ? `certain-${certainColors[0]}` : "";
+          }
+        
+          function knownExclusions(card) {
+            const pieces = [];
+            if (card.excludedColors.length) {
+              pieces.push(`Non: ${card.excludedColors.map(colorText).join(", ")}`);
+            }
+            if (card.excludedNumbers.length) {
+              pieces.push(`Non: ${card.excludedNumbers.join(", ")}`);
+            }
+            return pieces.length ? pieces.join("<br>") : "Nessuna esclusione";
+          }
+        
+          function currentAvailableCounts() {
+            const counts = {};
+            COLORI.forEach(color => {
+              NUMERI.forEach(number => {
+                counts[identityKey(color, number)] = availableCount(color, number);
+              });
+            });
+            return counts;
+          }
+        
+          function isCardDirectlyImpossible(card) {
+            return candidatesForCard(card, currentAvailableCounts()).length === 0;
+          }
+        
+          function impossibleClueResult() {
+            const directIndexes = state.hand
+              .map((card, index) => isCardDirectlyImpossible(card) ? index : -1)
+              .filter(index => index >= 0);
+        
+            if (directIndexes.length) {
+              return { indexes: directIndexes, globalConflict: false };
+            }
+        
+            const probabilities = ensureProbabilityCache();
+            const hasAnyValidAssignment = probabilities.some(result => result?.total > 0);
+        
+            if (state.hand.length && !hasAnyValidAssignment) {
+              return {
+                indexes: state.hand.map((_, index) => index),
+                globalConflict: true
+              };
+            }
+        
+            return { indexes: [], globalConflict: false };
+          }
+        
+          function notifyImpossibleClue() {
+            const result = impossibleClueResult();
+            if (!result.indexes.length) return;
+        
+            const positions = result.indexes.map(index => index + 1).join(", ");
+            const message = result.globalConflict
+              ? "⚠️ Questa combinazione di indizi è impossibile: non esiste una distribuzione valida per l’intera mano."
+              : `⚠️ Indizio impossibile sulla carta ${positions}: non è rimasto nessun colore/numero compatibile.`;
+        
+            toast(message, 5200);
+          }
+        
+          function renderCards() {
+            const container = document.getElementById("cards");
+            probabilityCache = ensureProbabilityCache();
+        
+            if (!state.hand.length) {
+              container.innerHTML = `<div class="assistant">Il mazzo è terminato e non hai più carte in mano.</div>`;
+              return;
+            }
+        
+            container.innerHTML = state.hand.map((card, index) => {
+              const probs = probabilityCache[index];
+              const evaluation = evaluateCard(index);
+        
+              const colorsHtml = COLORI.map(color => {
+                const p = probs?.byColor?.[color] || 0;
+                return `<div class="prob-row ${p ? "" : "zero"}">
+                  <span>${colorText(color)}</span><strong>${formatPercent(p)}</strong>
+                </div>`;
+              }).join("");
+        
+              const numbersHtml = NUMERI.map(number => {
+                const p = probs?.byNumber?.[number] || 0;
+                return `<div class="prob-row ${p ? "" : "zero"}">
+                  <span>${number}</span><strong>${formatPercent(p)}</strong>
+                </div>`;
+              }).join("");
+        
+              const directlyImpossible = isCardDirectlyImpossible(card);
+        
+              return `
+                <div class="card-wrap ${directlyImpossible ? "impossible" : ""}">
+                  <article
+                    class="card ${card.selected ? "selected" : ""}"
+                    id="card-${index}"
+                    onpointerdown="startCardPress(event, ${index})"
+                    onpointerup="endCardPress(event, ${index})"
+                    onpointercancel="cancelCardPress()"
+                    onpointerleave="cancelCardPress()"
+                    oncontextmenu="event.preventDefault()"
+                  >
+                    <div class="draw-label">${drawLabel(card)}</div>
+                    <div class="card-main ${certainColorClass(probs)}">${mainCardLabel(card)}</div>
+        
+                    <div class="card-evaluation">
+                      <div class="eval">Giocabile<br><strong>${formatPercent(evaluation.play)}</strong></div>
+                      <div class="eval">Scarto sicuro<br><strong>${formatPercent(evaluation.safeDiscard)}</strong></div>
+                    </div>
+        
+                    <div class="card-actions">
+                      <button class="success" onclick="event.stopPropagation(); openActionModal('play', ${index})">Gioca</button>
+                      <button class="warning" onclick="event.stopPropagation(); openActionModal('discard', ${index})">Scarta</button>
+                    </div>
+                  </article>
+        
+                  <div class="prob-columns">
+                    <div class="prob-group">${colorsHtml}</div>
+                    <div class="prob-group">${numbersHtml}</div>
+                  </div>
+                </div>
+              `;
+            }).join("");
+          }
+        
+          function renderControls() {
+            if (controlsRendered) return;
+            // L'Arcobaleno reagisce a tutti gli indizi colore, ma non è un indizio
+            // direttamente dichiarabile.
+            document.getElementById("color-controls").innerHTML = COLORI_BASE.map(color => `
+              <button
+                class="color-button ${colorClass(color)}"
+                title="${colorText(color)}"
+                aria-label="${colorText(color)}"
+                style="${backgroundStyle(color)}"
+                onclick="giveColorClue('${color}')"
+              ></button>
+            `).join("");
+        
+            document.getElementById("number-controls").innerHTML = NUMERI.map(number => `
+              <button class="number-button" onclick="giveNumberClue('${number}')">${number}</button>
+            `).join("");
+            controlsRendered = true;
+          }
+        
+          function renderFireworks() {
+            document.getElementById("fireworks").innerHTML = COLORI.map(color => `
+              <div
+                class="firework drop-zone ${colorClass(color)}"
+                data-drop-type="firework"
+                data-drop-color="${color}"
+                style="${backgroundStyle(color)} color:${textColorFor(color)}"
+              >
+        <!--        <div>${colorText(color)}</div>  -->
+                <div class="level">${state.fireworks[color] || 0}</div>
+                <div style="font-size:.72rem">Next: ${Math.min(5, Number(state.fireworks[color] || 0) + 1)}</div>
+              </div>
+            `).join("");
+          }
+        
+          function physicalCardHtml(card, source, playerId = "") {
+            return `
+              <button
+                class="physical-card ${colorClass(card.color)}"
+                style="${backgroundStyle(card.color)} color:${textColorFor(card.color)}"
+                title="${colorText(card.color)} ${card.number} · trascina"
+                aria-label="${colorText(card.color)} ${card.number}"
+                onpointerdown="startPhysicalDrag(event, '${card.id}', '${source}', '${playerId}')"
+                oncontextmenu="event.preventDefault()"
+              >
+                <span>${card.number}</span>
+                <span class="mini-color">${colorText(card.color)}</span>
+              </button>
+            `;
+          }
+        
+          function staticCardHtml(card, failed = false) {
+            return `
+              <div
+                class="physical-card ${colorClass(card.color)}"
+                style="${backgroundStyle(card.color)} color:${textColorFor(card.color)};cursor:default;touch-action:auto"
+                title="${failed ? "Giocata errata · " : ""}${colorText(card.color)} ${card.number}"
+              >
+                <span>${failed ? "⚠" : card.number}</span>
+                <span class="mini-color">${colorText(card.color)} ${failed ? card.number : ""}</span>
+              </div>
+            `;
+          }
+        function discardedCardHtml(card) {
+          return `
+            <button
+              class="physical-card ${colorClass(card.color)}"
+              style="${backgroundStyle(card.color)} color:${textColorFor(card.color)}"
+              title="${colorText(card.color)} ${card.number} · trascina sul fuoco o nelle residue"
+              aria-label="${colorText(card.color)} ${card.number}"
+              onpointerdown="startPhysicalDrag(event, '${card.id}', 'discard', '')"
+              oncontextmenu="event.preventDefault()"
+            >
+              <span>${card.number}</span>
+              <span class="mini-color">${colorText(card.color)}</span>
+            </button>
+          `;
         }
-        state.manualSeen[key] = 0;
-      });
-    });
-  }
-
-  function persistStateNow() {
-    if (saveTimer) {
-      clearTimeout(saveTimer);
-      saveTimer = null;
-    }
-    try {
-      // La cronologia resta in memoria: salvare decine di copie complete rallentava ogni tasto.
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ state }));
-    } catch (error) {
-      console.error("Impossibile salvare la partita:", error);
-    }
-  }
-
-  function saveState() {
-    if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(persistStateNow, SAVE_DELAY_MS);
-  }
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (!raw) return false;
-      const parsed = JSON.parse(raw);
-      state = parsed.state || parsed;
-      historyStack = Array.isArray(parsed.historyStack) ? parsed.historyStack.slice(-20) : [];
-      normalizeState();
-      saveState();
-      return true;
-    } catch (error) {
-      console.error("Salvataggio non leggibile:", error);
-      return false;
-    }
-  }
-
-  function usedCardIds() {
-    const ids = new Set();
-    state.played.forEach(card => card.id && ids.add(card.id));
-    state.discarded.forEach(card => card.id && ids.add(card.id));
-    state.opponents.forEach(player => player.hand.forEach(card => card.id && ids.add(card.id)));
-    return ids;
-  }
-
-  function residueCards() {
-    const used = usedCardIds();
-    return allPhysicalCards().filter(card => !used.has(card.id));
-  }
-
-  function firstResidueCard(color, number) {
-    return residueCards().find(card => card.color === color && card.number === String(number)) || null;
-  }
-
-  function opponentVisibleCount(color, number) {
-    return state.opponents.reduce((sum, player) => sum + player.hand.filter(card =>
-      card.color === color && card.number === String(number)
-    ).length, 0);
-  }
-
-  function physicalRemovedCount(color, number) {
-    return state.played.filter(x => x.color === color && x.number === String(number)).length +
-      state.discarded.filter(x => x.color === color && x.number === String(number)).length;
-  }
-
-  function physicalRemainingCount(color, number) {
-    return Math.max(0, initialCount(number) - physicalRemovedCount(color, number));
-  }
-
-  function availableCount(color, number) {
-    return Math.max(0, physicalRemainingCount(color, number) - opponentVisibleCount(color, number));
-  }
-
-  function allIdentityKeys() {
-    const keys = [];
-    COLORI.forEach(color => NUMERI.forEach(number => keys.push(identityKey(color, number))));
-    return keys;
-  }
-
-  function candidatesForCard(card, countsByKey) {
-    const allowedColors = card.colors.length
-      ? card.colors
-      : COLORI.filter(color => !card.excludedColors.includes(color));
-
-    const allowedNumbers = card.number
-      ? [String(card.number)]
-      : NUMERI.filter(number => !card.excludedNumbers.includes(number));
-
-    const result = [];
-    allowedColors.forEach(color => {
-      allowedNumbers.forEach(number => {
-        const key = identityKey(color, number);
-        if ((countsByKey[key] || 0) > 0) result.push(key);
-      });
-    });
-    return result;
-  }
-
-  function probabilitySignature() {
-    const hand = state.hand.map(card => ({
-      colors: card.colors,
-      excludedColors: card.excludedColors,
-      number: card.number,
-      excludedNumbers: card.excludedNumbers
-    }));
-    const counts = COLORI.flatMap(color =>
-      NUMERI.map(number => availableCount(color, number))
-    );
-    return JSON.stringify([hand, counts]);
-  }
-
-  function ensureProbabilityCache() {
-    const key = probabilitySignature();
-    if (key !== probabilityCacheKey) {
-      probabilityCache = calculateProbabilities();
-      probabilityCacheKey = key;
-    }
-    return probabilityCache;
-  }
-
-  function calculateProbabilities() {
-    const keys = allIdentityKeys();
-    const keyIndex = Object.fromEntries(keys.map((key, index) => [key, index]));
-    const baseCounts = keys.map(key => {
-      const { color, number } = splitIdentity(key);
-      return availableCount(color, number);
-    });
-    const baseCountObject = Object.fromEntries(keys.map((key, index) => [key, baseCounts[index]]));
-    const candidates = state.hand.map(card => candidatesForCard(card, baseCountObject));
-
-    return state.hand.map((card, targetIndex) => {
-      if (!candidates[targetIndex].length) return { total: 0, byIdentity: {}, byColor: {}, byNumber: {} };
-
-      const numerators = {};
-      let total = 0;
-
-      const others = state.hand
-        .map((_, index) => index)
-        .filter(index => index !== targetIndex)
-        .sort((a, b) => candidates[a].length - candidates[b].length);
-
-      // La cache è condivisa tra tutte le identità possibili della carta bersaglio.
-      // In questo modo il calcolo resta esatto, ma non ripete migliaia di stati uguali.
-      const memo = new Map();
-
-      function countAssignments(position, counts) {
-        if (position >= others.length) return 1;
-
-        const memoKey = `${position}:${counts.join(",")}`;
-        if (memo.has(memoKey)) return memo.get(memoKey);
-
-        const cardIndex = others[position];
-        let ways = 0;
-
-        for (const key of candidates[cardIndex]) {
-          const id = keyIndex[key];
-          const remaining = counts[id];
-          if (remaining <= 0) continue;
-          counts[id]--;
-          ways += remaining * countAssignments(position + 1, counts);
-          counts[id]++;
+          function renderOpponents() {
+            const container = document.getElementById("opponents");
+            if (!state.opponents.length) {
+              container.innerHTML = `<div class="assistant">Non ci sono altri giocatori configurati.</div>`;
+              return;
+            }
+        
+            container.innerHTML = state.opponents.map(player => {
+              const statusParts = [];
+              if (player.setupSlotsRemaining > 0) statusParts.push(`${player.setupSlotsRemaining} carte iniziali da inserire`);
+              if (player.drawSlotsPending > 0) statusParts.push(`${player.drawSlotsPending} pescate da inserire`);
+              const status = statusParts.length ? statusParts.join(" · ") : `${player.hand.length}/${cartePerGiocatore} carte`;
+        
+              return `
+                <div class="player-board drop-zone" data-drop-type="hand" data-player-id="${player.id}">
+                  <div class="player-header">
+                    <input
+                      class="player-name"
+                      value="${escapeHtml(player.name)}"
+                      aria-label="Nome ${escapeHtml(player.name)}"
+                      onchange="updatePlayerName('${player.id}', this.value)"
+                    />
+                <span class="subtle">${status}</span>
+                  </div>
+                  <div class="visible-hand">
+                    ${player.hand.length
+                      ? player.hand.map(card => physicalCardHtml(card, "opponent", player.id)).join("")
+                      : `<div class="empty-hand">Trascina qui le carte visibili di questo giocatore.</div>`}
+                  </div>
+                </div>
+              `;
+            }).join("");
+          }
+        
+          function updatePlayerName(playerId, value) {
+            const player = state.opponents.find(item => item.id === playerId);
+            if (!player) return;
+            player.name = String(value || "").trim() || player.name;
+            state.started = true;
+            renderOpponents();
+            renderAssistant();
+            saveState();
+          }
+        
+          function escapeHtml(value) {
+            return String(value)
+              .replaceAll("&", "&amp;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;")
+              .replaceAll('"', "&quot;")
+              .replaceAll("'", "&#039;");
+          }
+        
+          function groupZone(entries) {
+            const grouped = {};
+            entries.forEach(entry => {
+              const key = identityKey(entry.color, entry.number);
+              grouped[key] ??= { ...entry, count: 0, failed: false };
+              grouped[key].count++;
+              grouped[key].failed ||= Boolean(entry.failed);
+            });
+            return Object.values(grouped);
+          }
+        
+          function renderZones() {
+            document.getElementById("played-zone").innerHTML = state.played.length
+              ? state.played.map(entry => staticCardHtml(entry, false)).join("")
+              : `<span class="subtle">Nessuna carta giocata.</span>`;
+        
+        document.getElementById("discard-zone").innerHTML = state.discarded.length
+          ? state.discarded.map(entry => discardedCardHtml(entry)).join("")
+          : `<span class="subtle">Nessuno scarto.</span>`;
+          }
+        
+          function renderResidue() {
+            const container = document.getElementById("residue-tracker");
+            const residue = residueCards();
+        
+            container.innerHTML = COLORI.map(color => {
+              const cards = residue.filter(card => card.color === color);
+              return `
+                <div class="residue-row">
+                  <div class="residue-name">${colorText(color)}</div>
+                  <div class="residue-cards">
+                    ${cards.length
+                      ? cards.map(card => physicalCardHtml(card, "residue")).join("")
+                      : `<span class="subtle">Nessuna</span>`}
+                  </div>
+                </div>
+              `;
+            }).join("");
+          }
+        
+          function renderStatus() {
+            document.getElementById("deck-count").textContent = state.deckRemaining;
+            document.getElementById("clue-count").textContent = state.clues;
+            document.getElementById("strike-count").textContent = `${state.strikes} / 3`;
+            document.getElementById("score-count").textContent =
+              Object.values(state.fireworks).reduce((sum, value) => sum + Number(value || 0), 0);
+          }
+        
+          function bestVisibleClue() {
+            let best = null;
+        
+            state.opponents.forEach(player => {
+              const candidates = [];
+              COLORI.forEach(color => candidates.push({ type: "colore", value: color }));
+              NUMERI.forEach(number => candidates.push({ type: "numero", value: number }));
+        
+              candidates.forEach(candidate => {
+                const matches = player.hand.filter(card =>
+                  candidate.type === "colore"
+                    ? card.color === candidate.value
+                    : card.number === candidate.value
+                );
+                if (!matches.length) return;
+        
+                const playable = matches.filter(card => isPlayable(card.color, card.number));
+                if (!playable.length) return;
+        
+                const nonPlayable = matches.length - playable.length;
+                const critical = playable.filter(card => availableCount(card.color, card.number) === 0).length;
+                const score = playable.length * 10 - nonPlayable * 3 + critical * 2 - (matches.length - playable.length);
+        
+                const option = { player, candidate, matches, playable, nonPlayable, score };
+                if (!best || option.score > best.score) best = option;
+              });
+            });
+        
+            return best;
+          }
+        
+          function assistantRecommendation() {
+            if (!state.hand.length) {
+              return {
+                headline: "Partita nelle ultime mosse",
+                detail: "Non hai più carte in mano. Controlla soltanto il punteggio finale."
+              };
+            }
+        
+            const evaluations = state.hand.map((_, index) => ({ index, ...evaluateCard(index) }));
+            const certainPlay = evaluations.find(x => x.play >= 0.999999);
+            if (certainPlay) {
+              return {
+                headline: `Gioca la carta ${certainPlay.index + 1}`,
+                detail: `È giocabile con probabilità ${formatPercent(certainPlay.play)}.`
+              };
+            }
+        
+            const certainDiscard = evaluations
+              .filter(x => x.safeDiscard >= 0.999999)
+              .sort((a, b) => b.useless - a.useless)[0];
+        
+            if (certainDiscard) {
+              return {
+                headline: `Scarta la carta ${certainDiscard.index + 1}`,
+                detail: `Lo scarto risulta sicuro con probabilità ${formatPercent(certainDiscard.safeDiscard)}.`
+              };
+            }
+        
+            if (state.clues > 0) {
+              const clue = bestVisibleClue();
+              if (clue) {
+                const value = clue.candidate.type === "colore"
+                  ? colorText(clue.candidate.value)
+                  : clue.candidate.value;
+                const positions = clue.playable.map(card => clue.player.hand.indexOf(card) + 1).join(", ");
+                const touchedText = clue.matches.length === 1 ? "1 carta" : `${clue.matches.length} carte`;
+                const playableText = clue.playable.length === 1 ? "1 carta giocabile" : `${clue.playable.length} carte giocabili`;
+                return {
+                  headline: `Indizio ${clue.candidate.type} “${value}” a ${clue.player.name}`,
+                  detail: `Tocca ${touchedText} e segnala ${playableText}${positions ? `, in posizione ${positions}` : ""}.`
+                };
+              }
+              return {
+                headline: "Meglio dare un indizio",
+                detail: "Nessuna carta della tua mano è sicura. Completa le mani visibili per ricevere un suggerimento preciso sull'indizio."
+              };
+            }
+        
+            const safestDiscard = [...evaluations].sort((a, b) => b.safeDiscard - a.safeDiscard)[0];
+            if (safestDiscard && safestDiscard.safeDiscard > 0) {
+              return {
+                headline: `Scarto meno rischioso: carta ${safestDiscard.index + 1}`,
+                detail: `Probabilità stimata di scarto sicuro: ${formatPercent(safestDiscard.safeDiscard)}. Non è una certezza.`
+              };
+            }
+        
+            const bestPlay = [...evaluations].sort((a, b) => b.play - a.play)[0];
+            return {
+              headline: `Nessuna mossa sicura`,
+              detail: bestPlay
+                ? `La carta ${bestPlay.index + 1} è la più giocabile, ma solo al ${formatPercent(bestPlay.play)}.`
+                : "Controlla gli indizi registrati e le carte visibili."
+            };
+          }
+        
+          function renderAssistant() {
+            const recommendation = assistantRecommendation();
+            const details = state.hand.map((_, index) => {
+              const evaluation = evaluateCard(index);
+              return `
+                <div class="assistant-card">
+                  <strong>Carta ${index + 1}</strong><br>
+                  Gioca: ${formatPercent(evaluation.play)} ·
+                  Scarto sicuro: ${formatPercent(evaluation.safeDiscard)} ·
+                  Ultima copia: ${formatPercent(evaluation.critical)}
+                </div>
+              `;
+            }).join("");
+        
+            document.getElementById("assistant").innerHTML = `
+              <strong>${recommendation.headline}</strong>
+              <div style="margin-top:4px">${recommendation.detail}</div>
+              <div class="assistant-details">${details}</div>
+              <div class="subtle" style="margin-top:9px">
+                Il calcolo considera insieme tutte le carte della mano e tutte le copie fisiche ancora disponibili.
+              </div>
+            `;
+          }
+        
+          function renderAnalysis() {
+            renderCards();
+            renderAssistant();
+          }
+        
+          function render() {
+            renderStatus();
+            renderFireworks();
+            renderCards();
+            renderOpponents();
+            renderControls();
+            renderAssistant();
+            renderZones();
+            renderResidue();
+          }
+        
+          function toggleCardSelection(index) {
+            const card = state.hand[index];
+            if (!card) return;
+            card.selected = !card.selected;
+            state.started = true;
+            document.getElementById(`card-${index}`)?.classList.toggle("selected", card.selected);
+            saveState();
+          }
+        
+          function startCardPress(event, index) {
+            if (event.target.closest("button")) return;
+            cancelCardPress();
+            event.currentTarget.classList.add("pressing");
+            pressTriggered = false;
+            pressTimer = setTimeout(() => {
+              pressTimer = null;
+              pressTriggered = true;
+              event.currentTarget.classList.remove("pressing");
+              openQuickModal(index);
+            }, LONG_PRESS_MS);
+          }
+        
+          function endCardPress(event, index) {
+            if (event.target.closest("button")) return;
+            event.currentTarget.classList.remove("pressing");
+            if (pressTimer) {
+              clearTimeout(pressTimer);
+              pressTimer = null;
+              toggleCardSelection(index);
+            } else if (!pressTriggered) {
+              toggleCardSelection(index);
+            }
+            pressTriggered = false;
+          }
+        
+          function cancelCardPress() {
+            if (pressTimer) {
+              clearTimeout(pressTimer);
+              pressTimer = null;
+            }
+            document.querySelectorAll(".card.pressing").forEach(card => card.classList.remove("pressing"));
+          }
+        
+          function findOpponent(playerId) {
+            return state.opponents.find(player => player.id === playerId) || null;
+          }
+        
+          function locateDraggedCard(cardId, source, playerId) {
+            if (source === "residue") return cardFromId(cardId);
+        	if (source === "discard") {
+            return state.discarded.find(card => card.id === cardId) || null;
+          }
+            if (source === "opponent") {
+              const player = findOpponent(playerId);
+              return player?.hand.find(card => card.id === cardId) || null;
+            }
+            return null;
+          }
+        
+          function startPhysicalDrag(event, cardId, source, playerId = "") {
+            if (event.button !== undefined && event.button !== 0) return;
+            const card = locateDraggedCard(cardId, source, playerId);
+            if (!card) return;
+        
+            event.preventDefault();
+            dragState = {
+              cardId, source, playerId, card: clone(card),
+              origin: event.currentTarget,
+              startX: event.clientX, startY: event.clientY,
+              x: event.clientX, y: event.clientY,
+              dragging: false, preview: null
+            };
+        
+            document.addEventListener("pointermove", handlePhysicalDragMove, { passive: false });
+            document.addEventListener("pointerup", finishPhysicalDrag);
+            document.addEventListener("pointercancel", cancelPhysicalDrag);
+          }
+        
+          function beginPhysicalDrag() {
+            if (!dragState || dragState.dragging) return;
+            dragState.dragging = true;
+            dragState.preview = dragState.origin.cloneNode(true);
+            dragState.preview.classList.add("drag-preview");
+            dragState.preview.removeAttribute("onpointerdown");
+            document.body.appendChild(dragState.preview);
+            document.body.classList.add("dragging");
+            document.getElementById("drag-banner").classList.add("show");
+          }
+        
+          function handlePhysicalDragMove(event) {
+            if (!dragState) return;
+            dragState.x = event.clientX;
+            dragState.y = event.clientY;
+            const distance = Math.hypot(event.clientX - dragState.startX, event.clientY - dragState.startY);
+            if (!dragState.dragging && distance >= DRAG_THRESHOLD) beginPhysicalDrag();
+            if (!dragState.dragging) return;
+        
+            event.preventDefault();
+            if (dragFrame) return;
+            dragFrame = requestAnimationFrame(() => {
+              dragFrame = null;
+              if (!dragState?.dragging) return;
+              const x = dragState.x;
+              const y = dragState.y;
+              dragState.preview.style.left = `${x - 29}px`;
+              dragState.preview.style.top = `${y - 38}px`;
+        
+              const edge = 72;
+              if (typeof window.scrollBy === "function") {
+                if (y < edge) window.scrollBy(0, -14);
+                else if (y > window.innerHeight - edge) window.scrollBy(0, 14);
+              }
+        
+              const below = document.elementFromPoint(x, y);
+              const zone = below?.closest?.("[data-drop-type]") || null;
+              if (zone !== activeDropZone) {
+                activeDropZone?.classList.remove("drop-active");
+                activeDropZone = zone;
+                activeDropZone?.classList.add("drop-active");
+              }
+            });
+          }
+        
+          function finishPhysicalDrag(event) {
+            if (!dragState) return;
+            const wasDragging = dragState.dragging;
+            const payload = {
+              cardId: dragState.cardId,
+              source: dragState.source,
+              playerId: dragState.playerId,
+              card: clone(dragState.card)
+            };
+            const zone = activeDropZone;
+            clearPhysicalDrag();
+        
+            if (!wasDragging || !zone) return;
+            movePhysicalCard(payload, {
+              type: zone.dataset.dropType,
+              playerId: zone.dataset.playerId || "",
+              color: zone.dataset.dropColor || ""
+            });
+          }
+        
+          function cancelPhysicalDrag() {
+            clearPhysicalDrag();
+          }
+        
+          function clearPhysicalDrag() {
+            document.removeEventListener("pointermove", handlePhysicalDragMove);
+            document.removeEventListener("pointerup", finishPhysicalDrag);
+            document.removeEventListener("pointercancel", cancelPhysicalDrag);
+            if (dragFrame) cancelAnimationFrame(dragFrame);
+            dragFrame = null;
+            dragState?.preview?.remove();
+            activeDropZone?.classList.remove("drop-active");
+            activeDropZone = null;
+            dragState = null;
+            document.body.classList.remove("dragging");
+            document.getElementById("drag-banner").classList.remove("show");
+          }
+        
+          function removeFromOpponent(player, cardId) {
+            const index = player.hand.findIndex(card => card.id === cardId);
+            if (index < 0) return null;
+            return player.hand.splice(index, 1)[0];
+          }
+          
+        function removeFromDiscard(cardId) {
+          const index = state.discarded.findIndex(card => card.id === cardId);
+        
+          if (index < 0) return null;
+        
+          return state.discarded.splice(index, 1)[0];
         }
-
-        memo.set(memoKey, ways);
-        return ways;
-      }
-
-      for (const targetKey of candidates[targetIndex]) {
-        const targetId = keyIndex[targetKey];
-        const copies = baseCounts[targetId];
-        if (copies <= 0) continue;
-
-        const counts = baseCounts.slice();
-        counts[targetId]--;
-        const weightedWays = copies * countAssignments(0, counts);
-
-        if (weightedWays > 0) {
-          numerators[targetKey] = weightedWays;
-          total += weightedWays;
-        }
-      }
-
-      const byIdentity = {};
-      const byColor = Object.fromEntries(COLORI.map(color => [color, 0]));
-      const byNumber = Object.fromEntries(NUMERI.map(number => [number, 0]));
-
-      if (total > 0) {
-        Object.entries(numerators).forEach(([key, numerator]) => {
-          const probability = numerator / total;
-          const { color, number } = splitIdentity(key);
-          byIdentity[key] = probability;
-          byColor[color] += probability;
-          byNumber[number] += probability;
-        });
-      }
-
-      return { total, byIdentity, byColor, byNumber };
-    });
-  }
-
-  function isPlayable(color, number) {
-    return Number(number) === Number(state.fireworks[color] || 0) + 1;
-  }
-
-  function isSafeDiscardIdentity(color, number) {
-    const level = Number(state.fireworks[color] || 0);
-    if (Number(number) <= level) return true;
-    return availableCount(color, number) > 1;
-  }
-
-  function evaluateCard(index) {
-    const probs = probabilityCache[index];
-    if (!probs?.total) return { play: 0, safeDiscard: 0, critical: 0, useless: 0 };
-
-    let play = 0;
-    let safeDiscard = 0;
-    let critical = 0;
-    let useless = 0;
-
-    Object.entries(probs.byIdentity).forEach(([key, probability]) => {
-      const { color, number } = splitIdentity(key);
-      if (isPlayable(color, number)) play += probability;
-      if (isSafeDiscardIdentity(color, number)) safeDiscard += probability;
-
-      const level = Number(state.fireworks[color] || 0);
-      if (Number(number) <= level) useless += probability;
-      if (Number(number) > level && availableCount(color, number) === 1) critical += probability;
-    });
-
-    return { play, safeDiscard, critical, useless };
-  }
-
-  function formatPercent(value) {
-    if (!Number.isFinite(value)) return "—";
-    const percent = value * 100;
-    if (percent > 0 && percent < 0.1) return "<0,1%";
-    return `${percent.toLocaleString("it-IT", { maximumFractionDigits: 1 })}%`;
-  }
-
-  function drawLabel(card) {
-    if (!card.drawId) return "Carta iniziale";
-    const delta = state.ownDrawCounter - card.drawId;
-    if (delta <= 0) return "Ultima pescata";
-    if (delta === 1) return "Penultima pescata";
-    return `${delta + 1}ª pescata precedente`;
-  }
-
-  function mainCardLabel(card) {
-    return card.number || "?";
-  }
-
-  function certainColorClass(probabilities) {
-    if (!probabilities?.byColor) return "";
-
-    const certainColors = COLORI.filter(color =>
-      (probabilities.byColor[color] || 0) >= 0.999999
-    );
-
-    return certainColors.length === 1 ? `certain-${certainColors[0]}` : "";
-  }
-
-  function knownExclusions(card) {
-    const pieces = [];
-    if (card.excludedColors.length) {
-      pieces.push(`Non: ${card.excludedColors.map(colorText).join(", ")}`);
-    }
-    if (card.excludedNumbers.length) {
-      pieces.push(`Non: ${card.excludedNumbers.join(", ")}`);
-    }
-    return pieces.length ? pieces.join("<br>") : "Nessuna esclusione";
-  }
-
-  function currentAvailableCounts() {
-    const counts = {};
-    COLORI.forEach(color => {
-      NUMERI.forEach(number => {
-        counts[identityKey(color, number)] = availableCount(color, number);
-      });
-    });
-    return counts;
-  }
-
-  function isCardDirectlyImpossible(card) {
-    return candidatesForCard(card, currentAvailableCounts()).length === 0;
-  }
-
-  function impossibleClueResult() {
-    const directIndexes = state.hand
-      .map((card, index) => isCardDirectlyImpossible(card) ? index : -1)
-      .filter(index => index >= 0);
-
-    if (directIndexes.length) {
-      return { indexes: directIndexes, globalConflict: false };
-    }
-
-    const probabilities = ensureProbabilityCache();
-    const hasAnyValidAssignment = probabilities.some(result => result?.total > 0);
-
-    if (state.hand.length && !hasAnyValidAssignment) {
-      return {
-        indexes: state.hand.map((_, index) => index),
-        globalConflict: true
-      };
-    }
-
-    return { indexes: [], globalConflict: false };
-  }
-
-  function notifyImpossibleClue() {
-    const result = impossibleClueResult();
-    if (!result.indexes.length) return;
-
-    const positions = result.indexes.map(index => index + 1).join(", ");
-    const message = result.globalConflict
-      ? "⚠️ Questa combinazione di indizi è impossibile: non esiste una distribuzione valida per l’intera mano."
-      : `⚠️ Indizio impossibile sulla carta ${positions}: non è rimasto nessun colore/numero compatibile.`;
-
-    toast(message, 5200);
-  }
-
-  function renderCards() {
-    const container = document.getElementById("cards");
-    probabilityCache = ensureProbabilityCache();
-
-    if (!state.hand.length) {
-      container.innerHTML = `<div class="assistant">Il mazzo è terminato e non hai più carte in mano.</div>`;
-      return;
-    }
-
-    container.innerHTML = state.hand.map((card, index) => {
-      const probs = probabilityCache[index];
-      const evaluation = evaluateCard(index);
-
-      const colorsHtml = COLORI.map(color => {
-        const p = probs?.byColor?.[color] || 0;
-        return `<div class="prob-row ${p ? "" : "zero"}">
-          <span>${colorText(color)}</span><strong>${formatPercent(p)}</strong>
-        </div>`;
-      }).join("");
-
-      const numbersHtml = NUMERI.map(number => {
-        const p = probs?.byNumber?.[number] || 0;
-        return `<div class="prob-row ${p ? "" : "zero"}">
-          <span>${number}</span><strong>${formatPercent(p)}</strong>
-        </div>`;
-      }).join("");
-
-      const directlyImpossible = isCardDirectlyImpossible(card);
-
-      return `
-        <div class="card-wrap ${directlyImpossible ? "impossible" : ""}">
-          <article
-            class="card ${card.selected ? "selected" : ""}"
-            id="card-${index}"
-            onpointerdown="startCardPress(event, ${index})"
-            onpointerup="endCardPress(event, ${index})"
-            onpointercancel="cancelCardPress()"
-            onpointerleave="cancelCardPress()"
-            oncontextmenu="event.preventDefault()"
-          >
-            <div class="draw-label">${drawLabel(card)}</div>
-            <div class="card-main ${certainColorClass(probs)}">${mainCardLabel(card)}</div>
-
-            <div class="card-evaluation">
-              <div class="eval">Giocabile<br><strong>${formatPercent(evaluation.play)}</strong></div>
-              <div class="eval">Scarto sicuro<br><strong>${formatPercent(evaluation.safeDiscard)}</strong></div>
-            </div>
-
-            <div class="card-actions">
-              <button class="success" onclick="event.stopPropagation(); openActionModal('play', ${index})">Gioca</button>
-              <button class="warning" onclick="event.stopPropagation(); openActionModal('discard', ${index})">Scarta</button>
-            </div>
-          </article>
-
-          <div class="prob-columns">
-            <div class="prob-group">${colorsHtml}</div>
-            <div class="prob-group">${numbersHtml}</div>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function renderControls() {
-    if (controlsRendered) return;
-    // L'Arcobaleno reagisce a tutti gli indizi colore, ma non è un indizio
-    // direttamente dichiarabile.
-    document.getElementById("color-controls").innerHTML = COLORI_BASE.map(color => `
-      <button
-        class="color-button ${colorClass(color)}"
-        title="${colorText(color)}"
-        aria-label="${colorText(color)}"
-        style="${backgroundStyle(color)}"
-        onclick="giveColorClue('${color}')"
-      ></button>
-    `).join("");
-
-    document.getElementById("number-controls").innerHTML = NUMERI.map(number => `
-      <button class="number-button" onclick="giveNumberClue('${number}')">${number}</button>
-    `).join("");
-    controlsRendered = true;
-  }
-
-  function renderFireworks() {
-    document.getElementById("fireworks").innerHTML = COLORI.map(color => `
-      <div
-        class="firework drop-zone ${colorClass(color)}"
-        data-drop-type="firework"
-        data-drop-color="${color}"
-        style="${backgroundStyle(color)} color:${textColorFor(color)}"
-      >
-<!--        <div>${colorText(color)}</div>  -->
-        <div class="level">${state.fireworks[color] || 0}</div>
-        <div style="font-size:.72rem">Next: ${Math.min(5, Number(state.fireworks[color] || 0) + 1)}</div>
-      </div>
-    `).join("");
-  }
-
-  function physicalCardHtml(card, source, playerId = "") {
-    return `
-      <button
-        class="physical-card ${colorClass(card.color)}"
-        style="${backgroundStyle(card.color)} color:${textColorFor(card.color)}"
-        title="${colorText(card.color)} ${card.number} · trascina"
-        aria-label="${colorText(card.color)} ${card.number}"
-        onpointerdown="startPhysicalDrag(event, '${card.id}', '${source}', '${playerId}')"
-        oncontextmenu="event.preventDefault()"
-      >
-        <span>${card.number}</span>
-        <span class="mini-color">${colorText(card.color)}</span>
-      </button>
-    `;
-  }
-
-  function staticCardHtml(card, failed = false) {
-    return `
-      <div
-        class="physical-card ${colorClass(card.color)}"
-        style="${backgroundStyle(card.color)} color:${textColorFor(card.color)};cursor:default;touch-action:auto"
-        title="${failed ? "Giocata errata · " : ""}${colorText(card.color)} ${card.number}"
-      >
-        <span>${failed ? "⚠" : card.number}</span>
-        <span class="mini-color">${colorText(card.color)} ${failed ? card.number : ""}</span>
-      </div>
-    `;
-  }
-
-  function renderOpponents() {
-    const container = document.getElementById("opponents");
-    if (!state.opponents.length) {
-      container.innerHTML = `<div class="assistant">Non ci sono altri giocatori configurati.</div>`;
-      return;
-    }
-
-    container.innerHTML = state.opponents.map(player => {
-      const statusParts = [];
-      if (player.setupSlotsRemaining > 0) statusParts.push(`${player.setupSlotsRemaining} carte iniziali da inserire`);
-      if (player.drawSlotsPending > 0) statusParts.push(`${player.drawSlotsPending} pescate da inserire`);
-      const status = statusParts.length ? statusParts.join(" · ") : `${player.hand.length}/${cartePerGiocatore} carte`;
-
-      return `
-        <div class="player-board drop-zone" data-drop-type="hand" data-player-id="${player.id}">
-          <div class="player-header">
-            <input
-              class="player-name"
-              value="${escapeHtml(player.name)}"
-              aria-label="Nome ${escapeHtml(player.name)}"
-              onchange="updatePlayerName('${player.id}', this.value)"
-            />
-        <span class="subtle">${status}</span>
-          </div>
-          <div class="visible-hand">
-            ${player.hand.length
-              ? player.hand.map(card => physicalCardHtml(card, "opponent", player.id)).join("")
-              : `<div class="empty-hand">Trascina qui le carte visibili di questo giocatore.</div>`}
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function updatePlayerName(playerId, value) {
-    const player = state.opponents.find(item => item.id === playerId);
-    if (!player) return;
-    player.name = String(value || "").trim() || player.name;
-    state.started = true;
-    renderOpponents();
-    renderAssistant();
-    saveState();
-  }
-
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function groupZone(entries) {
-    const grouped = {};
-    entries.forEach(entry => {
-      const key = identityKey(entry.color, entry.number);
-      grouped[key] ??= { ...entry, count: 0, failed: false };
-      grouped[key].count++;
-      grouped[key].failed ||= Boolean(entry.failed);
-    });
-    return Object.values(grouped);
-  }
-
-  function renderZones() {
-    document.getElementById("played-zone").innerHTML = state.played.length
-      ? state.played.map(entry => staticCardHtml(entry, false)).join("")
-      : `<span class="subtle">Nessuna carta giocata.</span>`;
-
-    document.getElementById("discard-zone").innerHTML = state.discarded.length
-      ? state.discarded.map(entry => staticCardHtml(entry, Boolean(entry.failed))).join("")
-      : `<span class="subtle">Nessuno scarto.</span>`;
-  }
-
-  function renderResidue() {
-    const container = document.getElementById("residue-tracker");
-    const residue = residueCards();
-
-    container.innerHTML = COLORI.map(color => {
-      const cards = residue.filter(card => card.color === color);
-      return `
-        <div class="residue-row">
-          <div class="residue-name">${colorText(color)}</div>
-          <div class="residue-cards">
-            ${cards.length
-              ? cards.map(card => physicalCardHtml(card, "residue")).join("")
-              : `<span class="subtle">Nessuna</span>`}
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function renderStatus() {
-    document.getElementById("deck-count").textContent = state.deckRemaining;
-    document.getElementById("clue-count").textContent = state.clues;
-    document.getElementById("strike-count").textContent = `${state.strikes} / 3`;
-    document.getElementById("score-count").textContent =
-      Object.values(state.fireworks).reduce((sum, value) => sum + Number(value || 0), 0);
-  }
-
-  function bestVisibleClue() {
-    let best = null;
-
-    state.opponents.forEach(player => {
-      const candidates = [];
-      COLORI.forEach(color => candidates.push({ type: "colore", value: color }));
-      NUMERI.forEach(number => candidates.push({ type: "numero", value: number }));
-
-      candidates.forEach(candidate => {
-        const matches = player.hand.filter(card =>
-          candidate.type === "colore"
-            ? card.color === candidate.value
-            : card.number === candidate.value
-        );
-        if (!matches.length) return;
-
-        const playable = matches.filter(card => isPlayable(card.color, card.number));
-        if (!playable.length) return;
-
-        const nonPlayable = matches.length - playable.length;
-        const critical = playable.filter(card => availableCount(card.color, card.number) === 0).length;
-        const score = playable.length * 10 - nonPlayable * 3 + critical * 2 - (matches.length - playable.length);
-
-        const option = { player, candidate, matches, playable, nonPlayable, score };
-        if (!best || option.score > best.score) best = option;
-      });
-    });
-
-    return best;
-  }
-
-  function assistantRecommendation() {
-    if (!state.hand.length) {
-      return {
-        headline: "Partita nelle ultime mosse",
-        detail: "Non hai più carte in mano. Controlla soltanto il punteggio finale."
-      };
-    }
-
-    const evaluations = state.hand.map((_, index) => ({ index, ...evaluateCard(index) }));
-    const certainPlay = evaluations.find(x => x.play >= 0.999999);
-    if (certainPlay) {
-      return {
-        headline: `Gioca la carta ${certainPlay.index + 1}`,
-        detail: `È giocabile con probabilità ${formatPercent(certainPlay.play)}.`
-      };
-    }
-
-    const certainDiscard = evaluations
-      .filter(x => x.safeDiscard >= 0.999999)
-      .sort((a, b) => b.useless - a.useless)[0];
-
-    if (certainDiscard) {
-      return {
-        headline: `Scarta la carta ${certainDiscard.index + 1}`,
-        detail: `Lo scarto risulta sicuro con probabilità ${formatPercent(certainDiscard.safeDiscard)}.`
-      };
-    }
-
-    if (state.clues > 0) {
-      const clue = bestVisibleClue();
-      if (clue) {
-        const value = clue.candidate.type === "colore"
-          ? colorText(clue.candidate.value)
-          : clue.candidate.value;
-        const positions = clue.playable.map(card => clue.player.hand.indexOf(card) + 1).join(", ");
-        const touchedText = clue.matches.length === 1 ? "1 carta" : `${clue.matches.length} carte`;
-        const playableText = clue.playable.length === 1 ? "1 carta giocabile" : `${clue.playable.length} carte giocabili`;
-        return {
-          headline: `Indizio ${clue.candidate.type} “${value}” a ${clue.player.name}`,
-          detail: `Tocca ${touchedText} e segnala ${playableText}${positions ? `, in posizione ${positions}` : ""}.`
-        };
-      }
-      return {
-        headline: "Meglio dare un indizio",
-        detail: "Nessuna carta della tua mano è sicura. Completa le mani visibili per ricevere un suggerimento preciso sull'indizio."
-      };
-    }
-
-    const safestDiscard = [...evaluations].sort((a, b) => b.safeDiscard - a.safeDiscard)[0];
-    if (safestDiscard && safestDiscard.safeDiscard > 0) {
-      return {
-        headline: `Scarto meno rischioso: carta ${safestDiscard.index + 1}`,
-        detail: `Probabilità stimata di scarto sicuro: ${formatPercent(safestDiscard.safeDiscard)}. Non è una certezza.`
-      };
-    }
-
-    const bestPlay = [...evaluations].sort((a, b) => b.play - a.play)[0];
-    return {
-      headline: `Nessuna mossa sicura`,
-      detail: bestPlay
-        ? `La carta ${bestPlay.index + 1} è la più giocabile, ma solo al ${formatPercent(bestPlay.play)}.`
-        : "Controlla gli indizi registrati e le carte visibili."
-    };
-  }
-
-  function renderAssistant() {
-    const recommendation = assistantRecommendation();
-    const details = state.hand.map((_, index) => {
-      const evaluation = evaluateCard(index);
-      return `
-        <div class="assistant-card">
-          <strong>Carta ${index + 1}</strong><br>
-          Gioca: ${formatPercent(evaluation.play)} ·
-          Scarto sicuro: ${formatPercent(evaluation.safeDiscard)} ·
-          Ultima copia: ${formatPercent(evaluation.critical)}
-        </div>
-      `;
-    }).join("");
-
-    document.getElementById("assistant").innerHTML = `
-      <strong>${recommendation.headline}</strong>
-      <div style="margin-top:4px">${recommendation.detail}</div>
-      <div class="assistant-details">${details}</div>
-      <div class="subtle" style="margin-top:9px">
-        Il calcolo considera insieme tutte le carte della mano e tutte le copie fisiche ancora disponibili.
-      </div>
-    `;
-  }
-
-  function renderAnalysis() {
-    renderCards();
-    renderAssistant();
-  }
-
-  function render() {
-    renderStatus();
-    renderFireworks();
-    renderCards();
-    renderOpponents();
-    renderControls();
-    renderAssistant();
-    renderZones();
-    renderResidue();
-  }
-
-  function toggleCardSelection(index) {
-    const card = state.hand[index];
-    if (!card) return;
-    card.selected = !card.selected;
-    state.started = true;
-    document.getElementById(`card-${index}`)?.classList.toggle("selected", card.selected);
-    saveState();
-  }
-
-  function startCardPress(event, index) {
-    if (event.target.closest("button")) return;
-    cancelCardPress();
-    event.currentTarget.classList.add("pressing");
-    pressTriggered = false;
-    pressTimer = setTimeout(() => {
-      pressTimer = null;
-      pressTriggered = true;
-      event.currentTarget.classList.remove("pressing");
-      openQuickModal(index);
-    }, LONG_PRESS_MS);
-  }
-
-  function endCardPress(event, index) {
-    if (event.target.closest("button")) return;
-    event.currentTarget.classList.remove("pressing");
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
-      toggleCardSelection(index);
-    } else if (!pressTriggered) {
-      toggleCardSelection(index);
-    }
-    pressTriggered = false;
-  }
-
-  function cancelCardPress() {
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
-    }
-    document.querySelectorAll(".card.pressing").forEach(card => card.classList.remove("pressing"));
-  }
-
-  function findOpponent(playerId) {
-    return state.opponents.find(player => player.id === playerId) || null;
-  }
-
-  function locateDraggedCard(cardId, source, playerId) {
-    if (source === "residue") return cardFromId(cardId);
-    if (source === "opponent") {
-      const player = findOpponent(playerId);
-      return player?.hand.find(card => card.id === cardId) || null;
-    }
-    return null;
-  }
-
-  function startPhysicalDrag(event, cardId, source, playerId = "") {
-    if (event.button !== undefined && event.button !== 0) return;
-    const card = locateDraggedCard(cardId, source, playerId);
-    if (!card) return;
-
-    event.preventDefault();
-    dragState = {
-      cardId, source, playerId, card: clone(card),
-      origin: event.currentTarget,
-      startX: event.clientX, startY: event.clientY,
-      x: event.clientX, y: event.clientY,
-      dragging: false, preview: null
-    };
-
-    document.addEventListener("pointermove", handlePhysicalDragMove, { passive: false });
-    document.addEventListener("pointerup", finishPhysicalDrag);
-    document.addEventListener("pointercancel", cancelPhysicalDrag);
-  }
-
-  function beginPhysicalDrag() {
-    if (!dragState || dragState.dragging) return;
-    dragState.dragging = true;
-    dragState.preview = dragState.origin.cloneNode(true);
-    dragState.preview.classList.add("drag-preview");
-    dragState.preview.removeAttribute("onpointerdown");
-    document.body.appendChild(dragState.preview);
-    document.body.classList.add("dragging");
-    document.getElementById("drag-banner").classList.add("show");
-  }
-
-  function handlePhysicalDragMove(event) {
-    if (!dragState) return;
-    dragState.x = event.clientX;
-    dragState.y = event.clientY;
-    const distance = Math.hypot(event.clientX - dragState.startX, event.clientY - dragState.startY);
-    if (!dragState.dragging && distance >= DRAG_THRESHOLD) beginPhysicalDrag();
-    if (!dragState.dragging) return;
-
-    event.preventDefault();
-    if (dragFrame) return;
-    dragFrame = requestAnimationFrame(() => {
-      dragFrame = null;
-      if (!dragState?.dragging) return;
-      const x = dragState.x;
-      const y = dragState.y;
-      dragState.preview.style.left = `${x - 29}px`;
-      dragState.preview.style.top = `${y - 38}px`;
-
-      const edge = 72;
-      if (typeof window.scrollBy === "function") {
-        if (y < edge) window.scrollBy(0, -14);
-        else if (y > window.innerHeight - edge) window.scrollBy(0, 14);
-      }
-
-      const below = document.elementFromPoint(x, y);
-      const zone = below?.closest?.("[data-drop-type]") || null;
-      if (zone !== activeDropZone) {
-        activeDropZone?.classList.remove("drop-active");
-        activeDropZone = zone;
-        activeDropZone?.classList.add("drop-active");
-      }
-    });
-  }
-
-  function finishPhysicalDrag(event) {
-    if (!dragState) return;
-    const wasDragging = dragState.dragging;
-    const payload = {
-      cardId: dragState.cardId,
-      source: dragState.source,
-      playerId: dragState.playerId,
-      card: clone(dragState.card)
-    };
-    const zone = activeDropZone;
-    clearPhysicalDrag();
-
-    if (!wasDragging || !zone) return;
-    movePhysicalCard(payload, {
-      type: zone.dataset.dropType,
-      playerId: zone.dataset.playerId || "",
-      color: zone.dataset.dropColor || ""
-    });
-  }
-
-  function cancelPhysicalDrag() {
-    clearPhysicalDrag();
-  }
-
-  function clearPhysicalDrag() {
-    document.removeEventListener("pointermove", handlePhysicalDragMove);
-    document.removeEventListener("pointerup", finishPhysicalDrag);
-    document.removeEventListener("pointercancel", cancelPhysicalDrag);
-    if (dragFrame) cancelAnimationFrame(dragFrame);
-    dragFrame = null;
-    dragState?.preview?.remove();
-    activeDropZone?.classList.remove("drop-active");
-    activeDropZone = null;
-    dragState = null;
-    document.body.classList.remove("dragging");
-    document.getElementById("drag-banner").classList.remove("show");
-  }
-
-  function removeFromOpponent(player, cardId) {
-    const index = player.hand.findIndex(card => card.id === cardId);
-    if (index < 0) return null;
-    return player.hand.splice(index, 1)[0];
-  }
-
-  function registerOpponentDrawNeed(player) {
-    if (state.deckRemaining > 0) player.drawSlotsPending++;
-  }
-
-  function movePhysicalCard(payload, target) {
-    const { source, playerId, cardId } = payload;
-    const sourcePlayer = source === "opponent" ? findOpponent(playerId) : null;
-    const original = source === "residue"
-      ? cardFromId(cardId)
-      : sourcePlayer?.hand.find(card => card.id === cardId);
-    if (!original) {
-      toast("Carta non trovata. Riprova.");
-      return;
-    }
-
-    if (target.type === "hand") {
-      const targetPlayer = findOpponent(target.playerId);
-      if (!targetPlayer) return;
-      if (source === "opponent") {
-        toast(sourcePlayer?.id === targetPlayer.id
-          ? "La carta è già in questa mano."
-          : "Per correggere il giocatore, riporta prima la carta nelle residue.");
-        return;
-      }
-      if (targetPlayer.hand.length >= cartePerGiocatore) {
-        toast(`${targetPlayer.name} ha già ${cartePerGiocatore} carte.`);
-        return;
-      }
-
-      let dealSource = "initial";
-      if (targetPlayer.drawSlotsPending > 0) {
-        if (state.deckRemaining <= 0) {
-          toast("Il mazzo è terminato: non può essere pescata una nuova carta.");
+        
+          function registerOpponentDrawNeed(player) {
+            if (state.deckRemaining > 0) player.drawSlotsPending++;
+          }
+        
+          function movePhysicalCard(payload, target) {
+            const { source, playerId, cardId } = payload;
+            const sourcePlayer = source === "opponent" ? findOpponent(playerId) : null;
+        const original = source === "residue"
+          ? cardFromId(cardId)
+          : source === "discard"
+            ? state.discarded.find(card => card.id === cardId)
+            : sourcePlayer?.hand.find(card => card.id === cardId);
+            if (!original) {
+              toast("Carta non trovata. Riprova.");
+              return;
+            }
+        	if (
+          source === "discard" &&
+          !["residue", "firework", "played"].includes(target.type)
+        ) {
+          toast("Dagli scarti puoi giocare la carta oppure rimetterla nel mazzo.");
           return;
         }
-        dealSource = "drawn";
-      } else if (targetPlayer.setupSlotsRemaining <= 0) {
-        toast("Questa mano non ha uno spazio di pesca aperto.");
-        return;
-      }
-
-      pushHistory();
-      if (dealSource === "drawn") {
-        targetPlayer.drawSlotsPending--;
-        state.deckRemaining--;
-      } else {
-        targetPlayer.setupSlotsRemaining--;
-      }
-      targetPlayer.hand.push({ ...original, dealSource });
-      state.started = true;
-      saveState();
-      render();
-      return;
-    }
-
-    if (target.type === "residue") {
-      if (source !== "opponent" || !sourcePlayer) return;
-      pushHistory();
-      const removed = removeFromOpponent(sourcePlayer, cardId);
-      if (removed?.dealSource === "initial") {
-        sourcePlayer.setupSlotsRemaining = Math.min(cartePerGiocatore, sourcePlayer.setupSlotsRemaining + 1);
-      } else if (removed?.dealSource === "drawn") {
-        state.deckRemaining++;
-      }
-      state.started = true;
-      saveState();
-      render();
-      return;
-    }
-
-    if (!["discard", "firework", "played"].includes(target.type)) return;
-    if (target.type === "firework" && target.color !== original.color) {
-      toast(`Questa carta è ${colorText(original.color)}: trascinala sul fuoco corretto.`);
-      return;
-    }
-
-    const isPlayTarget = target.type === "firework" || target.type === "played";
-    const validPlay = isPlayTarget && isPlayable(original.color, original.number);
-    if (isPlayTarget && !validPlay) {
-      const level = state.fireworks[original.color] || 0;
-      if (!confirm(`Il fuoco ${colorText(original.color)} è a ${level}. Registrare ${colorText(original.color)} ${original.number} come giocata errata?`)) return;
-    }
-
-    pushHistory();
-    let movedCard = { ...original };
-    if (source === "opponent" && sourcePlayer) {
-      movedCard = removeFromOpponent(sourcePlayer, cardId) || movedCard;
-      registerOpponentDrawNeed(sourcePlayer);
-    } else if (source === "residue" && state.deckRemaining > 0) {
-      state.deckRemaining--;
-    }
-
-    if (target.type === "discard") {
-      state.discarded.push({ ...movedCard, source: "drag", failed: false, at: Date.now() });
-      state.clues = Math.min(8, state.clues + 1);
-      toast(`Scartata: ${colorText(movedCard.color)} ${movedCard.number}.`);
-    } else if (validPlay) {
-      state.played.push({ ...movedCard, source: "drag", at: Date.now() });
-      state.fireworks[movedCard.color] = Number(movedCard.number);
-      if (movedCard.number === "5") state.clues = Math.min(8, state.clues + 1);
-      toast(`Giocata corretta: ${colorText(movedCard.color)} ${movedCard.number}.`);
-    } else {
-      state.discarded.push({ ...movedCard, source: "drag", failed: true, at: Date.now() });
-      state.strikes = Math.min(3, state.strikes + 1);
-      toast(`Giocata errata: ${colorText(movedCard.color)} ${movedCard.number}.`);
-    }
-
-    state.started = true;
-    saveState();
-    render();
-  }
-
-  function colorsTouchedByClue(color) {
-    // Con la variante Arcobaleno, una carta Arcobaleno viene toccata da ogni
-    // normale indizio colore. Un indizio Rosso significa quindi
-    // "Rosso oppure Arcobaleno" finché un altro indizio non restringe il caso.
-    if (!arcobalenoAttivo || color === "Arcobaleno") return [color];
-    return [color, "Arcobaleno"];
-  }
-
-  function giveColorClue(color) {
-    const selected = state.hand.filter(card => card.selected);
-    if (!selected.length) {
-      toast("Seleziona prima le carte interessate dall'indizio.");
-      return;
-    }
-
-    pushHistory();
-    const touchedColors = colorsTouchedByClue(color);
-
-    state.hand.forEach(card => {
-      const currentlyPossible = card.colors.length
-        ? [...card.colors]
-        : COLORI.filter(candidate => !card.excludedColors.includes(candidate));
-
-      if (card.selected) {
-        const narrowed = currentlyPossible.filter(candidate => touchedColors.includes(candidate));
-        card.colors = narrowed;
-        card.excludedColors = COLORI.filter(candidate => !narrowed.includes(candidate));
-      } else {
-        // Una carta non toccata non può essere né il colore indicato né,
-        // con Arcobaleno attivo, una carta Arcobaleno.
-        touchedColors.forEach(candidate => {
-          if (!card.excludedColors.includes(candidate)) card.excludedColors.push(candidate);
-        });
-
-        if (card.colors.length) {
-          card.colors = card.colors.filter(candidate => !touchedColors.includes(candidate));
-          if (card.colors.length === 1) {
-            card.excludedColors = COLORI.filter(candidate => candidate !== card.colors[0]);
+        
+            if (target.type === "hand") {
+              const targetPlayer = findOpponent(target.playerId);
+              if (!targetPlayer) return;
+              if (source === "opponent") {
+                toast(sourcePlayer?.id === targetPlayer.id
+                  ? "La carta è già in questa mano."
+                  : "Per correggere il giocatore, riporta prima la carta nelle residue.");
+                return;
+              }
+              if (targetPlayer.hand.length >= cartePerGiocatore) {
+                toast(`${targetPlayer.name} ha già ${cartePerGiocatore} carte.`);
+                return;
+              }
+        
+              let dealSource = "initial";
+              if (targetPlayer.drawSlotsPending > 0) {
+                if (state.deckRemaining <= 0) {
+                  toast("Il mazzo è terminato: non può essere pescata una nuova carta.");
+                  return;
+                }
+                dealSource = "drawn";
+              } else if (targetPlayer.setupSlotsRemaining <= 0) {
+                toast("Questa mano non ha uno spazio di pesca aperto.");
+                return;
+              }
+        
+              pushHistory();
+              if (dealSource === "drawn") {
+                targetPlayer.drawSlotsPending--;
+                state.deckRemaining--;
+              } else {
+                targetPlayer.setupSlotsRemaining--;
+              }
+              targetPlayer.hand.push({ ...original, dealSource });
+              state.started = true;
+              saveState();
+              render();
+              return;
+            }
+        
+            if (target.type === "residue") {
+        	if (source === "discard") {
+          pushHistory();
+        
+          const returnedCard = removeFromDiscard(cardId);
+        
+          if (!returnedCard) {
+            historyStack.pop();
+            toast("Carta non trovata negli scarti.");
+            return;
           }
+        
+          state.deckRemaining++;
+          state.started = true;
+        
+          toast(
+            `Rimessa nel mazzo: ${colorText(returnedCard.color)} ${returnedCard.number}.`
+          );
+        
+          saveState();
+          render();
+          return;
         }
-      }
-      card.selected = false;
-    });
-
-    state.started = true;
-    renderAnalysis();
-    notifyImpossibleClue();
-    saveState();
-  }
-
-  function giveNumberClue(number) {
-    if (!state.hand.some(card => card.selected)) {
-      toast("Seleziona prima le carte interessate dall'indizio.");
-      return;
-    }
-
-    pushHistory();
-    state.hand.forEach(card => {
-      if (card.selected) card.number = String(number);
-      else if (!card.excludedNumbers.includes(String(number))) card.excludedNumbers.push(String(number));
-      card.selected = false;
-    });
-
-    state.started = true;
-    renderAnalysis();
-    notifyImpossibleClue();
-    saveState();
-  }
-
-  function openQuickModal(index) {
-    quickIndex = index;
-    const card = state.hand[index];
-    if (!card) return;
-
-    document.getElementById("quick-colors").innerHTML = COLORI.map(color => `
-      <button
-        class="choice ${card.colors.length === 1 && card.colors[0] === color ? "active" : ""} ${colorClass(color)}"
-        style="${backgroundStyle(color)} color:${textColorFor(color)}"
-        onclick="quickSetColor('${color}')"
-      >${colorText(color)}</button>
-    `).join("");
-
-    document.getElementById("quick-numbers").innerHTML = NUMERI.map(number => `
-      <button
-        class="choice ${card.number === number ? "active" : ""}"
-        onclick="quickSetNumber('${number}')"
-      >${number}</button>
-    `).join("");
-
-    document.getElementById("quick-overlay").classList.add("open");
-  }
-
-  function closeQuickModal() {
-    quickIndex = null;
-    document.getElementById("quick-overlay").classList.remove("open");
-  }
-
-  function quickSetColor(color) {
-    if (quickIndex === null || !state.hand[quickIndex]) return;
-    pushHistory();
-    const card = state.hand[quickIndex];
-    card.colors = [color];
-    card.excludedColors = COLORI.filter(x => x !== color);
-    state.started = true;
-    renderAnalysis();
-    saveState();
-    openQuickModal(quickIndex);
-  }
-
-  function quickSetNumber(number) {
-    if (quickIndex === null || !state.hand[quickIndex]) return;
-    pushHistory();
-    const card = state.hand[quickIndex];
-    card.number = String(number);
-    card.excludedNumbers = NUMERI.filter(x => x !== String(number));
-    state.started = true;
-    renderAnalysis();
-    saveState();
-    openQuickModal(quickIndex);
-  }
-
-  function quickRemoveColor() {
-    if (quickIndex === null || !state.hand[quickIndex]) return;
-    pushHistory();
-    state.hand[quickIndex].colors = [];
-    state.hand[quickIndex].excludedColors = [];
-    renderAnalysis();
-    saveState();
-    openQuickModal(quickIndex);
-  }
-
-  function quickRemoveNumber() {
-    if (quickIndex === null || !state.hand[quickIndex]) return;
-    pushHistory();
-    state.hand[quickIndex].number = null;
-    state.hand[quickIndex].excludedNumbers = [];
-    renderAnalysis();
-    saveState();
-    openQuickModal(quickIndex);
-  }
-
-  function openActionModal(type, handIndex) {
-    actionDraft = { type, handIndex, color: null, number: null };
-
-    document.getElementById("action-title").textContent =
-      type === "play" ? "Registra carta giocata" : "Registra carta scartata";
-    document.getElementById("action-subtitle").textContent =
-      handIndex === null
-        ? "Mossa di un altro giocatore: la carta verrà rimossa dalle possibilità."
-        : `Mossa della tua carta ${handIndex + 1}: se il mazzo non è vuoto verrà pescata una nuova carta.`;
-
-    document.getElementById("action-colors").innerHTML = COLORI.map(color => `
-      <button
-        class="choice ${colorClass(color)}"
-        data-action-color="${color}"
-        style="${backgroundStyle(color)} color:${textColorFor(color)}"
-        onclick="selectActionColor('${color}')"
-      >${colorText(color)}</button>
-    `).join("");
-
-    document.getElementById("action-numbers").innerHTML = NUMERI.map(number => `
-      <button
-        class="choice"
-        data-action-number="${number}"
-        onclick="selectActionNumber('${number}')"
-      >${number}</button>
-    `).join("");
-
-    updateActionPreview();
-    document.getElementById("action-overlay").classList.add("open");
-  }
-
-  function closeActionModal() {
-    document.getElementById("action-overlay").classList.remove("open");
-    actionDraft = { type: null, handIndex: null, color: null, number: null };
-  }
-
-  function selectActionColor(color) {
-    actionDraft.color = color;
-    document.querySelectorAll("[data-action-color]").forEach(button => {
-      button.classList.toggle("active", button.dataset.actionColor === color);
-    });
-    updateActionPreview();
-  }
-
-  function selectActionNumber(number) {
-    actionDraft.number = String(number);
-    document.querySelectorAll("[data-action-number]").forEach(button => {
-      button.classList.toggle("active", button.dataset.actionNumber === String(number));
-    });
-    updateActionPreview();
-  }
-
-  function updateActionPreview() {
-    const preview = document.getElementById("action-preview");
-    const confirm = document.getElementById("action-confirm");
-
-    if (!actionDraft.color || !actionDraft.number) {
-      preview.innerHTML = "Seleziona colore e numero reali.";
-      confirm.disabled = true;
-      return;
-    }
-
-    const physical = availableCount(actionDraft.color, actionDraft.number);
-    if (physical <= 0) {
-      preview.innerHTML = `<strong>Errore:</strong> tutte le copie di questa carta risultano già uscite.`;
-      confirm.disabled = true;
-      return;
-    }
-
-    if (actionDraft.type === "play") {
-      const valid = isPlayable(actionDraft.color, actionDraft.number);
-      preview.innerHTML = valid
-        ? `<strong>Giocata valida.</strong> Il fuoco ${colorText(actionDraft.color)} salirà a ${actionDraft.number}.`
-        : `<strong>Giocata errata.</strong> La carta finirà negli scarti e verrà aggiunto un errore.`;
-    } else {
-      preview.innerHTML = `<strong>Scarto.</strong> Recupererai un segnalino indizio, fino al massimo di 8.`;
-    }
-
-    confirm.disabled = false;
-  }
-
-  function confirmAction() {
-    const { type, handIndex, color, number } = actionDraft;
-    if (!type || !color || !number) return;
-    const physicalCard = firstResidueCard(color, number);
-    if (!physicalCard) {
-      toast("Questa carta non può essere registrata: non risultano copie disponibili nelle residue.");
-      return;
-    }
-
-    pushHistory();
-    const cardEntry = { ...physicalCard, source: handIndex === null ? "external" : "own", at: Date.now() };
-
-    if (type === "play") {
-      if (isPlayable(color, number)) {
-        state.played.push(cardEntry);
-        state.fireworks[color] = Number(number);
-        if (number === "5") state.clues = Math.min(8, state.clues + 1);
-        toast(`Giocata corretta: ${colorText(color)} ${number}.`);
-      } else {
-        state.discarded.push({ ...cardEntry, failed: true });
-        state.strikes = Math.min(3, state.strikes + 1);
-        toast(`Giocata errata: ${colorText(color)} ${number}.`);
-      }
-    } else {
-      state.discarded.push({ ...cardEntry, failed: false });
-      state.clues = Math.min(8, state.clues + 1);
-      toast(`Scartata: ${colorText(color)} ${number}.`);
-    }
-
-    if (state.deckRemaining > 0) {
-      state.deckRemaining--;
-      if (handIndex !== null) replaceOwnCard(handIndex);
-    } else if (handIndex !== null) {
-      state.hand.splice(handIndex, 1);
-    }
-
-    state.started = true;
-    closeActionModal();
-    saveState();
-    render();
-  }
-
-  function replaceOwnCard(index) {
-    const newCard = newHandCard(++state.ownDrawCounter);
-
-    if (resetMode === "sinistra") {
-      state.hand.splice(index, 1);
-      state.hand.unshift(newCard);
-    } else if (resetMode === "destra") {
-      state.hand.splice(index, 1);
-      state.hand.push(newCard);
-    } else {
-      state.hand[index] = newCard;
-    }
-  }
-
-  function adjustClues(delta) {
-    const next = Math.max(0, Math.min(8, state.clues + delta));
-    if (next === state.clues) return;
-    pushHistory();
-    state.clues = next;
-    state.started = true;
-    renderStatus();
-    renderAssistant();
-    saveState();
-  }
-
-  function adjustStrikes(delta) {
-    const next = Math.max(0, Math.min(3, state.strikes + delta));
-    if (next === state.strikes) return;
-    pushHistory();
-    state.strikes = next;
-    state.started = true;
-    renderStatus();
-    saveState();
-  }
-
-  function resetPartita() {
-    if (!confirm("Vuoi cancellare completamente la partita corrente?")) return;
-    state = initialState();
-    historyStack = [];
-    probabilityCacheKey = "";
-    render();
-    saveState();
-  }
-
-  function tornaAllaHome() {
-    if (state.started && !confirm("Tornare alla Home? La partita rimarrà salvata su questo dispositivo.")) return;
-    location.href = "index.html";
-  }
-
-  function toast(message, duration = 2600) {
-    const element = document.getElementById("toast");
-    element.textContent = message;
-    element.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => element.classList.remove("show"), duration);
-  }
-
-  async function requestWakeLock() {
-    try {
-      if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
-    } catch (error) {
-      console.warn("Wake Lock non disponibile:", error);
-      document.getElementById("wakelock-toggle").checked = false;
-    }
-  }
-
-  async function releaseWakeLock() {
-    try {
-      await wakeLock?.release();
-    } catch {}
-    wakeLock = null;
-  }
-
-  document.getElementById("wakelock-toggle").addEventListener("change", async event => {
-    if (event.target.checked) await requestWakeLock();
-    else await releaseWakeLock();
-  });
-
-  document.addEventListener("visibilitychange", async () => {
-    const toggle = document.getElementById("wakelock-toggle");
-    if (document.visibilityState === "visible" && toggle.checked && !wakeLock) {
-      await requestWakeLock();
-    }
-  });
-
-  window.addEventListener("pagehide", persistStateNow);
-
-  window.addEventListener("beforeunload", event => {
-    persistStateNow();
-    if (!state.started) return;
-    event.preventDefault();
-    event.returnValue = "";
-  });
-
-  Object.assign(window, {
-    undo,
-    tornaAllaHome,
-    resetPartita,
-    adjustClues,
-    adjustStrikes,
-    startCardPress,
-    endCardPress,
-    cancelCardPress,
-    startPhysicalDrag,
-    updatePlayerName,
-    giveColorClue,
-    giveNumberClue,
-    openQuickModal,
-    closeQuickModal,
-    quickSetColor,
-    quickSetNumber,
-    quickRemoveColor,
-    quickRemoveNumber,
-    openActionModal,
-    closeActionModal,
-    selectActionColor,
-    selectActionNumber,
-    confirmAction
-  });
-
-  if (!loadState()) normalizeState();
-  render();
-})();
-</script>
+              if (source !== "opponent" || !sourcePlayer) return;
+              pushHistory();
+              const removed = removeFromOpponent(sourcePlayer, cardId);
+              if (removed?.dealSource === "initial") {
+                sourcePlayer.setupSlotsRemaining = Math.min(cartePerGiocatore, sourcePlayer.setupSlotsRemaining + 1);
+              } else if (removed?.dealSource === "drawn") {
+                state.deckRemaining++;
+              }
+              state.started = true;
+              saveState();
+              render();
+              return;
+            }
+        
+            if (!["discard", "firework", "played"].includes(target.type)) return;
+            if (target.type === "firework" && target.color !== original.color) {
+              toast(`Questa carta è ${colorText(original.color)}: trascinala sul fuoco corretto.`);
+              return;
+            }
+        
+            const isPlayTarget = target.type === "firework" || target.type === "played";
+            const validPlay = isPlayTarget && isPlayable(original.color, original.number);
+        	if (source === "discard" && isPlayTarget && !validPlay) {
+          const nextNumber =
+            Number(state.fireworks[original.color] || 0) + 1;
+        
+          toast(
+            `Non può essere giocata: sul fuoco ${colorText(original.color)} serve il ${nextNumber}.`
+          );
+        
+          return;
+        }
+            if (isPlayTarget && !validPlay) {
+              const level = state.fireworks[original.color] || 0;
+              if (!confirm(`Il fuoco ${colorText(original.color)} è a ${level}. Registrare ${colorText(original.color)} ${original.number} come giocata errata?`)) return;
+            }
+        
+            pushHistory();
+            let movedCard = { ...original };
+        if (source === "opponent" && sourcePlayer) {
+          movedCard = removeFromOpponent(sourcePlayer, cardId) || movedCard;
+          registerOpponentDrawNeed(sourcePlayer);
+        
+        } else if (source === "discard") {
+          movedCard = removeFromDiscard(cardId) || movedCard;
+          delete movedCard.failed;
+        
+        } else if (source === "residue" && state.deckRemaining > 0) {
+          state.deckRemaining--;
+        }
+        
+            if (target.type === "discard") {
+              state.discarded.push({ ...movedCard, source: "drag", failed: false, at: Date.now() });
+              state.clues = Math.min(8, state.clues + 1);
+              toast(`Scartata: ${colorText(movedCard.color)} ${movedCard.number}.`);
+            } else if (validPlay) {
+              state.played.push({ ...movedCard, source: "drag", at: Date.now() });
+              state.fireworks[movedCard.color] = Number(movedCard.number);
+              if (movedCard.number === "5") state.clues = Math.min(8, state.clues + 1);
+              toast(`Giocata corretta: ${colorText(movedCard.color)} ${movedCard.number}.`);
+            } else {
+              state.discarded.push({ ...movedCard, source: "drag", failed: true, at: Date.now() });
+              state.strikes = Math.min(3, state.strikes + 1);
+              toast(`Giocata errata: ${colorText(movedCard.color)} ${movedCard.number}.`);
+            }
+        
+            state.started = true;
+            saveState();
+            render();
+          }
+        
+          function colorsTouchedByClue(color) {
+            // Con la variante Arcobaleno, una carta Arcobaleno viene toccata da ogni
+            // normale indizio colore. Un indizio Rosso significa quindi
+            // "Rosso oppure Arcobaleno" finché un altro indizio non restringe il caso.
+            if (!arcobalenoAttivo || color === "Arcobaleno") return [color];
+            return [color, "Arcobaleno"];
+          }
+        
+          function giveColorClue(color) {
+            const selected = state.hand.filter(card => card.selected);
+            if (!selected.length) {
+              toast("Seleziona prima le carte interessate dall'indizio.");
+              return;
+            }
+        
+            pushHistory();
+            const touchedColors = colorsTouchedByClue(color);
+        
+            state.hand.forEach(card => {
+              const currentlyPossible = card.colors.length
+                ? [...card.colors]
+                : COLORI.filter(candidate => !card.excludedColors.includes(candidate));
+        
+              if (card.selected) {
+                const narrowed = currentlyPossible.filter(candidate => touchedColors.includes(candidate));
+                card.colors = narrowed;
+                card.excludedColors = COLORI.filter(candidate => !narrowed.includes(candidate));
+              } else {
+                // Una carta non toccata non può essere né il colore indicato né,
+                // con Arcobaleno attivo, una carta Arcobaleno.
+                touchedColors.forEach(candidate => {
+                  if (!card.excludedColors.includes(candidate)) card.excludedColors.push(candidate);
+                });
+        
+                if (card.colors.length) {
+                  card.colors = card.colors.filter(candidate => !touchedColors.includes(candidate));
+                  if (card.colors.length === 1) {
+                    card.excludedColors = COLORI.filter(candidate => candidate !== card.colors[0]);
+                  }
+                }
+              }
+              card.selected = false;
+            });
+        
+            state.started = true;
+            renderAnalysis();
+            notifyImpossibleClue();
+            saveState();
+          }
+        
+          function giveNumberClue(number) {
+            if (!state.hand.some(card => card.selected)) {
+              toast("Seleziona prima le carte interessate dall'indizio.");
+              return;
+            }
+        
+            pushHistory();
+            state.hand.forEach(card => {
+              if (card.selected) card.number = String(number);
+              else if (!card.excludedNumbers.includes(String(number))) card.excludedNumbers.push(String(number));
+              card.selected = false;
+            });
+        
+            state.started = true;
+            renderAnalysis();
+            notifyImpossibleClue();
+            saveState();
+          }
+        
+          function openQuickModal(index) {
+            quickIndex = index;
+            const card = state.hand[index];
+            if (!card) return;
+        
+            document.getElementById("quick-colors").innerHTML = COLORI.map(color => `
+              <button
+                class="choice ${card.colors.length === 1 && card.colors[0] === color ? "active" : ""} ${colorClass(color)}"
+                style="${backgroundStyle(color)} color:${textColorFor(color)}"
+                onclick="quickSetColor('${color}')"
+              >${colorText(color)}</button>
+            `).join("");
+        
+            document.getElementById("quick-numbers").innerHTML = NUMERI.map(number => `
+              <button
+                class="choice ${card.number === number ? "active" : ""}"
+                onclick="quickSetNumber('${number}')"
+              >${number}</button>
+            `).join("");
+        
+            document.getElementById("quick-overlay").classList.add("open");
+          }
+        
+          function closeQuickModal() {
+            quickIndex = null;
+            document.getElementById("quick-overlay").classList.remove("open");
+          }
+        
+          function quickSetColor(color) {
+            if (quickIndex === null || !state.hand[quickIndex]) return;
+            pushHistory();
+            const card = state.hand[quickIndex];
+            card.colors = [color];
+            card.excludedColors = COLORI.filter(x => x !== color);
+            state.started = true;
+            renderAnalysis();
+            saveState();
+            openQuickModal(quickIndex);
+          }
+        
+          function quickSetNumber(number) {
+            if (quickIndex === null || !state.hand[quickIndex]) return;
+            pushHistory();
+            const card = state.hand[quickIndex];
+            card.number = String(number);
+            card.excludedNumbers = NUMERI.filter(x => x !== String(number));
+            state.started = true;
+            renderAnalysis();
+            saveState();
+            openQuickModal(quickIndex);
+          }
+        
+          function quickRemoveColor() {
+            if (quickIndex === null || !state.hand[quickIndex]) return;
+            pushHistory();
+            state.hand[quickIndex].colors = [];
+            state.hand[quickIndex].excludedColors = [];
+            renderAnalysis();
+            saveState();
+            openQuickModal(quickIndex);
+          }
+        
+          function quickRemoveNumber() {
+            if (quickIndex === null || !state.hand[quickIndex]) return;
+            pushHistory();
+            state.hand[quickIndex].number = null;
+            state.hand[quickIndex].excludedNumbers = [];
+            renderAnalysis();
+            saveState();
+            openQuickModal(quickIndex);
+          }
+        
+          function openActionModal(type, handIndex) {
+            actionDraft = { type, handIndex, color: null, number: null };
+        
+            document.getElementById("action-title").textContent =
+              type === "play" ? "Registra carta giocata" : "Registra carta scartata";
+            document.getElementById("action-subtitle").textContent =
+              handIndex === null
+                ? "Mossa di un altro giocatore: la carta verrà rimossa dalle possibilità."
+                : `Mossa della tua carta ${handIndex + 1}: se il mazzo non è vuoto verrà pescata una nuova carta.`;
+        
+            document.getElementById("action-colors").innerHTML = COLORI.map(color => `
+              <button
+                class="choice ${colorClass(color)}"
+                data-action-color="${color}"
+                style="${backgroundStyle(color)} color:${textColorFor(color)}"
+                onclick="selectActionColor('${color}')"
+              >${colorText(color)}</button>
+            `).join("");
+        
+            document.getElementById("action-numbers").innerHTML = NUMERI.map(number => `
+              <button
+                class="choice"
+                data-action-number="${number}"
+                onclick="selectActionNumber('${number}')"
+              >${number}</button>
+            `).join("");
+        
+            updateActionPreview();
+            document.getElementById("action-overlay").classList.add("open");
+          }
+        
+          function closeActionModal() {
+            document.getElementById("action-overlay").classList.remove("open");
+            actionDraft = { type: null, handIndex: null, color: null, number: null };
+          }
+        
+          function selectActionColor(color) {
+            actionDraft.color = color;
+            document.querySelectorAll("[data-action-color]").forEach(button => {
+              button.classList.toggle("active", button.dataset.actionColor === color);
+            });
+            updateActionPreview();
+          }
+        
+          function selectActionNumber(number) {
+            actionDraft.number = String(number);
+            document.querySelectorAll("[data-action-number]").forEach(button => {
+              button.classList.toggle("active", button.dataset.actionNumber === String(number));
+            });
+            updateActionPreview();
+          }
+        
+          function updateActionPreview() {
+            const preview = document.getElementById("action-preview");
+            const confirm = document.getElementById("action-confirm");
+        
+            if (!actionDraft.color || !actionDraft.number) {
+              preview.innerHTML = "Seleziona colore e numero reali.";
+              confirm.disabled = true;
+              return;
+            }
+        
+            const physical = availableCount(actionDraft.color, actionDraft.number);
+            if (physical <= 0) {
+              preview.innerHTML = `<strong>Errore:</strong> tutte le copie di questa carta risultano già uscite.`;
+              confirm.disabled = true;
+              return;
+            }
+        
+            if (actionDraft.type === "play") {
+              const valid = isPlayable(actionDraft.color, actionDraft.number);
+              preview.innerHTML = valid
+                ? `<strong>Giocata valida.</strong> Il fuoco ${colorText(actionDraft.color)} salirà a ${actionDraft.number}.`
+                : `<strong>Giocata errata.</strong> La carta finirà negli scarti e verrà aggiunto un errore.`;
+            } else {
+              preview.innerHTML = `<strong>Scarto.</strong> Recupererai un segnalino indizio, fino al massimo di 8.`;
+            }
+        
+            confirm.disabled = false;
+          }
+        
+          function confirmAction() {
+            const { type, handIndex, color, number } = actionDraft;
+            if (!type || !color || !number) return;
+            const physicalCard = firstResidueCard(color, number);
+            if (!physicalCard) {
+              toast("Questa carta non può essere registrata: non risultano copie disponibili nelle residue.");
+              return;
+            }
+        
+            pushHistory();
+            const cardEntry = { ...physicalCard, source: handIndex === null ? "external" : "own", at: Date.now() };
+        
+            if (type === "play") {
+              if (isPlayable(color, number)) {
+                state.played.push(cardEntry);
+                state.fireworks[color] = Number(number);
+                if (number === "5") state.clues = Math.min(8, state.clues + 1);
+                toast(`Giocata corretta: ${colorText(color)} ${number}.`);
+              } else {
+                state.discarded.push({ ...cardEntry, failed: true });
+                state.strikes = Math.min(3, state.strikes + 1);
+                toast(`Giocata errata: ${colorText(color)} ${number}.`);
+              }
+            } else {
+              state.discarded.push({ ...cardEntry, failed: false });
+              state.clues = Math.min(8, state.clues + 1);
+              toast(`Scartata: ${colorText(color)} ${number}.`);
+            }
+        
+            if (state.deckRemaining > 0) {
+              state.deckRemaining--;
+              if (handIndex !== null) replaceOwnCard(handIndex);
+            } else if (handIndex !== null) {
+              state.hand.splice(handIndex, 1);
+            }
+        
+            state.started = true;
+            closeActionModal();
+            saveState();
+            render();
+          }
+        
+          function replaceOwnCard(index) {
+            const newCard = newHandCard(++state.ownDrawCounter);
+        
+            if (resetMode === "sinistra") {
+              state.hand.splice(index, 1);
+              state.hand.unshift(newCard);
+            } else if (resetMode === "destra") {
+              state.hand.splice(index, 1);
+              state.hand.push(newCard);
+            } else {
+              state.hand[index] = newCard;
+            }
+          }
+        
+          function adjustClues(delta) {
+            const next = Math.max(0, Math.min(8, state.clues + delta));
+            if (next === state.clues) return;
+            pushHistory();
+            state.clues = next;
+            state.started = true;
+            renderStatus();
+            renderAssistant();
+            saveState();
+          }
+        
+          function adjustStrikes(delta) {
+            const next = Math.max(0, Math.min(3, state.strikes + delta));
+            if (next === state.strikes) return;
+            pushHistory();
+            state.strikes = next;
+            state.started = true;
+            renderStatus();
+            saveState();
+          }
+        
+          function resetPartita() {
+            if (!confirm("Vuoi cancellare completamente la partita corrente?")) return;
+            state = initialState();
+            historyStack = [];
+            probabilityCacheKey = "";
+            render();
+            saveState();
+          }
+        
+          function tornaAllaHome() {
+            if (state.started && !confirm("Tornare alla Home? La partita rimarrà salvata su questo dispositivo.")) return;
+            location.href = "index.html";
+          }
+        
+          function toast(message, duration = 2600) {
+            const element = document.getElementById("toast");
+            element.textContent = message;
+            element.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => element.classList.remove("show"), duration);
+          }
+        
+          async function requestWakeLock() {
+            try {
+              if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
+            } catch (error) {
+              console.warn("Wake Lock non disponibile:", error);
+              document.getElementById("wakelock-toggle").checked = false;
+            }
+          }
+        
+          async function releaseWakeLock() {
+            try {
+              await wakeLock?.release();
+            } catch {}
+            wakeLock = null;
+          }
+        
+          document.getElementById("wakelock-toggle").addEventListener("change", async event => {
+            if (event.target.checked) await requestWakeLock();
+            else await releaseWakeLock();
+          });
+        
+          document.addEventListener("visibilitychange", async () => {
+            const toggle = document.getElementById("wakelock-toggle");
+            if (document.visibilityState === "visible" && toggle.checked && !wakeLock) {
+              await requestWakeLock();
+            }
+          });
+        
+          window.addEventListener("pagehide", persistStateNow);
+        
+          window.addEventListener("beforeunload", event => {
+            persistStateNow();
+            if (!state.started) return;
+            event.preventDefault();
+            event.returnValue = "";
+          });
+        
+          Object.assign(window, {
+            undo,
+            tornaAllaHome,
+            resetPartita,
+            adjustClues,
+            adjustStrikes,
+            startCardPress,
+            endCardPress,
+            cancelCardPress,
+            startPhysicalDrag,
+            updatePlayerName,
+            giveColorClue,
+            giveNumberClue,
+            openQuickModal,
+            closeQuickModal,
+            quickSetColor,
+            quickSetNumber,
+            quickRemoveColor,
+            quickRemoveNumber,
+            openActionModal,
+            closeActionModal,
+            selectActionColor,
+            selectActionNumber,
+            confirmAction
+          });
+        
+          if (!loadState()) normalizeState();
+          render();
+        })();
+    </script>
 </body>
+
 </html>
