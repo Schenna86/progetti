@@ -559,6 +559,38 @@
         }
         .choice.active { border-color: white; box-shadow: 0 0 0 2px var(--accent); }
         .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+        /* Azioni sulle carte tramite tocco: più affidabili del drag and drop su cellulare */
+        .physical-card {
+          touch-action: manipulation;
+          cursor: pointer;
+        }
+        .physical-card:active {
+          cursor: pointer;
+          transform: scale(.94);
+        }
+        .physical-card-preview {
+          display: flex;
+          justify-content: center;
+          margin: 14px 0;
+        }
+        .physical-card-preview .physical-card {
+          width: 64px;
+          height: 82px;
+          font-size: 2.15rem;
+          cursor: default;
+          pointer-events: none;
+        }
+        .physical-action-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+          gap: 9px;
+          margin-top: 14px;
+        }
+        .physical-action-grid button {
+          min-height: 48px;
+          font-weight: 800;
+        }
     .panel-preferences {
   margin-top: 14px;
   padding-top: 12px;
@@ -717,15 +749,15 @@
                 </div>
             </div>
             <div class="zone-grid">
-                <div class="zone drop-zone" data-drop-type="played">
+                <div class="zone">
                     <h3>Giocate correttamente</h3>
                     <div class="zone-card-list" id="played-zone"></div>
-                    <div class="drop-help">Rilascia qui oppure sul fuoco del colore corrispondente.</div>
+                    <div class="drop-help">Le carte giocate correttamente restano in questa zona.</div>
                 </div>
-                <div class="zone drop-zone" data-drop-type="discard">
+                <div class="zone">
                     <h3>Scarti ed errori</h3>
                     <div class="zone-card-list" id="discard-zone"></div>
-                    <div class="drop-help">Rilascia qui una carta per scartarla.</div>
+                    <div class="drop-help">Tocca una carta scartata per giocarla con un bonus o rimetterla nel mazzo.</div>
                 </div>
             </div>
         </section>
@@ -740,7 +772,8 @@
 
         <section class="panel">
             <h2>Carte residue</h2>
-            <div class="residue-grid drop-zone" data-drop-type="residue" id="residue-tracker"></div>
+            <div class="subtle" style="margin-bottom:10px">Tocca una carta e scegli a quale giocatore assegnarla.</div>
+            <div class="residue-grid" id="residue-tracker"></div>
         </section>
 
 <section class="panel">
@@ -789,7 +822,7 @@
 		
 		
 
-        <div class="version">Versione prova 2.2 · probabilità sotto carta · avviso indizi impossibili</div>
+        <div class="version">Versione prova 2.4 · gestione carte tramite tocco</div>
     </main>
 
     <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
@@ -835,7 +868,18 @@
         </div>
     </div>
 
-    <div id="drag-banner" class="drag-banner">Rilascia nella zona desiderata</div>
+    <div id="physical-card-overlay" class="modal-overlay" onclick="if(event.target===this) closePhysicalCardMenu()">
+        <div class="modal">
+            <h3 id="physical-card-title">Carta selezionata</h3>
+            <div class="subtle" id="physical-card-description"></div>
+            <div class="physical-card-preview" id="physical-card-preview"></div>
+            <div class="physical-action-grid" id="physical-card-actions"></div>
+            <div class="modal-footer">
+                <button onclick="closePhysicalCardMenu()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <script>
@@ -894,6 +938,7 @@ let panelPreferences = {
           let probabilityCache = [];
           let quickIndex = null;
           let actionDraft = { type: null, handIndex: null, color: null, number: null };
+          let selectedPhysicalCard = { cardId: null, source: null, playerId: null };
           let toastTimer = null;
           let wakeLock = null;
           let saveTimer = null;
@@ -1624,9 +1669,7 @@ function togglePanelPreference(panelName) {
           function renderFireworks() {
             document.getElementById("fireworks").innerHTML = COLORI.map(color => `
               <div
-                class="firework drop-zone ${colorClass(color)}"
-                data-drop-type="firework"
-                data-drop-color="${color}"
+                class="firework ${colorClass(color)}"
                 style="${backgroundStyle(color)} color:${textColorFor(color)}"
               >
         <!--        <div>${colorText(color)}</div>  -->
@@ -1637,13 +1680,17 @@ function togglePanelPreference(panelName) {
           }
         
           function physicalCardHtml(card, source, playerId = "") {
+            const sourceLabel = source === "residue"
+              ? "assegna a un giocatore"
+              : "registra come giocata o scartata";
+
             return `
               <button
                 class="physical-card ${colorClass(card.color)}"
                 style="${backgroundStyle(card.color)} color:${textColorFor(card.color)}"
-                title="${colorText(card.color)} ${card.number} · trascina"
+                title="${colorText(card.color)} ${card.number} · ${sourceLabel}"
                 aria-label="${colorText(card.color)} ${card.number}"
-                onpointerdown="startPhysicalDrag(event, '${card.id}', '${source}', '${playerId}')"
+                onclick="openPhysicalCardMenu('${card.id}', '${source}', '${playerId}')"
                 oncontextmenu="event.preventDefault()"
               >
                 <span>${card.number}</span>
@@ -1651,7 +1698,7 @@ function togglePanelPreference(panelName) {
               </button>
             `;
           }
-        
+
           function staticCardHtml(card, failed = false) {
             return `
               <div
@@ -1669,9 +1716,9 @@ function togglePanelPreference(panelName) {
             <button
               class="physical-card ${colorClass(card.color)}"
               style="${backgroundStyle(card.color)} color:${textColorFor(card.color)}"
-              title="${colorText(card.color)} ${card.number} · trascina sul fuoco o nelle residue"
+              title="${colorText(card.color)} ${card.number} · scegli un'azione"
               aria-label="${colorText(card.color)} ${card.number}"
-              onpointerdown="startPhysicalDrag(event, '${card.id}', 'discard', '')"
+              onclick="openPhysicalCardMenu('${card.id}', 'discard', '')"
               oncontextmenu="event.preventDefault()"
             >
               <span>${card.number}</span>
@@ -1679,6 +1726,7 @@ function togglePanelPreference(panelName) {
             </button>
           `;
         }
+
           function renderOpponents() {
             const container = document.getElementById("opponents");
             if (!state.opponents.length) {
@@ -1693,7 +1741,7 @@ function togglePanelPreference(panelName) {
               const status = statusParts.length ? statusParts.join(" · ") : `${player.hand.length}/${cartePerGiocatore} carte`;
         
               return `
-                <div class="player-board drop-zone" data-drop-type="hand" data-player-id="${player.id}">
+                <div class="player-board">
                   <div class="player-header">
                     <input
                       class="player-name"
@@ -1706,7 +1754,7 @@ function togglePanelPreference(panelName) {
                   <div class="visible-hand">
                     ${player.hand.length
                       ? player.hand.map(card => physicalCardHtml(card, "opponent", player.id)).join("")
-                      : `<div class="empty-hand">Trascina qui le carte visibili di questo giocatore.</div>`}
+                      : `<div class="empty-hand">Le carte assegnate a questo giocatore compariranno qui.</div>`}
                   </div>
                 </div>
               `;
@@ -1975,6 +2023,100 @@ function togglePanelPreference(panelName) {
             return null;
           }
         
+          function openPhysicalCardMenu(cardId, source, playerId = "") {
+            const card = locateDraggedCard(cardId, source, playerId);
+
+            if (!card) {
+              toast("Carta non trovata. Riprova.");
+              return;
+            }
+
+            selectedPhysicalCard = { cardId, source, playerId };
+
+            const title = document.getElementById("physical-card-title");
+            const description = document.getElementById("physical-card-description");
+            const preview = document.getElementById("physical-card-preview");
+            const actions = document.getElementById("physical-card-actions");
+
+            title.textContent = `${colorText(card.color)} ${card.number}`;
+            preview.innerHTML = staticCardHtml(card, Boolean(card.failed));
+
+            if (source === "residue") {
+              description.textContent = "Scegli il giocatore a cui assegnare questa carta.";
+              actions.innerHTML = state.opponents.map(player => `
+                <button
+                  class="primary"
+                  onclick="executePhysicalCardAction('hand', '${player.id}')"
+                >
+                  ${escapeHtml(player.name)}
+                </button>
+              `).join("") || `<div class="subtle">Non ci sono altri giocatori configurati.</div>`;
+
+            } else if (source === "opponent") {
+              const player = findOpponent(playerId);
+              description.textContent = player
+                ? `Carta nella mano di ${player.name}. Come è stata usata?`
+                : "Come è stata usata questa carta?";
+
+              actions.innerHTML = `
+                <button class="success" onclick="executePhysicalCardAction('played')">
+                  Giocata
+                </button>
+                <button class="warning" onclick="executePhysicalCardAction('discard')">
+                  Scartata
+                </button>
+              `;
+
+            } else if (source === "discard") {
+              description.textContent = "Usa il bonus dell’espansione.";
+              actions.innerHTML = `
+                <button class="success" onclick="executePhysicalCardAction('played')">
+                  Gioca dagli scarti
+                </button>
+                <button class="primary" onclick="executePhysicalCardAction('residue')">
+                  Rimetti nel mazzo
+                </button>
+              `;
+            } else {
+              description.textContent = "";
+              actions.innerHTML = "";
+            }
+
+            document.getElementById("physical-card-overlay").classList.add("open");
+          }
+
+          function closePhysicalCardMenu() {
+            document.getElementById("physical-card-overlay").classList.remove("open");
+            selectedPhysicalCard = { cardId: null, source: null, playerId: null };
+          }
+
+          function executePhysicalCardAction(targetType, targetPlayerId = "") {
+            const { cardId, source, playerId } = selectedPhysicalCard;
+            if (!cardId || !source) return;
+
+            const card = locateDraggedCard(cardId, source, playerId);
+            if (!card) {
+              closePhysicalCardMenu();
+              toast("Carta non trovata. Riprova.");
+              return;
+            }
+
+            const payload = {
+              cardId,
+              source,
+              playerId,
+              card: clone(card)
+            };
+
+            closePhysicalCardMenu();
+
+            movePhysicalCard(payload, {
+              type: targetType,
+              playerId: targetPlayerId,
+              color: card.color
+            });
+          }
+
           function startPhysicalDrag(event, cardId, source, playerId = "") {
             if (event.button !== undefined && event.button !== 0) return;
             const card = locateDraggedCard(cardId, source, playerId);
@@ -2002,7 +2144,7 @@ function togglePanelPreference(panelName) {
             dragState.preview.removeAttribute("onpointerdown");
             document.body.appendChild(dragState.preview);
             document.body.classList.add("dragging");
-            document.getElementById("drag-banner").classList.add("show");
+            document.getElementById("drag-banner")?.classList.add("show");
           }
         
           function handlePhysicalDragMove(event) {
@@ -2074,7 +2216,7 @@ function togglePanelPreference(panelName) {
             activeDropZone = null;
             dragState = null;
             document.body.classList.remove("dragging");
-            document.getElementById("drag-banner").classList.remove("show");
+            document.getElementById("drag-banner")?.classList.remove("show");
           }
         
           function removeFromOpponent(player, cardId) {
@@ -2618,6 +2760,9 @@ function togglePanelPreference(panelName) {
 			togglePanelPreference,
             cancelCardPress,
             startPhysicalDrag,
+            openPhysicalCardMenu,
+            closePhysicalCardMenu,
+            executePhysicalCardAction,
             updatePlayerName,
             giveColorClue,
             giveNumberClue,
