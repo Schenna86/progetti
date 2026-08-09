@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07151d" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+
+  <title>Slot Machine</title>
+
+  <style>
+    :root {
+      --bg: #07151d;
+      --panel: rgba(10, 32, 43, .92);
+      --panel2: rgba(20, 47, 58, .92);
+      --gold: #e7b654;
+      --gold-light: #ffe19a;
+      --text: #f4f7f9;
+      --muted: #9eb0b8;
+      --danger: #ff7777;
+      --ok: #77e18a;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% 0%, #163b4d 0%, #091820 45%, #040b10 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #app {
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    .shell {
+      width: min(1200px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(25px, 4vw, 46px);
+      color: var(--gold-light);
+      letter-spacing: .03em;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chip-pill,
+    .user-pill {
+      border: 1px solid rgba(231,182,84,.62);
+      background: rgba(4, 16, 23, .74);
+      border-radius: 999px;
+      padding: 9px 14px;
+      white-space: nowrap;
+    }
+
+    .chip-pill strong {
+      color: var(--gold-light);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(231,182,84,.65);
+      color: white;
+      background: rgba(4, 16, 23, .8);
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, .9fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid rgba(231,182,84,.33);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(15,43,55,.95), rgba(6,22,30,.96));
+      box-shadow:
+        0 14px 35px rgba(0,0,0,.26),
+        inset 0 0 20px rgba(255,211,118,.035);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 19px;
+      color: var(--gold-light);
+    }
+
+    .panel-head small {
+      color: var(--muted);
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .game-card {
+      position: relative;
+      min-height: 280px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,221,143,.28);
+      background: #0a1a22;
+      box-shadow: 0 12px 24px rgba(0,0,0,.3);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 17px 30px rgba(0,0,0,.38);
+    }
+
+    .game-cover {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .game-shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(0,0,0,.08) 20%,
+          rgba(2,9,13,.28) 50%,
+          rgba(2,9,13,.96) 100%
+        );
+    }
+
+    .game-info {
+      position: absolute;
+      inset: auto 0 0;
+      padding: 18px;
+    }
+
+    .game-info h3 {
+      margin: 0 0 7px;
+      color: white;
+      font-size: 24px;
+      text-shadow: 0 2px 5px #000;
+    }
+
+    .game-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 13px;
+    }
+
+    .tag {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(5,25,34,.78);
+      border: 1px solid rgba(255,222,144,.3);
+      color: #e6edf0;
+    }
+
+    .play-btn {
+      width: 100%;
+      border: 1px solid #f4cd72;
+      border-radius: 11px;
+      padding: 11px 14px;
+      font-weight: 900;
+      color: #fff;
+      background: linear-gradient(#d99a32, #8c4614);
+    }
+
+    .empty-state {
+      padding: 36px 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .leaderboard-wrap {
+      padding: 12px 14px 16px;
+    }
+
+    .leader-row {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .leader-row:last-child {
+      border-bottom: 0;
+    }
+
+    .leader-row.me {
+      border-radius: 10px;
+      background: rgba(231,182,84,.13);
+      border: 1px solid rgba(231,182,84,.35);
+    }
+
+    .pos {
+      color: var(--gold-light);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .leader-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .leader-score {
+      font-variant-numeric: tabular-nums;
+      color: #d7e4e9;
+      font-weight: 800;
+    }
+
+    .my-ranking {
+      margin: 12px 8px 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .my-ranking strong {
+      color: var(--gold-light);
+    }
+
+    .small-btn {
+      border: 1px solid rgba(231,182,84,.42);
+      border-radius: 9px;
+      padding: 7px 10px;
+      background: rgba(0,0,0,.22);
+      color: white;
+    }
+
+    #authOverlay,
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(22,61,78,.98), rgba(2,8,12,.99));
+    }
+
+    .auth-card,
+    .loading-card {
+      width: min(440px, 100%);
+      border: 1px solid rgba(231,182,84,.6);
+      border-radius: 20px;
+      padding: 25px;
+      background: rgba(5,22,30,.96);
+      box-shadow: 0 25px 70px rgba(0,0,0,.55);
+    }
+
+    .auth-card h2,
+    .loading-card h2 {
+      color: var(--gold-light);
+      margin: 0 0 8px;
+      text-align: center;
+    }
+
+    .auth-card p {
+      margin: 0 0 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .auth-grid {
+      display: grid;
+      gap: 11px;
+    }
+
+    .auth-grid input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,225,150,.27);
+      border-radius: 10px;
+      background: rgba(0,0,0,.28);
+      color: white;
+      outline: none;
+    }
+
+    .auth-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      padding: 11px 13px;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+
+    .primary-btn {
+      border: 1px solid #f0cb75;
+      color: white;
+      background: linear-gradient(#d99a32, #874311);
+    }
+
+    .secondary-btn {
+      border: 1px solid rgba(231,182,84,.42);
+      color: white;
+      background: rgba(0,0,0,.24);
+    }
+
+    #authStatus {
+      min-height: 1.4em;
+      color: #ffd083;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .loader {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 16px;
+      border: 6px solid rgba(255,255,255,.12);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: loadingSpin .8s linear infinite;
+    }
+
+    @keyframes loadingSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    #loadError {
+      color: #ff9c9c;
+      white-space: pre-wrap;
+      user-select: text;
+      text-align: left;
+    }
+
+    @media (max-width: 800px) {
+      #app {
+        padding: 12px;
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .games {
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        padding: 13px;
+      }
+
+      .game-card {
+        min-height: 240px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+    <div class="shell">
+
+      <header>
+        <div class="brand">
+          <h1>Slot Machine</h1>
+          <p>Fiche virtuali · classifica settimanale</p>
+        </div>
+
+        <div class="header-actions">
+          <div class="user-pill">
+            👤 <strong id="usernameValue">—</strong>
+          </div>
+
+          <div class="chip-pill">
+            🪙 <strong id="balanceValue">0</strong>
+          </div>
+
+          <button id="refreshBtn" class="icon-btn" type="button" title="Aggiorna">↻</button>
+          <button id="logoutBtn" class="icon-btn" type="button" title="Esci">↪</button>
+        </div>
+      </header>
+
+
+      <div class="dashboard">
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Giochi</h2>
+              <small>Scegli una slot</small>
+            </div>
+          </div>
+
+          <div id="games" class="games"></div>
+        </section>
+
+
+        <aside class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Classifica settimanale</h2>
+              <small id="weekLabel">—</small>
+            </div>
+
+            <button id="leaderRefreshBtn" class="small-btn" type="button">Aggiorna</button>
+          </div>
+
+          <div class="leaderboard-wrap">
+            <div id="leaderboard"></div>
+            <div id="myRanking" class="my-ranking"></div>
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <div id="authOverlay">
+    <div class="auth-card">
+      <h2>Accedi</h2>
+      <p>Usa il tuo account per giocare e partecipare alla classifica.</p>
+
+      <div class="auth-grid">
+        <input id="usernameInput" type="text" autocomplete="username" placeholder="Username (solo registrazione)" />
+        <input id="emailInput" type="email" autocomplete="email" placeholder="Email" />
+        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Password" />
+
+        <div class="auth-actions">
+          <button id="loginBtn" class="primary-btn" type="button">Accedi</button>
+          <button id="signupBtn" class="secondary-btn" type="button">Registrati</button>
+        </div>
+
+        <div id="authStatus"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="loadingOverlay" class="hidden">
+    <div class="loading-card">
+      <div class="loader"></div>
+      <h2 id="loadingText">Caricamento...</h2>
+      <div id="loadError"></div>
+    </div>
+  </div>
+
+
+  <script type="module">
+
+    import {
+      createClient
+    } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+
+    // ========================================================
+    // CONFIGURAZIONE
+    // ========================================================
+
+    const SUPABASE_URL =
+      "https://jhpppwqdaceratwjnbzi.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
+
+
+    /*
+     * Cartella locale contenente gli asset delle slot.
+     *
+     * Esempio:
+     * ./assets/pirates/background.webp
+     */
+    const ASSETS_ROOT =
+      "./assets";
+
+
+    const supabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+
+    const $ =
+      selector =>
+        document.querySelector(
+          selector
+        );
+
+
+    const usernameValue =
+      $("#usernameValue");
+
+    const balanceValue =
+      $("#balanceValue");
+
+    const gamesEl =
+      $("#games");
+
+    const leaderboardEl =
+      $("#leaderboard");
+
+    const myRankingEl =
+      $("#myRanking");
+
+    const weekLabel =
+      $("#weekLabel");
+
+    const refreshBtn =
+      $("#refreshBtn");
+
+    const leaderRefreshBtn =
+      $("#leaderRefreshBtn");
+
+    const logoutBtn =
+      $("#logoutBtn");
+
+    const authOverlay =
+      $("#authOverlay");
+
+    const usernameInput =
+      $("#usernameInput");
+
+    const emailInput =
+      $("#emailInput");
+
+    const passwordInput =
+      $("#passwordInput");
+
+    const loginBtn =
+      $("#loginBtn");
+
+    const signupBtn =
+      $("#signupBtn");
+
+    const authStatus =
+      $("#authStatus");
+
+    const loadingOverlay =
+      $("#loadingOverlay");
+
+    const loadingText =
+      $("#loadingText");
+
+    const loadError =
+      $("#loadError");
+
+
+    const nf =
+      new Intl.NumberFormat(
+        "it-IT"
+      );
+
+
+    let currentSession =
+      null;
+
+
+    // ========================================================
+    // UTILITY
+    // ========================================================
+
+    function formatNumber(
+      value
+    ) {
+
+      return nf.format(
+        Number(value || 0)
+      );
+    }
+
+
+    function showLoading(
+      text = "Caricamento..."
+    ) {
+
+      loadingText.textContent =
+        text;
+
+      loadError.textContent =
+        "";
+
+      loadingOverlay.classList.remove(
+        "hidden"
+      );
+    }
+
+
+    function hideLoading() {
+
+      loadingOverlay.classList.add(
+        "hidden"
+      );
+    }
+
+
+    function showFatal(
+      error
+    ) {
+
+      console.error(error);
+
+      loadingText.textContent =
+        "Errore";
+
+      loadError.textContent =
+        error?.message
+        || String(error);
+
+      loadingOverlay.classList.remove(
+        "hidden"
+      );
+    }
+
+
+    function escapeHtml(
+      value
+    ) {
+
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+
+    function formatWeek(
+      isoStart,
+      isoEnd
+    ) {
+
+      if (
+        !isoStart
+        ||
+        !isoEnd
+      ) {
+
+        return "—";
+      }
+
+
+      const start =
+        new Date(
+          isoStart
+        );
+
+
+      const end =
+        new Date(
+          isoEnd
+        );
+
+
+      /*
+       * week_end è lunedì successivo.
+       * Mostriamo fino alla domenica precedente.
+       */
+      end.setMilliseconds(
+        end.getMilliseconds()
+        - 1
+      );
+
+
+      const formatter =
+        new Intl.DateTimeFormat(
+          "it-IT",
+          {
+            day: "2-digit",
+            month: "2-digit",
+            timeZone: "Europe/Rome"
+          }
+        );
+
+
+      return (
+        `${formatter.format(start)} – ` +
+        `${formatter.format(end)}`
+      );
+    }
+
+
+    function gamePage(
+      game
+    ) {
+
+      /*
+       * Ogni gioco si trova nella cartella con il suo ID:
+       *
+       * pirates -> /pirates/pirates.html
+       * jungle  -> /jungle/jungle.html
+       */
+      const gameId =
+        encodeURIComponent(
+          game.id
+        );
+
+
+      return (
+        `${gameId}/${gameId}.html`
+      );
+    }
+
+
+    function gameCoverUrl(
+      game
+    ) {
+
+      /*
+       * Per ora riutilizziamo background.webp come cover.
+       * In futuro possiamo aggiungere cover.webp senza cambiare
+       * il resto della home.
+       */
+      const folder =
+        game.asset_folder
+        || game.id;
+
+
+      const version =
+        game.asset_version
+        || 1;
+
+
+      return (
+        `${encodeURIComponent(folder)}/` +
+	`${ASSETS_ROOT}/` +        
+        `logo.webp?v=${encodeURIComponent(version)}`
+      );
+    }
+
+
+    // ========================================================
+    // PROFILO
+    // ========================================================
+
+    async function loadProfile() {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            "profiles"
+          )
+          .select(
+            "username,chips"
+          )
+          .single();
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      usernameValue.textContent =
+        data.username;
+
+
+      balanceValue.textContent =
+        formatNumber(
+          data.chips
+        );
+    }
+
+
+    // ========================================================
+    // SLOT ATTIVE
+    // ========================================================
+
+    async function loadGames() {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            "slot_games"
+          )
+          .select(
+            [
+              "id",
+              "name",
+              "reels",
+              "rows",
+              "max_lines",
+              "target_rtp",
+              "volatility",
+              "asset_folder",
+              "asset_version"
+            ].join(",")
+          )
+          .eq(
+            "active",
+            true
+          )
+          .order(
+            "name",
+            {
+              ascending: true
+            }
+          );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      renderGames(
+        data || []
+      );
+    }
+
+
+    function renderGames(
+      games
+    ) {
+
+      if (
+        !games.length
+      ) {
+
+        gamesEl.innerHTML =
+          `<div class="empty-state">Nessuna slot attiva.</div>`;
+
+        return;
+      }
+
+
+      gamesEl.innerHTML =
+        games
+          .map(
+            game => {
+
+              const volatility =
+                "★".repeat(
+                  Number(
+                    game.volatility
+                    || 0
+                  )
+                )
+                +
+                "☆".repeat(
+                  Math.max(
+                    0,
+                    5
+                    -
+                    Number(
+                      game.volatility
+                      || 0
+                    )
+                  )
+                );
+
+
+              return `
+                <article class="game-card">
+                  <img
+                    class="game-cover"
+                    src="${escapeHtml(gameCoverUrl(game))}"
+                    alt=""
+                    loading="lazy"
+                  />
+
+                  <div class="game-shade"></div>
+
+                  <div class="game-info">
+                    <h3>${escapeHtml(game.name)}</h3>
+
+                    <div class="game-meta">
+                      <span class="tag">
+                        ${Number(game.reels)}×${Number(game.rows)}
+                      </span>
+
+                      <span class="tag">
+                        ${Number(game.max_lines)} linee
+                      </span>
+
+                      ${
+                        game.target_rtp != null
+                        ? `
+                          <span class="tag">
+                            RTP ${Number(game.target_rtp).toFixed(2).replace(".", ",")}%
+                          </span>
+                        `
+                        : ""
+                      }
+
+                      ${
+                        game.volatility != null
+                        ? `
+                          <span class="tag" title="Volatilità">
+                            ${volatility}
+                          </span>
+                        `
+                        : ""
+                      }
+                    </div>
+
+                    <button
+                      class="play-btn"
+                      type="button"
+                      data-game-id="${escapeHtml(game.id)}"
+                      data-game-page="${escapeHtml(gamePage(game))}"
+                    >
+                      Gioca
+                    </button>
+                  </div>
+                </article>
+              `;
+            }
+          )
+          .join("");
+
+
+      gamesEl
+        .querySelectorAll(
+          ".play-btn"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                window.location.href =
+                  button.dataset.gamePage;
+              }
+            );
+          }
+        );
+    }
+
+
+    // ========================================================
+    // CLASSIFICA
+    // ========================================================
+
+    async function loadLeaderboard() {
+
+      leaderRefreshBtn.disabled =
+        true;
+
+
+      try {
+
+        const {
+          data,
+          error
+        } =
+          await supabase.rpc(
+            "get_weekly_leaderboard",
+            {
+              p_limit: 20
+            }
+          );
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        renderLeaderboard(
+          data
+        );
+
+      } finally {
+
+        leaderRefreshBtn.disabled =
+          false;
+      }
+    }
+
+
+    function renderLeaderboard(
+      data
+    ) {
+
+      const top =
+        data?.top || [];
+
+
+      weekLabel.textContent =
+        formatWeek(
+          data?.week_start,
+          data?.week_end
+        );
+
+
+      if (
+        top.length === 0
+      ) {
+
+        leaderboardEl.innerHTML =
+          `<div class="empty-state">Nessun punteggio questa settimana.</div>`;
+
+      } else {
+
+        const myUsername =
+          data?.me
+            ?.username;
+
+
+        leaderboardEl.innerHTML =
+          top
+            .map(
+              row => {
+
+                const isMe =
+                  myUsername
+                  &&
+                  row.username
+                    === myUsername;
+
+
+                return `
+                  <div class="leader-row ${isMe ? "me" : ""}">
+                    <div class="pos">#${Number(row.position)}</div>
+                    <div class="leader-name">${escapeHtml(row.username)}</div>
+                    <div class="leader-score">${formatNumber(row.score)}</div>
+                  </div>
+                `;
+              }
+            )
+            .join("");
+      }
+
+
+      const me =
+        data?.me;
+
+
+      if (
+        me?.username
+      ) {
+
+        myRankingEl.innerHTML = `
+          Tu: <strong>#${formatNumber(me.position)}</strong>
+          · ${escapeHtml(me.username)}
+          · <strong>${formatNumber(me.score)}</strong>
+        `;
+
+      } else {
+
+        myRankingEl.textContent =
+          "Posizione non disponibile.";
+      }
+    }
+
+
+    // ========================================================
+    // REFRESH HOME
+    // ========================================================
+
+    async function loadHome() {
+
+      if (
+        !currentSession
+      ) {
+
+        return;
+      }
+
+
+      showLoading(
+        "Caricamento home..."
+      );
+
+
+      try {
+
+        await Promise.all(
+          [
+            loadProfile(),
+            loadGames(),
+            loadLeaderboard()
+          ]
+        );
+
+
+        hideLoading();
+
+      } catch (error) {
+
+        showFatal(
+          error
+        );
+      }
+    }
+
+
+    refreshBtn.addEventListener(
+      "click",
+      loadHome
+    );
+
+
+    leaderRefreshBtn.addEventListener(
+      "click",
+      loadLeaderboard
+    );
+
+
+    // ========================================================
+    // AUTH
+    // ========================================================
+
+    async function login() {
+
+      authStatus.textContent =
+        "Accesso...";
+
+
+      const {
+        error
+      } =
+        await supabase.auth
+          .signInWithPassword(
+            {
+              email:
+                emailInput.value
+                  .trim(),
+
+              password:
+                passwordInput.value
+            }
+          );
+
+
+      if (error) {
+
+        authStatus.textContent =
+          error.message;
+
+        return;
+      }
+
+
+      authStatus.textContent =
+        "";
+    }
+
+
+    async function signup() {
+
+      const username =
+        usernameInput.value
+          .trim();
+
+
+      if (!username) {
+
+        authStatus.textContent =
+          "Inserisci uno username.";
+
+        return;
+      }
+
+
+      authStatus.textContent =
+        "Registrazione...";
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.auth
+          .signUp(
+            {
+              email:
+                emailInput.value
+                  .trim(),
+
+              password:
+                passwordInput.value,
+
+              options: {
+                data: {
+                  username
+                }
+              }
+            }
+          );
+
+
+      if (error) {
+
+        authStatus.textContent =
+          error.message;
+
+        return;
+      }
+
+
+      if (
+        !data.session
+      ) {
+
+        authStatus.textContent =
+          "Registrazione completata. Controlla l'email se la conferma è attiva.";
+
+      } else {
+
+        authStatus.textContent =
+          "";
+      }
+    }
+
+
+    loginBtn.addEventListener(
+      "click",
+      login
+    );
+
+
+    signupBtn.addEventListener(
+      "click",
+      signup
+    );
+
+
+    logoutBtn.addEventListener(
+      "click",
+      async () => {
+
+        await supabase.auth
+          .signOut();
+      }
+    );
+
+
+    // ========================================================
+    // SESSIONE
+    // ========================================================
+
+    async function setSession(
+      session
+    ) {
+
+      currentSession =
+        session;
+
+
+      if (
+        !session
+      ) {
+
+        usernameValue.textContent =
+          "—";
+
+        balanceValue.textContent =
+          "0";
+
+        gamesEl.innerHTML =
+          "";
+
+        leaderboardEl.innerHTML =
+          "";
+
+        myRankingEl.innerHTML =
+          "";
+
+        authOverlay.classList.remove(
+          "hidden"
+        );
+
+        hideLoading();
+
+        return;
+      }
+
+
+      authOverlay.classList.add(
+        "hidden"
+      );
+
+
+      await loadHome();
+    }
+
+
+    const initial =
+      await supabase.auth
+        .getSession();
+
+
+    await setSession(
+      initial.data.session
+    );
+
+
+    supabase.auth
+      .onAuthStateChange(
+        async (
+          event,
+          session
+        ) => {
+
+          if (
+            event === "INITIAL_SESSION"
+          ) {
+
+            return;
+          }
+
+
+          if (
+            event === "SIGNED_OUT"
+          ) {
+
+            await setSession(
+              null
+            );
+
+            return;
+          }
+
+
+          if (
+            event === "SIGNED_IN"
+            ||
+            event === "USER_UPDATED"
+          ) {
+
+            await setSession(
+              session
+            );
+
+            return;
+          }
+
+
+          if (
+            event === "TOKEN_REFRESHED"
+          ) {
+
+            currentSession =
+              session;
+          }
+        }
+      );
+
+  </script>
+
+</body>
+</html>

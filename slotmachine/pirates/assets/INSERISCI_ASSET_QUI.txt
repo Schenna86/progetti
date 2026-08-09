@@ -1,0 +1,2 @@
+Metti qui background.webp, frame.webp e logo.webp.
+I simboli vanno nella sottocartella symbols/.

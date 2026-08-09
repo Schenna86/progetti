@@ -1,0 +1,13 @@
+$env:SUPABASE_URL="https://jhpppwqdaceratwjnbzi.supabase.co"
+$env:SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTM3NzA5MiwiZXhwIjoyMDgwOTUzMDkyfQ.AS12V4lZLdHX3-BwQU_Dg3ADwN4oE6CyL0qbxmDedg8"
+$env:SIM_SPINS="20000000"
+$env:SIM_LINES="25"
+
+node .\slot-simulator-rejection.mjs pirates
+
+$env:SUPABASE_URL="https://jhpppwqdaceratwjnbzi.supabase.co"
+$env:SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTM3NzA5MiwiZXhwIjoyMDgwOTUzMDkyfQ.AS12V4lZLdHX3-BwQU_Dg3ADwN4oE6CyL0qbxmDedg8"
+$env:SIM_SPINS="500000000"
+$env:SIM_LINES="all"
+
+node .\slot-simulator-rejection.mjs pirates
