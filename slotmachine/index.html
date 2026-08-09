@@ -375,6 +375,22 @@
       background: rgba(0,0,0,.24);
     }
 
+    .forgot-password-btn {
+      justify-self: center;
+      border: 0;
+      padding: 2px 4px;
+      background: transparent;
+      color: var(--gold-light);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .forgot-password-btn:hover {
+      color: white;
+    }
+
     #authStatus {
       min-height: 1.4em;
       color: #ffd083;
@@ -511,6 +527,10 @@
           <button id="signupBtn" class="secondary-btn" type="button">Registrati</button>
         </div>
 
+        <button id="forgotPasswordBtn" class="forgot-password-btn" type="button">
+          Password dimenticata?
+        </button>
+
         <div id="authStatus"></div>
       </div>
     </div>
@@ -619,6 +639,9 @@
 
     const signupBtn =
       $("#signupBtn");
+
+    const forgotPasswordBtn =
+      $("#forgotPasswordBtn");
 
     const authStatus =
       $("#authStatus");
@@ -1234,6 +1257,69 @@
     }
 
 
+    async function forgotPassword() {
+
+      const email =
+        emailInput.value
+          .trim();
+
+
+      if (!email) {
+
+        authStatus.textContent =
+          "Inserisci prima il tuo indirizzo email.";
+
+        emailInput.focus();
+
+        return;
+      }
+
+
+      authStatus.textContent =
+        "Invio email di recupero...";
+
+
+      /*
+       * Risolve automaticamente il percorso corretto anche se
+       * il sito è pubblicato dentro una sottocartella
+       * (es. GitHub Pages /nome-repository/).
+       */
+      const redirectTo =
+        new URL(
+          "./reset-password.html",
+          window.location.href
+        ).href;
+
+
+      const {
+        error
+      } =
+        await supabase.auth
+          .resetPasswordForEmail(
+            email,
+            {
+              redirectTo
+            }
+          );
+
+
+      if (error) {
+
+        authStatus.textContent =
+          error.message;
+
+        return;
+      }
+
+
+      /*
+       * Messaggio volutamente generico.
+       */
+      authStatus.textContent =
+        "Se l'indirizzo è registrato, riceverai una email per reimpostare la password.";
+    }
+
+
     async function signup() {
 
       const username =
@@ -1310,6 +1396,12 @@
     signupBtn.addEventListener(
       "click",
       signup
+    );
+
+
+    forgotPasswordBtn.addEventListener(
+      "click",
+      forgotPassword
     );
 
 
