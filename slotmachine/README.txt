@@ -1,91 +1,32 @@
-SLOT MACHINE - HOME V1
-======================
+PASSO 4 - STATISTICHE GLOBALI PER SLOT
 
-FILE
-----
-index.html
-get_weekly_leaderboard.sql
+1. Esegui global-slot-stats.sql nel SQL Editor di Supabase.
+2. Metti nella root:
+   - index.html
+   - stats.html
 
-COSA FA
--------
-- Login Supabase
-- Registrazione Supabase
-- Mostra username
-- Mostra saldo fiche
-- Legge automaticamente tutte le slot attive da public.slot_games
-- Mostra una card per ogni slot
-- Usa background.webp della slot come immagine card
-- Classifica settimanale
-- Evidenzia la riga dell'utente
-- Mostra anche posizione personale se è fuori dalla Top 20
+La home aggiunge solo il pulsante:
+📊 Statistiche
 
-PRIMA DI USARLA
----------------
-1. Eseguire get_weekly_leaderboard.sql su Supabase.
-2. Aprire index.html.
-3. Impostare:
+Per ogni slot vengono mostrati:
+- spin totali
+- spin pagati
+- free spin
+- giocatori unici
+- bonus completati
+- totale giocato
+- vincite spin
+- vincite bonus
+- totale vinto
+- miglior vincita
+- netto giocatori
+- RTP osservato
+- confronto con target RTP
+- primo/ultimo spin
 
-   SUPABASE_URL
-   SUPABASE_ANON_KEY
+RTP osservato:
+(vincite spin + vincite bonus) / totale puntate paid * 100
 
-   Usare ANON/PUBLISHABLE KEY.
-   NON usare SERVICE_ROLE nel browser.
-
-STRUTTURA CONSIGLIATA
----------------------
-index.html
-pirates.html
-
-assets/
-└── pirates/
-    ├── background.webp
-    ├── frame.webp
-    ├── logo.webp
-    ├── bet.webp
-    ├── lines.webp
-    ├── total.webp
-    ├── winnings.webp
-    └── symbols/
-        └── ...
-
-NUOVE SLOT
-----------
-La home legge public.slot_games dove active=true.
-
-Convenzione della pagina:
-game.id = pirates -> pirates.html
-game.id = jungle  -> jungle.html
-game.id = space   -> space.html
-
-Quindi per aggiungere una nuova slot:
-1. aggiungere il record a slot_games
-2. impostare active=true
-3. creare <id>.html
-4. creare assets/<asset_folder>/background.webp
-
-Non serve modificare index.html.
-
-CLASSIFICA
-----------
-Il punteggio settimanale è:
-
-spin_bet + spin_win + bonus_win
-
-spin_bet è negativo.
-
-In pratica:
-vincite di gioco - puntate.
-
-Non vengono conteggiati:
-- initial
-- daily_bonus
-- admin
-
-La settimana va da lunedì 00:00 a lunedì successivo,
-interpretata nel fuso Europe/Rome.
-
-NOTA SU UTENTI CON SCORE 0
---------------------------
-La funzione include anche utenti che nella settimana non hanno giocato,
-con score 0. Se preferiamo mostrare solo chi ha effettuato almeno uno spin,
-possiamo cambiare facilmente la query.
+Le vincite dei free spin entrano nel numeratore.
+I free spin non aggiungono puntata al denominatore.
+Daily Bonus e accrediti esterni non entrano.

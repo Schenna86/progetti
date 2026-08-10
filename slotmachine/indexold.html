@@ -136,17 +136,6 @@
       background: rgba(4,16,23,.8);
     }
 
-    .stats-btn {
-      min-height: 42px;
-      border: 1px solid rgba(231,182,84,.52);
-      border-radius: 999px;
-      padding: 8px 14px;
-      background: rgba(4,16,23,.8);
-      color: white;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
     .dashboard {
       display: grid;
       grid-template-columns: minmax(0, 2fr) minmax(280px, .9fr);
@@ -256,92 +245,14 @@
       color: #e6edf0;
     }
 
-    .game-actions {
-      display: grid;
-      grid-template-columns: minmax(92px, .65fr) 1.35fr;
-      gap: 8px;
-    }
-
-    .play-btn,
-    .paylines-btn {
+    .play-btn {
       width: 100%;
+      border: 1px solid #f4cd72;
       border-radius: 11px;
       padding: 11px 14px;
       font-weight: 900;
       color: #fff;
-    }
-
-    .play-btn {
-      border: 1px solid #f4cd72;
       background: linear-gradient(#d99a32, #8c4614);
-    }
-
-    .paylines-btn {
-      border: 1px solid rgba(231,182,84,.52);
-      background: rgba(4,16,23,.82);
-    }
-
-    .reference-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(0,0,0,.88);
-      backdrop-filter: blur(5px);
-    }
-
-    .reference-card {
-      position: relative;
-      width: min(1440px, 96vw);
-      max-height: 94vh;
-      padding: 18px;
-      border: 1px solid rgba(231,182,84,.62);
-      border-radius: 18px;
-      background: #07151d;
-      box-shadow: 0 24px 80px rgba(0,0,0,.72);
-      overflow: auto;
-    }
-
-    .reference-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 12px;
-    }
-
-    .reference-head h2 {
-      margin: 0;
-      color: var(--gold-light);
-      font-size: 20px;
-    }
-
-    .reference-close {
-      flex: 0 0 auto;
-      width: 40px;
-      height: 40px;
-      border: 1px solid rgba(231,182,84,.58);
-      border-radius: 50%;
-      background: rgba(0,0,0,.28);
-      color: white;
-      font-size: 20px;
-    }
-
-    #referenceImage {
-      display: block;
-      max-width: 100%;
-      max-height: calc(94vh - 95px);
-      margin: 0 auto;
-      object-fit: contain;
-    }
-
-    #referenceError {
-      padding: 30px 15px;
-      color: #ffd083;
-      text-align: center;
     }
 
     .empty-state {
@@ -461,96 +372,6 @@
       padding: 7px 10px;
       background: rgba(0,0,0,.22);
       color: white;
-    }
-
-    .stats-panel {
-      margin-top: 18px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      padding: 16px 18px 4px;
-    }
-
-    .stat-card {
-      min-width: 0;
-      padding: 13px 12px;
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 13px;
-      background: rgba(0,0,0,.2);
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .stat-value {
-      margin-top: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--gold-light);
-      font-size: clamp(18px, 2.2vw, 27px);
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .history-wrap {
-      padding: 12px 18px 18px;
-      overflow-x: auto;
-    }
-
-    .history-table {
-      width: 100%;
-      min-width: 690px;
-      border-collapse: collapse;
-    }
-
-    .history-table th,
-    .history-table td {
-      padding: 9px 8px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      text-align: right;
-      font-size: 13px;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .history-table th {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-
-    .history-table th:first-child,
-    .history-table td:first-child,
-    .history-table th:nth-child(2),
-    .history-table td:nth-child(2) {
-      text-align: left;
-    }
-
-    .history-win {
-      color: #8bf39a;
-      font-weight: 800;
-    }
-
-    .history-loss {
-      color: #ff9d9d;
-    }
-
-    .history-free {
-      color: #8de7ff;
-      font-weight: 800;
-    }
-
-    @media (max-width: 800px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
     }
 
     #authOverlay,
@@ -728,10 +549,6 @@
             🎡 Bonus giornaliero
           </button>
 
-          <button id="statsBtn" class="stats-btn" type="button">
-            📊 Statistiche
-          </button>
-
           <button id="refreshBtn" class="icon-btn" type="button" title="Aggiorna">↻</button>
           <button id="logoutBtn" class="icon-btn" type="button" title="Esci">↪</button>
         </div>
@@ -779,84 +596,6 @@
 
       </div>
 
-
-      <section class="panel stats-panel">
-        <div class="panel-head">
-          <div>
-            <h2>Le mie statistiche</h2>
-            <small>Riepilogo di tutte le slot</small>
-          </div>
-
-          <button id="historyRefreshBtn" class="small-btn" type="button">
-            Aggiorna
-          </button>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">Spin totali</div>
-            <div id="statTotalSpins" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Totale giocato</div>
-            <div id="statTotalBet" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Totale vinto</div>
-            <div id="statTotalWin" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Miglior vincita</div>
-            <div id="statBestWin" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Spin pagati</div>
-            <div id="statPaidSpins" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Free spin giocati</div>
-            <div id="statFreeSpins" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Bonus completati</div>
-            <div id="statBonusCount" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Netto gioco</div>
-            <div id="statNet" class="stat-value">0</div>
-          </div>
-        </div>
-
-        <div class="history-wrap">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>Quando</th>
-                <th>Slot</th>
-                <th>Tipo</th>
-                <th>Linee</th>
-                <th>Puntata</th>
-                <th>Giocato</th>
-                <th>Vincita</th>
-              </tr>
-            </thead>
-
-            <tbody id="historyBody">
-              <tr>
-                <td colspan="7">Nessuna giocata.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
     </div>
   </div>
 
@@ -885,17 +624,6 @@
     </div>
   </div>
 
-
-  <div id="referenceOverlay" class="reference-overlay hidden">
-    <div class="reference-card">
-      <div class="reference-head">
-        <h2 id="referenceTitle">Linee vincenti</h2>
-        <button id="referenceCloseBtn" class="reference-close" type="button" aria-label="Chiudi">×</button>
-      </div>
-      <img id="referenceImage" alt="" />
-      <div id="referenceError" class="hidden">Tabella non disponibile.</div>
-    </div>
-  </div>
 
   <div id="loadingOverlay" class="hidden">
     <div class="loading-card">
@@ -988,9 +716,6 @@
     const dailyBonusBtn =
       $("#dailyBonusBtn");
 
-    const statsBtn =
-      $("#statsBtn");
-
     const leaderRefreshBtn =
       $("#leaderRefreshBtn");
 
@@ -1030,42 +755,6 @@
     const loadError =
       $("#loadError");
 
-    const historyRefreshBtn =
-      $("#historyRefreshBtn");
-
-    const statTotalSpins =
-      $("#statTotalSpins");
-
-    const statTotalBet =
-      $("#statTotalBet");
-
-    const statTotalWin =
-      $("#statTotalWin");
-
-    const statBestWin =
-      $("#statBestWin");
-
-    const statPaidSpins =
-      $("#statPaidSpins");
-
-    const statFreeSpins =
-      $("#statFreeSpins");
-
-    const statBonusCount =
-      $("#statBonusCount");
-
-    const statNet =
-      $("#statNet");
-
-    const historyBody =
-      $("#historyBody");
-
-    const referenceOverlay = $("#referenceOverlay");
-    const referenceTitle = $("#referenceTitle");
-    const referenceImage = $("#referenceImage");
-    const referenceError = $("#referenceError");
-    const referenceCloseBtn = $("#referenceCloseBtn");
-
 
     const nf =
       new Intl.NumberFormat(
@@ -1075,27 +764,6 @@
 
     let currentSession =
       null;
-
-
-    // ========================================================
-    // SINCRONIZZAZIONE SALDO
-    // ========================================================
-
-    const balanceSyncChannel =
-      "BroadcastChannel"
-      in window
-      ? new BroadcastChannel(
-          "slot-machine-sync"
-        )
-      : null;
-
-
-    let lastBalanceSyncAt =
-      0;
-
-
-    let balanceSyncRunning =
-      false;
 
 
     // ========================================================
@@ -1272,223 +940,6 @@
     }
 
 
-    function paylineTableUrl(game) {
-      const fileName =
-        `${Number(game.reels)}x${Number(game.rows)}_${Number(game.max_lines)}.webp`;
-
-      return (
-        `./${fileName}` +
-        `?v=${encodeURIComponent(game.asset_version || 1)}`
-      );
-    }
-
-
-    function openReferenceImage(title, url) {
-      referenceTitle.textContent = title;
-      referenceError.classList.add("hidden");
-      referenceImage.classList.remove("hidden");
-      referenceImage.alt = title;
-
-      referenceImage.onerror = () => {
-        referenceImage.classList.add("hidden");
-        referenceError.classList.remove("hidden");
-      };
-
-      referenceImage.src = url;
-      referenceOverlay.classList.remove("hidden");
-    }
-
-
-    function closeReferenceImage() {
-      referenceOverlay.classList.add("hidden");
-      referenceImage.removeAttribute("src");
-    }
-
-
-    referenceCloseBtn.addEventListener("click", closeReferenceImage);
-
-    referenceOverlay.addEventListener("click", event => {
-      if (event.target === referenceOverlay) {
-        closeReferenceImage();
-      }
-    });
-
-    window.addEventListener("keydown", event => {
-      if (
-        event.key === "Escape"
-        &&
-        !referenceOverlay.classList.contains("hidden")
-      ) {
-        closeReferenceImage();
-      }
-    });
-
-
-    async function syncBalanceFromServer(
-      force = false
-    ) {
-
-      if (
-        !currentSession
-        ||
-        balanceSyncRunning
-      ) {
-
-        return;
-      }
-
-
-      const now =
-        Date.now();
-
-
-      /*
-       * Focus + visibilitychange possono arrivare quasi insieme.
-       * Evitiamo richieste duplicate a Supabase.
-       */
-      if (
-        !force
-        &&
-        now - lastBalanceSyncAt < 800
-      ) {
-
-        return;
-      }
-
-
-      balanceSyncRunning =
-        true;
-
-
-      try {
-
-        const {
-          data,
-          error
-        } =
-          await supabase
-            .from(
-              "profiles"
-            )
-            .select(
-              "chips"
-            )
-            .single();
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        balanceValue.textContent =
-          formatNumber(
-            data.chips
-          );
-
-
-        lastBalanceSyncAt =
-          Date.now();
-
-      } catch (error) {
-
-        console.warn(
-          "Sincronizzazione saldo:",
-          error
-        );
-
-      } finally {
-
-        balanceSyncRunning =
-          false;
-      }
-    }
-
-
-    /*
-     * Ritorno alla home tramite back/forward cache.
-     * È il caso principale in cui il browser può mostrare
-     * temporaneamente il vecchio saldo senza ricaricare la pagina.
-     */
-    window.addEventListener(
-      "pageshow",
-      () => {
-
-        syncBalanceFromServer(
-          true
-        );
-      }
-    );
-
-
-    /*
-     * Utile anche quando la slot era aperta in un'altra tab.
-     */
-    window.addEventListener(
-      "focus",
-      () => {
-
-        syncBalanceFromServer();
-      }
-    );
-
-
-    document.addEventListener(
-      "visibilitychange",
-      () => {
-
-        if (
-          document.visibilityState
-          === "visible"
-        ) {
-
-          syncBalanceFromServer();
-        }
-      }
-    );
-
-
-    /*
-     * Segnale immediato proveniente da slot / Daily Bonus.
-     */
-    balanceSyncChannel
-      ?.addEventListener(
-        "message",
-        event => {
-
-          if (
-            event.data?.type
-            === "balance-changed"
-          ) {
-
-            syncBalanceFromServer(
-              true
-            );
-          }
-        }
-      );
-
-
-    /*
-     * Fallback per browser senza BroadcastChannel.
-     */
-    window.addEventListener(
-      "storage",
-      event => {
-
-        if (
-          event.key
-          === "slot-machine-balance-sync"
-        ) {
-
-          syncBalanceFromServer(
-            true
-          );
-        }
-      }
-    );
-
-
     // ========================================================
     // PROFILO
     // ========================================================
@@ -1522,10 +973,6 @@
         formatNumber(
           data.chips
         );
-
-
-      lastBalanceSyncAt =
-        Date.now();
     }
 
 
@@ -1664,25 +1111,14 @@
                       }
                     </div>
 
-                    <div class="game-actions">
-                      <button
-                        class="paylines-btn"
-                        type="button"
-                        data-game-name="${escapeHtml(game.name)}"
-                        data-payline-table="${escapeHtml(paylineTableUrl(game))}"
-                      >
-                        LINEE
-                      </button>
-
-                      <button
-                        class="play-btn"
-                        type="button"
-                        data-game-id="${escapeHtml(game.id)}"
-                        data-game-page="${escapeHtml(gamePage(game))}"
-                      >
-                        Gioca
-                      </button>
-                    </div>
+                    <button
+                      class="play-btn"
+                      type="button"
+                      data-game-id="${escapeHtml(game.id)}"
+                      data-game-page="${escapeHtml(gamePage(game))}"
+                    >
+                      Gioca
+                    </button>
                   </div>
                 </article>
               `;
@@ -1708,18 +1144,6 @@
             );
           }
         );
-
-
-      gamesEl
-        .querySelectorAll(".paylines-btn")
-        .forEach(button => {
-          button.addEventListener("click", () => {
-            openReferenceImage(
-              `Linee vincenti · ${button.dataset.gameName}`,
-              button.dataset.paylineTable
-            );
-          });
-        });
     }
 
 
@@ -1907,235 +1331,6 @@
 
 
     // ========================================================
-    // STATISTICHE PERSONALI
-    // ========================================================
-
-    async function loadPlayerHistory() {
-
-      historyRefreshBtn.disabled =
-        true;
-
-
-      try {
-
-        const {
-          data,
-          error
-        } =
-          await supabase.rpc(
-            "get_player_game_history",
-            {
-              p_limit: 10
-            }
-          );
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        renderPlayerHistory(
-          data
-        );
-
-      } finally {
-
-        historyRefreshBtn.disabled =
-          false;
-      }
-    }
-
-
-    function renderPlayerHistory(
-      data
-    ) {
-
-      const summary =
-        data?.summary
-        || {};
-
-
-      statTotalSpins.textContent =
-        formatNumber(
-          summary.total_spins
-        );
-
-
-      statTotalBet.textContent =
-        formatNumber(
-          summary.total_bet
-        );
-
-
-      statTotalWin.textContent =
-        formatNumber(
-          summary.total_win
-        );
-
-
-      statBestWin.textContent =
-        formatNumber(
-          summary.best_win
-        );
-
-
-      statPaidSpins.textContent =
-        formatNumber(
-          summary.paid_spins
-        );
-
-
-      statFreeSpins.textContent =
-        formatNumber(
-          summary.free_spins
-        );
-
-
-      statBonusCount.textContent =
-        formatNumber(
-          summary.bonus_count
-        );
-
-
-      const net =
-        Number(
-          summary.net
-          || 0
-        );
-
-
-      statNet.textContent =
-        (
-          net > 0
-          ? "+"
-          : ""
-        )
-        +
-        formatNumber(
-          net
-        );
-
-
-      statNet.style.color =
-        net > 0
-        ? "#8bf39a"
-        : net < 0
-          ? "#ff9d9d"
-          : "var(--gold-light)";
-
-
-      const rows =
-        data?.last_spins
-        || [];
-
-
-      if (
-        !rows.length
-      ) {
-
-        historyBody.innerHTML = `
-          <tr>
-            <td colspan="7">Nessuna giocata.</td>
-          </tr>
-        `;
-
-        return;
-      }
-
-
-      const dateFormatter =
-        new Intl.DateTimeFormat(
-          "it-IT",
-          {
-            day: "2-digit",
-            month: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "Europe/Rome"
-          }
-        );
-
-
-      historyBody.innerHTML =
-        rows
-          .map(
-            row => {
-
-              const wager =
-                Number(
-                  row.wager
-                  || 0
-                );
-
-
-              const totalWin =
-                Number(
-                  row.total_win
-                  || 0
-                );
-
-
-              const result =
-                totalWin
-                - wager;
-
-
-              const resultClass =
-                result > 0
-                ? "history-win"
-                : result < 0
-                  ? "history-loss"
-                  : "";
-
-
-              const type =
-                row.spin_type === "free"
-                ? `<span class="history-free">FREE</span>`
-                : "SPIN";
-
-
-              return `
-                <tr>
-                  <td>${escapeHtml(dateFormatter.format(new Date(row.created_at)))}</td>
-                  <td>${escapeHtml(row.game_id)}</td>
-                  <td>${type}</td>
-                  <td>${formatNumber(row.active_lines)}</td>
-                  <td>${formatNumber(row.bet_per_line)}</td>
-                  <td>${formatNumber(wager)}</td>
-                  <td class="${resultClass}">
-                    ${totalWin > 0 ? "+" : ""}${formatNumber(totalWin)}
-                    ${
-                      Number(row.bonus_win || 0) > 0
-                      ? ` <small>(bonus +${formatNumber(row.bonus_win)})</small>`
-                      : ""
-                    }
-                  </td>
-                </tr>
-              `;
-            }
-          )
-          .join("");
-    }
-
-
-    historyRefreshBtn.addEventListener(
-      "click",
-      loadPlayerHistory
-    );
-
-
-    statsBtn.addEventListener(
-      "click",
-      () => {
-
-        window.location.href =
-          "./stats.html";
-      }
-    );
-
-
-    // ========================================================
     // DAILY BONUS
     // ========================================================
 
@@ -2238,7 +1433,6 @@
             loadGames(),
             loadLeaderboard(),
             loadPreviousWinner(),
-            loadPlayerHistory(),
             loadDailyBonusState()
           ]
         );
@@ -2515,21 +1709,6 @@
 
         myRankingEl.innerHTML =
           "";
-
-        statTotalSpins.textContent = "0";
-        statTotalBet.textContent = "0";
-        statTotalWin.textContent = "0";
-        statBestWin.textContent = "0";
-        statPaidSpins.textContent = "0";
-        statFreeSpins.textContent = "0";
-        statBonusCount.textContent = "0";
-        statNet.textContent = "0";
-
-        historyBody.innerHTML = `
-          <tr>
-            <td colspan="7">Nessuna giocata.</td>
-          </tr>
-        `;
 
         authOverlay.classList.remove(
           "hidden"

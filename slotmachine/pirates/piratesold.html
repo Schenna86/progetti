@@ -299,25 +299,6 @@
       white-space: nowrap;
     }
 
-    .topbar-info-btn {
-      min-height: 2.9vw;
-      padding: .42vw .78vw;
-      border: .12vw solid rgba(245,201,92,.72);
-      border-radius: 100vw;
-      background: rgba(2,14,20,.82);
-      color: white;
-      cursor: pointer;
-      font-size: clamp(9px, .82vw, 16px);
-      font-weight: 900;
-      letter-spacing: .035em;
-      white-space: nowrap;
-    }
-
-    .topbar-info-btn:disabled {
-      opacity: .42;
-      cursor: default;
-    }
-
     #fullscreenBtn,
     #logoutBtn {
       border: .12vw solid rgba(245,201,92,.72);
@@ -332,59 +313,6 @@
       place-items: center;
       cursor: pointer;
       font-size: clamp(12px, 1.15vw, 22px);
-    }
-
-    #infoOverlay {
-      z-index: 340;
-    }
-
-    .info-dialog {
-      width: min(92%, 1180px);
-      max-height: 94%;
-    }
-
-    .info-dialog-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1vw;
-      margin-bottom: 12px;
-    }
-
-    .info-dialog-head h2 {
-      margin: 0;
-      text-align: left;
-    }
-
-    #infoCloseBtn {
-      flex: 0 0 auto;
-      width: 42px;
-      height: 42px;
-      border: .12vw solid rgba(245,201,92,.72);
-      border-radius: 50%;
-      background: rgba(2,14,20,.82);
-      color: white;
-      cursor: pointer;
-      font-size: 22px;
-    }
-
-    #infoImage {
-      display: block;
-      max-width: 100%;
-      max-height: calc(90vh - 100px);
-      margin: 0 auto;
-      object-fit: contain;
-    }
-
-    #infoError {
-      padding: 30px 15px;
-      color: #ffd58a;
-      text-align: center;
-    }
-
-    #infoError.hidden,
-    #infoImage.hidden {
-      display: none;
     }
 
 
@@ -608,7 +536,7 @@
 
     .dialog {
       position: relative;
-      width: min(88%, 1440px);
+      width: min(88%, 930px);
       max-height: 92%;
       overflow: auto;
       border: 2px solid #dfaa49;
@@ -1092,9 +1020,6 @@
           Saldo: <strong id="balanceValue">0</strong>
         </div>
 
-        <button id="paylinesBtn" class="topbar-info-btn" type="button">LINEE</button>
-        <button id="payoutBtn" class="topbar-info-btn" type="button">PAYOUT</button>
-
         <button id="fullscreenBtn" type="button" aria-label="Schermo intero">⛶</button>
         <button id="logoutBtn" type="button" aria-label="Torna alla home" title="Torna alla home">↪</button>
       </div>
@@ -1183,19 +1108,6 @@
         </div>
       </div>
 
-      <!-- TABELLE LINEE / PAYOUT -->
-      <div id="infoOverlay" class="overlay">
-        <div class="dialog info-dialog">
-          <div class="info-dialog-head">
-            <h2 id="infoTitle">Informazioni</h2>
-            <button id="infoCloseBtn" type="button" aria-label="Chiudi">×</button>
-          </div>
-
-          <img id="infoImage" alt="" />
-          <div id="infoError" class="hidden">Immagine non disponibile.</div>
-        </div>
-      </div>
-
       <!-- RIEPILOGO FREE SPIN -->
       <div id="freeSummaryOverlay" class="overlay">
         <div class="dialog free-summary-dialog">
@@ -1262,48 +1174,6 @@
 
 
     // ========================================================
-    // SINCRONIZZAZIONE SALDO
-    // ========================================================
-
-    const balanceSyncChannel =
-      "BroadcastChannel"
-      in window
-      ? new BroadcastChannel(
-          "slot-machine-sync"
-        )
-      : null;
-
-
-    function notifyBalanceChanged() {
-
-      balanceSyncChannel
-        ?.postMessage(
-          {
-            type:
-              "balance-changed"
-          }
-        );
-
-
-      /*
-       * Fallback per browser senza BroadcastChannel.
-       */
-      try {
-
-        localStorage.setItem(
-          "slot-machine-balance-sync",
-          String(
-            Date.now()
-          )
-        );
-
-      } catch {
-        // Nessun blocco del gioco se localStorage non è disponibile.
-      }
-    }
-
-
-    // ========================================================
     // STATO
     // ========================================================
 
@@ -1332,8 +1202,6 @@
       spinning: false,
 
       bonusOpen: false,
-
-      infoOpen: false,
 
       freeSessionId: null,
 
@@ -1453,14 +1321,6 @@
 
     const fullscreenBtn =
       $("#fullscreenBtn");
-
-    const paylinesBtn = $("#paylinesBtn");
-    const payoutBtn = $("#payoutBtn");
-    const infoOverlay = $("#infoOverlay");
-    const infoTitle = $("#infoTitle");
-    const infoImage = $("#infoImage");
-    const infoError = $("#infoError");
-    const infoCloseBtn = $("#infoCloseBtn");
 
     const bonusOverlay =
       $("#bonusOverlay");
@@ -1624,8 +1484,6 @@
       const locked =
         state.spinning
         || state.bonusOpen
-        || state.infoOpen
-        || state.freeSummaryOpen
         || state.freeRemaining > 0;
 
 
@@ -1641,12 +1499,6 @@
       linesNext.disabled =
         locked;
 
-      paylinesBtn.disabled =
-        locked;
-
-      payoutBtn.disabled =
-        locked;
-
 
       const canAfford =
         state.freeRemaining > 0
@@ -1657,7 +1509,6 @@
       spinBtn.disabled =
         state.spinning
         || state.bonusOpen
-        || state.infoOpen
         || state.freeSummaryOpen
         || !state.session
         || !canAfford;
@@ -1668,96 +1519,6 @@
         ? "FREE"
         : "SPIN";
     }
-
-
-    function paylineTableUrl() {
-
-      if (!state.config?.game) {
-        return "";
-      }
-
-      const game = state.config.game;
-      const version = game.asset_version || 1;
-
-      const fileName =
-        `${Number(game.reels)}x${Number(game.rows)}_${Number(game.max_lines)}.webp`;
-
-      return (
-        `../${fileName}` +
-        `?v=${encodeURIComponent(version)}`
-      );
-    }
-
-
-    function openInfoImage(title, url) {
-
-      if (
-        state.spinning
-        ||
-        state.bonusOpen
-        ||
-        state.freeSummaryOpen
-        ||
-        state.freeRemaining > 0
-      ) {
-        return;
-      }
-
-      state.infoOpen = true;
-      infoTitle.textContent = title;
-
-      infoError.classList.add("hidden");
-      infoImage.classList.remove("hidden");
-      infoImage.alt = title;
-
-      infoImage.onerror = () => {
-        infoImage.classList.add("hidden");
-        infoError.classList.remove("hidden");
-      };
-
-      infoImage.src = url;
-      infoOverlay.classList.add("visible");
-      updateControls();
-    }
-
-
-    function closeInfoImage() {
-      infoOverlay.classList.remove("visible");
-      infoImage.removeAttribute("src");
-      state.infoOpen = false;
-      updateControls();
-    }
-
-
-    paylinesBtn.addEventListener("click", () => {
-      openInfoImage(
-        "Linee vincenti",
-        paylineTableUrl()
-      );
-    });
-
-
-    payoutBtn.addEventListener("click", () => {
-      openInfoImage(
-        "Tabella payout",
-        assetUrl("payouttable.webp")
-      );
-    });
-
-
-    infoCloseBtn.addEventListener("click", closeInfoImage);
-
-    infoOverlay.addEventListener("click", event => {
-      if (event.target === infoOverlay) {
-        closeInfoImage();
-      }
-    });
-
-    window.addEventListener("keydown", event => {
-      if (event.key === "Escape" && state.infoOpen) {
-        closeInfoImage();
-      }
-    });
 
 
     // ========================================================
@@ -1858,12 +1619,6 @@
         assetUrl(
           "bonus2.webp"
         ),
-
-        assetUrl(
-          "payouttable.webp"
-        ),
-
-        paylineTableUrl(),
 
         ...state.symbols.map(
           symbol =>
@@ -2673,8 +2428,6 @@
         ||
         state.bonusOpen
         ||
-        state.infoOpen
-        ||
         !state.config
       ) {
 
@@ -2853,9 +2606,6 @@
           data.balance
           || 0
         );
-
-
-      notifyBalanceChanged();
 
 
       state.currentWin =
@@ -3266,9 +3016,6 @@
             Number(
               data.balance
             );
-
-
-          notifyBalanceChanged();
         }
 
 

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080b14" />
+  <title>Bonus giornaliero</title>
+  <style>
+    :root {
+      --panel: rgba(17,22,36,.94);
+      --gold: #f4c95d;
+      --gold-light: #ffe7a2;
+      --text: #f7f8fb;
+      --muted: #aab1c4;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 50% 30%, #202b4a 0%, #0d1220 38%, #060810 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding:
+        max(12px, env(safe-area-inset-top))
+        max(12px, env(safe-area-inset-right))
+        max(12px, env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
+    }
+
+    button { font: inherit; }
+
+    .page {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    header h1 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: clamp(25px, 4vw, 48px);
+    }
+
+    header p {
+      margin: 3px 0 0;
+      color: var(--muted);
+    }
+
+    .home-btn {
+      flex: 0 0 auto;
+      border: 1px solid rgba(244,201,93,.58);
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: rgba(0,0,0,.28);
+      color: white;
+      cursor: pointer;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0,1.3fr) minmax(270px,.7fr);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .wheel-card,
+    .info-card {
+      border: 1px solid rgba(244,201,93,.3);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: 0 24px 60px rgba(0,0,0,.38);
+    }
+
+    .wheel-card {
+      padding: clamp(14px,2vw,24px);
+    }
+
+    .wheel-stage {
+      position: relative;
+      width: min(72vh,100%);
+      aspect-ratio: 1;
+      margin: auto;
+      display: grid;
+      place-items: center;
+    }
+
+    .wheel-ring {
+      position: absolute;
+      inset: 1.5%;
+      border-radius: 50%;
+      border: clamp(5px,.8vw,11px) solid #dcae42;
+      box-shadow:
+        0 0 0 4px #674410,
+        0 0 30px rgba(244,201,93,.28),
+        inset 0 0 28px rgba(0,0,0,.55);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .pointer {
+      position: absolute;
+      z-index: 20;
+      left: 50%;
+      top: -1%;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: clamp(13px,2.2vw,24px) solid transparent;
+      border-right: clamp(13px,2.2vw,24px) solid transparent;
+      border-top: clamp(32px,5vw,55px) solid #fff2ad;
+      filter:
+        drop-shadow(0 4px 3px rgba(0,0,0,.65))
+        drop-shadow(0 0 8px rgba(255,214,91,.7));
+      transform-origin: 50% 0;
+    }
+
+    .pointer.ticking {
+      animation: pointerTick .11s ease-in-out infinite alternate;
+    }
+
+    @keyframes pointerTick {
+      from { transform: translateX(-50%) rotate(-4deg); }
+      to { transform: translateX(-50%) rotate(4deg); }
+    }
+
+    #wheelRotator {
+      width: 94%;
+      height: 94%;
+      border-radius: 50%;
+      transform: rotate(0deg);
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    #wheel {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .segment {
+      stroke: rgba(255,255,255,.18);
+      stroke-width: 1;
+      transition: filter .18s ease, stroke-width .18s ease;
+    }
+
+    .segment.winner {
+      stroke: white;
+      stroke-width: 4;
+      filter:
+        brightness(1.55)
+        drop-shadow(0 0 8px rgba(255,238,152,.95));
+    }
+
+    .segment-text {
+      fill: white;
+      font-weight: 900;
+      font-size: 13px;
+      paint-order: stroke;
+      stroke: rgba(0,0,0,.82);
+      stroke-width: 3px;
+      stroke-linejoin: round;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .hub {
+      position: absolute;
+      z-index: 10;
+      width: 20%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: clamp(4px,.65vw,9px) solid #dcae42;
+      background:
+        radial-gradient(circle at 40% 35%, #ffe5a1, #bd7b1c 40%, #593408 80%);
+      box-shadow:
+        0 5px 18px rgba(0,0,0,.55),
+        0 0 18px rgba(255,205,78,.25);
+      color: #2e1b05;
+      font-size: clamp(11px,1.6vw,21px);
+      font-weight: 1000;
+      text-align: center;
+      line-height: 1.05;
+      pointer-events: none;
+    }
+
+    .info-card {
+      padding: clamp(18px,2.4vw,30px);
+      display: grid;
+      gap: 18px;
+    }
+
+    .base-box {
+      padding: 15px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+      text-align: center;
+    }
+
+    .base-box small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .base-box strong {
+      color: var(--gold-light);
+      font-size: clamp(27px,3vw,42px);
+      font-variant-numeric: tabular-nums;
+    }
+
+    #spinBtn {
+      min-height: 58px;
+      border: 1px solid #ffe59d;
+      border-radius: 14px;
+      background: linear-gradient(180deg,#e5a63b,#934d12);
+      color: white;
+      font-size: clamp(18px,2vw,25px);
+      font-weight: 1000;
+      letter-spacing: .05em;
+      cursor: pointer;
+    }
+
+    #spinBtn:disabled {
+      opacity: .5;
+      cursor: default;
+    }
+
+    .result {
+      min-height: 115px;
+      padding: 15px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(244,201,93,.15),transparent 65%),
+        rgba(0,0,0,.25);
+      border: 1px solid rgba(244,201,93,.2);
+      text-align: center;
+    }
+
+    #resultMultiplier {
+      color: var(--gold-light);
+      font-size: clamp(28px,4vw,56px);
+      font-weight: 1000;
+      line-height: 1;
+    }
+
+    #resultWin {
+      margin-top: 7px;
+      font-size: clamp(18px,2vw,27px);
+      font-weight: 900;
+    }
+
+    #resultText {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    #status {
+      min-height: 1.5em;
+      text-align: center;
+      color: #ffd884;
+      font-size: 14px;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 7px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .legend div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(5,8,15,.96);
+    }
+
+    .loading.hidden { display: none; }
+
+    .loading-box {
+      width: min(390px,100%);
+      padding: 24px;
+      border-radius: 18px;
+      border: 1px solid rgba(244,201,93,.42);
+      background: #101522;
+      text-align: center;
+    }
+
+    .loader {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 14px;
+      border: 5px solid rgba(255,255,255,.12);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: loadingSpin .8s linear infinite;
+    }
+
+    @keyframes loadingSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 820px) {
+      .layout { grid-template-columns: 1fr; }
+      .wheel-stage { width: min(92vw,620px); }
+      header { align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>Bonus giornaliero</h1>
+        <p>Un giro al giorno. Il premio viene aggiunto direttamente al saldo.</p>
+      </div>
+      <button id="homeBtn" class="home-btn" type="button">← Home</button>
+    </header>
+
+    <main class="layout">
+      <section class="wheel-card">
+        <div class="wheel-stage">
+          <div id="pointer" class="pointer"></div>
+          <div id="wheelRotator">
+            <svg id="wheel" viewBox="0 0 500 500" role="img" aria-label="Roulette bonus giornaliero"></svg>
+          </div>
+          <div class="wheel-ring"></div>
+          <div class="hub">DAILY<br />BONUS</div>
+        </div>
+      </section>
+
+      <aside class="info-card">
+        <div class="base-box">
+          <small>Fiche base</small>
+          <strong id="baseAmount">10.000</strong>
+        </div>
+
+        <button id="spinBtn" type="button" disabled>GIRA</button>
+
+        <div class="result">
+          <div id="resultMultiplier">—</div>
+          <div id="resultWin">Bonus disponibile</div>
+          <div id="resultText">Gira la ruota per scoprire il premio di oggi.</div>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="legend">
+          <div><span>25 spicchi ×1</span><strong>50%</strong></div>
+          <div><span>10 spicchi ×2</span><strong>20%</strong></div>
+          <div><span>5 spicchi ×5</span><strong>10%</strong></div>
+          <div><span>4 spicchi ×10</span><strong>8%</strong></div>
+          <div><span>3 spicchi ×15</span><strong>6%</strong></div>
+          <div><span>2 spicchi ×30</span><strong>4%</strong></div>
+          <div><span>1 spicchio ×100</span><strong>2%</strong></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="loading-box">
+      <div class="loader"></div>
+      <strong id="loadingText">Caricamento bonus...</strong>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://jhpppwqdaceratwjnbzi.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
+
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      }
+    );
+
+    const $ = selector => document.querySelector(selector);
+
+    const wheel = $("#wheel");
+    const wheelRotator = $("#wheelRotator");
+    const pointer = $("#pointer");
+    const spinBtn = $("#spinBtn");
+    const homeBtn = $("#homeBtn");
+    const baseAmountEl = $("#baseAmount");
+    const resultMultiplier = $("#resultMultiplier");
+    const resultWin = $("#resultWin");
+    const resultText = $("#resultText");
+    const statusEl = $("#status");
+    const loading = $("#loading");
+    const loadingText = $("#loadingText");
+
+    const nf = new Intl.NumberFormat("it-IT");
+
+    const state = {
+      session: null,
+      segments: [],
+      baseAmount: 10000,
+      available: false,
+      spinning: false,
+      rotation: 0,
+      result: null,
+      nextAvailableAt: null
+    };
+
+
+    // ========================================================
+    // SINCRONIZZAZIONE SALDO
+    // ========================================================
+
+    const balanceSyncChannel =
+      "BroadcastChannel"
+      in window
+      ? new BroadcastChannel(
+          "slot-machine-sync"
+        )
+      : null;
+
+
+    function notifyBalanceChanged() {
+
+      balanceSyncChannel
+        ?.postMessage(
+          {
+            type:
+              "balance-changed"
+          }
+        );
+
+
+      try {
+
+        localStorage.setItem(
+          "slot-machine-balance-sync",
+          String(
+            Date.now()
+          )
+        );
+
+      } catch {
+        // Il Daily Bonus continua a funzionare anche senza localStorage.
+      }
+    }
+
+    function formatChips(value) {
+      return nf.format(Number(value || 0));
+    }
+
+    function polar(cx, cy, radius, angleDegrees) {
+      const angle = (angleDegrees - 90) * Math.PI / 180;
+      return {
+        x: cx + radius * Math.cos(angle),
+        y: cy + radius * Math.sin(angle)
+      };
+    }
+
+    function segmentColor(multiplier, index) {
+      const alternate = index % 2 === 0;
+
+      switch (Number(multiplier)) {
+        case 100: return alternate ? "#8229a8" : "#6f218f";
+        case 30:  return alternate ? "#c23338" : "#a6262c";
+        case 15:  return alternate ? "#d76a28" : "#bd5620";
+        case 10:  return alternate ? "#c59422" : "#a97b18";
+        case 5:   return alternate ? "#24885c" : "#1d714c";
+        case 2:   return alternate ? "#227a92" : "#1b667b";
+        default:  return alternate ? "#2b3654" : "#212b45";
+      }
+    }
+
+    function buildWheel() {
+      wheel.innerHTML = "";
+
+      const count = state.segments.length;
+      const step = 360 / count;
+
+      for (let index = 0; index < count; index++) {
+        const startAngle = index * step;
+        const endAngle = (index + 1) * step;
+        const centerAngle = startAngle + step / 2;
+
+        const start = polar(250,250,238,startAngle);
+        const end = polar(250,250,238,endAngle);
+
+        const path = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path"
+        );
+
+        path.setAttribute(
+          "d",
+          [
+            "M 250 250",
+            `L ${start.x} ${start.y}`,
+            `A 238 238 0 0 1 ${end.x} ${end.y}`,
+            "Z"
+          ].join(" ")
+        );
+
+        path.setAttribute(
+          "fill",
+          segmentColor(state.segments[index], index)
+        );
+
+        path.setAttribute("class", "segment");
+        path.dataset.index = index;
+        wheel.appendChild(path);
+
+        const textPoint = polar(250,250,194,centerAngle);
+
+        const text = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text"
+        );
+
+        text.setAttribute("x", textPoint.x);
+        text.setAttribute("y", textPoint.y);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dominant-baseline", "middle");
+        text.setAttribute("class", "segment-text");
+        text.setAttribute(
+          "transform",
+          `rotate(${centerAngle - 90} ${textPoint.x} ${textPoint.y})`
+        );
+
+        text.textContent = `×${state.segments[index]}`;
+        wheel.appendChild(text);
+      }
+    }
+
+    function clearWinner() {
+      wheel
+        .querySelectorAll(".segment.winner")
+        .forEach(item => item.classList.remove("winner"));
+    }
+
+    function highlightWinner(index) {
+      clearWinner();
+      wheel
+        .querySelector(`.segment[data-index="${index}"]`)
+        ?.classList.add("winner");
+    }
+
+    function setWheelToSegment(segmentIndex, animate = false) {
+      const count = state.segments.length;
+      if (!count) return;
+
+      const step = 360 / count;
+      const center = (Number(segmentIndex) + .5) * step;
+
+      if (!animate) {
+        const target = (360 - center) % 360;
+        state.rotation = target;
+        wheelRotator.style.transition = "none";
+        wheelRotator.style.transform = `rotate(${target}deg)`;
+        highlightWinner(segmentIndex);
+        return;
+      }
+
+      clearWinner();
+
+      // Solo effetto visivo: resta sempre nello spicchio deciso dal server.
+      const jitter = (Math.random() * 3.6) - 1.8;
+      const desiredMod = (360 - center - jitter + 360) % 360;
+      const currentMod = ((state.rotation % 360) + 360) % 360;
+      const delta = (desiredMod - currentMod + 360) % 360;
+
+      state.rotation += 7 * 360 + delta;
+
+      wheelRotator.style.transition =
+        "transform 5.2s cubic-bezier(.12,.68,.08,1)";
+
+      requestAnimationFrame(() => {
+        wheelRotator.style.transform =
+          `rotate(${state.rotation}deg)`;
+      });
+
+      pointer.classList.add("ticking");
+
+      window.setTimeout(() => {
+        pointer.classList.remove("ticking");
+        highlightWinner(segmentIndex);
+      }, 5200);
+    }
+
+    function showAvailable() {
+      resultMultiplier.textContent = "—";
+      resultWin.textContent = "Bonus disponibile";
+      resultText.textContent =
+        "Gira la ruota per scoprire il premio di oggi.";
+      statusEl.textContent = "Un giro disponibile oggi.";
+      spinBtn.disabled = false;
+      spinBtn.textContent = "GIRA";
+    }
+
+    function showResult(result, alreadyPlayed = false) {
+      const multiplier = Number(result.multiplier);
+      const win = Number(result.win_amount);
+
+      resultMultiplier.textContent = `×${multiplier}`;
+      resultWin.textContent = `+${formatChips(win)} fiche`;
+
+      resultText.textContent =
+        alreadyPlayed
+          ? "Hai già riscosso il bonus di oggi."
+          : `Nuovo saldo: ${formatChips(result.balance_after)} fiche`;
+
+      if (state.nextAvailableAt) {
+        const tomorrow =
+          new Intl.DateTimeFormat(
+            "it-IT",
+            {
+              day: "2-digit",
+              month: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Europe/Rome"
+            }
+          )
+          .format(new Date(state.nextAvailableAt));
+
+        statusEl.textContent =
+          `Prossimo giro: ${tomorrow}`;
+      } else {
+        statusEl.textContent = "Bonus di oggi riscosso.";
+      }
+
+      spinBtn.disabled = true;
+      spinBtn.textContent = "GIÀ RISCOSSO";
+    }
+
+    async function loadState() {
+      const { data, error } =
+        await supabase.rpc("get_daily_bonus_state");
+
+      if (error) throw error;
+
+      if (
+        !Array.isArray(data?.segments)
+        || data.segments.length !== 50
+      ) {
+        throw new Error("Configurazione roulette non valida.");
+      }
+
+      state.segments = data.segments.map(Number);
+      state.baseAmount = Number(data.base_amount || 10000);
+      state.available = data.available === true;
+      state.result = data.result || null;
+      state.nextAvailableAt = data.next_available_at || null;
+
+      baseAmountEl.textContent = formatChips(state.baseAmount);
+
+      buildWheel();
+
+      if (state.result) {
+        setWheelToSegment(
+          Number(state.result.segment_index),
+          false
+        );
+
+        showResult(state.result, true);
+      } else if (state.available) {
+        showAvailable();
+      } else {
+        spinBtn.disabled = true;
+        spinBtn.textContent = "NON DISPONIBILE";
+        statusEl.textContent =
+          "Daily Bonus temporaneamente disabilitato.";
+      }
+    }
+
+    async function spin() {
+      if (state.spinning || !state.available) return;
+
+      state.spinning = true;
+      spinBtn.disabled = true;
+      spinBtn.textContent = "GIRA...";
+      statusEl.textContent = "La ruota sta girando...";
+
+      const { data, error } =
+        await supabase.rpc("spin_daily_bonus");
+
+      if (error) {
+        state.spinning = false;
+        statusEl.textContent = error.message;
+        spinBtn.disabled = false;
+        spinBtn.textContent = "RIPROVA";
+        return;
+      }
+
+      state.available = false;
+      state.result = data;
+      state.nextAvailableAt = data.next_available_at || null;
+
+
+      if (
+        data.already_played
+        !== true
+      ) {
+
+        notifyBalanceChanged();
+      }
+
+
+      setWheelToSegment(
+        Number(data.segment_index),
+        true
+      );
+
+      window.setTimeout(() => {
+        showResult(
+          data,
+          data.already_played === true
+        );
+        state.spinning = false;
+      }, 5350);
+    }
+
+    spinBtn.addEventListener("click", spin);
+
+    homeBtn.addEventListener(
+      "click",
+      () => {
+        if (state.spinning) return;
+        window.location.href = "./index.html";
+      }
+    );
+
+    try {
+      const { data, error } =
+        await supabase.auth.getSession();
+
+      if (error) throw error;
+
+      if (!data.session) {
+        window.location.href = "./index.html";
+      } else {
+        state.session = data.session;
+        await loadState();
+        loading.classList.add("hidden");
+      }
+    } catch (error) {
+      console.error(error);
+      loadingText.textContent =
+        error?.message || String(error);
+    }
+  </script>
+</body>
+</html>
