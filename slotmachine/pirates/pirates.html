@@ -608,7 +608,7 @@
 
     .dialog {
       position: relative;
-      width: min(88%, 1440px);
+      width: min(88%, 930px);
       max-height: 92%;
       overflow: auto;
       border: 2px solid #dfaa49;
@@ -708,7 +708,15 @@
 
     #bonusOverlay {
       z-index: 300;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding:
+        max(6px, env(safe-area-inset-top))
+        max(6px, env(safe-area-inset-right))
+        max(6px, env(safe-area-inset-bottom))
+        max(6px, env(safe-area-inset-left));
       background:
         radial-gradient(circle at 50% 38%, rgba(231,169,67,.18), transparent 23%),
         radial-gradient(circle at 50% 50%, rgba(31,69,69,.42), rgba(0,0,0,.94) 72%),
@@ -733,6 +741,11 @@
     .bonus-dialog {
       position: relative;
       width: min(88%, 1050px);
+      max-height: calc(100% - 4px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
       padding: clamp(15px, 1.5vw, 28px);
       border: clamp(3px, .28vw, 6px) solid #8a541d;
       border-radius: clamp(18px, 1.5vw, 30px);
@@ -971,6 +984,9 @@
 
     #bonusContinue {
       display: none;
+      position: sticky;
+      z-index: 12;
+      bottom: 4px;
       margin: clamp(10px, 1vw, 16px) auto 0;
       min-width: 180px;
       padding-left: 2.2em;
@@ -996,18 +1012,96 @@
       text-align: left;
     }
 
-    @media (max-height: 550px) and (orientation: landscape) {
-      .dialog {
-        padding: 12px;
+    @media (max-height: 600px) and (orientation: landscape) {
+      #bonusOverlay {
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      .bonus-dialog {
+        width: min(96vw, 920px);
+        max-height: calc(100dvh - 12px);
+        margin: auto;
+        padding: clamp(7px, 1.5vh, 12px);
+        border-radius: clamp(12px, 2vh, 20px);
+      }
+
+      #bonusTitle {
+        font-size: clamp(18px, 5.2vh, 30px);
+        line-height: 1;
+      }
+
+      #bonusTitle::before,
+      #bonusTitle::after {
+        font-size: .62em;
+      }
+
+      #bonusSubtitle {
+        margin: clamp(3px, .7vh, 6px) auto clamp(4px, 1vh, 8px);
+        padding: .18em .8em;
+        font-size: clamp(9px, 2.8vh, 14px);
       }
 
       #chests {
-        width: 66vw;
-        gap: 8px;
+        width: min(64vw, 680px, calc(47dvh * 1.46));
+        max-height: none;
+        gap: clamp(3px, .8vh, 7px);
       }
 
       .chest {
-        border-radius: 10px;
+        border-radius: 9%;
+      }
+
+      .chest-value {
+        font-size: clamp(15px, 5vh, 27px);
+      }
+
+      #bonusInfo {
+        min-width: 34%;
+        margin: clamp(4px, 1vh, 8px) auto 0;
+        padding: .25em .9em;
+        font-size: clamp(10px, 3vh, 15px);
+      }
+
+      #bonusContinue {
+        bottom: 2px;
+        margin: clamp(4px, 1vh, 8px) auto 0;
+        min-width: 145px;
+        padding: .55em 1.5em;
+        font-size: clamp(10px, 3vh, 15px);
+      }
+    }
+
+    @media (max-height: 430px) and (orientation: landscape) {
+      .bonus-dialog {
+        width: min(98vw, 900px);
+        padding: 5px 8px 6px;
+      }
+
+      .bonus-dialog::before,
+      .bonus-dialog::after {
+        display: none;
+      }
+
+      #bonusTitle {
+        font-size: clamp(16px, 5vh, 22px);
+      }
+
+      #bonusSubtitle {
+        margin: 2px auto 4px;
+      }
+
+      #chests {
+        width: min(58vw, calc(45dvh * 1.46));
+        gap: 3px;
+      }
+
+      #bonusInfo {
+        margin-top: 3px;
+      }
+
+      #bonusContinue {
+        margin-top: 3px;
       }
     }
   
