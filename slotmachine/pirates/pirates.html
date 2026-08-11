@@ -534,6 +534,10 @@
     #spinBtn {
       position: absolute;
       z-index: 48;
+      touch-action: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
       left: var(--spin-left);
       top: var(--spin-top);
       width: var(--spin-size);
@@ -644,7 +648,7 @@
 
     .dialog {
       position: relative;
-      width: min(88%, 1920px);
+      width: min(88%, 930px);
       max-height: 92%;
       overflow: auto;
       border: 2px solid #dfaa49;
@@ -3096,6 +3100,10 @@
       false;
 
 
+    let ignoreSpinClickUntil =
+      0;
+
+
     function clearSpinLongPressTimer() {
 
       if (
@@ -3113,14 +3121,162 @@
     }
 
 
+    function startSpinLongPressTimer() {
+
+      if (
+        state.autoSpinActive
+        ||
+        spinBtn.disabled
+      ) {
+
+        return;
+      }
+
+
+      spinLongPressTriggered =
+        false;
+
+
+      clearSpinLongPressTimer();
+
+
+      spinLongPressTimer =
+        setTimeout(
+          () => {
+
+            spinLongPressTimer =
+              null;
+
+
+            spinLongPressTriggered =
+              true;
+
+
+            navigator.vibrate?.(
+              35
+            );
+
+
+            openAutoSpinMenu();
+
+          },
+          SPIN_LONG_PRESS_MS
+        );
+    }
+
+
+    // ========================================================
+    // TOUCH - SMARTPHONE / TABLET
+    // ========================================================
+
+    spinBtn.addEventListener(
+      "touchstart",
+      event => {
+
+        event.preventDefault();
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          return;
+        }
+
+
+        startSpinLongPressTimer();
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "touchend",
+      async event => {
+
+        event.preventDefault();
+
+
+        ignoreSpinClickUntil =
+          Date.now()
+          + 700;
+
+
+        clearSpinLongPressTimer();
+
+
+        if (
+          spinLongPressTriggered
+        ) {
+
+          spinLongPressTriggered =
+            false;
+
+          return;
+        }
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+
+          return;
+        }
+
+
+        if (
+          !spinBtn.disabled
+        ) {
+
+          await doSpin();
+        }
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "touchcancel",
+      event => {
+
+        event.preventDefault();
+
+
+        clearSpinLongPressTimer();
+
+
+        spinLongPressTriggered =
+          false;
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    // ========================================================
+    // MOUSE / PEN - DESKTOP
+    // ========================================================
+
     spinBtn.addEventListener(
       "pointerdown",
-      () => {
+      event => {
 
-        /*
-         * Durante AUTO il tap serve solo per STOP,
-         * quindi non avviamo un'altra pressione lunga.
-         */
+        if (
+          event.pointerType
+          === "touch"
+        ) {
+
+          return;
+        }
+
+
         if (
           state.autoSpinActive
           ||
@@ -3131,58 +3287,45 @@
         }
 
 
-        spinLongPressTriggered =
-          false;
-
-
-        clearSpinLongPressTimer();
-
-
-        spinLongPressTimer =
-          setTimeout(
-            () => {
-
-              spinLongPressTimer =
-                null;
-
-
-              spinLongPressTriggered =
-                true;
-
-
-              /*
-               * Piccolo feedback sui telefoni che lo supportano.
-               */
-              navigator.vibrate?.(
-                35
-              );
-
-
-              openAutoSpinMenu();
-
-            },
-            SPIN_LONG_PRESS_MS
-          );
+        startSpinLongPressTimer();
       }
     );
 
 
     spinBtn.addEventListener(
       "pointerup",
-      clearSpinLongPressTimer
+      event => {
+
+        if (
+          event.pointerType
+          !== "touch"
+        ) {
+
+          clearSpinLongPressTimer();
+        }
+      }
     );
 
 
     spinBtn.addEventListener(
       "pointercancel",
-      clearSpinLongPressTimer
+      event => {
+
+        if (
+          event.pointerType
+          !== "touch"
+        ) {
+
+          clearSpinLongPressTimer();
+
+
+          spinLongPressTriggered =
+            false;
+        }
+      }
     );
 
 
-    /*
-     * Evita il menu contestuale del browser su pressione lunga,
-     * soprattutto su mobile.
-     */
     spinBtn.addEventListener(
       "contextmenu",
       event => {
@@ -4315,11 +4458,16 @@
       "click",
       async () => {
 
-        /*
-         * Il rilascio dopo una pressione lunga genera spesso
-         * anche un click. Lo assorbiamo per non far partire
-         * uno spin involontario sotto al menu AUTO.
-         */
+        if (
+          Date.now()
+          <
+          ignoreSpinClickUntil
+        ) {
+
+          return;
+        }
+
+
         if (
           spinLongPressTriggered
         ) {
