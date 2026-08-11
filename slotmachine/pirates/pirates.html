@@ -568,6 +568,42 @@
     }
 
 
+    /*
+     * AUTOSPIN:
+     * pressione lunga sul pulsante SPIN.
+     * Durante AUTO compare un piccolo badge con gli spin residui.
+     */
+    #spinBtn.auto-active {
+      filter:
+        brightness(1.08)
+        drop-shadow(0 0 .65vw rgba(255,190,57,.42));
+    }
+
+    #spinBtn.auto-active::after {
+      content: attr(data-auto-label);
+      position: absolute;
+      left: 50%;
+      bottom: -13%;
+      transform: translateX(-50%);
+      min-width: 68%;
+      padding: .25em .55em;
+      border: .1vw solid rgba(245,201,92,.82);
+      border-radius: 100vw;
+      background: rgba(5,20,27,.94);
+      color: #ffe3a0;
+      font-family: "SlotFont", system-ui, sans-serif;
+      font-size: clamp(8px, .7vw, 14px);
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: .035em;
+      text-align: center;
+      white-space: nowrap;
+      box-shadow:
+        0 .16vw .4vw rgba(0,0,0,.5),
+        0 0 .55vw rgba(255,190,57,.18);
+      pointer-events: none;
+    }
+
     #freeBanner {
       display: none;
       position: absolute;
@@ -608,7 +644,7 @@
 
     .dialog {
       position: relative;
-      width: min(88%, 930px);
+      width: min(88%, 1920px);
       max-height: 92%;
       overflow: auto;
       border: 2px solid #dfaa49;
@@ -1012,6 +1048,81 @@
       text-align: left;
     }
 
+
+    #autoSpinOverlay {
+      z-index: 280;
+    }
+
+    .auto-spin-dialog {
+      width: min(76%, 520px);
+      max-height: 88%;
+      padding: clamp(14px, 1.5vw, 24px);
+    }
+
+    .auto-spin-dialog h2 {
+      margin-bottom: 6px;
+    }
+
+    .auto-spin-dialog p {
+      margin: 0 0 14px;
+      color: #d7e2e5;
+      font-size: clamp(10px, .9vw, 15px);
+    }
+
+    .auto-spin-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(8px, .8vw, 12px);
+      margin-top: 12px;
+    }
+
+    .auto-spin-option {
+      min-height: 48px;
+      border: .12vw solid rgba(245,201,92,.68);
+      border-radius: 12px;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(190,122,38,.96),
+          rgba(95,47,15,.96)
+        );
+      color: white;
+      font-size: clamp(15px, 1.3vw, 22px);
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    #autoSpinClose {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    @media (max-height: 430px) and (orientation: landscape) {
+      .auto-spin-dialog {
+        width: min(78%, 470px);
+        padding: 9px 12px;
+      }
+
+      .auto-spin-dialog p {
+        margin-bottom: 7px;
+      }
+
+      .auto-spin-options {
+        gap: 6px;
+        margin-top: 7px;
+      }
+
+      .auto-spin-option {
+        min-height: 36px;
+      }
+
+      #autoSpinClose {
+        margin-top: 6px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+      }
+    }
+
     @media (max-height: 600px) and (orientation: landscape) {
       #bonusOverlay {
         align-items: flex-start;
@@ -1227,9 +1338,40 @@
           <div id="winValue" class="panel-value">0</div>
         </div>
 
-        <button id="spinBtn" type="button" disabled>SPIN</button>
+        <button
+          id="spinBtn"
+          type="button"
+          disabled
+          title="Tieni premuto per Autospin"
+        >
+          SPIN
+        </button>
 
       </section>
+
+      <!-- AUTOSPIN -->
+      <div id="autoSpinOverlay" class="overlay">
+        <div class="dialog auto-spin-dialog">
+          <h2>AUTOSPIN</h2>
+
+          <p>
+            Scegli quanti spin pagati eseguire.
+            FREE e BONUS non consumano il contatore.
+            Tocca SPIN durante l'autospin per fermarlo.
+          </p>
+
+          <div class="auto-spin-options">
+            <button class="auto-spin-option" type="button" data-auto-count="10">10</button>
+            <button class="auto-spin-option" type="button" data-auto-count="25">25</button>
+            <button class="auto-spin-option" type="button" data-auto-count="50">50</button>
+            <button class="auto-spin-option" type="button" data-auto-count="100">100</button>
+          </div>
+
+          <button id="autoSpinClose" class="secondary-btn" type="button">
+            Annulla
+          </button>
+        </div>
+      </div>
 
       <!-- LOGIN -->
       <div id="authOverlay" class="overlay visible">
@@ -1425,6 +1567,14 @@
 
       spinning: false,
 
+      autoSpinActive: false,
+
+      autoSpinRemaining: 0,
+
+      autoSpinTotal: 0,
+
+      autoMenuOpen: false,
+
       bonusOpen: false,
 
       infoOpen: false,
@@ -1493,6 +1643,19 @@
 
     const spinBtn =
       $("#spinBtn");
+
+    const autoSpinOverlay =
+      $("#autoSpinOverlay");
+
+    const autoSpinClose =
+      $("#autoSpinClose");
+
+    const autoSpinOptions =
+      [
+        ...document.querySelectorAll(
+          ".auto-spin-option"
+        )
+      ];
 
     const betPrev =
       $("#betPrev");
@@ -1717,6 +1880,8 @@
 
       const locked =
         state.spinning
+        || state.autoSpinActive
+        || state.autoMenuOpen
         || state.bonusOpen
         || state.infoOpen
         || state.freeSummaryOpen
@@ -1748,13 +1913,34 @@
         state.balance >= bet * activeLines;
 
 
+      /*
+       * Durante AUTOSPIN SPIN rimane cliccabile anche mentre
+       * gira: un tap significa "fermati dopo lo spin corrente".
+       */
       spinBtn.disabled =
-        state.spinning
-        || state.bonusOpen
-        || state.infoOpen
-        || state.freeSummaryOpen
-        || !state.session
-        || !canAfford;
+        !state.autoSpinActive
+        &&
+        (
+          state.spinning
+          || state.autoMenuOpen
+          || state.bonusOpen
+          || state.infoOpen
+          || state.freeSummaryOpen
+          || !state.session
+          || !canAfford
+        );
+
+
+      spinBtn.classList.toggle(
+        "auto-active",
+        state.autoSpinActive
+      );
+
+
+      spinBtn.dataset.autoLabel =
+        state.autoSpinActive
+        ? `STOP · ${state.autoSpinRemaining}`
+        : "";
 
 
       spinBtn.textContent =
@@ -2672,6 +2858,378 @@
 
 
     // ========================================================
+    // AUTOSPIN
+    // ========================================================
+
+    function openAutoSpinMenu() {
+
+      if (
+        state.autoSpinActive
+        ||
+        state.spinning
+        ||
+        state.bonusOpen
+        ||
+        state.infoOpen
+        ||
+        state.freeSummaryOpen
+        ||
+        state.freeRemaining > 0
+        ||
+        !state.session
+        ||
+        !state.config
+      ) {
+
+        return;
+      }
+
+
+      state.autoMenuOpen =
+        true;
+
+
+      autoSpinOverlay.classList.add(
+        "visible"
+      );
+
+
+      updateControls();
+    }
+
+
+    function closeAutoSpinMenu() {
+
+      autoSpinOverlay.classList.remove(
+        "visible"
+      );
+
+
+      state.autoMenuOpen =
+        false;
+
+
+      updateControls();
+    }
+
+
+    function stopAutoSpin() {
+
+      state.autoSpinActive =
+        false;
+
+
+      state.autoSpinRemaining =
+        0;
+
+
+      state.autoSpinTotal =
+        0;
+
+
+      updateControls();
+    }
+
+
+    function canAffordNextPaidSpin() {
+
+      if (!state.config) {
+        return false;
+      }
+
+
+      const bets =
+        state.config.game.allowed_bets
+          .map(Number);
+
+
+      const lines =
+        state.config.game.allowed_lines
+          .map(Number);
+
+
+      const bet =
+        bets[state.betIndex];
+
+
+      const activeLines =
+        lines[state.linesIndex];
+
+
+      return (
+        state.balance
+        >=
+        bet * activeLines
+      );
+    }
+
+
+    async function scheduleNextAutoSpin(
+      delay = 650
+    ) {
+
+      if (
+        !state.autoSpinActive
+        ||
+        state.autoSpinRemaining <= 0
+      ) {
+
+        return;
+      }
+
+
+      /*
+       * FREE, BONUS e riepiloghi gestiscono autonomamente
+       * il proprio flusso. AUTO riprenderà alla loro chiusura.
+       */
+      if (
+        state.spinning
+        ||
+        state.bonusOpen
+        ||
+        state.infoOpen
+        ||
+        state.freeSummaryOpen
+        ||
+        state.freeRemaining > 0
+      ) {
+
+        return;
+      }
+
+
+      if (
+        !canAffordNextPaidSpin()
+      ) {
+
+        stopAutoSpin();
+
+        return;
+      }
+
+
+      await sleep(
+        delay
+      );
+
+
+      if (
+        state.autoSpinActive
+        &&
+        state.autoSpinRemaining > 0
+        &&
+        !state.spinning
+        &&
+        !state.bonusOpen
+        &&
+        !state.infoOpen
+        &&
+        !state.freeSummaryOpen
+        &&
+        state.freeRemaining <= 0
+      ) {
+
+        await doSpin();
+      }
+    }
+
+
+    function startAutoSpin(
+      count
+    ) {
+
+      const parsedCount =
+        Number(
+          count
+        );
+
+
+      if (
+        !Number.isInteger(
+          parsedCount
+        )
+        ||
+        parsedCount <= 0
+        ||
+        !canAffordNextPaidSpin()
+      ) {
+
+        closeAutoSpinMenu();
+
+        return;
+      }
+
+
+      state.autoSpinActive =
+        true;
+
+
+      state.autoSpinRemaining =
+        parsedCount;
+
+
+      state.autoSpinTotal =
+        parsedCount;
+
+
+      closeAutoSpinMenu();
+
+
+      updateControls();
+
+
+      scheduleNextAutoSpin(
+        120
+      );
+    }
+
+
+    const SPIN_LONG_PRESS_MS =
+      550;
+
+
+    let spinLongPressTimer =
+      null;
+
+
+    let spinLongPressTriggered =
+      false;
+
+
+    function clearSpinLongPressTimer() {
+
+      if (
+        spinLongPressTimer
+      ) {
+
+        clearTimeout(
+          spinLongPressTimer
+        );
+
+
+        spinLongPressTimer =
+          null;
+      }
+    }
+
+
+    spinBtn.addEventListener(
+      "pointerdown",
+      () => {
+
+        /*
+         * Durante AUTO il tap serve solo per STOP,
+         * quindi non avviamo un'altra pressione lunga.
+         */
+        if (
+          state.autoSpinActive
+          ||
+          spinBtn.disabled
+        ) {
+
+          return;
+        }
+
+
+        spinLongPressTriggered =
+          false;
+
+
+        clearSpinLongPressTimer();
+
+
+        spinLongPressTimer =
+          setTimeout(
+            () => {
+
+              spinLongPressTimer =
+                null;
+
+
+              spinLongPressTriggered =
+                true;
+
+
+              /*
+               * Piccolo feedback sui telefoni che lo supportano.
+               */
+              navigator.vibrate?.(
+                35
+              );
+
+
+              openAutoSpinMenu();
+
+            },
+            SPIN_LONG_PRESS_MS
+          );
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "pointerup",
+      clearSpinLongPressTimer
+    );
+
+
+    spinBtn.addEventListener(
+      "pointercancel",
+      clearSpinLongPressTimer
+    );
+
+
+    /*
+     * Evita il menu contestuale del browser su pressione lunga,
+     * soprattutto su mobile.
+     */
+    spinBtn.addEventListener(
+      "contextmenu",
+      event => {
+
+        event.preventDefault();
+      }
+    );
+
+
+    autoSpinOptions.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            startAutoSpin(
+              button.dataset.autoCount
+            );
+          }
+        );
+      }
+    );
+
+
+    autoSpinClose.addEventListener(
+      "click",
+      closeAutoSpinMenu
+    );
+
+
+    autoSpinOverlay.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target
+          === autoSpinOverlay
+        ) {
+
+          closeAutoSpinMenu();
+        }
+      }
+    );
+
+
+    // ========================================================
     // RIEPILOGO FREE SPIN
     // ========================================================
 
@@ -2736,7 +3294,7 @@
 
     freeSummaryContinue.addEventListener(
       "click",
-      () => {
+      async () => {
 
         freeSummaryOverlay.classList.remove(
           "visible"
@@ -2752,6 +3310,18 @@
 
 
         updateControls();
+
+
+        if (
+          state.autoSpinActive
+          &&
+          state.autoSpinRemaining > 0
+        ) {
+
+          await scheduleNextAutoSpin(
+            350
+          );
+        }
       }
     );
 
@@ -2768,6 +3338,8 @@
         state.bonusOpen
         ||
         state.infoOpen
+        ||
+        state.autoMenuOpen
         ||
         !state.config
       ) {
@@ -2809,6 +3381,14 @@
         &&
         state.balance < bet * activeLines
       ) {
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+        }
+
         return;
       }
 
@@ -2891,6 +3471,14 @@
 
         state.spinning =
           false;
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+        }
 
 
         updateControls();
@@ -2981,6 +3569,37 @@
         state.freeRemaining === 0;
 
 
+      /*
+       * Il contatore AUTO scala SOLO dopo uno spin pagato
+       * completato con successo. FREE e BONUS non lo consumano.
+       */
+      if (
+        !freeSessionUsed
+        &&
+        state.autoSpinActive
+      ) {
+
+        state.autoSpinRemaining =
+          Math.max(
+            0,
+            state.autoSpinRemaining - 1
+          );
+
+
+        if (
+          state.autoSpinRemaining <= 0
+        ) {
+
+          state.autoSpinActive =
+            false;
+
+
+          state.autoSpinTotal =
+            0;
+        }
+      }
+
+
       highlightWinningLines(
         data.winning_lines
         || []
@@ -3055,6 +3674,24 @@
         await sleep(900);
 
         await doSpin();
+
+        return;
+      }
+
+
+      // ======================================================
+      // PROSSIMO AUTOSPIN PAGATO
+      // ======================================================
+
+      if (
+        state.autoSpinActive
+        &&
+        state.autoSpinRemaining > 0
+      ) {
+
+        await scheduleNextAutoSpin(
+          650
+        );
       }
     }
 
@@ -3561,6 +4198,20 @@
           await sleep(500);
 
           await doSpin();
+
+          return;
+        }
+
+
+        if (
+          state.autoSpinActive
+          &&
+          state.autoSpinRemaining > 0
+        ) {
+
+          await scheduleNextAutoSpin(
+            400
+          );
         }
       }
     );
@@ -3662,7 +4313,36 @@
 
     spinBtn.addEventListener(
       "click",
-      doSpin
+      async () => {
+
+        /*
+         * Il rilascio dopo una pressione lunga genera spesso
+         * anche un click. Lo assorbiamo per non far partire
+         * uno spin involontario sotto al menu AUTO.
+         */
+        if (
+          spinLongPressTriggered
+        ) {
+
+          spinLongPressTriggered =
+            false;
+
+          return;
+        }
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+
+          return;
+        }
+
+
+        await doSpin();
+      }
     );
 
 
@@ -3804,6 +4484,14 @@
         }
 
 
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+        }
+
+
         /*
          * Torna alla home mantenendo attiva
          * la sessione Supabase.
@@ -3865,6 +4553,8 @@
 
         if (
           state.spinning
+          ||
+          state.autoSpinActive
           ||
           state.bonusOpen
           ||
@@ -4000,6 +4690,18 @@
 
             state.balance =
               0;
+
+            state.autoSpinActive =
+              false;
+
+            state.autoSpinRemaining =
+              0;
+
+            state.autoSpinTotal =
+              0;
+
+            state.autoMenuOpen =
+              false;
 
             state.freeRemaining =
               0;
