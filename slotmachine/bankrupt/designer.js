@@ -83,7 +83,7 @@
     if (el) el.dataset.designerKey = key;
   }
 
-  stage.insertAdjacentHTML("beforeend", `
+/*  stage.insertAdjacentHTML("beforeend", `
     <button id="designerToggle" type="button" title="Designer layout">🛠</button>
 
     <aside id="designerPanel">
@@ -116,7 +116,7 @@
 
     <div id="designerToast"></div>
   `);
-
+*/
   const root = document.documentElement;
   const toggle = document.getElementById("designerToggle");
   const panel = document.getElementById("designerPanel");
