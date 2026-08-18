@@ -71,6 +71,7 @@
     html, body {
       width: 100%;
       height: 100%;
+      height: 100dvh;
       margin: 0;
       overflow: hidden;
       background: #03080c;
@@ -139,6 +140,8 @@
     #app {
       position: fixed;
       inset: 0;
+      height: 100vh;
+      height: 100dvh;
       display: grid;
       place-items: center;
       background: #020609;
@@ -148,6 +151,8 @@
       position: relative;
       width: min(100vw, calc(100vh * 16 / 9));
       height: min(100vh, calc(100vw * 9 / 16));
+      width: min(100vw, calc(100dvh * 16 / 9));
+      height: min(100dvh, calc(100vw * 9 / 16));
       aspect-ratio: 16 / 9;
       overflow: hidden;
       background: #0a2230;
@@ -799,7 +804,6 @@
         0 1.2vw 3vw rgba(0,0,0,.72),
         inset 0 .22vw .35vw rgba(255,225,157,.15),
         inset 0 -.5vw 1.1vw rgba(0,0,0,.55);
-      overflow: visible;
     }
 
     .bonus-dialog::before,
@@ -1159,7 +1163,7 @@
       }
 
       #chests {
-        width: min(90vw, 900px, calc(76dvh * 3.65));
+        width: min(90vw, 900px, calc(50dvh * 3.65));
         max-height: none;
         gap: clamp(3px, .8vh, 7px);
       }
@@ -1191,6 +1195,7 @@
     @media (max-height: 430px) and (orientation: landscape) {
       .bonus-dialog {
         width: min(98vw, 900px);
+        max-height: calc(100dvh - 6px);
         padding: 5px 8px 6px;
       }
 
@@ -1208,8 +1213,8 @@
       }
 
       #chests {
-        width: min(90vw, 860px, calc(72dvh * 3.65));
-        gap: 3px;
+        width: min(92vw, 860px, calc(46dvh * 3.65));
+        gap: 2px 4px;
       }
 
       #bonusInfo {
