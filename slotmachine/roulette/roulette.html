@@ -529,6 +529,261 @@
   }
 }
 
+
+/* ============================================================
+   CHIP SELECTOR SEPARATO
+   ============================================================ */
+
+.chip-selector {
+  padding: 10px 14px 8px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.16);
+}
+
+.chip-selector-label {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.controls {
+  display: block;
+}
+
+.action-buttons {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+
+/* ============================================================
+   MOBILE V2
+   Rapporto ruota / tavolo corretto + fiche separate
+   ============================================================ */
+
+@media (max-width: 680px) {
+
+  /* ---------------- RUOTA PIÙ GRANDE ---------------- */
+
+  .wheel-section {
+    display: block;
+    padding: 8px 7px 7px;
+  }
+
+  .wheel-wrap {
+    width: min(205px, 54vw);
+    max-width: 205px;
+    margin: 0 auto 7px;
+  }
+
+  .wheel-pointer {
+    top: -2px;
+    border-left-width: 8px;
+    border-right-width: 8px;
+    border-top-width: 15px;
+  }
+
+  .result-display {
+    width: min(310px, 92%);
+    margin: 0 auto 6px;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 8px;
+    padding: 7px 9px;
+  }
+
+  .result-ball {
+    width: 48px;
+    height: 48px;
+    font-size: 21px;
+  }
+
+  .history {
+    width: min(340px, 96%);
+    margin: 0 auto 5px;
+  }
+
+  .bet-summary {
+    width: min(340px, 96%);
+    margin: 0 auto;
+  }
+
+
+  /* ---------------- TAVOLO PIÙ PICCOLO ---------------- */
+
+  .table-scroll {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 6px 3px;
+    overflow: visible;
+  }
+
+  .roulette-table {
+    /*
+     * Ridotto volutamente:
+     * non usa più tutta la larghezza del pannello.
+     */
+    width: min(88vw, 430px);
+    min-width: 0;
+    max-width: 88vw;
+    margin: 0 auto;
+    aspect-ratio: 1448 / 758;
+  }
+
+
+  /* ---------------- FICHE: BLOCCO AUTONOMO ---------------- */
+
+  .chip-selector {
+    padding: 7px 6px 6px;
+    border-top: 1px solid rgba(231,182,84,.2);
+    border-bottom: 1px solid rgba(231,182,84,.2);
+    background: rgba(0,0,0,.22);
+  }
+
+  .chip-selector-label {
+    margin: 0 2px 4px;
+    font-size: 9px;
+  }
+
+  .chips {
+    display: flex;
+    width: 100%;
+    gap: 5px;
+    padding: 2px 2px 5px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip-btn {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+  }
+
+
+  /* ---------------- CONTROLLI: BLOCCO SEPARATO ---------------- */
+
+  .controls {
+    position: static;
+    display: block;
+    padding: 7px 6px;
+    border-top: 0;
+    background: rgba(4,18,25,.95);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 5px;
+    width: 100%;
+  }
+
+  .control-btn {
+    min-height: 40px;
+    padding: 6px 3px;
+    font-size: 10px;
+  }
+
+  .spin-btn {
+    grid-column: 1 / -1;
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+
+  /* ---------------- RIDUCI LA PARTE BASSA ---------------- */
+
+  .current-bets {
+    padding: 5px 6px 6px;
+  }
+
+  #betsList {
+    max-height: 92px;
+  }
+}
+
+
+/* ============================================================
+   TELEFONI MOLTO STRETTI
+   ============================================================ */
+
+@media (max-width: 390px) {
+
+  .wheel-wrap {
+    width: 190px;
+    max-width: 52vw;
+  }
+
+  .roulette-table {
+    width: 86vw;
+    max-width: 86vw;
+  }
+
+  .chip-btn {
+    flex-basis: 43px;
+    width: 43px;
+    height: 43px;
+  }
+}
+
+
+/* ============================================================
+   LANDSCAPE MOBILE V2
+   ============================================================ */
+
+@media (max-height: 520px) and (orientation: landscape) {
+
+  .layout {
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+
+  .wheel-wrap {
+    width: 140px;
+    max-width: 140px;
+  }
+
+  .roulette-table {
+    width: min(68vw, 620px);
+    max-width: 100%;
+  }
+
+  .chip-selector {
+    padding-top: 4px;
+    padding-bottom: 3px;
+  }
+
+  .chip-btn {
+    flex-basis: 38px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .controls {
+    padding: 4px;
+  }
+
+  .action-buttons {
+    grid-template-columns: repeat(4, minmax(0,1fr));
+  }
+
+  .spin-btn {
+    grid-column: auto;
+    min-height: 36px;
+    font-size: 12px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -536,7 +791,19 @@
 <header><div class="brand"><h1>Roulette Europea</h1><p>0–36 · puntate multiple · estrazione server-side</p></div><div class="top-progress"><div class="xp-header"><span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span><span id="xpText">0 / 20.000 XP</span></div><div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div></div><div class="header-actions"><div class="pill">👤 <strong id="usernameValue">—</strong></div><div class="pill">🪙 <strong id="balanceValue">0</strong></div><button id="homeBtn" class="header-btn">← Home</button></div></header>
 <div class="layout">
 <section class="panel wheel-panel"><div class="panel-head"><div><h2>Ruota</h2><small>Il risultato arriva dal server</small></div></div><div class="wheel-section"><div class="wheel-wrap"><div class="wheel-pointer"></div><img id="wheel" class="wheel-image" src="./assets/wheel.webp" alt="Ruota roulette europea"></div><div class="result-display"><div id="resultBall" class="result-ball green">—</div><div class="result-info"><strong id="resultTitle">In attesa</strong><span id="resultSubtitle">Piazza le fiche sul tavolo e premi SPIN.</span></div></div><div id="numberHistory" class="history"></div><div class="bet-summary"><div class="summary-row"><span>Puntata totale</span><strong id="totalBetValue">0</strong></div><div class="summary-row"><span>Ultimo ritorno</span><strong id="lastReturnValue">0</strong></div><div id="netRow" class="summary-row"><span>Ultimo netto</span><strong id="lastNetValue">0</strong></div></div></div></section>
-<section class="panel table-panel"><div class="panel-head"><div><h2>Tavolo</h2><small id="tableLimits">Caricamento limiti…</small></div></div><div class="table-scroll"><div class="roulette-table"><img class="roulette-table-image" src="./assets/table.webp" alt="" draggable="false"><div class="inside-row"><button id="zeroCell" class="zero-cell" data-code="N_0">0</button><div id="numbersWrap" class="numbers-wrap"><div id="numberGrid" class="number-grid"></div><div id="hotspotLayer" class="hotspot-layer"></div></div><div class="columns"><button class="column-cell" data-code="COLUMN_3">2 TO 1</button><button class="column-cell" data-code="COLUMN_2">2 TO 1</button><button class="column-cell" data-code="COLUMN_1">2 TO 1</button></div></div><div class="outside-grid"><button class="outside-cell span2" data-code="DOZEN_1">1ª DOZZINA</button><button class="outside-cell span2" data-code="DOZEN_2">2ª DOZZINA</button><button class="outside-cell span2" data-code="DOZEN_3">3ª DOZZINA</button><button class="outside-cell" data-code="LOW">1–18</button><button class="outside-cell" data-code="EVEN">PARI</button><button class="outside-cell red-bet" data-code="RED">ROSSO</button><button class="outside-cell black-bet" data-code="BLACK">NERO</button><button class="outside-cell" data-code="ODD">DISPARI</button><button class="outside-cell" data-code="HIGH">19–36</button></div></div></div><div class="controls"><div id="chips" class="chips"></div><div class="action-buttons"><button id="undoBtn" class="control-btn">↶ Ultima</button><button id="clearBtn" class="control-btn">Cancella</button><button id="repeatBtn" class="control-btn">Ripeti</button><button id="spinBtn" class="control-btn spin-btn">SPIN</button></div></div><div class="current-bets"><div class="current-bets-head"><span>Puntate piazzate</span><span id="positionCount">0 posizioni</span></div><div id="betsList"><div class="empty-bets">Nessuna puntata.</div></div></div><div id="status" class="status"></div></section>
+<section class="panel table-panel"><div class="panel-head"><div><h2>Tavolo</h2><small id="tableLimits">Caricamento limiti…</small></div></div><div class="table-scroll"><div class="roulette-table"><img class="roulette-table-image" src="./assets/table.webp" alt="" draggable="false"><div class="inside-row"><button id="zeroCell" class="zero-cell" data-code="N_0">0</button><div id="numbersWrap" class="numbers-wrap"><div id="numberGrid" class="number-grid"></div><div id="hotspotLayer" class="hotspot-layer"></div></div><div class="columns"><button class="column-cell" data-code="COLUMN_3">2 TO 1</button><button class="column-cell" data-code="COLUMN_2">2 TO 1</button><button class="column-cell" data-code="COLUMN_1">2 TO 1</button></div></div><div class="outside-grid"><button class="outside-cell span2" data-code="DOZEN_1">1ª DOZZINA</button><button class="outside-cell span2" data-code="DOZEN_2">2ª DOZZINA</button><button class="outside-cell span2" data-code="DOZEN_3">3ª DOZZINA</button><button class="outside-cell" data-code="LOW">1–18</button><button class="outside-cell" data-code="EVEN">PARI</button><button class="outside-cell red-bet" data-code="RED">ROSSO</button><button class="outside-cell black-bet" data-code="BLACK">NERO</button><button class="outside-cell" data-code="ODD">DISPARI</button><button class="outside-cell" data-code="HIGH">19–36</button></div></div></div><div class="chip-selector">
+  <div class="chip-selector-label">Scegli fiche</div>
+  <div id="chips" class="chips"></div>
+</div>
+
+<div class="controls">
+  <div class="action-buttons">
+    <button id="undoBtn" class="control-btn">↶ Ultima</button>
+    <button id="clearBtn" class="control-btn">Cancella</button>
+    <button id="repeatBtn" class="control-btn">Ripeti</button>
+    <button id="spinBtn" class="control-btn spin-btn">SPIN</button>
+  </div>
+</div><div class="current-bets"><div class="current-bets-head"><span>Puntate piazzate</span><span id="positionCount">0 posizioni</span></div><div id="betsList"><div class="empty-bets">Nessuna puntata.</div></div></div><div id="status" class="status"></div></section>
 </div></div></div>
 <div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento roulette…</strong><div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div></div></div>
 <script type="module">
