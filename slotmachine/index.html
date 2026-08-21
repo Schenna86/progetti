@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
 
-  <title>Slot Machine</title>
+  <title>Casino</title>
 
   <style>
     :root {
@@ -66,6 +66,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 14px;
       margin-bottom: 20px;
     }
@@ -185,10 +186,113 @@
     }
 
     .games {
+      display: block;
+      padding: 0;
+    }
+
+    .category-nav {
+      display: flex;
+      gap: 8px;
+      padding: 12px 18px 0;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .category-nav-btn {
+      flex: 0 0 auto;
+      border: 1px solid rgba(231,182,84,.38);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,.22);
+      color: #e8eef1;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .category-nav-btn:hover {
+      border-color: rgba(255,225,154,.78);
+      color: var(--gold-light);
+    }
+
+    .game-category {
+      padding: 18px;
+      border-bottom: 1px solid rgba(255,255,255,.065);
+      scroll-margin-top: 12px;
+    }
+
+    .game-category:last-child {
+      border-bottom: 0;
+    }
+
+    .game-category-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .game-category-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .game-category-title h3 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: 19px;
+    }
+
+    .game-category-title span {
+      font-size: 22px;
+    }
+
+    .game-category-head small {
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .category-games {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 16px;
-      padding: 18px;
+    }
+
+    .category-empty {
+      grid-column: 1 / -1;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed rgba(231,182,84,.22);
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(0,0,0,.12);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .game-type-badge {
+      position: absolute;
+      z-index: 3;
+      top: 10px;
+      left: 10px;
+      padding: 5px 8px;
+      border: 1px solid rgba(255,225,154,.38);
+      border-radius: 999px;
+      background: rgba(3,12,17,.78);
+      color: var(--gold-light);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+
+    .game-actions.single-action {
+      grid-template-columns: 1fr;
     }
 
     .game-card {
@@ -673,6 +777,89 @@
       text-align: left;
     }
 
+    /* ========================================================
+       XP / LIVELLO
+       ======================================================== */
+
+    .xp-panel {
+      flex: 1 0 100%;
+      width: 100%;
+      user-select: none;
+    }
+
+    .xp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 5px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 2px 3px rgba(0, 0, 0, .8);
+    }
+
+    .xp-level {
+      white-space: nowrap;
+    }
+
+    .xp-level strong {
+      color: var(--gold-light);
+      font-size: 16px;
+    }
+
+    .xp-text {
+      color: #dfe8ec;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      opacity: .95;
+      text-align: right;
+    }
+
+    .xp-bar {
+      position: relative;
+      width: 100%;
+      height: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, .75);
+      border-radius: 10px;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(0,0,0,.75),
+          rgba(30,30,30,.85)
+        );
+      box-shadow:
+        0 2px 6px rgba(0,0,0,.6),
+        inset 0 1px 3px rgba(0,0,0,.8);
+    }
+
+    .xp-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: 8px;
+      background:
+        linear-gradient(
+          90deg,
+          #2769ff,
+          #6f5cff,
+          #c255ff
+        );
+      box-shadow:
+        inset 0 1px 4px rgba(255,255,255,.4),
+        0 0 8px rgba(111,92,255,.7);
+      transition: width .6s ease;
+    }
+
+    .xp-fill::after {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 45%;
+      border-radius: 8px;
+      background: rgba(255,255,255,.18);
+    }
+
     @media (max-width: 800px) {
       #app {
         padding: 12px;
@@ -688,13 +875,34 @@
         flex-wrap: wrap;
       }
 
+      .xp-panel {
+        width: 100%;
+      }
+
       .dashboard {
         grid-template-columns: 1fr;
       }
 
-      .games {
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      .category-nav {
+        padding: 10px 13px 0;
+      }
+
+      .game-category {
         padding: 13px;
+      }
+
+      .category-games {
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      }
+
+      .game-category-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .game-category-head small {
+        text-align: left;
       }
 
       .game-card {
@@ -711,8 +919,8 @@
 
       <header>
         <div class="brand">
-          <h1>Slot Machine</h1>
-          <p>Fiche virtuali · classifica settimanale</p>
+          <h1>Casino</h1>
+          <p>Giochi · livelli · collezione · classifica settimanale</p>
         </div>
 
         <div class="header-actions">
@@ -735,6 +943,25 @@
           <button id="refreshBtn" class="icon-btn" type="button" title="Aggiorna">↻</button>
           <button id="logoutBtn" class="icon-btn" type="button" title="Esci">↪</button>
         </div>
+		<div class="xp-panel" id="xpPanel">
+
+    <div class="xp-header">
+        <span class="xp-level">
+            LIVELLO <strong id="xpLevel">1</strong>
+        </span>
+
+        <span class="xp-text" id="xpText">
+            0 / 20.000 XP
+        </span>
+    </div>
+
+    <div class="xp-bar">
+        <div class="xp-fill" id="xpFill"></div>
+    </div>
+
+	</div>
+		
+		
       </header>
 
 
@@ -744,8 +971,15 @@
           <div class="panel-head">
             <div>
               <h2>Giochi</h2>
-              <small>Scegli una slot</small>
+              <small>Scegli una categoria</small>
             </div>
+          </div>
+
+          <div class="category-nav" id="categoryNav">
+            <button class="category-nav-btn" type="button" data-category-target="category-slot">🎰 Slot</button>
+            <button class="category-nav-btn" type="button" data-category-target="category-roulette">🎡 Roulette</button>
+            <button class="category-nav-btn" type="button" data-category-target="category-blackjack">🂡 Blackjack</button>
+            <button class="category-nav-btn" type="button" data-category-target="category-cards">🃏 Carte</button>
           </div>
 
           <div id="games" class="games"></div>
@@ -784,7 +1018,7 @@
         <div class="panel-head">
           <div>
             <h2>Le mie statistiche</h2>
-            <small>Riepilogo di tutte le slot</small>
+            <small>Riepilogo complessivo di Slot e Roulette</small>
           </div>
 
           <button id="historyRefreshBtn" class="small-btn" type="button">
@@ -794,8 +1028,8 @@
 
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-label">Spin totali</div>
-            <div id="statTotalSpins" class="stat-value">0</div>
+            <div class="stat-label">Giocate totali</div>
+            <div id="statTotalPlays" class="stat-value">0</div>
           </div>
 
           <div class="stat-card">
@@ -814,17 +1048,17 @@
           </div>
 
           <div class="stat-card">
-            <div class="stat-label">Spin pagati</div>
-            <div id="statPaidSpins" class="stat-value">0</div>
+            <div class="stat-label">Spin slot</div>
+            <div id="statSlotSpins" class="stat-value">0</div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-label">Free spin giocati</div>
-            <div id="statFreeSpins" class="stat-value">0</div>
+            <div class="stat-label">Giri roulette</div>
+            <div id="statRouletteSpins" class="stat-value">0</div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-label">Bonus completati</div>
+            <div class="stat-label">Bonus slot</div>
             <div id="statBonusCount" class="stat-value">0</div>
           </div>
 
@@ -839,12 +1073,12 @@
             <thead>
               <tr>
                 <th>Quando</th>
-                <th>Slot</th>
+                <th>Gioco</th>
                 <th>Tipo</th>
-                <th>Linee</th>
-                <th>Puntata</th>
+                <th>Esito</th>
                 <th>Giocato</th>
                 <th>Vincita</th>
+                <th>Netto</th>
               </tr>
             </thead>
 
@@ -1033,8 +1267,8 @@
     const historyRefreshBtn =
       $("#historyRefreshBtn");
 
-    const statTotalSpins =
-      $("#statTotalSpins");
+    const statTotalPlays =
+      $("#statTotalPlays");
 
     const statTotalBet =
       $("#statTotalBet");
@@ -1045,11 +1279,11 @@
     const statBestWin =
       $("#statBestWin");
 
-    const statPaidSpins =
-      $("#statPaidSpins");
+    const statSlotSpins =
+      $("#statSlotSpins");
 
-    const statFreeSpins =
-      $("#statFreeSpins");
+    const statRouletteSpins =
+      $("#statRouletteSpins");
 
     const statBonusCount =
       $("#statBonusCount");
@@ -1075,7 +1309,7 @@
 
     let currentSession =
       null;
-
+	let levelTable = [];
 
     // ========================================================
     // SINCRONIZZAZIONE SALDO
@@ -1095,6 +1329,10 @@
 
 
     let balanceSyncRunning =
+      false;
+
+
+    let progressionSyncRunning =
       false;
 
 
@@ -1228,11 +1466,28 @@
     ) {
 
       /*
-       * Ogni gioco si trova nella cartella con il suo ID:
+       * Da ora la pagina del gioco è configurata nel Casino Core.
        *
-       * pirates -> /pirates/pirates.html
-       * jungle  -> /jungle/jungle.html
+       * Esempi:
+       * pirates  -> pirates/pirates.html
+       * roulette -> roulette/roulette.html
        */
+      if (
+        game.page_path
+        &&
+        String(game.page_path).trim()
+      ) {
+
+        return String(
+          game.page_path
+        )
+          .replace(
+            /^\.?\//,
+            ""
+          );
+      }
+
+
       const gameId =
         encodeURIComponent(
           game.id
@@ -1245,30 +1500,249 @@
     }
 
 
+async function loadLevelTable(force = false) {
+
+    if (levelTable.length && !force) {
+        return levelTable;
+    }
+
+    const { data, error } = await supabase
+        .from("levels")
+        .select("level, xp_required")
+        .order("level", {
+            ascending: true
+        })
+        .range(0, 499);
+
+    if (error) {
+        console.error(
+            "Errore caricamento livelli:",
+            error
+        );
+
+        throw error;
+    }
+
+    levelTable = data || [];
+
+    if (!levelTable.length) {
+        throw new Error(
+            "La tabella levels non contiene livelli accessibili."
+        );
+    }
+
+    return levelTable;
+}
+
+function updateXpBar(totalXp, level) {
+
+    const xpLevel =
+        document.getElementById("xpLevel");
+
+    const xpText =
+        document.getElementById("xpText");
+
+    const xpFill =
+        document.getElementById("xpFill");
+
+
+    if (
+        !xpLevel ||
+        !xpText ||
+        !xpFill
+    ) {
+        return;
+    }
+
+
+    totalXp = Number(totalXp || 0);
+    level = Number(level || 1);
+
+
+    xpLevel.textContent =
+        level;
+
+
+    /* =========================================
+       LIVELLO MASSIMO
+       ========================================= */
+
+    if (level >= 500) {
+
+        xpFill.style.width =
+            "100%";
+
+        xpText.textContent =
+            `${formatXp(totalXp)} XP · MAX`;
+
+        return;
+    }
+
+
+    /* =========================================
+       SOGLIA LIVELLO CORRENTE
+       ========================================= */
+
+    const currentLevelData =
+        levelTable.find(
+            x => Number(x.level) === level
+        )
+        ||
+        (
+            level === 1
+            ? {
+                level: 1,
+                xp_required: 0
+              }
+            : null
+        );
+
+
+    /* =========================================
+       SOGLIA LIVELLO SUCCESSIVO
+       ========================================= */
+
+    const nextLevelData =
+        levelTable.find(
+            x => Number(x.level) === level + 1
+        );
+
+
+    if (
+        !currentLevelData ||
+        !nextLevelData
+    ) {
+
+        console.warn(
+            "Livello non trovato:",
+            level,
+            {
+                currentLevelData,
+                nextLevelData
+            }
+        );
+
+        return;
+    }
+
+
+    const currentLevelXp =
+        Number(
+            currentLevelData.xp_required
+        );
+
+
+    const nextLevelXp =
+        Number(
+            nextLevelData.xp_required
+        );
+
+
+    /* =========================================
+       XP DEL LIVELLO
+       ========================================= */
+
+    const xpIntoLevel =
+        Math.max(
+            0,
+            totalXp - currentLevelXp
+        );
+
+
+    const xpNeeded =
+        nextLevelXp - currentLevelXp;
+
+
+    let percent =
+        xpNeeded > 0
+            ? (xpIntoLevel / xpNeeded) * 100
+            : 100;
+
+
+    percent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                percent
+            )
+        );
+
+
+    xpFill.style.width =
+        `${percent}%`;
+
+
+    xpText.textContent =
+        `${formatXp(xpIntoLevel)} / ${formatXp(xpNeeded)} XP`;
+}
+function formatXp(value) {
+
+    return Number(value || 0)
+        .toLocaleString("it-IT");
+}
     function gameCoverUrl(
       game
     ) {
 
-      /*
-       * Per ora riutilizziamo background.webp come cover.
-       * In futuro possiamo aggiungere cover.webp senza cambiare
-       * il resto della home.
-       */
       const folder =
-        game.asset_folder
-        || game.id;
+        encodeURIComponent(
+          game.asset_folder
+          || game.id
+        );
 
 
       const version =
-        game.asset_version
-        || 1;
+        encodeURIComponent(
+          game.asset_version
+          || 1
+        );
 
 
-      return (
-        `${encodeURIComponent(folder)}/` +
-	`${ASSETS_ROOT}/` +        
-        `logo.webp?v=${encodeURIComponent(version)}`
-      );
+      /*
+       * Ogni macro-gioco può avere una cover diversa.
+       *
+       * Slot:
+       *   /pirates/assets/logo.webp
+       *
+       * Roulette:
+       *   /roulette/assets/wheel.webp
+       *
+       * Blackjack / Carte:
+       *   quando arriveranno useremo cover.webp.
+       */
+      switch (
+        game.game_type
+      ) {
+
+        case "roulette":
+
+          return (
+            `${folder}/assets/wheel.webp?v=${version}`
+          );
+
+
+        case "blackjack":
+
+          return (
+            `${folder}/assets/cover.webp?v=${version}`
+          );
+
+
+        case "cards":
+
+          return (
+            `${folder}/assets/cover.webp?v=${version}`
+          );
+
+
+        case "slot":
+        default:
+
+          return (
+            `${folder}/assets/logo.webp?v=${version}`
+          );
+      }
     }
 
 
@@ -1405,6 +1879,40 @@
     }
 
 
+    async function syncProgressionFromServer() {
+
+      if (
+        !currentSession
+        ||
+        progressionSyncRunning
+      ) {
+        return;
+      }
+
+
+      progressionSyncRunning =
+        true;
+
+
+      try {
+
+        await loadUserProgression();
+
+      } catch (error) {
+
+        console.warn(
+          "Sincronizzazione XP:",
+          error
+        );
+
+      } finally {
+
+        progressionSyncRunning =
+          false;
+      }
+    }
+
+
     /*
      * Ritorno alla home tramite back/forward cache.
      * È il caso principale in cui il browser può mostrare
@@ -1417,6 +1925,8 @@
         syncBalanceFromServer(
           true
         );
+
+        syncProgressionFromServer();
       }
     );
 
@@ -1429,6 +1939,7 @@
       () => {
 
         syncBalanceFromServer();
+        syncProgressionFromServer();
       }
     );
 
@@ -1443,6 +1954,7 @@
         ) {
 
           syncBalanceFromServer();
+          syncProgressionFromServer();
         }
       }
     );
@@ -1464,6 +1976,8 @@
             syncBalanceFromServer(
               true
             );
+
+            syncProgressionFromServer();
           }
         }
       );
@@ -1484,6 +1998,8 @@
           syncBalanceFromServer(
             true
           );
+
+          syncProgressionFromServer();
         }
       }
     );
@@ -1530,52 +2046,425 @@
 
 
     // ========================================================
-    // SLOT ATTIVE
+    // CASINO GAMES
     // ========================================================
+
+    const GAME_CATEGORIES = [
+      {
+        type: "slot",
+        id: "category-slot",
+        icon: "🎰",
+        title: "Slot",
+        description: "Slot machine e bonus game"
+      },
+      {
+        type: "roulette",
+        id: "category-roulette",
+        icon: "🎡",
+        title: "Roulette",
+        description: "Roulette europea e future varianti"
+      },
+      {
+        type: "blackjack",
+        id: "category-blackjack",
+        icon: "🂡",
+        title: "Blackjack",
+        description: "Tavoli blackjack"
+      },
+      {
+        type: "cards",
+        id: "category-cards",
+        icon: "🃏",
+        title: "Carte",
+        description: "Pacchetti, collezione e marketplace"
+      }
+    ];
+
 
     async function loadGames() {
 
-      const {
-        data,
-        error
-      } =
-        await supabase
-          .from(
-            "slot_games"
-          )
-          .select(
-            [
-              "id",
-              "name",
-              "reels",
-              "rows",
-              "max_lines",
-              "target_rtp",
-              "volatility",
-              "asset_folder",
-              "asset_version"
-            ].join(",")
-          )
-          .eq(
-            "active",
-            true
-          )
-          .order(
-            "name",
-            {
-              ascending: true
-            }
-          );
+      const [
+        casinoResult,
+        slotResult,
+        rouletteResult
+      ] =
+        await Promise.all(
+          [
+            supabase
+              .from(
+                "casino_games"
+              )
+              .select(
+                [
+                  "id",
+                  "name",
+                  "game_type",
+                  "active",
+                  "asset_folder",
+                  "asset_version",
+                  "page_path",
+                  "sort_order"
+                ].join(",")
+              )
+              .eq(
+                "active",
+                true
+              )
+              .order(
+                "sort_order",
+                {
+                  ascending: true
+                }
+              )
+              .order(
+                "name",
+                {
+                  ascending: true
+                }
+              ),
+
+            supabase
+              .from(
+                "slot_games"
+              )
+              .select(
+                [
+                  "id",
+                  "reels",
+                  "rows",
+                  "max_lines",
+                  "target_rtp",
+                  "volatility"
+                ].join(",")
+              )
+              .eq(
+                "active",
+                true
+              ),
+
+            supabase
+              .from(
+                "roulette_games"
+              )
+              .select(
+                [
+                  "game_id",
+                  "variant",
+                  "target_rtp",
+                  "max_total_bet"
+                ].join(",")
+              )
+          ]
+        );
 
 
-      if (error) {
-        throw error;
+      if (
+        casinoResult.error
+      ) {
+        throw casinoResult.error;
       }
 
 
+      if (
+        slotResult.error
+      ) {
+        throw slotResult.error;
+      }
+
+
+      if (
+        rouletteResult.error
+      ) {
+        throw rouletteResult.error;
+      }
+
+
+      const slotConfig =
+        new Map(
+          (
+            slotResult.data
+            || []
+          )
+            .map(
+              game => [
+                game.id,
+                game
+              ]
+            )
+        );
+
+
+      const rouletteConfig =
+        new Map(
+          (
+            rouletteResult.data
+            || []
+          )
+            .map(
+              game => [
+                game.game_id,
+                game
+              ]
+            )
+        );
+
+
+      const games =
+        (
+          casinoResult.data
+          || []
+        )
+          .map(
+            game => ({
+              ...game,
+
+              slot_config:
+                slotConfig.get(
+                  game.id
+                )
+                || null,
+
+              roulette_config:
+                rouletteConfig.get(
+                  game.id
+                )
+                || null
+            })
+          );
+
+
       renderGames(
-        data || []
+        games
       );
+    }
+
+
+    function renderGameTags(
+      game
+    ) {
+
+      const tags =
+        [];
+
+
+      if (
+        game.game_type === "slot"
+        &&
+        game.slot_config
+      ) {
+
+        const cfg =
+          game.slot_config;
+
+
+        tags.push(
+          `${Number(cfg.reels)}×${Number(cfg.rows)}`
+        );
+
+
+        tags.push(
+          `${Number(cfg.max_lines)} linee`
+        );
+
+
+        if (
+          cfg.target_rtp != null
+        ) {
+
+          tags.push(
+            `RTP ${Number(cfg.target_rtp)
+              .toFixed(2)
+              .replace(".", ",")}%`
+          );
+        }
+
+
+        if (
+          cfg.volatility != null
+        ) {
+
+          const volatility =
+            "★".repeat(
+              Number(
+                cfg.volatility
+                || 0
+              )
+            )
+            +
+            "☆".repeat(
+              Math.max(
+                0,
+                5
+                -
+                Number(
+                  cfg.volatility
+                  || 0
+                )
+              )
+            );
+
+
+          tags.push(
+            volatility
+          );
+        }
+      }
+
+
+      if (
+        game.game_type === "roulette"
+      ) {
+
+        const cfg =
+          game.roulette_config;
+
+
+        tags.push(
+          "0–36"
+        );
+
+
+        if (
+          cfg?.variant === "european"
+        ) {
+
+          tags.push(
+            "Europea"
+          );
+        }
+
+
+        if (
+          cfg?.target_rtp != null
+        ) {
+
+          tags.push(
+            `RTP ${Number(cfg.target_rtp)
+              .toFixed(2)
+              .replace(".", ",")}%`
+          );
+        }
+      }
+
+
+      if (
+        game.game_type === "blackjack"
+      ) {
+
+        tags.push(
+          "Blackjack"
+        );
+      }
+
+
+      if (
+        game.game_type === "cards"
+      ) {
+
+        tags.push(
+          "Collezionabili"
+        );
+
+        tags.push(
+          "Marketplace"
+        );
+      }
+
+
+      return tags
+        .map(
+          tag => `
+            <span class="tag">
+              ${escapeHtml(tag)}
+            </span>
+          `
+        )
+        .join("");
+    }
+
+
+    function renderGameCard(
+      game
+    ) {
+
+      const isSlot =
+        game.game_type === "slot";
+
+
+      const typeLabel =
+        GAME_CATEGORIES.find(
+          category =>
+            category.type ===
+            game.game_type
+        )
+          ?.title
+        || game.game_type;
+
+
+      return `
+        <article class="game-card">
+
+          <img
+            class="game-cover"
+            src="${escapeHtml(gameCoverUrl(game))}"
+            alt=""
+            loading="lazy"
+            onerror="this.style.display='none'"
+          />
+
+          <div class="game-shade"></div>
+
+          <div class="game-type-badge">
+            ${escapeHtml(typeLabel)}
+          </div>
+
+          <div class="game-info">
+
+            <h3>
+              ${escapeHtml(game.name)}
+            </h3>
+
+            <div class="game-meta">
+              ${renderGameTags(game)}
+            </div>
+
+            <div class="game-actions ${isSlot ? "" : "single-action"}">
+
+              ${
+                isSlot
+                &&
+                game.slot_config
+                ? `
+                  <button
+                    class="paylines-btn"
+                    type="button"
+                    data-game-name="${escapeHtml(game.name)}"
+                    data-payline-table="${escapeHtml(
+                      paylineTableUrl({
+                        ...game,
+                        ...game.slot_config
+                      })
+                    )}"
+                  >
+                    LINEE
+                  </button>
+                `
+                : ""
+              }
+
+              <button
+                class="play-btn"
+                type="button"
+                data-game-id="${escapeHtml(game.id)}"
+                data-game-page="${escapeHtml(gamePage(game))}"
+              >
+                Gioca
+              </button>
+
+            </div>
+          </div>
+        </article>
+      `;
     }
 
 
@@ -1583,112 +2472,67 @@
       games
     ) {
 
-      if (
-        !games.length
-      ) {
-
-        gamesEl.innerHTML =
-          `<div class="empty-state">Nessuna slot attiva.</div>`;
-
-        return;
-      }
-
-
-      gamesEl.innerHTML =
-        games
+      const html =
+        GAME_CATEGORIES
           .map(
-            game => {
+            category => {
 
-              const volatility =
-                "★".repeat(
-                  Number(
-                    game.volatility
-                    || 0
-                  )
-                )
-                +
-                "☆".repeat(
-                  Math.max(
-                    0,
-                    5
-                    -
-                    Number(
-                      game.volatility
-                      || 0
-                    )
-                  )
+              const categoryGames =
+                games.filter(
+                  game =>
+                    game.game_type ===
+                    category.type
                 );
 
 
               return `
-                <article class="game-card">
-                  <img
-                    class="game-cover"
-                    src="${escapeHtml(gameCoverUrl(game))}"
-                    alt=""
-                    loading="lazy"
-                  />
+                <section
+                  id="${category.id}"
+                  class="game-category"
+                >
 
-                  <div class="game-shade"></div>
+                  <div class="game-category-head">
 
-                  <div class="game-info">
-                    <h3>${escapeHtml(game.name)}</h3>
-
-                    <div class="game-meta">
-                      <span class="tag">
-                        ${Number(game.reels)}×${Number(game.rows)}
-                      </span>
-
-                      <span class="tag">
-                        ${Number(game.max_lines)} linee
-                      </span>
-
-                      ${
-                        game.target_rtp != null
-                        ? `
-                          <span class="tag">
-                            RTP ${Number(game.target_rtp).toFixed(2).replace(".", ",")}%
-                          </span>
-                        `
-                        : ""
-                      }
-
-                      ${
-                        game.volatility != null
-                        ? `
-                          <span class="tag" title="Volatilità">
-                            ${volatility}
-                          </span>
-                        `
-                        : ""
-                      }
+                    <div class="game-category-title">
+                      <span>${category.icon}</span>
+                      <h3>${escapeHtml(category.title)}</h3>
                     </div>
 
-                    <div class="game-actions">
-                      <button
-                        class="paylines-btn"
-                        type="button"
-                        data-game-name="${escapeHtml(game.name)}"
-                        data-payline-table="${escapeHtml(paylineTableUrl(game))}"
-                      >
-                        LINEE
-                      </button>
+                    <small>
+                      ${escapeHtml(category.description)}
+                    </small>
 
-                      <button
-                        class="play-btn"
-                        type="button"
-                        data-game-id="${escapeHtml(game.id)}"
-                        data-game-page="${escapeHtml(gamePage(game))}"
-                      >
-                        Gioca
-                      </button>
-                    </div>
                   </div>
-                </article>
+
+                  <div class="category-games">
+
+                    ${
+                      categoryGames.length
+                      ?
+                      categoryGames
+                        .map(
+                          renderGameCard
+                        )
+                        .join("")
+                      :
+                      `
+                        <div class="category-empty">
+                          Prossimamente
+                        </div>
+                      `
+                    }
+
+                  </div>
+
+                </section>
               `;
             }
           )
           .join("");
+
+
+      gamesEl.innerHTML =
+        html;
 
 
       gamesEl
@@ -1711,16 +2555,54 @@
 
 
       gamesEl
-        .querySelectorAll(".paylines-btn")
-        .forEach(button => {
-          button.addEventListener("click", () => {
-            openReferenceImage(
-              `Linee vincenti · ${button.dataset.gameName}`,
-              button.dataset.paylineTable
+        .querySelectorAll(
+          ".paylines-btn"
+        )
+        .forEach(
+          button => {
+
+            button.addEventListener(
+              "click",
+              () => {
+
+                openReferenceImage(
+                  `Linee vincenti · ${button.dataset.gameName}`,
+                  button.dataset.paylineTable
+                );
+              }
             );
-          });
-        });
+          }
+        );
     }
+
+
+    document
+      .querySelectorAll(
+        "[data-category-target]"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            () => {
+
+              const target =
+                document.getElementById(
+                  button.dataset.categoryTarget
+                );
+
+
+              target?.scrollIntoView(
+                {
+                  behavior: "smooth",
+                  block: "start"
+                }
+              );
+            }
+          );
+        }
+      );
 
 
     // ========================================================
@@ -1956,9 +2838,10 @@
         || {};
 
 
-      statTotalSpins.textContent =
+      statTotalPlays.textContent =
         formatNumber(
-          summary.total_spins
+          summary.total_plays
+          ?? summary.total_spins
         );
 
 
@@ -1980,15 +2863,16 @@
         );
 
 
-      statPaidSpins.textContent =
+      statSlotSpins.textContent =
         formatNumber(
-          summary.paid_spins
+          summary.slot_spins
+          ?? summary.total_spins
         );
 
 
-      statFreeSpins.textContent =
+      statRouletteSpins.textContent =
         formatNumber(
-          summary.free_spins
+          summary.roulette_spins
         );
 
 
@@ -2026,7 +2910,8 @@
 
 
       const rows =
-        data?.last_spins
+        data?.last_plays
+        || data?.last_spins
         || [];
 
 
@@ -2076,40 +2961,71 @@
                 );
 
 
-              const result =
+              const netResult =
                 totalWin
-                - wager;
+                -
+                wager;
 
 
               const resultClass =
-                result > 0
+                netResult > 0
                 ? "history-win"
-                : result < 0
+                : netResult < 0
                   ? "history-loss"
                   : "";
 
 
+              const isRoulette =
+                row.game_type ===
+                "roulette";
+
+
               const type =
-                row.spin_type === "free"
-                ? `<span class="history-free">FREE</span>`
-                : "SPIN";
+                isRoulette
+                ? "ROULETTE"
+                : row.play_type === "free"
+                  ? `<span class="history-free">FREE</span>`
+                  : "SPIN";
+
+
+              const outcome =
+                isRoulette
+                ? (
+                    row.result_number != null
+                    ? `Numero ${formatNumber(row.result_number)}`
+                    : "—"
+                  )
+                : (
+                    Number(row.active_lines || 0) > 0
+                    ? `${formatNumber(row.active_lines)} linee`
+                    : "—"
+                  );
+
+
+              const bonusText =
+                !isRoulette
+                &&
+                Number(
+                  row.bonus_win
+                  || 0
+                ) > 0
+                ? ` <small>(bonus +${formatNumber(row.bonus_win)})</small>`
+                : "";
 
 
               return `
                 <tr>
                   <td>${escapeHtml(dateFormatter.format(new Date(row.created_at)))}</td>
-                  <td>${escapeHtml(row.game_id)}</td>
+                  <td>${escapeHtml(row.game_name || row.game_id)}</td>
                   <td>${type}</td>
-                  <td>${formatNumber(row.active_lines)}</td>
-                  <td>${formatNumber(row.bet_per_line)}</td>
+                  <td>${escapeHtml(outcome)}</td>
                   <td>${formatNumber(wager)}</td>
-                  <td class="${resultClass}">
+                  <td>
                     ${totalWin > 0 ? "+" : ""}${formatNumber(totalWin)}
-                    ${
-                      Number(row.bonus_win || 0) > 0
-                      ? ` <small>(bonus +${formatNumber(row.bonus_win)})</small>`
-                      : ""
-                    }
+                    ${bonusText}
+                  </td>
+                  <td class="${resultClass}">
+                    ${netResult > 0 ? "+" : ""}${formatNumber(netResult)}
                   </td>
                 </tr>
               `;
@@ -2239,7 +3155,8 @@
             loadLeaderboard(),
             loadPreviousWinner(),
             loadPlayerHistory(),
-            loadDailyBonusState()
+            loadDailyBonusState(),
+            loadUserProgression()
           ]
         );
 
@@ -2388,7 +3305,60 @@
       authStatus.textContent =
         "Se l'indirizzo è registrato, riceverai una email per reimpostare la password.";
     }
+async function loadUserProgression() {
 
+    if (!currentSession?.user?.id) {
+        updateXpBar(0, 1);
+        return;
+    }
+
+
+    if (!levelTable.length) {
+        await loadLevelTable();
+    }
+
+
+    const { data, error } = await supabase
+        .from("user_progression")
+        .select("xp, level")
+        .eq(
+            "user_id",
+            currentSession.user.id
+        )
+        .maybeSingle();
+
+
+    if (error) {
+
+        console.error(
+            "Errore caricamento XP:",
+            error
+        );
+
+        throw error;
+    }
+
+
+    /*
+     * Un utente nuovo può non avere ancora una riga in
+     * user_progression finché non effettua la prima operazione XP.
+     */
+    if (!data) {
+
+        updateXpBar(
+            0,
+            1
+        );
+
+        return;
+    }
+
+
+    updateXpBar(
+        data.xp,
+        data.level
+    );
+}
 
     async function signup() {
 
@@ -2492,7 +3462,7 @@
     async function setSession(
       session
     ) {
-
+		
       currentSession =
         session;
 
@@ -2507,6 +3477,11 @@
         balanceValue.textContent =
           "0";
 
+        updateXpBar(
+          0,
+          1
+        );
+
         gamesEl.innerHTML =
           "";
 
@@ -2516,12 +3491,12 @@
         myRankingEl.innerHTML =
           "";
 
-        statTotalSpins.textContent = "0";
+        statTotalPlays.textContent = "0";
         statTotalBet.textContent = "0";
         statTotalWin.textContent = "0";
         statBestWin.textContent = "0";
-        statPaidSpins.textContent = "0";
-        statFreeSpins.textContent = "0";
+        statSlotSpins.textContent = "0";
+        statRouletteSpins.textContent = "0";
         statBonusCount.textContent = "0";
         statNet.textContent = "0";
 

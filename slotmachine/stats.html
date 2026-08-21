@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#07151d" />
-  <title>Statistiche Slot</title>
+  <title>Statistiche Casino</title>
 
   <style>
     :root {
@@ -34,7 +34,10 @@
       padding: 18px;
     }
 
-    button { font: inherit; cursor: pointer; }
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
 
     .shell {
       width: min(1400px, 100%);
@@ -75,6 +78,12 @@
       color: white;
     }
 
+    .category {
+      margin: 22px 0 10px;
+      color: var(--gold-light);
+      font-size: 20px;
+    }
+
     .games {
       display: grid;
       gap: 16px;
@@ -111,8 +120,21 @@
       font-size: 12px;
     }
 
+    .type-badge {
+      display: inline-block;
+      margin-right: 6px;
+      padding: 3px 7px;
+      border: 1px solid rgba(231,182,84,.35);
+      border-radius: 999px;
+      color: var(--gold-light);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
     .rtp-box {
       text-align: right;
+      min-width: 150px;
     }
 
     .rtp-box small {
@@ -200,7 +222,9 @@
       background: rgba(4,11,16,.95);
     }
 
-    .loading.hidden { display: none; }
+    .loading.hidden {
+      display: none;
+    }
 
     .loader {
       width: 58px;
@@ -229,6 +253,15 @@
         flex-direction: column;
       }
 
+      .game-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .rtp-box {
+        text-align: left;
+      }
+
       .stats-grid {
         grid-template-columns: repeat(2, minmax(0,1fr));
       }
@@ -244,7 +277,7 @@
       <div>
         <h1>Statistiche globali</h1>
         <div class="subtitle">
-          Dati reali registrati dagli spin
+          Slot e Roulette · dati reali registrati dal Casino Core
         </div>
       </div>
 
@@ -260,9 +293,7 @@
 
 
   <div id="loading" class="loading">
-    <div>
-      <div class="loader"></div>
-    </div>
+    <div class="loader"></div>
   </div>
 
 
@@ -330,7 +361,10 @@
     ) {
 
       return nf.format(
-        Number(value || 0)
+        Number(
+          value
+          || 0
+        )
       );
     }
 
@@ -348,9 +382,14 @@
 
 
       return (
-        Number(value)
+        Number(
+          value
+        )
           .toFixed(3)
-          .replace(".", ",")
+          .replace(
+            ".",
+            ","
+          )
         +
         "%"
       );
@@ -361,7 +400,10 @@
       value
     ) {
 
-      if (!value) {
+      if (
+        !value
+      ) {
+
         return "—";
       }
 
@@ -378,7 +420,9 @@
         }
       )
         .format(
-          new Date(value)
+          new Date(
+            value
+          )
         );
     }
 
@@ -387,12 +431,303 @@
       value
     ) {
 
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+      return String(
+        value
+        ?? ""
+      )
+        .replaceAll(
+          "&",
+          "&amp;"
+        )
+        .replaceAll(
+          "<",
+          "&lt;"
+        )
+        .replaceAll(
+          ">",
+          "&gt;"
+        )
+        .replaceAll(
+          '"',
+          "&quot;"
+        )
+        .replaceAll(
+          "'",
+          "&#039;"
+        );
+    }
+
+
+    function stat(
+      label,
+      value,
+      cssClass = ""
+    ) {
+
+      return `
+        <div class="stat">
+          <div class="stat-label">
+            ${escapeHtml(label)}
+          </div>
+
+          <div class="stat-value ${cssClass}">
+            ${escapeHtml(value)}
+          </div>
+        </div>
+      `;
+    }
+
+
+    function renderSlotStats(
+      game
+    ) {
+
+      const d =
+        game.details
+        || {};
+
+
+      return [
+        stat(
+          "Spin totali",
+          formatNumber(
+            d.total_spins
+          )
+        ),
+
+        stat(
+          "Spin pagati",
+          formatNumber(
+            d.paid_spins
+          )
+        ),
+
+        stat(
+          "Free spin",
+          formatNumber(
+            d.free_spins
+          )
+        ),
+
+        stat(
+          "Giocatori unici",
+          formatNumber(
+            game.unique_players
+          )
+        ),
+
+        stat(
+          "Bonus completati",
+          formatNumber(
+            d.bonus_count
+          )
+        ),
+
+        stat(
+          "Totale giocato",
+          formatNumber(
+            game.total_bet
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Vincite spin",
+          formatNumber(
+            d.spin_win
+          )
+        ),
+
+        stat(
+          "Vincite bonus",
+          formatNumber(
+            d.bonus_win
+          )
+        ),
+
+        stat(
+          "Totale vinto",
+          formatNumber(
+            game.total_win
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Miglior vincita",
+          formatNumber(
+            game.best_win
+          ),
+          "good"
+        )
+      ]
+        .join("");
+    }
+
+
+    function renderRouletteStats(
+      game
+    ) {
+
+      const d =
+        game.details
+        || {};
+
+
+      const zeroPct =
+        Number(
+          d.total_spins
+          || 0
+        ) > 0
+        ? (
+            Number(
+              d.zero_count
+              || 0
+            )
+            /
+            Number(
+              d.total_spins
+            )
+            *
+            100
+          )
+            .toFixed(3)
+            .replace(
+              ".",
+              ","
+            )
+          +
+          "%"
+        : "—";
+
+
+      return [
+        stat(
+          "Giri totali",
+          formatNumber(
+            d.total_spins
+          )
+        ),
+
+        stat(
+          "Giocatori unici",
+          formatNumber(
+            game.unique_players
+          )
+        ),
+
+        stat(
+          "Giri con ritorno",
+          formatNumber(
+            d.rounds_with_return
+          )
+        ),
+
+        stat(
+          "Giri in profitto",
+          formatNumber(
+            d.profitable_rounds
+          )
+        ),
+
+        stat(
+          "Uscite dello 0",
+          `${formatNumber(d.zero_count)} · ${zeroPct}`
+        ),
+
+        stat(
+          "Totale giocato",
+          formatNumber(
+            game.total_bet
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Totale restituito",
+          formatNumber(
+            game.total_win
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Puntata media",
+          formatNumber(
+            Math.round(
+              Number(
+                d.average_bet
+                || 0
+              )
+            )
+          )
+        ),
+
+        stat(
+          "Miglior ritorno",
+          formatNumber(
+            game.best_win
+          ),
+          "good"
+        ),
+
+        stat(
+          "Netto giocatori",
+          (
+            Number(
+              game.net
+              || 0
+            ) > 0
+            ? "+"
+            : ""
+          )
+          +
+          formatNumber(
+            game.net
+          ),
+          Number(game.net || 0) > 0
+            ? "good"
+            : Number(game.net || 0) < 0
+              ? "bad"
+              : ""
+        )
+      ]
+        .join("");
+    }
+
+
+    function gameMeta(
+      game
+    ) {
+
+      const d =
+        game.details
+        || {};
+
+
+      if (
+        game.game_type ===
+        "roulette"
+      ) {
+
+        return `
+          <span class="type-badge">Roulette</span>
+          ${escapeHtml(
+            d.variant === "european"
+            ? "Europea · singolo zero"
+            : d.variant || ""
+          )}
+          · ID ${escapeHtml(game.game_id)}
+        `;
+      }
+
+
+      return `
+        <span class="type-badge">Slot</span>
+        ${formatNumber(d.reels)}×${formatNumber(d.rows)}
+        · ${formatNumber(d.max_lines)} linee
+        · ID ${escapeHtml(game.game_id)}
+      `;
     }
 
 
@@ -410,7 +745,7 @@
       ) {
 
         gamesEl.innerHTML =
-          `<div class="empty">Nessuna slot disponibile.</div>`;
+          `<div class="empty">Nessun gioco disponibile.</div>`;
 
         return;
       }
@@ -441,7 +776,9 @@
                 observed != null
                 &&
                 target != null
-                ? observed - target
+                ? observed
+                  -
+                  target
                 : null;
 
 
@@ -452,22 +789,36 @@
                 );
 
 
+              const body =
+                game.game_type ===
+                "roulette"
+                ? renderRouletteStats(
+                    game
+                  )
+                : renderSlotStats(
+                    game
+                  );
+
+
               return `
                 <section class="game-card">
 
                   <div class="game-head">
+
                     <div>
                       <h2>${escapeHtml(game.name)}</h2>
+
                       <div class="game-meta">
-                        ${Number(game.reels)}×${Number(game.rows)}
-                        · ${Number(game.max_lines)} linee
-                        · ID ${escapeHtml(game.game_id)}
+                        ${gameMeta(game)}
                       </div>
                     </div>
 
                     <div class="rtp-box">
                       <small>RTP osservato</small>
-                      <strong>${formatRtp(observed)}</strong>
+
+                      <strong>
+                        ${formatRtp(observed)}
+                      </strong>
 
                       ${
                         target != null
@@ -484,78 +835,47 @@
                         : ""
                       }
                     </div>
+
                   </div>
 
 
                   <div class="stats-grid">
+                    ${body}
 
-                    <div class="stat">
-                      <div class="stat-label">Spin totali</div>
-                      <div class="stat-value">${formatNumber(game.total_spins)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Spin pagati</div>
-                      <div class="stat-value">${formatNumber(game.paid_spins)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Free spin</div>
-                      <div class="stat-value">${formatNumber(game.free_spins)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Giocatori unici</div>
-                      <div class="stat-value">${formatNumber(game.unique_players)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Bonus completati</div>
-                      <div class="stat-value">${formatNumber(game.bonus_count)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Totale giocato</div>
-                      <div class="stat-value gold">${formatNumber(game.total_bet)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Vincite spin</div>
-                      <div class="stat-value">${formatNumber(game.spin_win)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Vincite bonus</div>
-                      <div class="stat-value">${formatNumber(game.bonus_win)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Totale vinto</div>
-                      <div class="stat-value gold">${formatNumber(game.total_win)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Miglior vincita</div>
-                      <div class="stat-value good">${formatNumber(game.best_win)}</div>
-                    </div>
-
-                    <div class="stat">
-                      <div class="stat-label">Netto giocatori</div>
-                      <div class="stat-value ${net > 0 ? "good" : net < 0 ? "bad" : ""}">
-                        ${net > 0 ? "+" : ""}${formatNumber(net)}
-                      </div>
-                    </div>
-
+                    ${
+                      game.game_type !==
+                      "roulette"
+                      ? stat(
+                          "Netto giocatori",
+                          (
+                            net > 0
+                            ? "+"
+                            : ""
+                          )
+                          +
+                          formatNumber(
+                            net
+                          ),
+                          net > 0
+                            ? "good"
+                            : net < 0
+                              ? "bad"
+                              : ""
+                        )
+                      : ""
+                    }
                   </div>
 
 
                   <div class="game-footer">
                     <span>
-                      Primo spin: ${formatDate(game.first_spin_at)}
+                      Prima giocata:
+                      ${formatDate(game.first_play_at)}
                     </span>
 
                     <span>
-                      Ultimo spin: ${formatDate(game.last_spin_at)}
+                      Ultima giocata:
+                      ${formatDate(game.last_play_at)}
                     </span>
                   </div>
 
@@ -581,11 +901,14 @@
           error
         } =
           await supabase.rpc(
-            "get_global_slot_stats"
+            "get_global_casino_stats"
           );
 
 
-        if (error) {
+        if (
+          error
+        ) {
+
           throw error;
         }
 
@@ -594,14 +917,24 @@
           data
         );
 
-      } catch (error) {
+      } catch (
+        error
+      ) {
 
-        console.error(error);
+        console.error(
+          error
+        );
 
 
         gamesEl.innerHTML = `
           <div class="error">
-            ${escapeHtml(error?.message || String(error))}
+            ${escapeHtml(
+              error?.message
+              ||
+              String(
+                error
+              )
+            )}
           </div>
         `;
 
