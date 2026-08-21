@@ -784,6 +784,532 @@
   }
 }
 
+
+/* ============================================================
+   MOBILE V3 - LAYOUT DEFINITIVO PER ORIENTAMENTO
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   PORTRAIT
+   Il tavolo viene ruotato di 90°.
+   In questo modo i 12 numeri non vengono compressi nei 360/400px
+   di larghezza del telefono.
+   ------------------------------------------------------------ */
+
+@media (max-width: 680px) and (orientation: portrait) {
+
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  #app {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .layout {
+    display: block;
+  }
+
+  .wheel-panel,
+  .table-panel {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 7px;
+  }
+
+
+  /* RUOTA */
+
+  .wheel-section {
+    padding: 9px 6px 8px;
+  }
+
+  .wheel-wrap {
+    width: min(275px, 70vw);
+    max-width: 275px;
+    margin: 0 auto 8px;
+  }
+
+  .result-display {
+    width: min(350px, 96%);
+  }
+
+  .history,
+  .bet-summary {
+    width: min(360px, 98%);
+  }
+
+
+  /* TAVOLO VERTICALE */
+
+  .table-panel {
+    overflow: hidden;
+  }
+
+  .table-scroll {
+    /*
+     * L'immagine originale è 1448x758.
+     * Dopo la rotazione:
+     *
+     * larghezza visibile = larghezza telefono
+     * altezza visibile   = larghezza × 1448/758
+     *
+     * Su un telefono da 390 px:
+     * circa 380 × 726 px.
+     */
+    --portrait-table-width: min(96vw, 430px);
+
+    position: relative;
+    display: block;
+    width: 100%;
+    height: calc(var(--portrait-table-width) * 1448 / 758);
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .roulette-table {
+    position: absolute;
+
+    /*
+     * Prima della rotazione la larghezza deve diventare
+     * l'altezza finale del tavolo.
+     */
+    width: calc(var(--portrait-table-width) * 1448 / 758);
+    max-width: none;
+    min-width: 0;
+
+    left: 50%;
+    top: 50%;
+    margin: 0;
+
+    transform:
+      translate(-50%, -50%)
+      rotate(90deg);
+
+    transform-origin: 50% 50%;
+  }
+
+
+  /*
+   * Con il tavolo ruotato le caselle dei numeri diventano
+   * circa 45-55px larghe sui telefoni normali.
+   */
+  .number-cell,
+  .zero-cell,
+  .outside-cell,
+  .column-cell {
+    touch-action: manipulation;
+  }
+
+
+  /*
+   * Split / corner / street:
+   * leggermente più grandi per il touch.
+   */
+  .bet-hotspot {
+    width: 28px;
+    height: 28px;
+  }
+
+
+  /*
+   * La fiche è circolare, ma la label centrale deve restare
+   * leggibile anche se il tavolo è ruotato.
+   */
+  .number-cell .bet-chip,
+  .zero-cell .bet-chip,
+  .outside-cell .bet-chip,
+  .column-cell .bet-chip {
+    transform:
+      translateY(-50%)
+      rotate(-90deg);
+  }
+
+  .bet-hotspot .bet-chip {
+    transform:
+      translate(-50%, -50%)
+      rotate(-90deg);
+  }
+
+
+  /* FICHE */
+
+  .chip-selector {
+    padding: 8px 6px 6px;
+  }
+
+  .chip-btn {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+
+  /* CONTROLLI */
+
+  .controls {
+    padding: 7px 6px 8px;
+  }
+
+  .action-buttons {
+    grid-template-columns:
+      repeat(3, minmax(0,1fr));
+  }
+
+  .control-btn {
+    min-height: 42px;
+  }
+
+  .spin-btn {
+    grid-column: 1 / -1;
+    min-height: 50px;
+    font-size: 17px;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   PORTRAIT MOLTO STRETTO
+   ------------------------------------------------------------ */
+
+@media (max-width: 380px) and (orientation: portrait) {
+
+  .wheel-wrap {
+    width: 255px;
+    max-width: 72vw;
+  }
+
+  .table-scroll {
+    --portrait-table-width: 95vw;
+  }
+
+  .chip-btn {
+    flex-basis: 45px;
+    width: 45px;
+    height: 45px;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   LANDSCAPE
+   Ruota grande a sinistra.
+   Il tavolo occupa SOLO la larghezza residua.
+   ------------------------------------------------------------ */
+
+@media (orientation: landscape) and (max-height: 560px) {
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 100%;
+    padding: 4px;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 100%;
+  }
+
+
+  /* HEADER MOLTO COMPATTO */
+
+  header {
+    display: grid;
+    grid-template-columns:
+      auto
+      minmax(150px, 1fr)
+      auto;
+
+    gap: 5px;
+    margin-bottom: 4px;
+  }
+
+  .brand h1 {
+    font-size: 17px;
+  }
+
+  .brand p {
+    display: none;
+  }
+
+  .top-progress {
+    grid-column: auto;
+    min-width: 0;
+  }
+
+  .header-actions {
+    flex-wrap: nowrap;
+  }
+
+  .pill,
+  .header-btn {
+    min-height: 30px;
+    padding: 4px 7px;
+    font-size: 10px;
+  }
+
+
+  /* LAYOUT */
+
+  .layout {
+    display: grid;
+
+    /*
+     * La colonna ruota prende circa 220px.
+     * Il tavolo prende TUTTO il resto, ma senza min-width.
+     */
+    grid-template-columns:
+      minmax(190px, 27vw)
+      minmax(0, 1fr);
+
+    gap: 5px;
+    width: 100%;
+    max-width: 100%;
+    align-items: start;
+  }
+
+  .wheel-panel,
+  .table-panel {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .panel-head {
+    padding: 4px 7px;
+  }
+
+  .panel-head h2 {
+    font-size: 12px;
+  }
+
+  .panel-head small {
+    font-size: 8px;
+  }
+
+
+  /* RUOTA */
+
+  .wheel-panel .panel-head {
+    display: none;
+  }
+
+  .wheel-section {
+    display: block;
+    padding: 4px;
+  }
+
+  .wheel-wrap {
+    width: min(205px, 52vh);
+    max-width: 205px;
+    margin: 0 auto 4px;
+  }
+
+  .result-display {
+    width: 100%;
+    margin: 0 0 3px;
+    padding: 4px;
+    grid-template-columns:
+      38px
+      minmax(0,1fr);
+  }
+
+  .result-ball {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+  }
+
+  .result-info strong {
+    font-size: 11px;
+  }
+
+  .result-info span {
+    font-size: 8px;
+  }
+
+  .history {
+    width: 100%;
+    margin: 2px 0;
+  }
+
+  .history-number {
+    min-width: 21px;
+    height: 21px;
+    font-size: 8px;
+  }
+
+  .bet-summary {
+    width: 100%;
+    margin: 2px 0 0;
+    padding: 3px;
+  }
+
+  .summary-row span {
+    font-size: 7px;
+  }
+
+  .summary-row strong {
+    font-size: 9px;
+  }
+
+
+  /* TAVOLO */
+
+  .table-scroll {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    padding: 2px;
+    overflow: hidden;
+  }
+
+  .roulette-table {
+    position: relative;
+    left: auto;
+    top: auto;
+
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    margin: 0;
+
+    aspect-ratio: 1448 / 758;
+
+    transform: none;
+  }
+
+  .bet-hotspot {
+    width: 24px;
+    height: 24px;
+  }
+
+
+  /* FICHE */
+
+  .chip-selector {
+    padding: 3px 4px;
+  }
+
+  .chip-selector-label {
+    display: none;
+  }
+
+  .chips {
+    gap: 3px;
+    padding: 1px 1px 2px;
+  }
+
+  .chip-btn {
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
+  }
+
+
+  /* CONTROLLI SEPARATI */
+
+  .controls {
+    position: static;
+    padding: 3px 4px 4px;
+  }
+
+  .action-buttons {
+    display: grid;
+    grid-template-columns:
+      repeat(4, minmax(0,1fr));
+
+    gap: 3px;
+  }
+
+  .control-btn {
+    min-height: 34px;
+    padding: 3px 2px;
+    font-size: 9px;
+  }
+
+  .spin-btn {
+    grid-column: auto;
+    min-height: 34px;
+    font-size: 12px;
+  }
+
+
+  /* PUNTATE PIAZZATE MOLTO COMPATTE */
+
+  .current-bets {
+    padding: 3px 4px;
+  }
+
+  .current-bets-head {
+    margin-bottom: 2px;
+  }
+
+  #betsList {
+    max-height: 68px;
+  }
+
+  .bet-line {
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+
+  .status {
+    min-height: 14px;
+    padding: 0 4px 3px;
+    font-size: 8px;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   LANDSCAPE MOLTO BASSO
+   ------------------------------------------------------------ */
+
+@media (orientation: landscape) and (max-height: 410px) {
+
+  .layout {
+    grid-template-columns:
+      minmax(185px, 25vw)
+      minmax(0,1fr);
+  }
+
+  .wheel-wrap {
+    width: min(185px, 49vh);
+  }
+
+  .history {
+    display: none;
+  }
+
+  .bet-summary {
+    grid-template-columns:
+      repeat(3,1fr);
+  }
+
+  .chip-btn {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  #betsList {
+    max-height: 55px;
+  }
+}
+
 </style>
 </head>
 <body>
