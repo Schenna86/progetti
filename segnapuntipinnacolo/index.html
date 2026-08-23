@@ -621,10 +621,10 @@
         label.textContent = unitDisplayName(unit);
 
         const input = document.createElement("input");
-        input.type = "number";
-        input.inputMode = "numeric";
-        input.step = "5";
-        input.placeholder = "0 (multipli di 5)";
+        input.type = "text";
+        input.inputMode = "text";
+        input.autocomplete = "off";
+        input.placeholder = "es. 100+50-10";
         input.dataset.unitId = String(unit.id);
 
         label.appendChild(input);
@@ -684,19 +684,28 @@
       renderDealer();
     }
 
+    function parsePointsExpression(rawValue) {
+      const expression = rawValue.trim().replace(/\s+/g, "");
+      if (expression === "") return 0;
+
+      // Sono ammessi solo numeri interi uniti da + e -.
+      // Esempi: 120, -20, 100+50-10, -30+15.
+      if (!/^[+-]?\d+(?:[+-]\d+)*$/.test(expression)) return NaN;
+
+      const terms = expression.match(/[+-]?\d+/g) || [];
+      return terms.reduce((total, term) => total + Number(term), 0);
+    }
+
     function addRound() {
       const inputs = [...document.querySelectorAll("[data-unit-id]")];
-      const points = inputs.map(input => {
-        if (input.value.trim() === "") return 0;
-        return Number(input.value);
-      });
+      const points = inputs.map(input => parsePointsExpression(input.value));
 
       const hasInvalidPoints = points.some(value =>
         !Number.isFinite(value) || !Number.isInteger(value) || value % 5 !== 0
       );
 
       if (hasInvalidPoints) {
-        alert("I punteggi devono essere numeri interi multipli di 5, anche negativi.");
+        alert("Inserisci un numero o una somma/sottrazione valida. Il risultato finale deve essere un multiplo di 5 (es. 100+50-10).");
         return;
       }
 
