@@ -1310,6 +1310,149 @@
   }
 }
 
+
+/* ============================================================
+   RISULTATO SUL TAVOLO
+   ============================================================ */
+
+/*
+ * Numero estratto:
+ * alone dorato/bianco.
+ */
+.roulette-table .last-win-number {
+  position: relative;
+  z-index: 12 !important;
+
+  box-shadow:
+    inset 0 0 0 3px #fff4a3,
+    inset 0 0 18px rgba(255,210,60,.55),
+    0 0 8px rgba(255,222,90,.95),
+    0 0 22px rgba(255,190,35,.85) !important;
+
+  filter:
+    brightness(1.32)
+    saturate(1.12);
+
+  animation:
+    winningNumberPulse 1.15s ease-in-out infinite alternate;
+}
+
+
+/*
+ * Puntate vincenti:
+ * alone verde.
+ */
+.roulette-table .last-win-bet {
+  position: relative;
+  z-index: 11 !important;
+
+  box-shadow:
+    inset 0 0 0 3px #7dff98,
+    inset 0 0 15px rgba(60,255,115,.35),
+    0 0 8px rgba(90,255,130,.9),
+    0 0 18px rgba(30,220,90,.7) !important;
+
+  background-color:
+    rgba(50,220,95,.22) !important;
+}
+
+
+/*
+ * Se lo straight sul numero uscito era stato puntato,
+ * il numero mantiene il bordo dorato ma riceve anche
+ * un secondo alone verde.
+ */
+.roulette-table .last-win-number.last-win-bet {
+  box-shadow:
+    inset 0 0 0 3px #fff4a3,
+    inset 0 0 0 6px rgba(92,255,125,.72),
+    inset 0 0 18px rgba(255,210,60,.52),
+    0 0 9px rgba(255,225,100,.95),
+    0 0 24px rgba(60,255,110,.78) !important;
+}
+
+
+/*
+ * Gli hotspot normalmente sono quasi invisibili.
+ * Quando una puntata split/corner/street/six-line vince,
+ * diventano un indicatore verde ben visibile.
+ */
+.bet-hotspot.last-win-bet {
+  opacity: 1 !important;
+
+  border:
+    2px solid #8cff9f !important;
+
+  background:
+    rgba(20,170,70,.72) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,.52),
+    0 0 8px #67ff8b,
+    0 0 17px rgba(70,255,120,.88) !important;
+
+  font-weight: 950;
+}
+
+
+/*
+ * Lo zero è un elemento separato rispetto a numberGrid.
+ */
+#zeroCell.last-win-number {
+  z-index: 13 !important;
+}
+
+
+@keyframes winningNumberPulse {
+
+  from {
+    filter:
+      brightness(1.18)
+      saturate(1.06);
+  }
+
+  to {
+    filter:
+      brightness(1.48)
+      saturate(1.2);
+  }
+}
+
+
+/*
+ * Su mobile riduciamo leggermente lo spessore per non
+ * coprire i numeri piccoli.
+ */
+@media (max-width: 680px) {
+
+  .roulette-table .last-win-number {
+    box-shadow:
+      inset 0 0 0 2px #fff4a3,
+      inset 0 0 12px rgba(255,210,60,.5),
+      0 0 6px rgba(255,222,90,.95),
+      0 0 15px rgba(255,190,35,.82) !important;
+  }
+
+  .roulette-table .last-win-bet {
+    box-shadow:
+      inset 0 0 0 2px #7dff98,
+      inset 0 0 10px rgba(60,255,115,.32),
+      0 0 6px rgba(90,255,130,.9),
+      0 0 13px rgba(30,220,90,.7) !important;
+  }
+
+  .roulette-table .last-win-number.last-win-bet {
+    box-shadow:
+      inset 0 0 0 2px #fff4a3,
+      inset 0 0 0 4px rgba(92,255,125,.72),
+      0 0 7px rgba(255,225,100,.95),
+      0 0 16px rgba(60,255,110,.8) !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1337,7 +1480,7 @@ import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+e
 const SUPABASE_URL="https://jhpppwqdaceratwjnbzi.supabase.co",SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),GAME_ID="roulette",nf=new Intl.NumberFormat("it-IT");
 const RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]),WHEEL=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
-let session=null,game=null,options=[],byCode=new Map,byId=new Map,bets=new Map,actions=[],previous=[],selectedChip=1,allowedChips=[],levels=[],spinning=false,wheelTurns=0,recent=[];
+let session=null,game=null,options=[],byCode=new Map,byId=new Map,bets=new Map,actions=[],previous=[],selectedChip=1,allowedChips=[],levels=[],spinning=false,wheelTurns=0,recent=[],lastWinningNumber=null,lastWinningOptionIds=new Set();
 const $=s=>document.querySelector(s),fmt=v=>nf.format(Number(v||0)),color=n=>Number(n)===0?"green":RED.has(Number(n))?"red":"black",compact=v=>{v=Number(v);return v>=1e6?`${v/1e6}M`:v>=1e3?`${v/1e3}K`:String(v)};
 function status(m="",err=false){$("#status").textContent=m;$("#status").style.color=err?"#ff9a9a":"#ffd083"}function total(){return[...bets.values()].reduce((a,b)=>a+Number(b),0)}function busy(v){spinning=v;document.querySelectorAll("button").forEach(b=>{if(b.id!=="homeBtn")b.disabled=v})}
 function buildWheel(){}function animateWheel(n){const i=WHEEL.indexOf(Number(n));if(i<0)return Promise.resolve();wheelTurns+=6;$("#wheel").style.transform=`rotate(${wheelTurns*360-i*(360/WHEEL.length)}deg)`;return new Promise(r=>setTimeout(r,2150))}
@@ -1349,12 +1492,138 @@ function renderChips(arr){$("#chips").innerHTML="";arr.forEach(v=>{const b=docum
 function rectFor(n){const p=$("#numbersWrap").getBoundingClientRect();if(Number(n)===0){const r=$("#zeroCell").getBoundingClientRect();return{left:0,right:0,top:r.top-p.top,bottom:r.bottom-p.top,width:0,height:r.height,cx:0,cy:r.top-p.top+r.height/2}}const e=document.querySelector(`[data-number="${n}"]`);if(!e)return null;const r=e.getBoundingClientRect();return{left:r.left-p.left,right:r.right-p.left,top:r.top-p.top,bottom:r.bottom-p.top,width:r.width,height:r.height,cx:r.left-p.left+r.width/2,cy:r.top-p.top+r.height/2}}
 function hotspotPos(o){const nums=(o.numbers||[]).map(Number),rs=nums.map(rectFor).filter(Boolean);if(!rs.length)return null;if(nums.includes(0)){const nz=nums.filter(n=>n!==0).map(rectFor).filter(Boolean),y=nz.reduce((s,r)=>s+r.cy,0)/(nz.length||1);return{x:2,y,label:o.bet_type==="corner"?"4":o.bet_type==="street"?"3":"×"}}if(o.bet_type==="split"||o.bet_type==="corner")return{x:rs.reduce((s,r)=>s+r.cx,0)/rs.length,y:rs.reduce((s,r)=>s+r.cy,0)/rs.length,label:o.bet_type==="corner"?"4":"×"};if(o.bet_type==="street")return{x:Math.min(...rs.map(r=>r.left))+rs[0].width/2,y:Math.max(...rs.map(r=>r.bottom))-2,label:"3"};if(o.bet_type==="six_line")return{x:(Math.min(...rs.map(r=>r.left))+Math.max(...rs.map(r=>r.right)))/2,y:Math.max(...rs.map(r=>r.bottom))-2,label:"6"};return null}
 function renderHotspots(){const layer=$("#hotspotLayer");layer.innerHTML="";const types=new Set(["split","street","corner","six_line"]);options.filter(o=>types.has(o.bet_type)).forEach(o=>{const p=hotspotPos(o);if(!p)return;const b=document.createElement("button");b.className="bet-hotspot";b.dataset.optionId=o.id;b.style.left=`${p.x}px`;b.style.top=`${p.y}px`;b.textContent=p.label;b.title=`${o.label} · paga ${o.payout_profit}:1`;b.onclick=()=>place(o.id);layer.appendChild(b)});markers()}
-function place(id){if(spinning)return;id=Number(id);const o=byId.get(id),chip=Number(selectedChip),cur=Number(bets.get(id)||0);if(!o||chip<=0)return;if(cur+chip>Number(game.max_bet_per_position))return status(`Massimo ${fmt(game.max_bet_per_position)} sulla stessa posizione.`,true);if(total()+chip>Number(game.max_total_bet))return status(`Massimo ${fmt(game.max_total_bet)} per giro.`,true);bets.set(id,cur+chip);actions.push({id,amount:chip});status();renderBets()}function undo(){const a=actions.pop();if(!a)return;const n=Number(bets.get(a.id)||0)-a.amount;n>0?bets.set(a.id,n):bets.delete(a.id);renderBets()}function clearBets(){bets.clear();actions=[];renderBets()}function remove(id){bets.delete(Number(id));actions=actions.filter(a=>a.id!==Number(id));renderBets()}function repeat(){if(!previous.length)return status("Nessuna puntata precedente.",true);const t=previous.reduce((s,x)=>s+Number(x.amount),0);if(t>Number(game.max_total_bet))return status("La puntata precedente supera il limite attuale.",true);bets.clear();actions=[];previous.forEach(x=>{bets.set(Number(x.option_id),Number(x.amount));actions.push({id:Number(x.option_id),amount:Number(x.amount)})});renderBets()}
+
+function clearResultHighlights(){
+  lastWinningNumber=null;
+  lastWinningOptionIds.clear();
+
+  document
+    .querySelectorAll(
+      ".last-win-number,.last-win-bet"
+    )
+    .forEach(
+      e=>{
+        e.classList.remove(
+          "last-win-number",
+          "last-win-bet"
+        );
+      }
+    );
+}
+
+function setResultHighlights(number){
+  const n=Number(number);
+
+  lastWinningNumber=n;
+  lastWinningOptionIds.clear();
+
+  /*
+   * La risposta server ci dà il numero uscito.
+   * Per sapere quali puntate hanno vinto usiamo ESATTAMENTE
+   * le posizioni che erano ancora presenti in bets al momento
+   * del risultato.
+   */
+  for(const[id]of bets){
+    const option=byId.get(Number(id));
+
+    if(
+      option
+      &&
+      Array.isArray(option.numbers)
+      &&
+      option.numbers
+        .map(Number)
+        .includes(n)
+    ){
+      lastWinningOptionIds.add(
+        Number(id)
+      );
+    }
+  }
+
+  renderResultHighlights();
+}
+
+function renderResultHighlights(){
+  document
+    .querySelectorAll(
+      ".last-win-number,.last-win-bet"
+    )
+    .forEach(
+      e=>{
+        e.classList.remove(
+          "last-win-number",
+          "last-win-bet"
+        );
+      }
+    );
+
+
+  /*
+   * Numero vincente.
+   */
+  if(lastWinningNumber!=null){
+
+    const numberTarget=
+      Number(lastWinningNumber)===0
+      ? $("#zeroCell")
+      : document.querySelector(
+          `[data-number="${Number(lastWinningNumber)}"]`
+        );
+
+
+    numberTarget
+      ?.classList
+      .add(
+        "last-win-number"
+      );
+  }
+
+
+  /*
+   * Tutte le puntate vincenti realmente piazzate
+   * nell'ultimo giro.
+   */
+  for(
+    const id
+    of lastWinningOptionIds
+  ){
+
+    const option=
+      byId.get(
+        Number(id)
+      );
+
+
+    if(!option){
+      continue;
+    }
+
+
+    const target=
+      document.querySelector(
+        `[data-option-id="${option.id}"]`
+      )
+      ||
+      document.querySelector(
+        `[data-code="${option.code}"]`
+      );
+
+
+    target
+      ?.classList
+      .add(
+        "last-win-bet"
+      );
+  }
+}
+
+function place(id){if(spinning)return;id=Number(id);const o=byId.get(id),chip=Number(selectedChip),cur=Number(bets.get(id)||0);if(!o||chip<=0)return;if(cur+chip>Number(game.max_bet_per_position))return status(`Massimo ${fmt(game.max_bet_per_position)} sulla stessa posizione.`,true);if(total()+chip>Number(game.max_total_bet))return status(`Massimo ${fmt(game.max_total_bet)} per giro.`,true);if(bets.size===0&&lastWinningNumber!=null)clearResultHighlights();bets.set(id,cur+chip);actions.push({id,amount:chip});status();renderBets()}function undo(){const a=actions.pop();if(!a)return;const n=Number(bets.get(a.id)||0)-a.amount;n>0?bets.set(a.id,n):bets.delete(a.id);renderBets()}function clearBets(){bets.clear();actions=[];renderBets()}function remove(id){bets.delete(Number(id));actions=actions.filter(a=>a.id!==Number(id));renderBets()}function repeat(){if(!previous.length)return status("Nessuna puntata precedente.",true);const t=previous.reduce((s,x)=>s+Number(x.amount),0);if(t>Number(game.max_total_bet))return status("La puntata precedente supera il limite attuale.",true);if(lastWinningNumber!=null)clearResultHighlights();bets.clear();actions=[];previous.forEach(x=>{bets.set(Number(x.option_id),Number(x.amount));actions.push({id:Number(x.option_id),amount:Number(x.amount)})});renderBets()}
 function renderBets(){$("#totalBetValue").textContent=fmt(total());$("#positionCount").textContent=`${bets.size} ${bets.size===1?"posizione":"posizioni"}`;$("#betsList").innerHTML=bets.size?[...bets].map(([id,a])=>`<div class="bet-line"><span>${byId.get(id)?.label||id}</span><strong>${fmt(a)}</strong><button class="bet-remove" data-rm="${id}">×</button></div>`).join(""):`<div class="empty-bets">Nessuna puntata.</div>`;document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>remove(b.dataset.rm));markers()}
 function markerChipValue(id,totalAmount){for(let i=actions.length-1;i>=0;i--){if(Number(actions[i].id)===Number(id)&&allowedChips.includes(Number(actions[i].amount)))return Number(actions[i].amount)}const sorted=[...allowedChips].map(Number).sort((a,b)=>b-a);return sorted.find(v=>v<=Number(totalAmount))||sorted[sorted.length-1]||1}
-function markers(){document.querySelectorAll(".bet-chip").forEach(e=>e.remove());document.querySelectorAll(".bet-hotspot").forEach(e=>e.classList.remove("has-bet"));for(const[id,a]of bets){const o=byId.get(id);let t=document.querySelector(`[data-option-id="${o?.id}"]`)||document.querySelector(`[data-code="${o?.code}"]`);if(!t)continue;t.classList.add("has-bet");const chipValue=markerChipValue(id,a),s=document.createElement("span");s.className="bet-chip";s.innerHTML=`<img src="./assets/chips/${chipValue}.webp" alt=""><span>${compact(a)}</span>`;t.appendChild(s)}}
+function markers(){document.querySelectorAll(".bet-chip").forEach(e=>e.remove());document.querySelectorAll(".bet-hotspot").forEach(e=>e.classList.remove("has-bet"));for(const[id,a]of bets){const o=byId.get(id);let t=document.querySelector(`[data-option-id="${o?.id}"]`)||document.querySelector(`[data-code="${o?.code}"]`);if(!t)continue;t.classList.add("has-bet");const chipValue=markerChipValue(id,a),s=document.createElement("span");s.className="bet-chip";s.innerHTML=`<img src="./assets/chips/${chipValue}.webp" alt=""><span>${compact(a)}</span>`;t.appendChild(s)}renderResultHighlights()}
 async function play(){if(spinning||!bets.size)return !bets.size&&status("Piazza almeno una puntata.",true);const payload=[...bets].map(([id,a])=>({option_id:Number(id),amount:Number(a)}));busy(true);status("La ruota gira…");try{const{data,error}=await supabase.rpc("play_roulette",{p_game_id:GAME_ID,p_bets:payload});if(error)throw error;previous=payload.map(x=>({...x}));await animateWheel(data.result.number);apply(data);bets.clear();actions=[];renderBets();if("BroadcastChannel"in window){const c=new BroadcastChannel("slot-machine-sync");c.postMessage({type:"balance-changed"});c.close()}localStorage.setItem("slot-machine-balance-sync",String(Date.now()))}catch(e){console.error(e);status(e?.message||String(e),true)}finally{busy(false)}}
-function apply(d){const n=Number(d.result.number),c=d.result.color||color(n);$("#resultBall").className=`result-ball ${c}`;$("#resultBall").textContent=n;$("#resultTitle").textContent=`${n} · ${c==="red"?"ROSSO":c==="black"?"NERO":"VERDE"}`;const wc=Array.isArray(d.winning_bets)?d.winning_bets.length:0;$("#resultSubtitle").textContent=wc?`${wc} ${wc===1?"puntata vincente":"puntate vincenti"}`:"Nessuna puntata vincente";$("#balanceValue").textContent=fmt(d.balance);$("#lastReturnValue").textContent=fmt(d.total_return);const net=Number(d.net_result||0);$("#lastNetValue").textContent=`${net>0?"+":""}${fmt(net)}`;$("#netRow").classList.toggle("net-positive",net>0);$("#netRow").classList.toggle("net-negative",net<0);if(d.xp)updateXp(d.xp.total,d.xp.level);recent.unshift(n);recent=recent.slice(0,15);renderHistory();status(net>0?`Vincita netta: +${fmt(net)} fiche`:net<0?`Risultato netto: ${fmt(net)} fiche`:"Pareggio.")}
+function apply(d){const n=Number(d.result.number),c=d.result.color||color(n);setResultHighlights(n);$("#resultBall").className=`result-ball ${c}`;$("#resultBall").textContent=n;$("#resultTitle").textContent=`${n} · ${c==="red"?"ROSSO":c==="black"?"NERO":"VERDE"}`;const wc=Array.isArray(d.winning_bets)?d.winning_bets.length:0;$("#resultSubtitle").textContent=wc?`${wc} ${wc===1?"puntata vincente":"puntate vincenti"}`:"Nessuna puntata vincente";$("#balanceValue").textContent=fmt(d.balance);$("#lastReturnValue").textContent=fmt(d.total_return);const net=Number(d.net_result||0);$("#lastNetValue").textContent=`${net>0?"+":""}${fmt(net)}`;$("#netRow").classList.toggle("net-positive",net>0);$("#netRow").classList.toggle("net-negative",net<0);if(d.xp)updateXp(d.xp.total,d.xp.level);recent.unshift(n);recent=recent.slice(0,15);renderHistory();status(net>0?`Vincita netta: +${fmt(net)} fiche`:net<0?`Risultato netto: ${fmt(net)} fiche`:"Pareggio.")}
 function renderHistory(){$("#numberHistory").innerHTML=recent.map(n=>`<span class="history-number ${color(n)}">${n}</span>`).join("")}
 async function init(){try{const{data,error}=await supabase.auth.getSession();if(error)throw error;session=data.session;if(!session){location.href="../";return}buildWheel();buildNumbers();await Promise.all([loadProfile(),loadLevels(),loadConfig(),loadOptions(),loadRecent()]);await loadProgress();requestAnimationFrame(()=>{renderHotspots();renderBets()});$("#loadingOverlay").classList.add("hidden")}catch(e){console.error(e);$("#loadingText").textContent="Errore";$("#loadingError").textContent=e?.message||String(e)}}
 $("#homeBtn").onclick=()=>location.href="../";$("#undoBtn").onclick=undo;$("#clearBtn").onclick=clearBets;$("#repeatBtn").onclick=repeat;$("#spinBtn").onclick=play;let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(renderHotspots,100)});document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="visible"&&session&&!spinning){try{await Promise.all([loadProfile(),loadProgress()])}catch(e){console.warn(e)}}});await init();
