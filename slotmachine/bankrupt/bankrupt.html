@@ -1226,6 +1226,39 @@
       }
     }
   
+
+    /* ========================================================
+       PAYLINES VINCENTI
+       ======================================================== */
+
+    #paylineOverlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 60;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .payline-win {
+      fill: none;
+      stroke-width: clamp(4px, .34vw, 8px);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+      opacity: .88;
+      filter:
+        drop-shadow(0 0 2px rgba(255,255,255,.95))
+        drop-shadow(0 0 7px currentColor);
+      animation: paylinePulse .62s ease-in-out infinite alternate;
+    }
+
+    @keyframes paylinePulse {
+      from { opacity: .58; }
+      to { opacity: 1; }
+    }
+
     /* ========================================================
        FIX V5 - ORDINE LIVELLI GRAFICI
        ========================================================
@@ -1300,6 +1333,13 @@
 
       <div id="reelsWrap">
         <div id="reels"></div>
+
+        <svg
+          id="paylineOverlay"
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        ></svg>
       </div>
 
       <div id="topBar">
@@ -1636,6 +1676,12 @@
     const reelsEl =
       $("#reels");
 
+    const reelsWrap =
+      $("#reelsWrap");
+
+    const paylineOverlay =
+      $("#paylineOverlay");
+
     const balanceValue =
       $("#balanceValue");
 
@@ -1777,6 +1823,58 @@
       );
     }
 
+
+
+    // ========================================================
+    // PUNTATA / LINEE - PERSISTENZA PER SLOT
+    // ========================================================
+
+    function stakeStorageKey() {
+      return `slot-machine-stake:${GAME_ID}`;
+    }
+
+    function saveStakeSelection() {
+      if (!state.config) {
+        return;
+      }
+
+      const bets = state.config.game.allowed_bets.map(Number);
+      const lines = state.config.game.allowed_lines.map(Number);
+      const bet = bets[state.betIndex];
+      const activeLines = lines[state.linesIndex];
+
+      if (!Number.isFinite(bet) || !Number.isFinite(activeLines)) {
+        return;
+      }
+
+      try {
+        localStorage.setItem(
+          stakeStorageKey(),
+          JSON.stringify({ bet, activeLines })
+        );
+      } catch {
+        // La slot continua a funzionare anche senza localStorage.
+      }
+    }
+
+    function getSavedStakeSelection() {
+      try {
+        const raw = localStorage.getItem(stakeStorageKey());
+
+        if (!raw) {
+          return null;
+        }
+
+        const parsed = JSON.parse(raw);
+
+        return {
+          bet: Number(parsed.bet),
+          activeLines: Number(parsed.activeLines)
+        };
+      } catch {
+        return null;
+      }
+    }
 
     // ========================================================
     // UI GENERALE
@@ -2446,6 +2544,9 @@
               "winner"
             )
         );
+
+
+      paylineOverlay.replaceChildren();
     }
 
 
@@ -2588,6 +2689,85 @@
     }
 
 
+
+    function drawWinningPaylines(
+      winningLines
+    ) {
+
+      paylineOverlay.replaceChildren();
+
+      if (
+        !Array.isArray(winningLines)
+        || winningLines.length === 0
+        || !state.config
+      ) {
+        return;
+      }
+
+      const reels = Number(state.config.game.reels);
+      const wrapRect = reelsWrap.getBoundingClientRect();
+
+      if (wrapRect.width <= 0 || wrapRect.height <= 0) {
+        return;
+      }
+
+      const colors = [
+        '#ffd84a',
+        '#ff5d5d',
+        '#52e5ff',
+        '#7cff8c',
+        '#ff83e6',
+        '#ff9f43',
+        '#b69cff',
+        '#ffffff'
+      ];
+
+      winningLines.forEach((win, winIndex) => {
+        const line = state.paylinesByNo.get(Number(win.line_no));
+
+        if (!line) {
+          return;
+        }
+
+        const points = [];
+
+        /*
+         * Disegniamo tutta la forma della payline, non soltanto
+         * i simboli consecutivi che hanno pagato. Così si vede
+         * chiaramente quale linea ha vinto.
+         */
+        for (let reel = 0; reel < reels; reel++) {
+          const row = Number(line.pattern[reel]);
+          const cell = getCell(row, reel);
+
+          if (!cell) {
+            continue;
+          }
+
+          const rect = cell.getBoundingClientRect();
+          const x = ((rect.left + rect.width / 2 - wrapRect.left) / wrapRect.width) * 1000;
+          const y = ((rect.top + rect.height / 2 - wrapRect.top) / wrapRect.height) * 1000;
+
+          points.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+        }
+
+        if (points.length < 2) {
+          return;
+        }
+
+        const polyline = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'polyline'
+        );
+
+        polyline.setAttribute('points', points.join(' '));
+        polyline.setAttribute('class', 'payline-win');
+        polyline.setAttribute('stroke', colors[winIndex % colors.length]);
+        polyline.dataset.lineNo = String(win.line_no);
+        paylineOverlay.appendChild(polyline);
+      });
+    }
+
     function highlightWinningLines(
       winningLines
     ) {
@@ -2653,6 +2833,11 @@
           );
         }
       }
+
+
+      drawWinningPaylines(
+        winningLines
+      );
     }
 
 
@@ -2673,6 +2858,32 @@
     // ========================================================
 
     async function loadGame() {
+
+      const previousBets =
+        state.config?.game
+          ?.allowed_bets
+          ?.map(Number)
+        || [];
+
+
+      const previousLines =
+        state.config?.game
+          ?.allowed_lines
+          ?.map(Number)
+        || [];
+
+
+      const previousBet =
+        previousBets[
+          state.betIndex
+        ];
+
+
+      const previousActiveLines =
+        previousLines[
+          state.linesIndex
+        ];
+
 
       showLoading(
         "Caricamento Fraudulent Bankruptcy..."
@@ -2826,17 +3037,61 @@
 
       } else {
 
+        const savedStake =
+          getSavedStakeSelection();
+
+
+        const preferredBet =
+          Number.isFinite(
+            previousBet
+          )
+          ? previousBet
+          : savedStake?.bet;
+
+
+        const preferredLines =
+          Number.isFinite(
+            previousActiveLines
+          )
+          ? previousActiveLines
+          : savedStake?.activeLines;
+
+
+        const restoredBetIndex =
+          bets.indexOf(
+            Number(
+              preferredBet
+            )
+          );
+
+
+        const restoredLinesIndex =
+          lines.indexOf(
+            Number(
+              preferredLines
+            )
+          );
+
+
         state.betIndex =
-          0;
+          restoredBetIndex >= 0
+          ? restoredBetIndex
+          : 0;
 
 
         state.linesIndex =
-          Math.max(
-            0,
-            lines.length - 1
-          );
+          restoredLinesIndex >= 0
+          ? restoredLinesIndex
+          : Math.max(
+              0,
+              lines.length - 1
+            );
 
       }
+
+
+      saveStakeSelection();
+
 
       buildGrid();
 
@@ -4370,6 +4625,8 @@
           % bets.length;
 
 
+        saveStakeSelection();
+
         updateControls();
       }
     );
@@ -4391,6 +4648,8 @@
           )
           % bets.length;
 
+
+        saveStakeSelection();
 
         updateControls();
       }
@@ -4415,6 +4674,8 @@
           % lines.length;
 
 
+        saveStakeSelection();
+
         updateControls();
       }
     );
@@ -4436,6 +4697,8 @@
           )
           % lines.length;
 
+
+        saveStakeSelection();
 
         updateControls();
       }
@@ -4862,13 +5125,41 @@
 
           if (
             event === "SIGNED_IN"
-            ||
+          ) {
+
+            /*
+             * Supabase può emettere SIGNED_IN anche tornando
+             * sulla scheda già autenticata. Se il gioco è già
+             * caricato aggiorniamo soltanto la sessione.
+             */
+            state.session =
+              session;
+
+
+            if (
+              !state.config
+            ) {
+
+              await handleSession(
+                session
+              );
+            }
+
+
+            return;
+          }
+
+
+          if (
             event === "USER_UPDATED"
           ) {
 
             await handleSession(
               session
             );
+
+
+            return;
           }
 
 
