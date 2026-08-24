@@ -335,6 +335,104 @@
       .wheel-stage { width: min(92vw,620px); }
       header { align-items: flex-start; }
     }
+  
+    .weekly-prize-card {
+      margin-top: 18px;
+      padding: clamp(16px,2vw,24px);
+      border: 1px solid rgba(244,201,93,.30);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: 0 18px 45px rgba(0,0,0,.30);
+    }
+
+    .weekly-prize-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .weekly-prize-head h2 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: clamp(19px,2.3vw,27px);
+    }
+
+    .weekly-prize-head p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .weekly-prize-content {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.23);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .weekly-prize-position {
+      color: var(--gold-light);
+      font-size: clamp(21px,3vw,34px);
+      font-weight: 1000;
+    }
+
+    .weekly-prize-detail {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .weekly-prize-amount {
+      margin-top: 4px;
+      color: white;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    #weeklyPrizeClaimBtn {
+      min-width: 190px;
+      min-height: 50px;
+      border: 1px solid #ffe59d;
+      border-radius: 13px;
+      padding: 9px 15px;
+      background: linear-gradient(180deg,#e5a63b,#934d12);
+      color: white;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    #weeklyPrizeClaimBtn:disabled {
+      opacity: .48;
+      cursor: default;
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.14);
+    }
+
+    #weeklyPrizeStatus {
+      min-height: 1.4em;
+      margin-top: 9px;
+      color: #ffd884;
+      font-size: 13px;
+    }
+
+    @media (max-width: 620px) {
+      .weekly-prize-content {
+        grid-template-columns: 1fr;
+      }
+
+      #weeklyPrizeClaimBtn {
+        width: 100%;
+        min-width: 0;
+      }
+    }
+
   </style>
 </head>
 
@@ -387,6 +485,31 @@
         </div>
       </aside>
     </main>
+
+    <section class="weekly-prize-card">
+      <div class="weekly-prize-head">
+        <div>
+          <h2>🏆 Premio classifica settimanale</h2>
+          <p>Se eri tra i primi 3 della settimana scorsa puoi riscuotere qui il premio una sola volta.</p>
+        </div>
+      </div>
+
+      <div class="weekly-prize-content">
+        <div>
+          <div id="weeklyPrizePosition" class="weekly-prize-position">—</div>
+          <div id="weeklyPrizeAmount" class="weekly-prize-amount"></div>
+          <div id="weeklyPrizeDetail" class="weekly-prize-detail">
+            Controllo del premio in corso...
+          </div>
+        </div>
+
+        <button id="weeklyPrizeClaimBtn" type="button" disabled>
+          RISCUOTI PREMIO
+        </button>
+      </div>
+
+      <div id="weeklyPrizeStatus"></div>
+    </section>
   </div>
 
   <div id="loading" class="loading">
@@ -429,6 +552,12 @@
     const loading = $("#loading");
     const loadingText = $("#loadingText");
 
+    const weeklyPrizePosition = $("#weeklyPrizePosition");
+    const weeklyPrizeAmount = $("#weeklyPrizeAmount");
+    const weeklyPrizeDetail = $("#weeklyPrizeDetail");
+    const weeklyPrizeClaimBtn = $("#weeklyPrizeClaimBtn");
+    const weeklyPrizeStatus = $("#weeklyPrizeStatus");
+
     const nf = new Intl.NumberFormat("it-IT");
 
     const state = {
@@ -439,7 +568,9 @@
       spinning: false,
       rotation: 0,
       result: null,
-      nextAvailableAt: null
+      nextAvailableAt: null,
+      weeklyPrize: null,
+      weeklyClaimRunning: false
     };
 
 
@@ -668,6 +799,225 @@
       spinBtn.textContent = "GIÀ RISCOSSO";
     }
 
+    function renderWeeklyPrizeState(data) {
+
+      state.weeklyPrize =
+        data
+        || null;
+
+
+      weeklyPrizeStatus.textContent =
+        "";
+
+
+      if (!data?.eligible) {
+
+        weeklyPrizePosition.textContent =
+          "Non classificato";
+
+        weeklyPrizeAmount.textContent =
+          "";
+
+        weeklyPrizeDetail.textContent =
+          "Non eri tra i primi 3 della settimana precedente.";
+
+        weeklyPrizeClaimBtn.disabled =
+          true;
+
+        weeklyPrizeClaimBtn.textContent =
+          "NON DISPONIBILE";
+
+        return;
+      }
+
+
+      const medals = {
+        1: "🥇 1° posto",
+        2: "🥈 2° posto",
+        3: "🥉 3° posto"
+      };
+
+
+      weeklyPrizePosition.textContent =
+        medals[
+          Number(
+            data.position
+          )
+        ]
+        || `${data.position}° posto`;
+
+
+      weeklyPrizeDetail.textContent =
+        `Punteggio settimana scorsa: ${formatChips(data.score)}.`;
+
+
+      if (!data.configured) {
+
+        weeklyPrizeAmount.textContent =
+          "Premio non ancora configurato";
+
+        weeklyPrizeClaimBtn.disabled =
+          true;
+
+        weeklyPrizeClaimBtn.textContent =
+          "IN ATTESA";
+
+        return;
+      }
+
+
+      weeklyPrizeAmount.textContent =
+        `Premio: ${formatChips(data.reward)} fiche`;
+
+
+      if (data.claimed) {
+
+        weeklyPrizeDetail.textContent +=
+          " Premio già riscosso.";
+
+        weeklyPrizeClaimBtn.disabled =
+          true;
+
+        weeklyPrizeClaimBtn.textContent =
+          "GIÀ RISCOSSO";
+
+        return;
+      }
+
+
+      weeklyPrizeClaimBtn.disabled =
+        data.available !== true;
+
+      weeklyPrizeClaimBtn.textContent =
+        data.available === true
+          ? "RISCUOTI PREMIO"
+          : "NON DISPONIBILE";
+    }
+
+
+    async function loadWeeklyPrizeState() {
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "get_weekly_prize_state"
+        );
+
+
+      if (error) {
+
+        console.warn(
+          "Premio settimanale:",
+          error
+        );
+
+
+        weeklyPrizePosition.textContent =
+          "Premio settimanale";
+
+        weeklyPrizeAmount.textContent =
+          "";
+
+        weeklyPrizeDetail.textContent =
+          "Impossibile verificare il premio.";
+
+        weeklyPrizeStatus.textContent =
+          error.message;
+
+        weeklyPrizeClaimBtn.disabled =
+          true;
+
+        return;
+      }
+
+
+      renderWeeklyPrizeState(
+        data
+      );
+    }
+
+
+    async function claimWeeklyPrize() {
+
+      if (
+        state.weeklyClaimRunning
+        ||
+        state.weeklyPrize?.available !== true
+      ) {
+        return;
+      }
+
+
+      state.weeklyClaimRunning =
+        true;
+
+      weeklyPrizeClaimBtn.disabled =
+        true;
+
+      weeklyPrizeClaimBtn.textContent =
+        "RISCOSSIONE...";
+
+      weeklyPrizeStatus.textContent =
+        "Accredito del premio in corso...";
+
+
+      try {
+
+        const {
+          data,
+          error
+        } =
+          await supabase.rpc(
+            "claim_weekly_prize"
+          );
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        weeklyPrizeStatus.textContent =
+          `Premio riscosso: +${formatChips(data.reward)} fiche. Nuovo saldo: ${formatChips(data.balance)}.`;
+
+
+        notifyBalanceChanged();
+
+
+        await loadWeeklyPrizeState();
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        weeklyPrizeStatus.textContent =
+          error?.message
+          || String(
+            error
+          );
+
+
+        await loadWeeklyPrizeState();
+
+      } finally {
+
+        state.weeklyClaimRunning =
+          false;
+      }
+    }
+
+
+    weeklyPrizeClaimBtn.addEventListener(
+      "click",
+      claimWeeklyPrize
+    );
+
+
     async function loadState() {
       const { data, error } =
         await supabase.rpc("get_daily_bonus_state");
@@ -775,7 +1125,14 @@
         window.location.href = "./index.html";
       } else {
         state.session = data.session;
-        await loadState();
+
+        await Promise.all(
+          [
+            loadState(),
+            loadWeeklyPrizeState()
+          ]
+        );
+
         loading.classList.add("hidden");
       }
     } catch (error) {

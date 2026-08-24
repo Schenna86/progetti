@@ -909,6 +909,74 @@
         min-height: 240px;
       }
     }
+  
+    .profile-pill {
+      color: white;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .profile-pill:hover {
+      border-color: rgba(255,225,154,.92);
+      box-shadow: 0 0 14px rgba(231,182,84,.14);
+    }
+
+    .previous-week-podium {
+      display: grid;
+      gap: 7px;
+      margin-top: 9px;
+    }
+
+    .previous-podium-row {
+      display: grid;
+      grid-template-columns: 31px minmax(0,1fr) auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 38px;
+      padding: 7px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.055);
+    }
+
+    .previous-podium-row.place-1 {
+      border-color: rgba(255,217,102,.5);
+      background: rgba(255,202,61,.10);
+    }
+
+    .previous-podium-row.place-2 {
+      border-color: rgba(220,228,235,.28);
+    }
+
+    .previous-podium-row.place-3 {
+      border-color: rgba(202,134,83,.32);
+    }
+
+    .previous-podium-medal {
+      text-align: center;
+      font-size: 19px;
+    }
+
+    .previous-podium-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 850;
+    }
+
+    .previous-podium-score {
+      color: #ffe4a2;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .podium-empty {
+      padding: 8px 2px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
   </style>
 </head>
 
@@ -924,9 +992,9 @@
         </div>
 
         <div class="header-actions">
-          <div class="user-pill">
+          <button id="profileBtn" class="user-pill profile-pill" type="button" title="Apri profilo">
             👤 <strong id="usernameValue">—</strong>
-          </div>
+          </button>
 
           <div class="chip-pill">
             🪙 <strong id="balanceValue">0</strong>
@@ -935,11 +1003,7 @@
           <button id="dailyBonusBtn" class="daily-bonus-btn" type="button">
             🎡 Bonus giornaliero
           </button>
-<!-- 
-          <button id="statsBtn" class="stats-btn" type="button">
-            📊 Statistiche
-          </button>
--->
+
           <button id="refreshBtn" class="icon-btn" type="button" title="Aggiorna">↻</button>
           <button id="logoutBtn" class="icon-btn" type="button" title="Esci">↪</button>
         </div>
@@ -976,11 +1040,11 @@
           </div>
 
           <div class="category-nav" id="categoryNav">
-            <button class="category-nav-btn" type="button" data-category-target="category-slot">🎰 Slot</button>
-            <button class="category-nav-btn" type="button" data-category-target="category-roulette">🎡 Roulette</button>
-            <button class="category-nav-btn" type="button" data-category-target="category-blackjack">🂡 Blackjack</button>
-            <button class="category-nav-btn" type="button" data-category-target="category-cards">🃏 Carte</button>
-          </div>
+ <button class="category-nav-btn" type="button" data-category-target="category-slot">🎰 Slot</button>
+<button class="category-nav-btn" type="button" data-category-target="category-roulette">🎡 Roulette</button>
+<button class="category-nav-btn" type="button" data-category-target="category-tombola">🎱 Tombola</button>
+<button class="category-nav-btn" type="button" data-category-target="category-blackjack">🂡 Blackjack</button>
+<button class="category-nav-btn" type="button" data-category-target="category-cards">🃏 Carte</button>         </div>
 
           <div id="games" class="games"></div>
         </section>
@@ -998,11 +1062,12 @@
 
           <div class="leaderboard-wrap">
             <div id="previousWinner" class="previous-winner">
-              <div class="previous-winner-title">🏆 Campione settimana scorsa</div>
-              <div class="previous-winner-main">
-                <div id="previousWinnerName" class="previous-winner-name">—</div>
-                <div id="previousWinnerScore" class="previous-winner-score"></div>
+              <div class="previous-winner-title">🏆 Podio settimana scorsa</div>
+
+              <div id="previousWeekPodium" class="previous-week-podium">
+                <div class="podium-empty">—</div>
               </div>
+
               <div id="previousWinnerWeek" class="previous-winner-week">—</div>
             </div>
 
@@ -1012,84 +1077,6 @@
         </aside>
 
       </div>
-
-
-      <section class="panel stats-panel">
-        <div class="panel-head">
-          <div>
-            <h2>Le mie statistiche</h2>
-            <small>Riepilogo complessivo di Slot e Roulette</small>
-          </div>
-
-          <button id="historyRefreshBtn" class="small-btn" type="button">
-            Aggiorna
-          </button>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">Giocate totali</div>
-            <div id="statTotalPlays" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Totale giocato</div>
-            <div id="statTotalBet" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Totale vinto</div>
-            <div id="statTotalWin" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Miglior vincita</div>
-            <div id="statBestWin" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Spin slot</div>
-            <div id="statSlotSpins" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Giri roulette</div>
-            <div id="statRouletteSpins" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Bonus slot</div>
-            <div id="statBonusCount" class="stat-value">0</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-label">Netto gioco</div>
-            <div id="statNet" class="stat-value">0</div>
-          </div>
-        </div>
-
-        <div class="history-wrap">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>Quando</th>
-                <th>Gioco</th>
-                <th>Tipo</th>
-                <th>Esito</th>
-                <th>Giocato</th>
-                <th>Vincita</th>
-                <th>Netto</th>
-              </tr>
-            </thead>
-
-            <tbody id="historyBody">
-              <tr>
-                <td colspan="7">Nessuna giocata.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
 
     </div>
   </div>
@@ -1101,7 +1088,6 @@
       <p>Usa il tuo account per giocare e partecipare alla classifica.</p>
 
       <div class="auth-grid">
-        <input id="usernameInput" type="text" autocomplete="username" placeholder="Username (solo registrazione)" />
         <input id="emailInput" type="email" autocomplete="email" placeholder="Email" />
         <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Password" />
 
@@ -1201,11 +1187,8 @@
     const leaderboardEl =
       $("#leaderboard");
 
-    const previousWinnerName =
-      $("#previousWinnerName");
-
-    const previousWinnerScore =
-      $("#previousWinnerScore");
+    const previousWeekPodium =
+      $("#previousWeekPodium");
 
     const previousWinnerWeek =
       $("#previousWinnerWeek");
@@ -1222,8 +1205,8 @@
     const dailyBonusBtn =
       $("#dailyBonusBtn");
 
-    const statsBtn =
-      $("#statsBtn");
+    const profileBtn =
+      $("#profileBtn");
 
     const leaderRefreshBtn =
       $("#leaderRefreshBtn");
@@ -1233,9 +1216,6 @@
 
     const authOverlay =
       $("#authOverlay");
-
-    const usernameInput =
-      $("#usernameInput");
 
     const emailInput =
       $("#emailInput");
@@ -1263,36 +1243,6 @@
 
     const loadError =
       $("#loadError");
-
-    const historyRefreshBtn =
-      $("#historyRefreshBtn");
-
-    const statTotalPlays =
-      $("#statTotalPlays");
-
-    const statTotalBet =
-      $("#statTotalBet");
-
-    const statTotalWin =
-      $("#statTotalWin");
-
-    const statBestWin =
-      $("#statBestWin");
-
-    const statSlotSpins =
-      $("#statSlotSpins");
-
-    const statRouletteSpins =
-      $("#statRouletteSpins");
-
-    const statBonusCount =
-      $("#statBonusCount");
-
-    const statNet =
-      $("#statNet");
-
-    const historyBody =
-      $("#historyBody");
 
     const referenceOverlay = $("#referenceOverlay");
     const referenceTitle = $("#referenceTitle");
@@ -2045,6 +1995,53 @@ function formatXp(value) {
     }
 
 
+    async function ensureUsernameOrRedirect() {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            "profiles"
+          )
+          .select(
+            "username"
+          )
+          .eq(
+            "user_id",
+            currentSession.user.id
+          )
+          .maybeSingle();
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      const username =
+        String(
+          data?.username
+          || ""
+        )
+          .trim();
+
+
+      if (!username) {
+
+        window.location.replace(
+          "./profile.html?setup=1"
+        );
+
+        return false;
+      }
+
+
+      return true;
+    }
+
+
     // ========================================================
     // CASINO GAMES
     // ========================================================
@@ -2064,6 +2061,13 @@ function formatXp(value) {
         title: "Roulette",
         description: "Roulette europea e future varianti"
       },
+	   {
+    type: "tombola",
+    id: "category-tombola",
+    icon: "🎱",
+    title: "Tombola",
+    description: "Tombola 1–90 contro il banco e multiplayer"
+  },
       {
         type: "blackjack",
         id: "category-blackjack",
@@ -2369,7 +2373,15 @@ function formatXp(value) {
           "Marketplace"
         );
       }
-
+	  
+	  
+		if (
+		game.game_type === "tombola"
+		) {
+		tags.push("1–90");
+		tags.push("Fino a 10 cartelle");
+		tags.push("RTP 97,42%");
+		}
 
       return tags
         .map(
@@ -2606,7 +2618,7 @@ function formatXp(value) {
 
 
     // ========================================================
-    // CAMPIONE SETTIMANA PRECEDENTE
+    // PODIO SETTIMANA PRECEDENTE
     // ========================================================
 
     async function loadPreviousWinner() {
@@ -2616,7 +2628,7 @@ function formatXp(value) {
         error
       } =
         await supabase.rpc(
-          "get_previous_week_winner"
+          "get_previous_week_top3"
         );
 
 
@@ -2642,32 +2654,47 @@ function formatXp(value) {
         );
 
 
-      const winner =
-        data?.winner;
+      const top =
+        Array.isArray(
+          data?.top
+        )
+          ? data.top
+          : [];
 
 
-      if (
-        !winner?.username
-      ) {
+      if (!top.length) {
 
-        previousWinnerName.textContent =
-          "Nessun vincitore";
-
-        previousWinnerScore.textContent =
-          "";
+        previousWeekPodium.innerHTML =
+          `<div class="podium-empty">Nessun classificato.</div>`;
 
         return;
       }
 
 
-      previousWinnerName.textContent =
-        winner.username;
+      const medals =
+        [
+          "🥇",
+          "🥈",
+          "🥉"
+        ];
 
 
-      previousWinnerScore.textContent =
-        formatNumber(
-          winner.score
-        );
+      previousWeekPodium.innerHTML =
+        top
+          .slice(
+            0,
+            3
+          )
+          .map(
+            (row, index) => `
+              <div class="previous-podium-row place-${index + 1}">
+                <div class="previous-podium-medal">${medals[index]}</div>
+                <div class="previous-podium-name">${escapeHtml(row.username)}</div>
+                <div class="previous-podium-score">${formatNumber(row.score)}</div>
+              </div>
+            `
+          )
+          .join("");
     }
 
 
@@ -2789,271 +2816,6 @@ function formatXp(value) {
 
 
     // ========================================================
-    // STATISTICHE PERSONALI
-    // ========================================================
-
-    async function loadPlayerHistory() {
-
-      historyRefreshBtn.disabled =
-        true;
-
-
-      try {
-
-        const {
-          data,
-          error
-        } =
-          await supabase.rpc(
-            "get_player_game_history",
-            {
-              p_limit: 10
-            }
-          );
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        renderPlayerHistory(
-          data
-        );
-
-      } finally {
-
-        historyRefreshBtn.disabled =
-          false;
-      }
-    }
-
-
-    function renderPlayerHistory(
-      data
-    ) {
-
-      const summary =
-        data?.summary
-        || {};
-
-
-      statTotalPlays.textContent =
-        formatNumber(
-          summary.total_plays
-          ?? summary.total_spins
-        );
-
-
-      statTotalBet.textContent =
-        formatNumber(
-          summary.total_bet
-        );
-
-
-      statTotalWin.textContent =
-        formatNumber(
-          summary.total_win
-        );
-
-
-      statBestWin.textContent =
-        formatNumber(
-          summary.best_win
-        );
-
-
-      statSlotSpins.textContent =
-        formatNumber(
-          summary.slot_spins
-          ?? summary.total_spins
-        );
-
-
-      statRouletteSpins.textContent =
-        formatNumber(
-          summary.roulette_spins
-        );
-
-
-      statBonusCount.textContent =
-        formatNumber(
-          summary.bonus_count
-        );
-
-
-      const net =
-        Number(
-          summary.net
-          || 0
-        );
-
-
-      statNet.textContent =
-        (
-          net > 0
-          ? "+"
-          : ""
-        )
-        +
-        formatNumber(
-          net
-        );
-
-
-      statNet.style.color =
-        net > 0
-        ? "#8bf39a"
-        : net < 0
-          ? "#ff9d9d"
-          : "var(--gold-light)";
-
-
-      const rows =
-        data?.last_plays
-        || data?.last_spins
-        || [];
-
-
-      if (
-        !rows.length
-      ) {
-
-        historyBody.innerHTML = `
-          <tr>
-            <td colspan="7">Nessuna giocata.</td>
-          </tr>
-        `;
-
-        return;
-      }
-
-
-      const dateFormatter =
-        new Intl.DateTimeFormat(
-          "it-IT",
-          {
-            day: "2-digit",
-            month: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "Europe/Rome"
-          }
-        );
-
-
-      historyBody.innerHTML =
-        rows
-          .map(
-            row => {
-
-              const wager =
-                Number(
-                  row.wager
-                  || 0
-                );
-
-
-              const totalWin =
-                Number(
-                  row.total_win
-                  || 0
-                );
-
-
-              const netResult =
-                totalWin
-                -
-                wager;
-
-
-              const resultClass =
-                netResult > 0
-                ? "history-win"
-                : netResult < 0
-                  ? "history-loss"
-                  : "";
-
-
-              const isRoulette =
-                row.game_type ===
-                "roulette";
-
-
-              const type =
-                isRoulette
-                ? "ROULETTE"
-                : row.play_type === "free"
-                  ? `<span class="history-free">FREE</span>`
-                  : "SPIN";
-
-
-              const outcome =
-                isRoulette
-                ? (
-                    row.result_number != null
-                    ? `Numero ${formatNumber(row.result_number)}`
-                    : "—"
-                  )
-                : (
-                    Number(row.active_lines || 0) > 0
-                    ? `${formatNumber(row.active_lines)} linee`
-                    : "—"
-                  );
-
-
-              const bonusText =
-                !isRoulette
-                &&
-                Number(
-                  row.bonus_win
-                  || 0
-                ) > 0
-                ? ` <small>(bonus +${formatNumber(row.bonus_win)})</small>`
-                : "";
-
-
-              return `
-                <tr>
-                  <td>${escapeHtml(dateFormatter.format(new Date(row.created_at)))}</td>
-                  <td>${escapeHtml(row.game_name || row.game_id)}</td>
-                  <td>${type}</td>
-                  <td>${escapeHtml(outcome)}</td>
-                  <td>${formatNumber(wager)}</td>
-                  <td>
-                    ${totalWin > 0 ? "+" : ""}${formatNumber(totalWin)}
-                    ${bonusText}
-                  </td>
-                  <td class="${resultClass}">
-                    ${netResult > 0 ? "+" : ""}${formatNumber(netResult)}
-                  </td>
-                </tr>
-              `;
-            }
-          )
-          .join("");
-    }
-
-
-    historyRefreshBtn.addEventListener(
-      "click",
-      loadPlayerHistory
-    );
-
-
-/*    statsBtn.addEventListener(
-      "click",
-      () => {
-
-        window.location.href =
-          "./stats.html";
-      }
-    );
-	*/
-	
-
-
-    // ========================================================
     // DAILY BONUS
     // ========================================================
 
@@ -3129,6 +2891,16 @@ function formatXp(value) {
     );
 
 
+    profileBtn.addEventListener(
+      "click",
+      () => {
+
+        window.location.href =
+          "./profile.html";
+      }
+    );
+
+
     // ========================================================
     // REFRESH HOME
     // ========================================================
@@ -3156,7 +2928,6 @@ function formatXp(value) {
             loadGames(),
             loadLeaderboard(),
             loadPreviousWinner(),
-            loadPlayerHistory(),
             loadDailyBonusState(),
             loadUserProgression()
           ]
@@ -3364,20 +3135,6 @@ async function loadUserProgression() {
 
     async function signup() {
 
-      const username =
-        usernameInput.value
-          .trim();
-
-
-      if (!username) {
-
-        authStatus.textContent =
-          "Inserisci uno username.";
-
-        return;
-      }
-
-
       authStatus.textContent =
         "Registrazione...";
 
@@ -3394,13 +3151,7 @@ async function loadUserProgression() {
                   .trim(),
 
               password:
-                passwordInput.value,
-
-              options: {
-                data: {
-                  username
-                }
-              }
+                passwordInput.value
             }
           );
 
@@ -3414,9 +3165,7 @@ async function loadUserProgression() {
       }
 
 
-      if (
-        !data.session
-      ) {
+      if (!data.session) {
 
         authStatus.textContent =
           "Registrazione completata. Controlla l'email se la conferma è attiva.";
@@ -3493,22 +3242,8 @@ async function loadUserProgression() {
         myRankingEl.innerHTML =
           "";
 
-        statTotalPlays.textContent = "0";
-        statTotalBet.textContent = "0";
-        statTotalWin.textContent = "0";
-        statBestWin.textContent = "0";
-        statSlotSpins.textContent = "0";
-        statRouletteSpins.textContent = "0";
-        statBonusCount.textContent = "0";
-        statNet.textContent = "0";
 
-        historyBody.innerHTML = `
-          <tr>
-            <td colspan="7">Nessuna giocata.</td>
-          </tr>
-        `;
-
-        authOverlay.classList.remove(
+authOverlay.classList.remove(
           "hidden"
         );
 
@@ -3523,7 +3258,28 @@ async function loadUserProgression() {
       );
 
 
-      await loadHome();
+      try {
+
+        const usernameReady =
+          await ensureUsernameOrRedirect();
+
+
+        if (!usernameReady) {
+
+          hideLoading();
+
+          return;
+        }
+
+
+        await loadHome();
+
+      } catch (error) {
+
+        showFatal(
+          error
+        );
+      }
     }
 
 
