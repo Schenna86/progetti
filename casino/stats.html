@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07151d" />
+  <title>Statistiche Casino</title>
+
+  <style>
+    :root {
+      --bg: #07151d;
+      --panel: rgba(10,32,43,.94);
+      --gold: #e7b654;
+      --gold-light: #ffe19a;
+      --text: #f4f7f9;
+      --muted: #9eb0b8;
+      --ok: #8bf39a;
+      --danger: #ff9d9d;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 50% 0%, #163b4d 0%, #091820 45%, #040b10 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .shell {
+      width: min(1400px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: clamp(26px, 4vw, 46px);
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid rgba(231,182,84,.55);
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: rgba(4,16,23,.8);
+      color: white;
+    }
+
+    .category {
+      margin: 22px 0 10px;
+      color: var(--gold-light);
+      font-size: 20px;
+    }
+
+    .games {
+      display: grid;
+      gap: 16px;
+    }
+
+    .game-card {
+      border: 1px solid rgba(231,182,84,.34);
+      border-radius: 18px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(15,43,55,.96), rgba(6,22,30,.97));
+      box-shadow:
+        0 14px 35px rgba(0,0,0,.26);
+    }
+
+    .game-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 17px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .game-head h2 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: 21px;
+    }
+
+    .game-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .type-badge {
+      display: inline-block;
+      margin-right: 6px;
+      padding: 3px 7px;
+      border: 1px solid rgba(231,182,84,.35);
+      border-radius: 999px;
+      color: var(--gold-light);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+
+    .rtp-box {
+      text-align: right;
+      min-width: 150px;
+    }
+
+    .rtp-box small {
+      display: block;
+      color: var(--muted);
+    }
+
+    .rtp-box strong {
+      color: var(--gold-light);
+      font-size: 25px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rtp-target {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 10px;
+      padding: 16px;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 12px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.07);
+      background: rgba(0,0,0,.2);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stat-value {
+      margin-top: 4px;
+      color: white;
+      font-size: clamp(17px, 2vw, 25px);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stat-value.good { color: var(--ok); }
+    .stat-value.bad { color: var(--danger); }
+    .stat-value.gold { color: var(--gold-light); }
+
+    .game-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 0 16px 15px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .empty,
+    .error {
+      padding: 35px 20px;
+      border: 1px solid rgba(231,182,84,.3);
+      border-radius: 16px;
+      background: var(--panel);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .error {
+      color: #ffb0b0;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: grid;
+      place-items: center;
+      background: rgba(4,11,16,.95);
+    }
+
+    .loading.hidden {
+      display: none;
+    }
+
+    .loader {
+      width: 58px;
+      height: 58px;
+      border: 6px solid rgba(255,255,255,.12);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1000px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 650px) {
+      body { padding: 12px; }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .game-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .rtp-box {
+        text-align: left;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="shell">
+
+    <header>
+      <div>
+        <h1>Statistiche globali</h1>
+        <div class="subtitle">
+          Slot e Roulette · dati reali registrati dal Casino Core
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="refreshBtn" class="btn" type="button">↻ Aggiorna</button>
+        <button id="homeBtn" class="btn" type="button">← Home</button>
+      </div>
+    </header>
+
+    <main id="games" class="games"></main>
+
+  </div>
+
+
+  <div id="loading" class="loading">
+    <div class="loader"></div>
+  </div>
+
+
+  <script type="module">
+
+    import {
+      createClient
+    } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+
+    const SUPABASE_URL =
+      "https://jhpppwqdaceratwjnbzi.supabase.co";
+
+
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
+
+
+    const supabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+
+    const gamesEl =
+      document.querySelector(
+        "#games"
+      );
+
+
+    const loading =
+      document.querySelector(
+        "#loading"
+      );
+
+
+    const refreshBtn =
+      document.querySelector(
+        "#refreshBtn"
+      );
+
+
+    const homeBtn =
+      document.querySelector(
+        "#homeBtn"
+      );
+
+
+    const nf =
+      new Intl.NumberFormat(
+        "it-IT"
+      );
+
+
+    function formatNumber(
+      value
+    ) {
+
+      return nf.format(
+        Number(
+          value
+          || 0
+        )
+      );
+    }
+
+
+    function formatRtp(
+      value
+    ) {
+
+      if (
+        value == null
+      ) {
+
+        return "—";
+      }
+
+
+      return (
+        Number(
+          value
+        )
+          .toFixed(3)
+          .replace(
+            ".",
+            ","
+          )
+        +
+        "%"
+      );
+    }
+
+
+    function formatDate(
+      value
+    ) {
+
+      if (
+        !value
+      ) {
+
+        return "—";
+      }
+
+
+      return new Intl.DateTimeFormat(
+        "it-IT",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Europe/Rome"
+        }
+      )
+        .format(
+          new Date(
+            value
+          )
+        );
+    }
+
+
+    function escapeHtml(
+      value
+    ) {
+
+      return String(
+        value
+        ?? ""
+      )
+        .replaceAll(
+          "&",
+          "&amp;"
+        )
+        .replaceAll(
+          "<",
+          "&lt;"
+        )
+        .replaceAll(
+          ">",
+          "&gt;"
+        )
+        .replaceAll(
+          '"',
+          "&quot;"
+        )
+        .replaceAll(
+          "'",
+          "&#039;"
+        );
+    }
+
+
+    function stat(
+      label,
+      value,
+      cssClass = ""
+    ) {
+
+      return `
+        <div class="stat">
+          <div class="stat-label">
+            ${escapeHtml(label)}
+          </div>
+
+          <div class="stat-value ${cssClass}">
+            ${escapeHtml(value)}
+          </div>
+        </div>
+      `;
+    }
+
+
+    function renderSlotStats(
+      game
+    ) {
+
+      const d =
+        game.details
+        || {};
+
+
+      return [
+        stat(
+          "Spin totali",
+          formatNumber(
+            d.total_spins
+          )
+        ),
+
+        stat(
+          "Spin pagati",
+          formatNumber(
+            d.paid_spins
+          )
+        ),
+
+        stat(
+          "Free spin",
+          formatNumber(
+            d.free_spins
+          )
+        ),
+
+        stat(
+          "Giocatori unici",
+          formatNumber(
+            game.unique_players
+          )
+        ),
+
+        stat(
+          "Bonus completati",
+          formatNumber(
+            d.bonus_count
+          )
+        ),
+
+        stat(
+          "Totale giocato",
+          formatNumber(
+            game.total_bet
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Vincite spin",
+          formatNumber(
+            d.spin_win
+          )
+        ),
+
+        stat(
+          "Vincite bonus",
+          formatNumber(
+            d.bonus_win
+          )
+        ),
+
+        stat(
+          "Totale vinto",
+          formatNumber(
+            game.total_win
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Miglior vincita",
+          formatNumber(
+            game.best_win
+          ),
+          "good"
+        )
+      ]
+        .join("");
+    }
+
+
+    function renderRouletteStats(
+      game
+    ) {
+
+      const d =
+        game.details
+        || {};
+
+
+      const zeroPct =
+        Number(
+          d.total_spins
+          || 0
+        ) > 0
+        ? (
+            Number(
+              d.zero_count
+              || 0
+            )
+            /
+            Number(
+              d.total_spins
+            )
+            *
+            100
+          )
+            .toFixed(3)
+            .replace(
+              ".",
+              ","
+            )
+          +
+          "%"
+        : "—";
+
+
+      return [
+        stat(
+          "Giri totali",
+          formatNumber(
+            d.total_spins
+          )
+        ),
+
+        stat(
+          "Giocatori unici",
+          formatNumber(
+            game.unique_players
+          )
+        ),
+
+        stat(
+          "Giri con ritorno",
+          formatNumber(
+            d.rounds_with_return
+          )
+        ),
+
+        stat(
+          "Giri in profitto",
+          formatNumber(
+            d.profitable_rounds
+          )
+        ),
+
+        stat(
+          "Uscite dello 0",
+          `${formatNumber(d.zero_count)} · ${zeroPct}`
+        ),
+
+        stat(
+          "Totale giocato",
+          formatNumber(
+            game.total_bet
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Totale restituito",
+          formatNumber(
+            game.total_win
+          ),
+          "gold"
+        ),
+
+        stat(
+          "Puntata media",
+          formatNumber(
+            Math.round(
+              Number(
+                d.average_bet
+                || 0
+              )
+            )
+          )
+        ),
+
+        stat(
+          "Miglior ritorno",
+          formatNumber(
+            game.best_win
+          ),
+          "good"
+        ),
+
+        stat(
+          "Netto giocatori",
+          (
+            Number(
+              game.net
+              || 0
+            ) > 0
+            ? "+"
+            : ""
+          )
+          +
+          formatNumber(
+            game.net
+          ),
+          Number(game.net || 0) > 0
+            ? "good"
+            : Number(game.net || 0) < 0
+              ? "bad"
+              : ""
+        )
+      ]
+        .join("");
+    }
+
+
+    function gameMeta(
+      game
+    ) {
+
+      const d =
+        game.details
+        || {};
+
+
+      if (
+        game.game_type ===
+        "roulette"
+      ) {
+
+        return `
+          <span class="type-badge">Roulette</span>
+          ${escapeHtml(
+            d.variant === "european"
+            ? "Europea · singolo zero"
+            : d.variant || ""
+          )}
+          · ID ${escapeHtml(game.game_id)}
+        `;
+      }
+
+
+      return `
+        <span class="type-badge">Slot</span>
+        ${formatNumber(d.reels)}×${formatNumber(d.rows)}
+        · ${formatNumber(d.max_lines)} linee
+        · ID ${escapeHtml(game.game_id)}
+      `;
+    }
+
+
+    function render(
+      data
+    ) {
+
+      const games =
+        data?.games
+        || [];
+
+
+      if (
+        !games.length
+      ) {
+
+        gamesEl.innerHTML =
+          `<div class="empty">Nessun gioco disponibile.</div>`;
+
+        return;
+      }
+
+
+      gamesEl.innerHTML =
+        games
+          .map(
+            game => {
+
+              const observed =
+                game.observed_rtp == null
+                ? null
+                : Number(
+                    game.observed_rtp
+                  );
+
+
+              const target =
+                game.target_rtp == null
+                ? null
+                : Number(
+                    game.target_rtp
+                  );
+
+
+              const difference =
+                observed != null
+                &&
+                target != null
+                ? observed
+                  -
+                  target
+                : null;
+
+
+              const net =
+                Number(
+                  game.net
+                  || 0
+                );
+
+
+              const body =
+                game.game_type ===
+                "roulette"
+                ? renderRouletteStats(
+                    game
+                  )
+                : renderSlotStats(
+                    game
+                  );
+
+
+              return `
+                <section class="game-card">
+
+                  <div class="game-head">
+
+                    <div>
+                      <h2>${escapeHtml(game.name)}</h2>
+
+                      <div class="game-meta">
+                        ${gameMeta(game)}
+                      </div>
+                    </div>
+
+                    <div class="rtp-box">
+                      <small>RTP osservato</small>
+
+                      <strong>
+                        ${formatRtp(observed)}
+                      </strong>
+
+                      ${
+                        target != null
+                        ? `
+                          <div class="rtp-target">
+                            Target ${formatRtp(target)}
+                            ${
+                              difference != null
+                              ? ` · ${difference >= 0 ? "+" : ""}${difference.toFixed(3).replace(".", ",")} pt`
+                              : ""
+                            }
+                          </div>
+                        `
+                        : ""
+                      }
+                    </div>
+
+                  </div>
+
+
+                  <div class="stats-grid">
+                    ${body}
+
+                    ${
+                      game.game_type !==
+                      "roulette"
+                      ? stat(
+                          "Netto giocatori",
+                          (
+                            net > 0
+                            ? "+"
+                            : ""
+                          )
+                          +
+                          formatNumber(
+                            net
+                          ),
+                          net > 0
+                            ? "good"
+                            : net < 0
+                              ? "bad"
+                              : ""
+                        )
+                      : ""
+                    }
+                  </div>
+
+
+                  <div class="game-footer">
+                    <span>
+                      Prima giocata:
+                      ${formatDate(game.first_play_at)}
+                    </span>
+
+                    <span>
+                      Ultima giocata:
+                      ${formatDate(game.last_play_at)}
+                    </span>
+                  </div>
+
+                </section>
+              `;
+            }
+          )
+          .join("");
+    }
+
+
+    async function loadStats() {
+
+      loading.classList.remove(
+        "hidden"
+      );
+
+
+      try {
+
+        const {
+          data,
+          error
+        } =
+          await supabase.rpc(
+            "get_global_casino_stats"
+          );
+
+
+        if (
+          error
+        ) {
+
+          throw error;
+        }
+
+
+        render(
+          data
+        );
+
+      } catch (
+        error
+      ) {
+
+        console.error(
+          error
+        );
+
+
+        gamesEl.innerHTML = `
+          <div class="error">
+            ${escapeHtml(
+              error?.message
+              ||
+              String(
+                error
+              )
+            )}
+          </div>
+        `;
+
+      } finally {
+
+        loading.classList.add(
+          "hidden"
+        );
+      }
+    }
+
+
+    refreshBtn.addEventListener(
+      "click",
+      loadStats
+    );
+
+
+    homeBtn.addEventListener(
+      "click",
+      () => {
+
+        window.location.href =
+          "./index.html";
+      }
+    );
+
+
+    const {
+      data,
+      error
+    } =
+      await supabase.auth
+        .getSession();
+
+
+    if (
+      error
+      ||
+      !data.session
+    ) {
+
+      window.location.href =
+        "./index.html";
+
+    } else {
+
+      await loadStats();
+    }
+
+  </script>
+
+</body>
+</html>

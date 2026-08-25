@@ -1,0 +1,185 @@
+/* ============================================================
+   PIRATE TREASURE - VISUAL LAYOUT DESIGNER
+   ============================================================ */
+
+#designerToggle {
+  position: absolute;
+  z-index: 3000;
+  left: .8%;
+  top: 1.2%;
+  width: 3.1vw;
+  height: 3.1vw;
+  min-width: 34px;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: .12vw solid rgba(255, 222, 130, .9);
+  background: rgba(4, 18, 25, .93);
+  color: #fff;
+  cursor: pointer;
+  font-size: clamp(15px, 1.25vw, 25px);
+  box-shadow: 0 .25vw .7vw rgba(0,0,0,.55);
+}
+
+#designerToggle.active {
+  background: #865019;
+  box-shadow: 0 0 0 .12vw #ffe399, 0 0 .9vw rgba(255,190,50,.7);
+}
+
+#designerPanel {
+  display: none;
+  position: absolute;
+  z-index: 3000;
+  left: .8%;
+  top: 5.2%;
+  width: min(32vw, 520px);
+  max-height: 88%;
+  overflow: auto;
+  padding: .8vw;
+  border: .12vw solid rgba(245,201,92,.85);
+  border-radius: .75vw;
+  background: rgba(4,18,25,.97);
+  box-shadow: 0 .5vw 1.5vw rgba(0,0,0,.65);
+  color: white;
+}
+
+#designerPanel.visible { display: block; }
+
+#designerPanel h3 {
+  margin: 0 0 .5vw;
+  color: #ffe3a0;
+  font-size: clamp(13px, 1.05vw, 21px);
+}
+
+.designer-note {
+  margin: 0 0 .65vw;
+  opacity: .78;
+  font-size: clamp(9px, .7vw, 14px);
+  line-height: 1.35;
+}
+
+.designer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .35vw;
+  margin-bottom: .55vw;
+}
+
+.designer-field { display: grid; gap: .15vw; }
+
+.designer-field label {
+  font-size: clamp(8px, .6vw, 12px);
+  opacity: .7;
+  text-transform: uppercase;
+}
+
+.designer-field input {
+  min-width: 0;
+  width: 100%;
+  padding: .32vw .25vw;
+  border: .08vw solid rgba(255,222,145,.35);
+  border-radius: .32vw;
+  background: rgba(0,0,0,.34);
+  color: #fff;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  user-select: text;
+}
+
+#designerCssOutput {
+  width: 100%;
+  min-height: 10.5em;
+  resize: vertical;
+  padding: .5vw;
+  border: .08vw solid rgba(255,222,145,.28);
+  border-radius: .4vw;
+  background: rgba(0,0,0,.44);
+  color: #d6f6ff;
+  font: clamp(8px, .62vw, 12px)/1.35 Consolas, "Courier New", monospace;
+  user-select: text;
+}
+
+.designer-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .35vw;
+  margin-top: .45vw;
+}
+
+.designer-actions button {
+  padding: .42vw .25vw;
+  border: .08vw solid rgba(245,201,92,.55);
+  border-radius: .38vw;
+  background: rgba(122,72,19,.67);
+  color: white;
+  cursor: pointer;
+  font-size: clamp(8px, .67vw, 13px);
+  font-weight: 750;
+}
+
+#designerSelectionBox {
+  display: none;
+  position: absolute;
+  z-index: 2900;
+  border: .15vw dashed #5ce3ff;
+  background: rgba(55,208,255,.035);
+  box-shadow: 0 0 0 .07vw rgba(0,0,0,.65), 0 0 .8vw rgba(55,208,255,.5);
+  cursor: move;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+#designerSelectionBox.visible { display: block; }
+
+#designerSelectionLabel {
+  position: absolute;
+  left: 0;
+  top: -1.55vw;
+  padding: .16vw .42vw;
+  border-radius: .25vw;
+  background: #087d98;
+  color: white;
+  font-size: clamp(8px, .63vw, 13px);
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+#designerResizeHandle {
+  position: absolute;
+  right: -.55vw;
+  bottom: -.55vw;
+  width: 1.15vw;
+  height: 1.15vw;
+  min-width: 16px;
+  min-height: 16px;
+  border-radius: 50%;
+  border: .11vw solid #fff;
+  background: #168cad;
+  box-shadow: 0 .15vw .4vw rgba(0,0,0,.55);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+#stage.designer-mode [data-designer-key] {
+  outline: .08vw dotted rgba(255,255,255,.28);
+}
+
+#designerToast {
+  display: none;
+  position: absolute;
+  z-index: 3100;
+  left: 50%;
+  bottom: 2%;
+  transform: translateX(-50%);
+  padding: .42vw .85vw;
+  border-radius: 100vw;
+  background: rgba(3,18,25,.94);
+  border: .08vw solid rgba(245,201,92,.65);
+  color: white;
+  font-size: clamp(9px, .75vw, 14px);
+  pointer-events: none;
+}
+
+#designerToast.visible { display: block; }
