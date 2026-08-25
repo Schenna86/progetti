@@ -1579,6 +1579,410 @@ header{
   z-index:20;
 }
 
+
+/* ============================================================
+   BLACKJACK V3.4 - MOBILE RESPONSIVE
+   ============================================================ */
+@media (max-width:760px){
+
+  html,body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden!important;
+  }
+
+  #app{
+    width:100%;
+    max-width:100%;
+    padding:6px;
+    overflow:visible;
+  }
+
+  .shell{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin:0 auto;
+  }
+
+  header{
+    position:relative!important;
+    left:auto!important;
+    width:100%!important;
+    max-width:100%!important;
+    padding:7px 8px;
+    gap:6px;
+    border-radius:10px;
+  }
+
+  .brand h1{font-size:18px}
+  .brand p{font-size:8px;line-height:1.25}
+  .top-progress{width:100%;min-width:0}
+  .xp-header{font-size:8px}
+
+  .header-actions{
+    width:100%;
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    justify-content:flex-start;
+  }
+
+  .pill{
+    min-height:28px;
+    padding:5px 7px;
+    font-size:9px;
+  }
+
+  .header-btn{
+    min-height:28px;
+    padding:5px 8px;
+    font-size:9px;
+  }
+
+  /* Il vecchio layout forzava 980px: su mobile va rimosso. */
+  .table-shell{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    aspect-ratio:1672 / 941;
+    min-height:0!important;
+    margin:8px auto 326px!important;
+    border-radius:9px;
+    overflow:visible!important;
+    background-size:100% 100%;
+    box-shadow:0 12px 30px #000b;
+  }
+
+  .table-inner{
+    width:100%;
+    height:100%;
+    min-width:0;
+    padding:0!important;
+  }
+
+  /* Mantiene il tavolo reale, niente carosello mobile. */
+  .seats{
+    position:absolute!important;
+    inset:0!important;
+    display:block!important;
+    overflow:visible!important;
+    scroll-snap-type:none!important;
+  }
+
+  .seat{
+    position:absolute!important;
+    flex:none!important;
+    width:19%!important;
+    height:19%!important;
+    min-width:0!important;
+    top:calc(var(--y) - 19%)!important;
+    transform:translateX(-50%)!important;
+    scroll-snap-align:none!important;
+  }
+
+  .seat-head{
+    top:-9px!important;
+    gap:2px;
+    padding:1px 3px;
+    border-radius:5px;
+  }
+
+  .seat-title{
+    font-size:6px!important;
+    letter-spacing:0;
+  }
+
+  .seat-toggle{
+    min-width:25px!important;
+    height:20px!important;
+    padding:0 4px!important;
+    font-size:7px!important;
+  }
+
+  /* Fiche/puntata ancora cliccabili senza sovrapporsi. */
+  .bet-row{
+    width:66px!important;
+    bottom:-9px!important;
+    gap:1px!important;
+  }
+
+  .bet-chip{
+    width:38px!important;
+    height:38px!important;
+    flex-basis:38px!important;
+  }
+
+  .bet-chip .chip-fallback{
+    width:36px;
+    height:36px;
+    border-width:3px;
+    font-size:6px;
+  }
+
+  .bet-row select{
+    width:66px!important;
+    height:30px!important;
+    padding:2px 17px 2px 4px!important;
+    border-radius:6px;
+    font-size:8px!important;
+  }
+
+  .seat-stake{
+    bottom:-61px!important;
+    width:78px!important;
+    font-size:6px!important;
+    line-height:1.1;
+  }
+
+  /* Mano singola */
+  .hands-wrap,
+  .seat:not(:has(.hand:nth-child(2))) .hands-wrap{
+    width:175%!important;
+    height:75px!important;
+    gap:2px!important;
+  }
+
+  .hand{
+    height:72px!important;
+    max-width:78px!important;
+  }
+
+  .seat:not(:has(.hand:nth-child(2))) .hand{
+    max-width:82px!important;
+  }
+
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card{
+    width:38px!important;
+    height:54px!important;
+    flex-basis:38px!important;
+    padding:2px!important;
+    border-radius:4px;
+  }
+
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card + .playing-card{
+    margin-left:-16px!important;
+  }
+
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .rank{font-size:11px!important}
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .suit{font-size:16px!important}
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .foot{font-size:8px!important}
+
+  /* 2 mani */
+  .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hands-wrap{
+    width:235%!important;
+  }
+
+  .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand{
+    max-width:58px!important;
+  }
+
+  .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card{
+    width:31px!important;
+    height:44px!important;
+    flex-basis:31px!important;
+    padding:2px!important;
+  }
+
+  .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card + .playing-card{
+    margin-left:-14px!important;
+  }
+
+  /* 3 mani */
+  .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hands-wrap{
+    width:285%!important;
+  }
+
+  .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand{
+    max-width:47px!important;
+  }
+
+  .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card{
+    width:27px!important;
+    height:39px!important;
+    flex-basis:27px!important;
+    padding:1px!important;
+  }
+
+  .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card + .playing-card{
+    margin-left:-12px!important;
+  }
+
+  /* 4 mani */
+  .seat:has(.hand:nth-child(4)) .hands-wrap{
+    width:335%!important;
+  }
+
+  .seat:has(.hand:nth-child(4)) .hand{
+    max-width:40px!important;
+  }
+
+  .seat:has(.hand:nth-child(4)) .hand .playing-card{
+    width:24px!important;
+    height:35px!important;
+    flex-basis:24px!important;
+    padding:1px!important;
+  }
+
+  .seat:has(.hand:nth-child(4)) .hand .playing-card + .playing-card{
+    margin-left:-11px!important;
+  }
+
+  .hand-cards{bottom:13px!important}
+
+  .hand-title{
+    top:-7px!important;
+    padding:0 2px!important;
+    font-size:5px!important;
+  }
+
+  .hand-total-badge{
+    top:0!important;
+    right:0!important;
+    min-width:18px!important;
+    height:18px!important;
+    padding:0 3px!important;
+    font-size:7px!important;
+  }
+
+  .hand-bet-total{
+    bottom:0!important;
+    max-width:72px!important;
+    padding:0 2px!important;
+    font-size:5px!important;
+  }
+
+  .hand-bet-total strong{font-size:6px!important}
+
+  .hand-result{
+    top:11px!important;
+    padding:0 2px!important;
+    font-size:5px!important;
+  }
+
+  /* Dealer più grande del giocatore, ma contenuto nel tavolo. */
+  .dealer-zone{
+    left:50%!important;
+    top:26.2%!important;
+    width:40%!important;
+  }
+
+  .dealer-zone .cards-row{
+    min-height:64px!important;
+    gap:3px!important;
+  }
+
+  .dealer-zone .playing-card{
+    width:44px!important;
+    height:63px!important;
+    padding:3px!important;
+    border-radius:5px;
+  }
+
+  .dealer-zone .playing-card .rank{font-size:13px!important}
+  .dealer-zone .playing-card .suit{font-size:19px!important}
+  .dealer-zone .playing-card .foot{font-size:10px!important}
+
+  .dealer-zone > .dealer-total{
+    padding:2px 5px!important;
+    font-size:7px!important;
+  }
+
+  .table-topbar{top:24%!important}
+
+  .round-badge{
+    padding:2px 5px!important;
+    font-size:7px!important;
+  }
+
+  /* I comandi restano grandi e sotto il tavolo. */
+  .control-dock{
+    position:absolute!important;
+    left:50%!important;
+    top:calc(100% + 8px)!important;
+    width:calc(100vw - 12px)!important;
+    max-width:none!important;
+    transform:translateX(-50%)!important;
+    margin:0!important;
+    display:grid;
+    gap:7px;
+  }
+
+  .control-panel{
+    padding:8px;
+    border-radius:9px;
+  }
+
+  .control-panel h3{
+    margin-bottom:6px;
+    font-size:9px;
+  }
+
+  .bet-summary{gap:4px}
+
+  .summary-box{
+    min-width:0;
+    padding:6px 4px;
+  }
+
+  .summary-box small{font-size:7px}
+  .summary-box strong{font-size:12px}
+
+  .main-action{
+    min-height:38px;
+    font-size:11px;
+  }
+
+  .action-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:5px;
+  }
+
+  .game-action{
+    min-height:38px;
+    padding:7px 4px;
+    font-size:10px;
+  }
+
+  .status{
+    padding:7px;
+    font-size:8px;
+  }
+
+  .result-strip{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px;
+  }
+
+  .result-stat{
+    min-width:0;
+    padding:6px 4px;
+  }
+
+  .legend{display:none!important}
+
+  .modal-card{
+    width:calc(100vw - 16px)!important;
+    max-width:none!important;
+    max-height:90vh;
+    overflow:auto;
+  }
+
+  .modal-summary{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+
+  .modal-hands{overflow-x:auto}
+
+  .bj-debug-panel{
+    left:6px;
+    right:6px;
+    top:6px;
+    width:auto;
+    max-height:72vh;
+  }
+}
+
 </style>
 </head>
 <body>
