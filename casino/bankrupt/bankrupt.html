@@ -1720,6 +1720,12 @@
 
       balance: 0,
 
+      userLevel: 1,
+
+      maxBetPerLine: null,
+
+      freeBetPerLine: null,
+
       spinning: false,
 
       autoSpinActive: false,
@@ -2126,9 +2132,15 @@
       }
 
 
+      state.userLevel =
+        Number(
+          data?.level || 1
+        );
+
+
       updateXp(
         data?.xp || 0,
-        data?.level || 1
+        state.userLevel
       );
     }
 
@@ -2143,6 +2155,203 @@
           error
         );
       }
+    }
+
+
+
+    // ========================================================
+    // LIMITE PUNTATA PER LINEA - BANKRUPT
+    // ========================================================
+
+    async function loadBetLimit() {
+
+      if (!state.session) {
+        return;
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "get_my_slot_bet_limit",
+          {
+            p_game_id:
+              GAME_ID
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      state.userLevel =
+        Number(
+          data?.level
+          ?? state.userLevel
+          ?? 1
+        );
+
+
+      const limit =
+        Number(
+          data?.max_bet_per_line
+        );
+
+
+      state.maxBetPerLine =
+        Number.isFinite(limit)
+        &&
+        limit > 0
+          ? limit
+          : null;
+    }
+
+
+    async function refreshBetLimitSafely() {
+
+      try {
+
+        await loadBetLimit();
+
+        /*
+         * Se il livello ha sbloccato nuove puntate,
+         * i controlli le vedranno immediatamente.
+         */
+        updateControls();
+
+      } catch (error) {
+
+        console.error(
+          "Limite puntata:",
+          error
+        );
+      }
+    }
+
+
+    function getAllowedBets() {
+
+      if (
+        !state.config?.game?.allowed_bets
+      ) {
+        return [];
+      }
+
+
+      const allBets =
+        state.config.game.allowed_bets
+          .map(Number)
+          .filter(Number.isFinite)
+          .sort(
+            (a, b) =>
+              a - b
+          );
+
+
+      let bets =
+        state.maxBetPerLine == null
+        ? allBets
+        : allBets.filter(
+            bet =>
+              bet <= state.maxBetPerLine
+          );
+
+
+      /*
+       * Una sessione FREE già iniziata mantiene la puntata
+       * originale anche se in futuro il limite venisse abbassato.
+       */
+      if (
+        state.freeRemaining > 0
+        &&
+        Number.isFinite(
+          state.freeBetPerLine
+        )
+        &&
+        allBets.includes(
+          state.freeBetPerLine
+        )
+        &&
+        !bets.includes(
+          state.freeBetPerLine
+        )
+      ) {
+
+        bets = [
+          ...bets,
+          state.freeBetPerLine
+        ]
+          .sort(
+            (a, b) =>
+              a - b
+          );
+      }
+
+
+      /*
+       * Con la configurazione attuale Bankrupt ha sempre
+       * almeno la puntata 1 al livello 1.
+       */
+      return bets;
+    }
+
+
+    function bestBetIndex(
+      bets,
+      preferredBet
+    ) {
+
+      if (!bets.length) {
+        return 0;
+      }
+
+
+      const preferred =
+        Number(
+          preferredBet
+        );
+
+
+      const exactIndex =
+        bets.indexOf(
+          preferred
+        );
+
+
+      if (exactIndex >= 0) {
+        return exactIndex;
+      }
+
+
+      if (
+        Number.isFinite(
+          preferred
+        )
+      ) {
+
+        for (
+          let index =
+            bets.length - 1;
+          index >= 0;
+          index--
+        ) {
+
+          if (
+            bets[index]
+            <= preferred
+          ) {
+
+            return index;
+          }
+        }
+      }
+
+
+      return 0;
     }
 
 
@@ -2172,6 +2381,8 @@
 
         await refreshProgressSafely();
 
+        await refreshBetLimitSafely();
+
         return result;
 
       } catch (error) {
@@ -2199,7 +2410,7 @@
         return;
       }
 
-      const bets = state.config.game.allowed_bets.map(Number);
+      const bets = getAllowedBets();
       const lines = state.config.game.allowed_lines.map(Number);
       const bet = bets[state.betIndex];
       const activeLines = lines[state.linesIndex];
@@ -2293,13 +2504,46 @@
 
 
       const bets =
-        state.config.game.allowed_bets
-          .map(Number);
+        getAllowedBets();
 
 
       const lines =
         state.config.game.allowed_lines
           .map(Number);
+
+
+      if (!bets.length) {
+
+        betValue.textContent =
+          "—";
+
+        totalBetValue.textContent =
+          "—";
+
+        betPrev.disabled =
+          true;
+
+        betNext.disabled =
+          true;
+
+        spinBtn.disabled =
+          true;
+
+        return;
+      }
+
+
+      if (
+        state.betIndex
+        >= bets.length
+      ) {
+
+        state.betIndex =
+          Math.max(
+            0,
+            bets.length - 1
+          );
+      }
 
 
       const bet =
@@ -3221,10 +3465,9 @@
     async function loadGame() {
 
       const previousBets =
-        state.config?.game
-          ?.allowed_bets
-          ?.map(Number)
-        || [];
+        state.config
+        ? getAllowedBets()
+        : [];
 
 
       const previousLines =
@@ -3340,9 +3583,16 @@
         );
 
 
+      state.freeBetPerLine =
+        data.free?.bet_per_line != null
+        ? Number(
+            data.free.bet_per_line
+          )
+        : null;
+
+
       const bets =
-        data.game.allowed_bets
-          .map(Number);
+        getAllowedBets();
 
 
       const lines =
@@ -3419,10 +3669,9 @@
 
 
         const restoredBetIndex =
-          bets.indexOf(
-            Number(
-              preferredBet
-            )
+          bestBetIndex(
+            bets,
+            preferredBet
           );
 
 
@@ -3435,9 +3684,7 @@
 
 
         state.betIndex =
-          restoredBetIndex >= 0
-          ? restoredBetIndex
-          : 0;
+          restoredBetIndex;
 
 
         state.linesIndex =
@@ -3567,8 +3814,7 @@
 
 
       const bets =
-        state.config.game.allowed_bets
-          .map(Number);
+        getAllowedBets();
 
 
       const lines =
@@ -4119,8 +4365,7 @@
 
 
       const bets =
-        state.config.game.allowed_bets
-          .map(Number);
+        getAllowedBets();
 
 
       const lines =
@@ -4991,8 +5236,7 @@
       () => {
 
         const bets =
-          state.config.game
-            .allowed_bets;
+          getAllowedBets();
 
 
         state.betIndex =
@@ -5016,8 +5260,7 @@
       () => {
 
         const bets =
-          state.config.game
-            .allowed_bets;
+          getAllowedBets();
 
 
         state.betIndex =
@@ -5420,6 +5663,8 @@
           loadProgress()
         ]);
 
+        await loadBetLimit();
+
         await loadGame();
 
 
@@ -5485,6 +5730,15 @@
 
             state.balance =
               0;
+
+            state.userLevel =
+              1;
+
+            state.maxBetPerLine =
+              null;
+
+            state.freeBetPerLine =
+              null;
 
             state.autoSpinActive =
               false;
