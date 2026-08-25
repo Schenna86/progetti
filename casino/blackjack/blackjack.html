@@ -377,7 +377,7 @@ header{
  */
 .table-shell{
   width:100%;
-  min-width:980px;
+  min-width:0;
   aspect-ratio:1672 / 941;
   min-height:0;
   margin:0 auto 225px;
@@ -809,25 +809,6 @@ header{
   }
 }
 
-/* Layout desktop-first: su schermi piccoli il tavolo resta proporzionato
-   e la pagina può scorrere orizzontalmente senza distruggere le coordinate. */
-@media(max-width:1000px){
-  .shell{
-    width:980px;
-    max-width:none;
-  }
-
-  header{
-    width:calc(100vw - 16px);
-    max-width:960px;
-    position:sticky;
-    left:8px;
-  }
-
-  .table-shell{
-    min-width:980px;
-  }
-}
 
 
 /* ============================================================
@@ -1581,406 +1562,451 @@ header{
 
 
 /* ============================================================
-   BLACKJACK V3.4 - MOBILE RESPONSIVE
+   BLACKJACK V3.5 - RESPONSIVE REALE MOBILE/TABLET
    ============================================================ */
-@media (max-width:760px){
+@media (max-width:1000px){
 
-  html,body{
+  html,
+  body{
     width:100%;
     max-width:100%;
-    overflow-x:hidden!important;
+    overflow-x:hidden;
   }
 
   #app{
     width:100%;
     max-width:100%;
-    padding:6px;
-    overflow:visible;
+    padding:8px;
   }
 
   .shell{
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
+    width:100%;
+    max-width:100%;
+    min-width:0;
     margin:0 auto;
   }
 
   header{
-    position:relative!important;
-    left:auto!important;
-    width:100%!important;
-    max-width:100%!important;
-    padding:7px 8px;
-    gap:6px;
-    border-radius:10px;
-  }
-
-  .brand h1{font-size:18px}
-  .brand p{font-size:8px;line-height:1.25}
-  .top-progress{width:100%;min-width:0}
-  .xp-header{font-size:8px}
-
-  .header-actions{
+    position:relative;
+    left:auto;
     width:100%;
-    display:flex;
-    flex-wrap:wrap;
-    gap:5px;
-    justify-content:flex-start;
+    max-width:100%;
   }
 
-  .pill{
-    min-height:28px;
-    padding:5px 7px;
-    font-size:9px;
-  }
-
-  .header-btn{
-    min-height:28px;
-    padding:5px 8px;
-    font-size:9px;
-  }
-
-  /* Il vecchio layout forzava 980px: su mobile va rimosso. */
   .table-shell{
-    width:100%!important;
-    min-width:0!important;
-    max-width:100%!important;
+    width:100%;
+    max-width:100%;
+    min-width:0;
     aspect-ratio:1672 / 941;
-    min-height:0!important;
-    margin:8px auto 326px!important;
-    border-radius:9px;
-    overflow:visible!important;
-    background-size:100% 100%;
-    box-shadow:0 12px 30px #000b;
+    margin-left:auto;
+    margin-right:auto;
+    overflow:visible;
   }
 
   .table-inner{
     width:100%;
     height:100%;
     min-width:0;
-    padding:0!important;
   }
 
-  /* Mantiene il tavolo reale, niente carosello mobile. */
+  /* niente vecchio carosello mobile */
   .seats{
-    position:absolute!important;
-    inset:0!important;
-    display:block!important;
-    overflow:visible!important;
-    scroll-snap-type:none!important;
+    position:absolute;
+    inset:0;
+    display:block;
+    overflow:visible;
+    scroll-snap-type:none;
   }
 
   .seat{
-    position:absolute!important;
-    flex:none!important;
-    width:19%!important;
-    height:19%!important;
-    min-width:0!important;
-    top:calc(var(--y) - 19%)!important;
-    transform:translateX(-50%)!important;
-    scroll-snap-align:none!important;
+    position:absolute;
+    flex:none;
+    min-width:0;
+    scroll-snap-align:none;
+    transform:translateX(-50%);
   }
 
+  .control-dock{
+    width:min(920px,calc(100vw - 16px));
+    max-width:calc(100vw - 16px);
+  }
+
+  .legend{
+    width:calc(100vw - 16px);
+    max-width:100%;
+  }
+
+  .modal-card{
+    max-width:calc(100vw - 18px);
+  }
+}
+
+/* ============================================================
+   TELEFONO PORTRAIT / SCHERMI STRETTI
+   ============================================================ */
+@media (max-width:700px){
+
+  #app{
+    padding:5px;
+  }
+
+  header{
+    padding:6px 7px;
+    margin-bottom:7px;
+    border-radius:9px;
+  }
+
+  .brand h1{
+    font-size:18px;
+  }
+
+  .brand p{
+    display:none;
+  }
+
+  .top-progress{
+    width:100%;
+    min-width:0;
+  }
+
+  .xp-header{
+    font-size:8px;
+  }
+
+  .xp-bar{
+    height:11px;
+  }
+
+  .header-actions{
+    gap:4px;
+  }
+
+  .pill,
+  .header-btn{
+    min-height:28px;
+    padding:5px 7px;
+    font-size:9px;
+  }
+
+  .table-shell{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    margin:5px auto 300px;
+    border-radius:8px;
+    box-shadow:0 10px 25px #000a;
+  }
+
+  .seat{
+    width:18%;
+    height:19%;
+    top:calc(var(--y) - 19%);
+  }
+
+  /* Manteniamo fiche sui cerchi, ma spostiamo le CARTE verso il centro. */
+  .seat:nth-child(1) .hands-wrap{left:68%}
+  .seat:nth-child(2) .hands-wrap{left:57%}
+  .seat:nth-child(4) .hands-wrap{left:43%}
+  .seat:nth-child(5) .hands-wrap{left:32%}
+
   .seat-head{
-    top:-9px!important;
-    gap:2px;
+    top:-8px;
     padding:1px 3px;
+    gap:2px;
     border-radius:5px;
   }
 
   .seat-title{
-    font-size:6px!important;
-    letter-spacing:0;
+    font-size:6px;
   }
 
   .seat-toggle{
-    min-width:25px!important;
-    height:20px!important;
-    padding:0 4px!important;
-    font-size:7px!important;
+    min-width:26px;
+    height:22px;
+    padding:0 4px;
+    font-size:7px;
   }
 
-  /* Fiche/puntata ancora cliccabili senza sovrapporsi. */
   .bet-row{
-    width:66px!important;
-    bottom:-9px!important;
-    gap:1px!important;
+    width:70px;
+    bottom:-8px;
+    gap:2px;
   }
 
   .bet-chip{
-    width:38px!important;
-    height:38px!important;
-    flex-basis:38px!important;
+    width:40px;
+    height:40px;
+    flex-basis:40px;
   }
 
   .bet-chip .chip-fallback{
-    width:36px;
-    height:36px;
-    border-width:3px;
+    width:38px;
+    height:38px;
     font-size:6px;
   }
 
   .bet-row select{
-    width:66px!important;
-    height:30px!important;
-    padding:2px 17px 2px 4px!important;
-    border-radius:6px;
-    font-size:8px!important;
+    width:70px;
+    height:31px;
+    padding:2px 18px 2px 4px;
+    font-size:8px;
   }
 
   .seat-stake{
-    bottom:-61px!important;
-    width:78px!important;
-    font-size:6px!important;
-    line-height:1.1;
+    bottom:-63px;
+    width:82px;
+    font-size:6px;
   }
 
-  /* Mano singola */
   .hands-wrap,
   .seat:not(:has(.hand:nth-child(2))) .hands-wrap{
-    width:175%!important;
-    height:75px!important;
-    gap:2px!important;
+    top:auto;
+    bottom:23px;
+    width:190%;
+    height:78px;
+    gap:2px;
   }
 
   .hand{
-    height:72px!important;
-    max-width:78px!important;
+    height:75px;
+    max-width:82px;
   }
 
   .seat:not(:has(.hand:nth-child(2))) .hand{
-    max-width:82px!important;
+    max-width:86px;
   }
 
   .seat:not(:has(.hand:nth-child(2))) .hand .playing-card{
-    width:38px!important;
-    height:54px!important;
-    flex-basis:38px!important;
-    padding:2px!important;
+    width:40px;
+    height:57px;
+    flex-basis:40px;
+    padding:2px;
     border-radius:4px;
   }
 
   .seat:not(:has(.hand:nth-child(2))) .hand .playing-card + .playing-card{
-    margin-left:-16px!important;
+    margin-left:-17px;
   }
 
-  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .rank{font-size:11px!important}
-  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .suit{font-size:16px!important}
-  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .foot{font-size:8px!important}
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .rank{font-size:11px}
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .suit{font-size:17px}
+  .seat:not(:has(.hand:nth-child(2))) .hand .playing-card .foot{font-size:8px}
 
-  /* 2 mani */
   .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hands-wrap{
-    width:235%!important;
+    width:245%;
+    gap:2px;
   }
 
   .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand{
-    max-width:58px!important;
+    max-width:59px;
   }
 
   .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card{
-    width:31px!important;
-    height:44px!important;
-    flex-basis:31px!important;
-    padding:2px!important;
+    width:31px;
+    height:45px;
+    flex-basis:31px;
   }
 
   .seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card + .playing-card{
-    margin-left:-14px!important;
+    margin-left:-14px;
   }
 
-  /* 3 mani */
   .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hands-wrap{
-    width:285%!important;
+    width:300%;
+    gap:1px;
   }
 
   .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand{
-    max-width:47px!important;
+    max-width:48px;
   }
 
   .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card{
-    width:27px!important;
-    height:39px!important;
-    flex-basis:27px!important;
-    padding:1px!important;
+    width:27px;
+    height:39px;
+    flex-basis:27px;
   }
 
   .seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card + .playing-card{
-    margin-left:-12px!important;
+    margin-left:-12px;
   }
 
-  /* 4 mani */
   .seat:has(.hand:nth-child(4)) .hands-wrap{
-    width:335%!important;
+    width:345%;
+    gap:1px;
   }
 
   .seat:has(.hand:nth-child(4)) .hand{
-    max-width:40px!important;
+    max-width:40px;
   }
 
   .seat:has(.hand:nth-child(4)) .hand .playing-card{
-    width:24px!important;
-    height:35px!important;
-    flex-basis:24px!important;
-    padding:1px!important;
+    width:24px;
+    height:35px;
+    flex-basis:24px;
   }
 
   .seat:has(.hand:nth-child(4)) .hand .playing-card + .playing-card{
-    margin-left:-11px!important;
+    margin-left:-11px;
   }
 
-  .hand-cards{bottom:13px!important}
+  .hand-cards{bottom:13px}
 
   .hand-title{
-    top:-7px!important;
-    padding:0 2px!important;
-    font-size:5px!important;
+    top:-6px;
+    font-size:5px;
   }
 
   .hand-total-badge{
-    top:0!important;
-    right:0!important;
-    min-width:18px!important;
-    height:18px!important;
-    padding:0 3px!important;
-    font-size:7px!important;
+    top:0;
+    right:0;
+    min-width:18px;
+    height:18px;
+    padding:0 3px;
+    font-size:7px;
   }
 
   .hand-bet-total{
-    bottom:0!important;
-    max-width:72px!important;
-    padding:0 2px!important;
-    font-size:5px!important;
+    max-width:75px;
+    padding:0 2px;
+    font-size:5px;
   }
 
-  .hand-bet-total strong{font-size:6px!important}
+  .hand-bet-total strong{font-size:6px}
 
   .hand-result{
-    top:11px!important;
-    padding:0 2px!important;
-    font-size:5px!important;
+    top:11px;
+    font-size:5px;
   }
 
-  /* Dealer più grande del giocatore, ma contenuto nel tavolo. */
   .dealer-zone{
-    left:50%!important;
-    top:26.2%!important;
-    width:40%!important;
+    left:50%;
+    top:26.2%;
+    width:42%;
   }
 
   .dealer-zone .cards-row{
-    min-height:64px!important;
-    gap:3px!important;
+    min-height:66px;
+    gap:3px;
   }
 
   .dealer-zone .playing-card{
-    width:44px!important;
-    height:63px!important;
-    padding:3px!important;
+    width:46px;
+    height:66px;
+    padding:3px;
     border-radius:5px;
   }
 
-  .dealer-zone .playing-card .rank{font-size:13px!important}
-  .dealer-zone .playing-card .suit{font-size:19px!important}
-  .dealer-zone .playing-card .foot{font-size:10px!important}
+  .dealer-zone .playing-card .rank{font-size:13px}
+  .dealer-zone .playing-card .suit{font-size:20px}
+  .dealer-zone .playing-card .foot{font-size:10px}
 
   .dealer-zone > .dealer-total{
-    padding:2px 5px!important;
-    font-size:7px!important;
+    padding:2px 5px;
+    font-size:7px;
   }
-
-  .table-topbar{top:24%!important}
 
   .round-badge{
-    padding:2px 5px!important;
-    font-size:7px!important;
+    padding:2px 5px;
+    font-size:7px;
   }
 
-  /* I comandi restano grandi e sotto il tavolo. */
   .control-dock{
-    position:absolute!important;
-    left:50%!important;
-    top:calc(100% + 8px)!important;
-    width:calc(100vw - 12px)!important;
-    max-width:none!important;
-    transform:translateX(-50%)!important;
-    margin:0!important;
-    display:grid;
-    gap:7px;
+    left:50%;
+    top:calc(100% + 8px);
+    width:calc(100vw - 10px);
+    max-width:calc(100vw - 10px);
+    transform:translateX(-50%);
+    grid-template-columns:1fr;
+    gap:6px;
   }
 
   .control-panel{
-    padding:8px;
-    border-radius:9px;
+    padding:7px;
+    border-radius:8px;
   }
 
   .control-panel h3{
-    margin-bottom:6px;
+    margin-bottom:5px;
     font-size:9px;
   }
 
-  .bet-summary{gap:4px}
+  .bet-summary{gap:3px}
 
   .summary-box{
     min-width:0;
-    padding:6px 4px;
+    padding:5px 3px;
   }
 
   .summary-box small{font-size:7px}
-  .summary-box strong{font-size:12px}
+  .summary-box strong{font-size:11px}
 
   .main-action{
-    min-height:38px;
+    min-height:40px;
     font-size:11px;
   }
 
   .action-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:5px;
   }
 
   .game-action{
-    min-height:38px;
-    padding:7px 4px;
+    min-height:40px;
+    padding:7px 3px;
     font-size:10px;
   }
 
   .status{
-    padding:7px;
+    padding:6px;
     font-size:8px;
   }
 
   .result-strip{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:4px;
   }
 
-  .result-stat{
-    min-width:0;
-    padding:6px 4px;
-  }
-
-  .legend{display:none!important}
+  .legend{display:none}
 
   .modal-card{
-    width:calc(100vw - 16px)!important;
-    max-width:none!important;
-    max-height:90vh;
+    width:calc(100vw - 12px);
+    max-width:calc(100vw - 12px);
+    max-height:92vh;
     overflow:auto;
   }
 
   .modal-summary{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-columns:repeat(3,minmax(0,1fr));
   }
 
   .modal-hands{overflow-x:auto}
+}
 
-  .bj-debug-panel{
-    left:6px;
-    right:6px;
-    top:6px;
-    width:auto;
-    max-height:72vh;
+/* ============================================================
+   TELEFONO LANDSCAPE / TABLET STRETTO
+   ============================================================ */
+@media (min-width:701px) and (max-width:1000px){
+
+  #app{padding:7px}
+
+  header{
+    padding:7px 9px;
+    margin-bottom:8px;
   }
+
+  .brand h1{font-size:22px}
+  .brand p{font-size:9px}
+
+  .table-shell{
+    margin-bottom:225px;
+  }
+
+  .control-dock{
+    width:min(900px,calc(100vw - 16px));
+  }
+
+  .seat:nth-child(1) .hands-wrap{left:57%}
+  .seat:nth-child(5) .hands-wrap{left:43%}
 }
 
 </style>
