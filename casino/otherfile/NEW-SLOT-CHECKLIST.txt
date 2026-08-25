@@ -1,0 +1,75 @@
+CHECKLIST NUOVA SLOT
+
+[ ] game_id definito
+[ ] slot_games configurato
+[ ] slot_symbols configurati
+[ ] payline_set assegnato
+[ ] simulatore RTP eseguito
+[ ] RTP accettato
+
+CARTELLA
+[ ] /{game_id}/{game_id}.html
+
+ASSET STANDARD
+[ ] background.webp
+[ ] frame.webp
+[ ] logo.webp
+[ ] bet.webp
+[ ] lines.webp
+[ ] total.webp
+[ ] winnings.webp
+[ ] spin.webp
+[ ] payouttable.webp
+[ ] assets/symbols/*
+
+PAYLINES
+[ ] /{reels}x{rows}_{max_lines}.webp presente in root
+[ ] pulsante LINEE funzionante in home
+[ ] pulsante LINEE funzionante nella slot
+
+TOPBAR
+[ ] saldo
+[ ] LINEE
+[ ] PAYOUT
+[ ] fullscreen
+[ ] home senza logout
+
+SPIN
+[ ] usa spin_slot_safe
+[ ] doppio click bloccato
+[ ] due tab testate
+[ ] saldo server-side
+[ ] risultato server-side
+
+FREE
+[ ] sessione server-side
+[ ] bet preservata
+[ ] linee preservate
+[ ] refresh riprende sessione
+[ ] retrigger funzionante
+[ ] summary finale funzionante
+[ ] bonus durante FREE incluso nel summary
+
+BONUS
+[ ] logica server-side
+[ ] nessun valore nascosto leggibile dal browser
+[ ] refresh/ripresa bonus gestiti
+[ ] saldo aggiornato dal server
+
+UX
+[ ] landscape
+[ ] portrait blocker
+[ ] beforeunload durante gioco
+[ ] overlay LINEE/PAYOUT chiudibili
+[ ] touch testato
+
+SISTEMA
+[ ] balance sync
+[ ] storico personale
+[ ] statistiche globali
+[ ] RTP osservato
+[ ] classifica settimanale
+
+GO LIVE
+[ ] asset_version aggiornato
+[ ] slot_games.active = true
