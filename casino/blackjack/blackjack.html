@@ -1,0 +1,2995 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06140f">
+<title>Blackjack</title>
+<style>
+:root{--bg:#050b09;--panel:#0b1713;--panel2:#10251c;--felt:#0b5639;--felt2:#073f2b;--gold:#d7ad55;--gold2:#ffe5a0;--text:#f5f7f5;--muted:#9daea5;--good:#7fe3a0;--bad:#ff9292;--blue:#72aefc;--line:#ffffff16;--wood:#4b2815}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#173f2f,#07100c 45%,#020504);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+button,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.42}.hidden{display:none!important}
+#app{min-height:100vh;padding:14px}.shell{width:min(1600px,100%);margin:auto}
+header{display:grid;grid-template-columns:auto minmax(280px,1fr) auto;gap:16px;align-items:center;margin-bottom:14px}
+.brand h1{margin:0;color:var(--gold2);font-size:clamp(25px,3vw,42px)}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill,.header-btn{min-height:40px;padding:8px 12px;border:1px solid rgba(215,173,85,.55);border-radius:999px;background:#04100bcc;color:white}
+.pill strong{color:var(--gold2)}.header-btn{font-weight:850}
+.xp-header{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px;font-size:12px;font-weight:800}
+.xp-level strong{color:var(--gold2);font-size:15px}.xp-bar{height:16px;border:1px solid #ffffff70;border-radius:999px;overflow:hidden;background:#0008}
+.xp-fill{width:0;height:100%;background:linear-gradient(90deg,#2769ff,#6f5cff,#c255ff);transition:width .55s}
+.table-shell{position:relative;overflow:hidden;border:1px solid rgba(215,173,85,.48);border-radius:30px;background:radial-gradient(circle at 50% 24%,#13734d 0,#0a5639 32%,#073b29 72%,#052b1e 100%);box-shadow:inset 0 0 0 8px #3b2114,inset 0 0 0 11px #a4773a55,0 22px 55px #0008;min-height:690px}
+.table-shell:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;background:repeating-radial-gradient(circle at 50% 35%,transparent 0 18px,#ffffff08 19px 20px)}
+.table-inner{position:relative;z-index:1;padding:18px 18px 22px}
+.table-topbar{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+.rules-badge{color:#e8d8aa;font-size:11px;line-height:1.45}.rules-badge.right{text-align:right}
+.round-badge{min-width:180px;padding:8px 14px;border:1px solid #f4d4876b;border-radius:999px;background:#0005;text-align:center;font-size:12px;font-weight:900;color:var(--gold2)}
+.dealer-zone{display:flex;flex-direction:column;align-items:center;margin:18px auto 26px;min-height:185px}.zone-title{font-size:12px;letter-spacing:.12em;color:#d5dfd9;font-weight:1000}.dealer-total{margin:5px 0 8px;color:var(--gold2);font-weight:1000;min-height:24px}.cards-row{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;min-height:118px}
+.playing-card{width:76px;height:108px;padding:7px;display:flex;flex-direction:column;justify-content:space-between;border-radius:9px;border:1px solid #0004;background:linear-gradient(145deg,#fff,#e9e9e4);color:#171717;box-shadow:0 6px 13px #0007;font-family:Georgia,"Times New Roman",serif;font-weight:1000}
+.playing-card.red{color:#bd2525}.playing-card .rank{font-size:22px;line-height:1}.playing-card .suit{font-size:33px;align-self:center;line-height:1}.playing-card .foot{font-size:18px;align-self:flex-end;transform:rotate(180deg);line-height:1}
+.playing-card.back{justify-content:center;align-items:center;border:5px solid #e6d8ac;background:repeating-linear-gradient(45deg,#152b50 0 5px,#bba354 5px 7px,#152b50 7px 12px);color:#ffe9a5}
+.playing-card.back:after{content:"♠";display:grid;place-items:center;width:45px;height:65px;border:2px solid #ffe9a5;border-radius:6px;background:#091c36dd;font-size:29px}
+.seats{display:grid;grid-template-columns:repeat(5,minmax(170px,1fr));gap:10px;align-items:stretch}
+.seat{min-width:0;min-height:285px;padding:10px;border:1px solid #ffffff22;border-radius:18px;background:#001c1482;transition:.18s ease;box-shadow:inset 0 0 22px #0003}
+.seat.enabled{border-color:#d7ad5570}.seat.active-turn{border-color:#ffe090;box-shadow:0 0 0 2px #ffe09042,0 0 24px #ffc85e42,inset 0 0 25px #0003}.seat.completed{border-color:#ffffff28}
+.seat-head{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:7px}.seat-title{font-weight:1000;color:var(--gold2);font-size:13px}
+.seat-toggle{min-width:35px;height:25px;padding:0 8px;border:1px solid #ffffff22;border-radius:999px;background:#0004;color:#aaa;font-size:10px;font-weight:1000}.seat-toggle.on{border-color:#85e7ab;background:#155e3d;color:white}
+.bet-row{display:flex;gap:6px;align-items:center;margin-bottom:8px}.bet-row select{min-width:0;width:100%;height:36px;padding:5px 7px;border:1px solid #d7ad554f;border-radius:9px;background:#04140e;color:white;font-weight:800}
+.seat-stake{font-size:10px;color:var(--muted);min-height:15px;margin-bottom:5px}.hands-wrap{display:flex;gap:7px;overflow-x:auto;padding:3px 1px 7px;scrollbar-width:thin}
+.hand{flex:0 0 155px;min-height:190px;padding:8px;border:1px solid #ffffff18;border-radius:13px;background:#0003}.hand.active{border-color:#ffdc75;background:#4a390f55}.hand.win{border-color:#79e39c}.hand.loss{border-color:#ff8e8e70}.hand.push{border-color:#7aafff}
+.hand-title{display:flex;justify-content:space-between;gap:6px;font-size:10px;color:var(--muted);margin-bottom:6px}.hand-title strong{color:#fff}.hand-cards{display:flex;gap:4px;overflow-x:auto;min-height:78px;padding-bottom:3px}
+.hand .playing-card{width:50px;height:72px;padding:4px;border-radius:6px;flex:0 0 50px}.hand .playing-card .rank{font-size:15px}.hand .playing-card .suit{font-size:21px}.hand .playing-card .foot{font-size:12px}
+.hand-meta{display:grid;grid-template-columns:1fr auto;gap:4px;margin-top:6px;font-size:10px}.hand-meta span{color:var(--muted)}.hand-meta b{color:var(--gold2)}
+.hand-result{margin-top:6px;font-size:10px;font-weight:1000}.hand-result.win{color:var(--good)}.hand-result.loss{color:var(--bad)}.hand-result.push{color:var(--blue)}
+.empty-seat{min-height:190px;display:grid;place-items:center;text-align:center;border:1px dashed #ffffff1b;border-radius:13px;color:#ffffff55;font-size:11px;padding:10px}
+.control-dock{margin:18px auto 0;width:min(920px,100%);display:grid;grid-template-columns:1.1fr 1fr;gap:10px}
+.control-panel{padding:11px;border:1px solid #ffffff1c;border-radius:16px;background:#03130db8;box-shadow:0 8px 25px #0004}.control-panel h3{margin:0 0 8px;color:var(--gold2);font-size:13px}
+.bet-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.summary-box{padding:8px;border:1px solid #ffffff13;border-radius:10px;background:#0003;text-align:center}.summary-box small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.summary-box strong{display:block;margin-top:2px;color:var(--gold2);font-size:17px}
+.main-action{width:100%;min-height:48px;margin-top:9px;border:1px solid #ffe49b;border-radius:11px;background:linear-gradient(#d7a342,#805016);color:white;font-weight:1000;font-size:16px}
+.action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.game-action{min-height:48px;border:1px solid #ffffff2a;border-radius:10px;background:#071c14;color:white;font-weight:1000}.game-action.primary{border-color:#ffe49b;background:#745116}.game-action.double{border-color:#75b6ff;background:#173d63}.game-action.split{border-color:#cb90ff;background:#492560}
+.status{grid-column:1/-1;min-height:38px;padding:8px 11px;border:1px solid #ffffff16;border-radius:11px;background:#0003;color:#f6ce79;font-size:12px}
+.result-strip{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.result-stat{padding:8px;border:1px solid #ffffff14;border-radius:10px;background:#0003;text-align:center}.result-stat small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.result-stat strong{display:block;margin-top:3px;color:var(--gold2);font-size:16px}
+.legend{margin-top:11px;color:#d5dfd9aa;text-align:center;font-size:10px}
+#loadingOverlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px;background:#020705ef}.loading-card{width:min(420px,100%);padding:24px;border:1px solid #d7ad5588;border-radius:18px;background:#071710;text-align:center}.loader{width:52px;height:52px;margin:0 auto 13px;border:6px solid #ffffff1f;border-top-color:var(--gold);border-radius:50%;animation:loader .8s linear infinite}@keyframes loader{to{transform:rotate(360deg)}}
+.modal{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:18px;background:#020705b5;backdrop-filter:blur(3px)}.modal-card{width:min(720px,100%);max-height:min(82vh,760px);overflow:auto;border:1px solid #d7ad5588;border-radius:19px;background:linear-gradient(#10251c,#07120d);box-shadow:0 20px 60px #000a}
+.modal-head{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid #ffffff15;background:#10251cf5}.modal-head strong{color:var(--gold2);font-size:19px}.modal-close{width:34px;height:34px;border:1px solid #ffffff22;border-radius:999px;background:#0004;color:white}
+.modal-body{padding:14px}.modal-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:11px}.modal-hands{display:grid;gap:7px}.modal-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px;border:1px solid #ffffff12;border-radius:10px;background:#0003}.modal-row .result-word{font-weight:1000}.modal-row.win .result-word{color:var(--good)}.modal-row.loss .result-word{color:var(--bad)}.modal-row.push .result-word{color:var(--blue)}
+@media(max-width:1250px){.seats{grid-template-columns:repeat(3,minmax(190px,1fr))}}
+@media(max-width:900px){header{grid-template-columns:1fr auto}.top-progress{grid-column:1/-1;grid-row:2}.seats{grid-template-columns:repeat(2,minmax(180px,1fr))}.control-dock{grid-template-columns:1fr}}
+@media(max-width:620px){#app{padding:8px}header{display:flex;flex-direction:column;align-items:stretch}.header-actions{justify-content:flex-start}.table-shell{border-radius:20px}.table-inner{padding:11px 8px 16px}.table-topbar{grid-template-columns:1fr}.rules-badge.right{text-align:left}.round-badge{justify-self:start}.dealer-zone{margin-top:12px}.seats{display:flex;overflow-x:auto;gap:8px;scroll-snap-type:x mandatory}.seat{flex:0 0 min(86vw,330px);scroll-snap-align:center}.control-dock{margin-top:12px}.action-grid{grid-template-columns:repeat(2,1fr)}.result-strip{grid-template-columns:repeat(2,1fr)}.playing-card{width:64px;height:92px}.modal-summary{grid-template-columns:1fr}}
+
+/* ============================================================
+   BLACKJACK V2 - GRAFICA + ANIMAZIONI
+   ============================================================ */
+
+.table-inner::after{
+  content:"BLACKJACK PAYS 3 TO 2";
+  position:absolute;
+  left:50%;
+  top:235px;
+  transform:translateX(-50%);
+  width:max-content;
+  color:#f5df9a16;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(18px,2.2vw,35px);
+  font-weight:1000;
+  letter-spacing:.08em;
+  pointer-events:none;
+  z-index:-1
+}
+
+.dealer-zone{
+  position:relative
+}
+
+.card-shoe{
+  position:absolute;
+  right:max(2%,18px);
+  top:30px;
+  width:92px;
+  height:116px;
+  border:1px solid #d5bd7e66;
+  border-radius:10px 10px 18px 18px;
+  background:
+    linear-gradient(120deg,#111,#343434 45%,#101010 46% 100%);
+  box-shadow:
+    inset 0 0 0 4px #0008,
+    0 9px 17px #0007;
+  transform:skewY(-3deg);
+  display:grid;
+  place-items:center;
+  color:#f3dea0;
+  font-size:9px;
+  font-weight:1000;
+  letter-spacing:.08em;
+  text-align:center;
+  pointer-events:none
+}
+
+.card-shoe::before{
+  content:"";
+  position:absolute;
+  top:-8px;
+  left:9px;
+  right:9px;
+  height:12px;
+  border-radius:4px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #f3f0e6 0 1px,
+      #1b294b 1px 3px
+    );
+  box-shadow:0 2px 5px #0006
+}
+
+.card-shoe::after{
+  content:"";
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:13px;
+  height:48px;
+  border:2px solid #d7ad5555;
+  border-radius:5px;
+  background:#071018
+}
+
+.card-shoe span{
+  position:relative;
+  z-index:1;
+  margin-top:-75px
+}
+
+.bet-chip{
+  flex:0 0 43px;
+  width:43px;
+  height:43px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  border:4px dashed #f0dd9b;
+  outline:2px solid #241a0f;
+  background:
+    radial-gradient(circle,#c99d39 0 40%,#684417 41% 64%,#d4ae52 65%);
+  box-shadow:
+    inset 0 0 0 2px #fff5,
+    0 5px 9px #0007;
+  color:white;
+  text-shadow:0 1px 2px #000;
+  font-size:9px;
+  font-weight:1000;
+  opacity:.35;
+  transform:scale(.92);
+  transition:.18s ease
+}
+
+.bet-chip.live{
+  opacity:1;
+  transform:scale(1)
+}
+
+.bet-chip.pop{
+  animation:chipPop .22s ease-out
+}
+
+@keyframes chipPop{
+  0%{transform:scale(.72) translateY(-5px)}
+  70%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+
+.playing-card{
+  transform-origin:center;
+  backface-visibility:hidden;
+  will-change:transform,opacity
+}
+
+.playing-card.deal-in{
+  animation:
+    dealCard .36s cubic-bezier(.18,.8,.25,1.14) backwards;
+  animation-delay:var(--delay,0ms)
+}
+
+.playing-card.split-slide{
+  animation:
+    splitCard .32s cubic-bezier(.2,.85,.3,1.1) backwards;
+  animation-delay:var(--delay,0ms)
+}
+
+.playing-card.flip-reveal{
+  animation:
+    revealCard .46s cubic-bezier(.2,.75,.2,1) backwards;
+  animation-delay:var(--delay,0ms)
+}
+
+@keyframes dealCard{
+  0%{
+    opacity:.15;
+    transform:
+      translate(var(--deal-x,140px),var(--deal-y,-170px))
+      rotate(14deg)
+      scale(.72)
+  }
+  70%{opacity:1}
+  100%{
+    opacity:1;
+    transform:translate(0,0) rotate(0) scale(1)
+  }
+}
+
+@keyframes splitCard{
+  0%{
+    opacity:.5;
+    transform:translateX(var(--split-x,-65px)) rotate(-7deg) scale(.94)
+  }
+  100%{
+    opacity:1;
+    transform:translateX(0) rotate(0) scale(1)
+  }
+}
+
+@keyframes revealCard{
+  0%{
+    opacity:.35;
+    transform:perspective(500px) rotateY(88deg) scaleX(.1)
+  }
+  55%{
+    opacity:1;
+    transform:perspective(500px) rotateY(-8deg)
+  }
+  100%{
+    opacity:1;
+    transform:perspective(500px) rotateY(0)
+  }
+}
+
+.hand.active{
+  animation:activeHandPulse 1.45s ease-in-out infinite
+}
+
+@keyframes activeHandPulse{
+  0%,100%{
+    box-shadow:
+      0 0 0 1px #ffdc7560,
+      0 0 10px #ffca5530
+  }
+  50%{
+    box-shadow:
+      0 0 0 2px #ffdc75a0,
+      0 0 23px #ffc23f75
+  }
+}
+
+.hand.win{
+  animation:winGlow .7s ease-out
+}
+
+@keyframes winGlow{
+  0%{box-shadow:0 0 0 #62ee9100}
+  45%{box-shadow:0 0 28px #62ee9190}
+  100%{box-shadow:0 0 0 #62ee9100}
+}
+
+.hand.loss{
+  filter:saturate(.76)
+}
+
+.round-badge.dealing{
+  animation:badgePulse .7s ease-in-out infinite alternate
+}
+
+@keyframes badgePulse{
+  from{box-shadow:0 0 0 #f3d37a00}
+  to{box-shadow:0 0 18px #f3d37a65}
+}
+
+.modal-card{
+  animation:resultModalIn .2s cubic-bezier(.2,.8,.3,1)
+}
+
+@keyframes resultModalIn{
+  from{opacity:0;transform:translateY(10px) scale(.97)}
+  to{opacity:1;transform:none}
+}
+
+
+
+@media(max-width:720px){
+  .card-shoe{
+    width:68px;
+    height:88px;
+    right:6px;
+    top:46px;
+    opacity:.72
+  }
+
+  .card-shoe::after{
+    bottom:9px;
+    height:34px
+  }
+
+  .card-shoe span{
+    margin-top:-54px;
+    font-size:7px
+  }
+
+  .table-inner::after{
+    top:220px;
+    font-size:17px
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,
+  *::before,
+  *::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important
+  }
+}
+
+
+/* Configurazione della mano successiva con risultati ancora visibili */
+.seat.completed .bet-row{
+  position:relative
+}
+.seat.completed .bet-row::after{
+  content:"PROSSIMA";
+  position:absolute;
+  right:6px;
+  top:-14px;
+  color:#ffe5a088;
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.08em;
+  pointer-events:none
+}
+
+
+/* ============================================================
+   BLACKJACK V3 - TAVOLO ALLEGATO + POSTAZIONI REALI
+   ============================================================ */
+
+/* Lo stesso tavolo viene usato anche come atmosfera di sfondo pagina. */
+html,
+body{
+  background:
+    linear-gradient(#010403e8,#010403ef),
+    url("./assets/table.webp") center center / cover fixed no-repeat;
+}
+
+header{
+  padding:9px 12px;
+  border:1px solid #d7ad5538;
+  border-radius:15px;
+  background:#020705c9;
+  backdrop-filter:blur(7px);
+  box-shadow:0 10px 30px #0007;
+}
+
+/*
+ * Il tavolo non viene più ricostruito in CSS:
+ * l'immagine allegata è il layout reale.
+ */
+.table-shell{
+  width:100%;
+  min-width:980px;
+  aspect-ratio:1672 / 941;
+  min-height:0;
+  margin:0 auto 225px;
+  overflow:visible;
+  border:0;
+  border-radius:18px;
+  background:
+    url("./assets/table.webp")
+    center center / 100% 100%
+    no-repeat;
+  box-shadow:0 24px 70px #000b;
+}
+
+.table-shell::before{
+  display:none;
+}
+
+.table-inner{
+  position:absolute;
+  inset:0;
+  padding:0;
+}
+
+.table-inner::after{
+  display:none;
+}
+
+/* Il tavolo contiene già le regole stampate. */
+.rules-badge{
+  display:none;
+}
+
+.table-topbar{
+  position:absolute;
+  left:50%;
+  top:27.5%;
+  z-index:20;
+  display:block;
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+
+.round-badge{
+  min-width:0;
+  padding:6px 11px;
+  border-color:#d7ad5568;
+  background:#00120bc7;
+  box-shadow:0 4px 14px #0007;
+  font-size:10px;
+}
+
+/* Lo shoe è già disegnato nell'immagine. */
+.card-shoe{
+  display:none;
+}
+
+/* ============================================================
+   DEALER: carte dentro la zona superiore del tavolo
+   ============================================================ */
+
+.dealer-zone{
+  position:absolute;
+  left:50%;
+  top:7.2%;
+  z-index:12;
+  width:39%;
+  min-height:0;
+  margin:0;
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+
+.dealer-zone .zone-title{
+  display:none;
+}
+
+.dealer-zone .cards-row{
+  min-height:92px;
+  gap:5px;
+  align-items:flex-start;
+}
+
+.dealer-zone > .dealer-total{
+  order:2;
+  margin:1px 0 0;
+  padding:3px 8px;
+  border:1px solid #d7ad5540;
+  border-radius:999px;
+  background:#00130bc7;
+  font-size:11px;
+  min-height:0;
+}
+
+.dealer-zone .playing-card{
+  width:60px;
+  height:86px;
+  padding:5px;
+}
+
+.dealer-zone .playing-card .rank{
+  font-size:17px;
+}
+
+.dealer-zone .playing-card .suit{
+  font-size:26px;
+}
+
+.dealer-zone .playing-card .foot{
+  font-size:14px;
+}
+
+/* ============================================================
+   LE 5 POSTAZIONI SONO ANCORATE AI CERCHI DELL'IMMAGINE.
+   Coordinate percentuali ricavate dall'immagine 1672x941.
+   ============================================================ */
+
+.seats{
+  position:absolute;
+  inset:0;
+  z-index:15;
+  display:block;
+  pointer-events:none;
+}
+
+/*
+ * --x / --y = centro del cerchio stampato sul tavolo.
+ * La postazione si sviluppa verso l'alto dal relativo cerchio.
+ */
+.seat{
+  --x:50%;
+  --y:65%;
+
+  position:absolute;
+  left:var(--x);
+  top:calc(var(--y) - 27%);
+  width:18.4%;
+  height:27%;
+  min-width:0;
+  min-height:0;
+  padding:0;
+  transform:translateX(-50%);
+  border:0;
+  border-radius:14px;
+  background:transparent;
+  box-shadow:none;
+  pointer-events:auto;
+}
+
+.seat:nth-child(1){--x:17.3%;--y:55.4%}
+.seat:nth-child(2){--x:32.5%;--y:64.7%}
+.seat:nth-child(3){--x:49.4%;--y:67.7%}
+.seat:nth-child(4){--x:66.3%;--y:64.7%}
+.seat:nth-child(5){--x:81.7%;--y:55.4%}
+
+.seat.enabled,
+.seat.completed{
+  border:0;
+  background:transparent;
+  box-shadow:none;
+}
+
+.seat.active-turn{
+  border:0;
+  box-shadow:none;
+}
+
+/* alone, senza pannello rettangolare */
+.seat-head{
+  position:absolute;
+  left:50%;
+  top:0;
+  z-index:4;
+  width:max-content;
+  max-width:100%;
+  margin:0;
+  transform:translate(-50%,-15%);
+  padding:3px 6px;
+  border:1px solid #d7ad5545;
+  border-radius:999px;
+  background:#00120bc7;
+  backdrop-filter:blur(3px);
+}
+
+.seat-title{
+  font-size:9px;
+  letter-spacing:.05em;
+}
+
+.seat-toggle{
+  min-width:29px;
+  height:20px;
+  padding:0 6px;
+  font-size:8px;
+}
+
+/*
+ * Le mani stanno sopra il cerchio.
+ * Con split le colonne si comprimono senza scrollbar orizzontale.
+ */
+.hands-wrap{
+  position:absolute;
+  left:0;
+  right:0;
+  top:17px;
+  bottom:45px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:3px;
+  overflow:visible;
+  padding:0;
+}
+
+.hand{
+  flex:1 1 0;
+  min-width:0;
+  max-width:100%;
+  min-height:0;
+  height:100%;
+  padding:3px;
+  overflow:visible;
+  border:0;
+  border-radius:8px;
+  background:#00130b80;
+  box-shadow:0 4px 11px #0006;
+}
+
+.hand.active{
+  border:1px solid #ffe18f;
+  background:#3e300a80;
+}
+
+.hand.win{
+  border:1px solid #79e39c;
+}
+
+.hand.loss{
+  border:1px solid #ff8e8e58;
+}
+
+.hand.push{
+  border:1px solid #7aafff;
+}
+
+.hand-title{
+  margin-bottom:2px;
+  font-size:7px;
+}
+
+.hand-cards{
+  min-height:0;
+  height:56%;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:0;
+  overflow:visible;
+  padding:0;
+}
+
+.hand .playing-card{
+  flex:0 0 36px;
+  width:36px;
+  height:52px;
+  padding:3px;
+  border-radius:5px;
+}
+
+.hand .playing-card + .playing-card{
+  margin-left:-18px;
+}
+
+.hand .playing-card .rank{
+  font-size:11px;
+}
+
+.hand .playing-card .suit{
+  font-size:15px;
+}
+
+.hand .playing-card .foot{
+  font-size:9px;
+}
+
+.hand-meta{
+  grid-template-columns:1fr auto;
+  gap:1px 3px;
+  margin-top:2px;
+  font-size:7px;
+}
+
+.hand-result{
+  margin-top:2px;
+  font-size:7px;
+}
+
+.empty-seat{
+  display:none;
+}
+
+/* ============================================================
+   FICHE / PUNTATA: il centro coincide col cerchio stampato
+   ============================================================ */
+
+.bet-row{
+  position:absolute;
+  left:50%;
+  bottom:0;
+  z-index:6;
+  width:74px;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  transform:translate(-50%,50%);
+}
+
+.bet-chip{
+  width:58px;
+  height:58px;
+  flex:0 0 58px;
+  padding:0;
+  overflow:visible;
+  border:0;
+  outline:0;
+  background:transparent;
+  box-shadow:none;
+  opacity:.34;
+}
+
+.bet-chip.live{
+  opacity:1;
+}
+
+.bet-chip img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 5px 5px #0009);
+}
+
+.bet-chip .chip-fallback{
+  width:54px;
+  height:54px;
+  display:grid;
+  place-items:center;
+  border:4px dashed #f1d987;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,#d6ae4c 0 38%,#674311 39% 66%,#e1be62 67%);
+  color:#fff;
+  font-size:8px;
+  font-weight:1000;
+  text-shadow:0 1px 2px #000;
+  box-shadow:0 4px 8px #0008;
+}
+
+.bet-row select{
+  width:74px;
+  height:23px;
+  padding:1px 3px;
+  border-color:#d7ad5550;
+  border-radius:6px;
+  background:#00120be7;
+  font-size:8px;
+  text-align:center;
+}
+
+.seat-stake{
+  position:absolute;
+  left:50%;
+  bottom:-37px;
+  z-index:6;
+  width:118px;
+  min-height:0;
+  margin:0;
+  transform:translateX(-50%);
+  color:#eadcae;
+  font-size:7px;
+  text-align:center;
+  text-shadow:0 1px 2px #000;
+}
+
+.seat.completed .bet-row::after{
+  top:-9px;
+  right:-9px;
+  padding:1px 3px;
+  border-radius:4px;
+  background:#00120bcf;
+}
+
+/* ============================================================
+   CONTROLLI SOTTO IL TAVOLO
+   ============================================================ */
+
+.control-dock{
+  position:absolute;
+  left:50%;
+  top:calc(100% + 14px);
+  width:min(920px,92vw);
+  margin:0;
+  transform:translateX(-50%);
+}
+
+.control-panel,
+.status,
+.result-stat{
+  background:#020a07e8;
+  backdrop-filter:blur(7px);
+}
+
+.legend{
+  position:absolute;
+  left:50%;
+  top:calc(100% + 202px);
+  width:100%;
+  transform:translateX(-50%);
+}
+
+/* Le vecchie deformazioni ad arco non servono più: l'arco è nell'immagine. */
+@media(min-width:1251px){
+  .seat:nth-child(1),
+  .seat:nth-child(2),
+  .seat:nth-child(4),
+  .seat:nth-child(5){
+    transform:translateX(-50%);
+  }
+}
+
+/* Layout desktop-first: su schermi piccoli il tavolo resta proporzionato
+   e la pagina può scorrere orizzontalmente senza distruggere le coordinate. */
+@media(max-width:1000px){
+  .shell{
+    width:980px;
+    max-width:none;
+  }
+
+  header{
+    width:calc(100vw - 16px);
+    max-width:960px;
+    position:sticky;
+    left:8px;
+  }
+
+  .table-shell{
+    min-width:980px;
+  }
+}
+
+
+/* ============================================================
+   BLACKJACK V3.1 - UX POSTAZIONI + DEBUG POSIZIONI
+   ============================================================ */
+
+/* Più spazio cliccabile per la puntata */
+.bet-row{
+  width:108px;
+  gap:4px;
+}
+
+.bet-row select{
+  width:108px;
+  height:34px;
+  padding:4px 24px 4px 8px;
+  font-size:11px;
+  font-weight:900;
+  border:1px solid #e2bd6680;
+  border-radius:9px;
+  background:#00150def;
+  box-shadow:0 5px 13px #0008;
+  cursor:pointer;
+}
+
+.bet-row select:hover,
+.bet-row select:focus{
+  border-color:#ffe196;
+  outline:none;
+  box-shadow:0 0 0 2px #ffe19626,0 5px 13px #0008;
+}
+
+/* Fiche un po' più grande/cliccabile, ma il click vero resta sul select */
+.bet-chip{
+  width:64px;
+  height:64px;
+  flex-basis:64px;
+}
+
+/*
+ * La puntata per la prossima mano sta SOTTO il cerchio,
+ * così non può mai finire sopra le carte dell'ultima mano.
+ */
+.bet-row{
+  bottom:-18px;
+  transform:translate(-50%,100%);
+}
+
+.seat-stake{
+  bottom:-92px;
+  width:150px;
+  font-size:9px;
+  font-weight:800;
+}
+
+/* Le carte possono occupare più spazio verticale */
+.hands-wrap{
+  bottom:24px;
+}
+
+/* Niente "mega grid": i metadati della mano diventano minimali */
+.hand{
+  position:relative;
+  padding:4px 4px 18px;
+}
+
+.hand-meta{
+  display:none;
+}
+
+/* Totale carte in alto a destra */
+.hand-total-badge{
+  position:absolute;
+  top:3px;
+  right:3px;
+  z-index:5;
+  min-width:25px;
+  height:25px;
+  padding:0 6px;
+  display:grid;
+  place-items:center;
+  border:1px solid #ffe49b80;
+  border-radius:999px;
+  background:#00130de6;
+  box-shadow:0 3px 8px #0008;
+  color:#ffe6a6;
+  font-size:10px;
+  font-weight:1000;
+}
+
+/* In basso basta il valore della puntata totale della mano */
+.hand-bet-total{
+  position:absolute;
+  left:4px;
+  right:4px;
+  bottom:3px;
+  min-height:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  color:#f1dfad;
+  font-size:8px;
+  font-weight:900;
+  text-align:center;
+}
+
+.hand-bet-total strong{
+  color:#ffe29a;
+}
+
+.hand-result{
+  position:absolute;
+  left:50%;
+  top:30px;
+  z-index:7;
+  margin:0;
+  padding:1px 4px;
+  transform:translateX(-50%);
+  border-radius:5px;
+  background:#00140ddd;
+  white-space:nowrap;
+  font-size:7px;
+}
+
+.hand-cards{
+  padding-top:10px;
+}
+
+/* Ultima mano: lascia più chiaro che i controlli sotto sono per la prossima */
+.seat.completed .bet-row::after{
+  top:-13px;
+  right:-6px;
+  font-size:7px;
+}
+
+/* ============================================================
+   DEBUG POSIZIONI
+   Attivazione: blackjack.html?debug=1
+   ============================================================ */
+
+.bj-debug-panel{
+  position:fixed;
+  right:10px;
+  top:10px;
+  z-index:5000;
+  width:310px;
+  max-height:calc(100vh - 20px);
+  overflow:auto;
+  padding:10px;
+  border:1px solid #ffe39a80;
+  border-radius:12px;
+  background:#020806f2;
+  box-shadow:0 15px 45px #000c;
+  color:white;
+  font-size:11px;
+}
+
+.bj-debug-panel h3{
+  margin:0 0 8px;
+  color:#ffe39a;
+  font-size:14px;
+}
+
+.bj-debug-row{
+  display:grid;
+  grid-template-columns:56px 1fr 46px 1fr 46px;
+  gap:5px;
+  align-items:center;
+  margin-bottom:6px;
+}
+
+.bj-debug-row input[type="number"]{
+  width:46px;
+  padding:3px;
+  border:1px solid #ffffff26;
+  border-radius:5px;
+  background:#06140f;
+  color:white;
+  font-size:10px;
+}
+
+.bj-debug-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.bj-debug-actions button{
+  padding:6px 8px;
+  border:1px solid #ffffff2a;
+  border-radius:6px;
+  background:#10251c;
+  color:white;
+  font-size:10px;
+  font-weight:900;
+}
+
+.bj-debug-output{
+  width:100%;
+  min-height:110px;
+  margin-top:8px;
+  padding:6px;
+  border:1px solid #ffffff1c;
+  border-radius:6px;
+  background:#0008;
+  color:#aef0c2;
+  font-family:ui-monospace,Consolas,monospace;
+  font-size:9px;
+  resize:vertical;
+}
+
+.bj-debug-cross{
+  position:absolute;
+  z-index:4990;
+  width:20px;
+  height:20px;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+.bj-debug-cross::before,
+.bj-debug-cross::after{
+  content:"";
+  position:absolute;
+  background:#ff4646;
+  box-shadow:0 0 4px #000;
+}
+
+.bj-debug-cross::before{
+  left:9px;
+  top:0;
+  width:2px;
+  height:20px;
+}
+
+.bj-debug-cross::after{
+  left:0;
+  top:9px;
+  width:20px;
+  height:2px;
+}
+
+.bj-debug-cross span{
+  position:absolute;
+  left:12px;
+  top:-8px;
+  padding:1px 3px;
+  border-radius:3px;
+  background:#000c;
+  color:#fff;
+  font-size:8px;
+  white-space:nowrap;
+}
+
+
+/* ============================================================
+   POSIZIONI DEFINITIVE TAVOLO
+   ============================================================ */
+.seat:nth-child(1){--x:12%;--y:60.1%}
+.seat:nth-child(2){--x:29.6%;--y:73.7%}
+.seat:nth-child(3){--x:50%;--y:75.7%}
+.seat:nth-child(4){--x:70.6%;--y:73%}
+.seat:nth-child(5){--x:88.9%;--y:61.5%}
+.dealer-zone{left:50%;top:26.2%}
+
+
+/* ============================================================
+   BLACKJACK V3.2 - POSTAZIONI PULITE E COMPATTE
+   ============================================================ */
+
+/*
+ * La seat serve solo da sistema di coordinate.
+ * Nessun pannello/quadrato verde deve essere visibile.
+ */
+.seat,
+.seat.enabled,
+.seat.completed,
+.seat.active-turn{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+
+/*
+ * Avviciniamo le carte al cerchio/ficha:
+ * la seat ora si sviluppa meno verso l'alto.
+ */
+.seat{
+  top:calc(var(--y) - 18%);
+  height:18%;
+  width:17%;
+  overflow:visible;
+}
+
+/* intestazione piccola, sospesa sopra le carte */
+.seat-head{
+  top:-15px;
+  padding:2px 5px;
+  background:#00120ba8;
+  border-color:#d7ad5536;
+  box-shadow:0 2px 7px #0006;
+}
+
+.seat-title{
+  font-size:8px;
+}
+
+.seat-toggle{
+  height:18px;
+  min-width:27px;
+  font-size:7px;
+}
+
+/*
+ * Area mani:
+ * nessun box di sfondo.
+ * Le mani sono semplicemente gruppi di carte.
+ */
+.hands-wrap{
+  left:50%;
+  right:auto;
+  top:0;
+  bottom:auto;
+  width:190%;
+  height:108px;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:8px;
+  overflow:visible;
+  pointer-events:none;
+}
+
+.hand{
+  position:relative;
+  flex:1 1 0;
+  min-width:0;
+  max-width:118px;
+  height:100px;
+  min-height:0;
+  padding:0;
+  overflow:visible;
+  border:0!important;
+  border-radius:0;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:none;
+  pointer-events:none;
+}
+
+/*
+ * Mano attiva / vinta / persa:
+ * niente riquadro. Solo glow attorno alle carte.
+ */
+.hand.active{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+.hand.active .hand-cards{
+  filter:drop-shadow(0 0 7px #ffd95e);
+}
+
+.hand.win .hand-cards{
+  filter:drop-shadow(0 0 7px #63e58d);
+}
+
+.hand.loss .hand-cards{
+  opacity:.74;
+}
+
+.hand.push .hand-cards{
+  filter:drop-shadow(0 0 6px #6faaff);
+}
+
+/* titolo mano quasi invisibile, utile solo quando ci sono split */
+.hand-title{
+  position:absolute;
+  left:50%;
+  top:-11px;
+  z-index:8;
+  margin:0;
+  transform:translateX(-50%);
+  padding:1px 4px;
+  border-radius:5px;
+  background:#00130ba8;
+  font-size:6px;
+  white-space:nowrap;
+}
+
+.hand-title span{
+  display:none;
+}
+
+/*
+ * Carte più grandi e sovrapposte.
+ * In split ogni mano mantiene la propria pila.
+ */
+.hand-cards{
+  position:absolute;
+  left:50%;
+  bottom:16px;
+  width:max-content;
+  height:auto;
+  min-height:0;
+  padding:0;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:0;
+  overflow:visible;
+  transform:translateX(-50%);
+}
+
+.hand .playing-card{
+  flex:0 0 44px;
+  width:44px;
+  height:63px;
+  padding:3px;
+  border-radius:5px;
+  box-shadow:0 4px 8px #0008;
+}
+
+.hand .playing-card + .playing-card{
+  margin-left:-20px;
+}
+
+.hand .playing-card .rank{
+  font-size:13px;
+}
+
+.hand .playing-card .suit{
+  font-size:18px;
+}
+
+.hand .playing-card .foot{
+  font-size:10px;
+}
+
+/*
+ * TOTALE SEMPRE in alto a destra della pila carte.
+ * Essendo dentro ogni .hand funziona anche su tutte le mani da split.
+ */
+.hand-total-badge{
+  top:0;
+  right:0;
+  z-index:12;
+  min-width:24px;
+  height:24px;
+  padding:0 5px;
+  border:1px solid #ffe49b96;
+  background:#00130dec;
+  box-shadow:0 3px 8px #0008;
+  font-size:10px;
+}
+
+/*
+ * Sotto le carte solo la puntata totale.
+ * Niente Totale/Puntata/Ritorno a griglia.
+ */
+.hand-bet-total{
+  left:50%;
+  right:auto;
+  bottom:0;
+  width:max-content;
+  max-width:115px;
+  min-height:0;
+  transform:translateX(-50%);
+  padding:1px 4px;
+  border-radius:5px;
+  background:#00120ba6;
+  color:#f1dfad;
+  font-size:7px;
+  white-space:nowrap;
+}
+
+.hand-bet-total strong{
+  font-size:8px;
+}
+
+/* risultato piccolo, sopra le carte */
+.hand-result{
+  top:15px;
+  font-size:6px;
+  background:#00140dbb;
+}
+
+/*
+ * Fiche e selettore subito sotto le carte.
+ * Così postazione e carte restano visivamente unite.
+ */
+.bet-row{
+  left:50%;
+  bottom:-18px;
+  width:98px;
+  transform:translate(-50%,100%);
+  gap:2px;
+}
+
+.bet-chip{
+  width:56px;
+  height:56px;
+  flex-basis:56px;
+}
+
+.bet-row select{
+  width:98px;
+  height:32px;
+  padding:3px 22px 3px 6px;
+  font-size:10px;
+}
+
+.seat-stake{
+  bottom:-82px;
+  width:130px;
+  font-size:8px;
+}
+
+/* A mano finita i controlli restano sotto le carte, non sopra */
+.seat.completed .bet-row{
+  z-index:20;
+}
+
+.seat.completed .bet-row::after{
+  top:-11px;
+}
+
+/*
+ * Split 2-4 mani:
+ * allarghiamo il gruppo ma restiamo senza pannelli.
+ */
+.seat:has(.hand:nth-child(2)) .hands-wrap{
+  width:240%;
+  gap:4px;
+}
+
+.seat:has(.hand:nth-child(3)) .hands-wrap{
+  width:300%;
+  gap:2px;
+}
+
+.seat:has(.hand:nth-child(4)) .hands-wrap{
+  width:350%;
+  gap:1px;
+}
+
+.seat:has(.hand:nth-child(3)) .hand,
+.seat:has(.hand:nth-child(4)) .hand{
+  max-width:88px;
+}
+
+.seat:has(.hand:nth-child(3)) .hand .playing-card,
+.seat:has(.hand:nth-child(4)) .hand .playing-card{
+  width:38px;
+  height:55px;
+  flex-basis:38px;
+}
+
+.seat:has(.hand:nth-child(3)) .hand .playing-card + .playing-card,
+.seat:has(.hand:nth-child(4)) .hand .playing-card + .playing-card{
+  margin-left:-18px;
+}
+
+/* Dealer più pulito nella nuova posizione */
+.dealer-zone{
+  width:34%;
+}
+
+.dealer-zone .cards-row{
+  min-height:74px;
+}
+
+.dealer-zone .playing-card{
+  width:53px;
+  height:76px;
+}
+
+/*
+ * Debug: aggiorna i valori di default alle coordinate definitive.
+ */
+
+
+/* ============================================================
+   BLACKJACK V3.3 - DIMENSIONE CARTE DINAMICA
+   ============================================================ */
+
+/* Dealer: carte sensibilmente più grandi */
+.dealer-zone .playing-card{
+  width:72px;
+  height:102px;
+  padding:6px;
+  border-radius:7px;
+}
+
+.dealer-zone .playing-card .rank{
+  font-size:19px;
+}
+
+.dealer-zone .playing-card .suit{
+  font-size:30px;
+}
+
+.dealer-zone .playing-card .foot{
+  font-size:16px;
+}
+
+.dealer-zone .cards-row{
+  min-height:104px;
+  gap:7px;
+}
+
+/* ============================================================
+   GIOCATORE - 1 MANO
+   ============================================================ */
+
+.seat:not(:has(.hand:nth-child(2))) .hand{
+  max-width:150px;
+}
+
+.seat:not(:has(.hand:nth-child(2))) .hand .playing-card{
+  width:58px;
+  height:82px;
+  flex-basis:58px;
+  padding:4px;
+  border-radius:6px;
+}
+
+.seat:not(:has(.hand:nth-child(2))) .hand .playing-card + .playing-card{
+  margin-left:-24px;
+}
+
+.seat:not(:has(.hand:nth-child(2))) .hand .playing-card .rank{
+  font-size:16px;
+}
+
+.seat:not(:has(.hand:nth-child(2))) .hand .playing-card .suit{
+  font-size:24px;
+}
+
+.seat:not(:has(.hand:nth-child(2))) .hand .playing-card .foot{
+  font-size:13px;
+}
+
+/* ============================================================
+   GIOCATORE - 2 MANI DOPO SPLIT
+   ============================================================ */
+
+.seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand{
+  max-width:118px;
+}
+
+.seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card{
+  width:48px;
+  height:69px;
+  flex-basis:48px;
+  padding:3px;
+}
+
+.seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card + .playing-card{
+  margin-left:-21px;
+}
+
+.seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card .rank{
+  font-size:14px;
+}
+
+.seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card .suit{
+  font-size:20px;
+}
+
+.seat:has(.hand:nth-child(2)):not(:has(.hand:nth-child(3))) .hand .playing-card .foot{
+  font-size:11px;
+}
+
+/* ============================================================
+   GIOCATORE - 3 MANI
+   ============================================================ */
+
+.seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand{
+  max-width:94px;
+}
+
+.seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card{
+  width:41px;
+  height:59px;
+  flex-basis:41px;
+  padding:3px;
+}
+
+.seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card + .playing-card{
+  margin-left:-18px;
+}
+
+.seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card .rank{
+  font-size:12px;
+}
+
+.seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card .suit{
+  font-size:17px;
+}
+
+.seat:has(.hand:nth-child(3)):not(:has(.hand:nth-child(4))) .hand .playing-card .foot{
+  font-size:10px;
+}
+
+/* ============================================================
+   GIOCATORE - 4 MANI
+   ============================================================ */
+
+.seat:has(.hand:nth-child(4)) .hand{
+  max-width:82px;
+}
+
+.seat:has(.hand:nth-child(4)) .hand .playing-card{
+  width:36px;
+  height:52px;
+  flex-basis:36px;
+  padding:2px;
+}
+
+.seat:has(.hand:nth-child(4)) .hand .playing-card + .playing-card{
+  margin-left:-16px;
+}
+
+.seat:has(.hand:nth-child(4)) .hand .playing-card .rank{
+  font-size:11px;
+}
+
+.seat:has(.hand:nth-child(4)) .hand .playing-card .suit{
+  font-size:15px;
+}
+
+.seat:has(.hand:nth-child(4)) .hand .playing-card .foot{
+  font-size:9px;
+}
+
+/* Più spazio verticale per la mano singola */
+.seat:not(:has(.hand:nth-child(2))) .hands-wrap{
+  height:126px;
+}
+
+/* Il totale resta in alto a destra anche con split */
+.hand-total-badge{
+  z-index:20;
+}
+
+</style>
+</head>
+<body>
+<div id="app"><div class="shell">
+<header>
+  <div class="brand"><h1>BLACKJACK</h1><p>6 mazzi · S17 · Blackjack 3:2 · Dealer no peek</p></div>
+  <div class="top-progress"><div class="xp-header"><span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span><span id="xpText">0 XP</span></div><div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div></div>
+  <div class="header-actions"><div class="pill">👤 <strong id="usernameValue">—</strong></div><div class="pill">🪙 <strong id="balanceValue">0</strong></div><button id="fullscreenBtn" class="header-btn" type="button">⛶</button><button id="homeBtn" class="header-btn" type="button">HOME</button></div>
+</header>
+
+<section class="table-shell"><div class="table-inner">
+  <div class="table-topbar">
+    <div class="rules-badge">Double su qualsiasi 2 carte · Double dopo split<br>Split fino a 4 mani per postazione</div>
+    <div id="roundBadge" class="round-badge">PRONTO</div>
+    <div class="rules-badge right">Split Assi: 1 carta e stop · No insurance<br>Dealer Blackjack: no peek</div>
+  </div>
+
+  <div class="dealer-zone">
+    <div class="zone-title">DEALER</div>
+    <div id="dealerTotal" class="dealer-total">—</div>
+    <div id="dealerCards" class="cards-row"></div>
+    <div class="card-shoe" aria-hidden="true"><span>6 DECKS</span></div>
+  </div>
+
+  <div id="seats" class="seats"></div>
+
+  <div class="control-dock">
+    <div class="control-panel">
+      <h3>PUNTATE TAVOLO</h3>
+      <div class="bet-summary">
+        <div class="summary-box"><small>Postazioni</small><strong id="enabledSeats">1</strong></div>
+        <div class="summary-box"><small>Puntata iniziale</small><strong id="initialBet">0</strong></div>
+        <div class="summary-box"><small>Totale esposto</small><strong id="totalStaked">0</strong></div>
+      </div>
+      <button id="dealBtn" class="main-action" type="button">DISTRIBUISCI</button>
+    </div>
+
+    <div class="control-panel">
+      <h3>AZIONI MANO</h3>
+      <div class="action-grid">
+        <button id="hitBtn" class="game-action primary" type="button">CARTA</button>
+        <button id="standBtn" class="game-action" type="button">STAI</button>
+        <button id="doubleBtn" class="game-action double" type="button">DOUBLE</button>
+        <button id="splitBtn" class="game-action split" type="button">SPLIT</button>
+      </div>
+    </div>
+
+    <div id="status" class="status">Caricamento Blackjack…</div>
+
+    <div id="resultStrip" class="result-strip hidden">
+      <div class="result-stat"><small>Puntato</small><strong id="resultStake">0</strong></div>
+      <div class="result-stat"><small>Ritorno</small><strong id="resultReturn">0</strong></div>
+      <div class="result-stat"><small>Netto</small><strong id="resultNet">0</strong></div>
+      <div class="result-stat"><small>Dealer</small><strong id="resultDealer">—</strong></div>
+    </div>
+  </div>
+
+  <div class="legend">Ogni postazione è indipendente. Il dealer gioca una sola volta contro tutte le mani.</div>
+</div></section>
+</div></div>
+
+<div id="resultModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head"><strong>Risultato tavolo</strong><button id="resultModalClose" class="modal-close" type="button">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-summary">
+        <div class="summary-box"><small>Puntato</small><strong id="modalStake">0</strong></div>
+        <div class="summary-box"><small>Ritorno</small><strong id="modalReturn">0</strong></div>
+        <div class="summary-box"><small>Netto</small><strong id="modalNet">0</strong></div>
+      </div>
+      <div id="modalDealer" style="margin-bottom:10px;color:var(--gold2);font-weight:900"></div>
+      <div id="modalHands" class="modal-hands"></div>
+    </div>
+  </div>
+</div>
+
+<div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento Blackjack…</strong><div id="loadingError" style="margin-top:10px;color:#ff9292;white-space:pre-wrap"></div></div></div>
+
+<script src="../shared/level-up-modal.js"></script>
+<script type="module">
+import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL="https://jhpppwqdaceratwjnbzi.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
+
+const nf=new Intl.NumberFormat("it-IT");
+const $=selector=>document.querySelector(selector);
+const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const STORAGE_KEY="casino-blackjack-bets-v1";
+
+let session=null;
+let config=null;
+let levels=[];
+let state={
+  round:null,
+  busy:false,
+  animating:false,
+  animation:null,
+  resultShownFor:null,
+  selectedBets:{1:null,2:null,3:null,4:null,5:null},
+  enabled:{1:true,2:false,3:false,4:false,5:false}
+};
+
+function fmt(value){return nf.format(Number(value||0))}
+
+function compactAmount(value){
+  const n=Number(value||0);
+
+  if(n>=1000000){
+    const v=n/1000000;
+    return `${Number.isInteger(v)?v:v.toFixed(1)}M`;
+  }
+
+  if(n>=1000){
+    const v=n/1000;
+    return `${Number.isInteger(v)?v:v.toFixed(1)}K`;
+  }
+
+  return String(n);
+}
+
+function sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+function roundHandMap(round){
+  const map=new Map();
+
+  for(const spot of round?.spots||[]){
+    for(const hand of spot.hands||[]){
+      map.set(hand.hand_id,{
+        spot,
+        hand
+      });
+    }
+  }
+
+  return map;
+}
+
+function buildActionAnimation(previousRound,nextRound,action,actedHandId){
+  const previous=roundHandMap(previousRound);
+  const next=roundHandMap(nextRound);
+
+  const cardAnimations={};
+
+  for(const [handId,nextEntry] of next.entries()){
+    const prevEntry=previous.get(handId);
+
+    if(!prevEntry){
+      /*
+       * Mano appena creata da SPLIT:
+       * la prima carta scivola lateralmente, la seconda arriva dal shoe.
+       */
+      cardAnimations[handId]=nextEntry.hand.cards.map((_,index)=>({
+        index,
+        kind:index===0?"split-slide":"deal-in",
+        delay:index===0?40:180
+      }));
+      continue;
+    }
+
+    const oldCards=prevEntry.hand.cards||[];
+    const newCards=nextEntry.hand.cards||[];
+
+    if(action==="SPLIT" && handId===actedHandId){
+      /*
+       * La vecchia coppia viene separata: la nuova seconda carta
+       * è quella pescata dopo lo split.
+       */
+      if(newCards.length>=2){
+        cardAnimations[handId]=[
+          {index:1,kind:"deal-in",delay:130}
+        ];
+      }
+      continue;
+    }
+
+    if(newCards.length>oldCards.length){
+      cardAnimations[handId]=[];
+
+      for(let index=oldCards.length;index<newCards.length;index++){
+        cardAnimations[handId].push({
+          index,
+          kind:"deal-in",
+          delay:70+(index-oldCards.length)*90
+        });
+      }
+    }
+  }
+
+  const dealerReveal=
+    previousRound?.status!=="COMPLETED"
+    && nextRound?.status==="COMPLETED";
+
+  return {
+    kind:"action",
+    action,
+    actedHandId,
+    cardAnimations,
+    dealerReveal
+  };
+}
+
+function animationDuration(animation,round){
+  if(!animation)return 0;
+
+  if(animation.kind==="initial"){
+    const seats=Math.max(1,round?.spots?.length||1);
+    return ((2*seats)+2)*115+240;
+  }
+
+  let duration=430;
+
+  for(const animations of Object.values(animation.cardAnimations||{})){
+    for(const item of animations){
+      duration=Math.max(
+        duration,
+        Number(item.delay||0)+420
+      );
+    }
+  }
+
+  if(animation.dealerReveal){
+    const count=Math.max(
+      2,
+      round?.dealer?.cards?.length||2
+    );
+
+    duration=Math.max(
+      duration,
+      300+Math.max(0,count-2)*210+620
+    );
+  }
+
+  return duration;
+}
+
+function status(message,isBad=false){$("#status").textContent=message;$("#status").style.color=isBad?"var(--bad)":"#f6ce79"}
+function showLoading(message="Caricamento…"){$("#loadingText").textContent=message;$("#loadingError").textContent="";$("#loadingOverlay").classList.remove("hidden")}
+function hideLoading(){$("#loadingOverlay").classList.add("hidden")}
+function fail(error){console.error(error);$("#loadingText").textContent="Errore";$("#loadingError").textContent=error?.details||error?.message||String(error);$("#loadingOverlay").classList.remove("hidden")}
+function setBusy(value,message=null){
+  state.busy=Boolean(value);
+
+  if(message){
+    status(message);
+  }
+
+  renderControls();
+
+  /*
+   * Durante una RPC renderSeats() crea select e toggle con disabled.
+   * Quando busy torna false dobbiamo ricrearli, altrimenti rimangono
+   * disabilitati nel DOM anche se il round è già concluso.
+   */
+  if(
+    !state.busy
+    && !state.animating
+    && (
+      !state.round
+      || state.round.status==="COMPLETED"
+    )
+  ){
+    renderSeats();
+    renderSummary();
+  }
+}
+
+function saveBetPreferences(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify({selectedBets:state.selectedBets,enabled:state.enabled}));
+}
+
+function loadBetPreferences(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return;
+    const saved=JSON.parse(raw);
+    if(saved?.selectedBets){
+      for(let seat=1;seat<=5;seat++){
+        if(saved.selectedBets[seat]!=null)state.selectedBets[seat]=Number(saved.selectedBets[seat]);
+      }
+    }
+    if(saved?.enabled){
+      for(let seat=1;seat<=5;seat++)state.enabled[seat]=Boolean(saved.enabled[seat]);
+    }
+    if(!Object.values(state.enabled).some(Boolean))state.enabled[1]=true;
+  }catch(error){console.warn("Preferenze Blackjack:",error)}
+}
+
+function normalizeConfig(data){
+  return {...data,decks:Number(data?.decks||6),max_seats:Number(data?.max_seats||5),max_hands_per_spot:Number(data?.max_hands_per_spot||4),allowed_bets:(data?.allowed_bets||[]).map(Number)};
+}
+
+function normalizeRound(data){
+  if(!data)return null;
+  return {
+    ...data,
+    initial_staked:Number(data.initial_staked||0),
+    total_staked:Number(data.total_staked||0),
+    total_return:Number(data.total_return||0),
+    net_result:data.net_result==null?null:Number(data.net_result),
+    balance:Number(data.balance||0),
+    active_hand_id:data.active_hand_id||null,
+    allowed_actions:Array.isArray(data.allowed_actions)?data.allowed_actions:[],
+    dealer:{...(data.dealer||{}),cards:Array.isArray(data?.dealer?.cards)?data.dealer.cards:[],total:data?.dealer?.total==null?null:Number(data.dealer.total)},
+    spots:(data.spots||[]).map(spot=>({...spot,seat_no:Number(spot.seat_no),initial_bet:Number(spot.initial_bet||0),hands:(spot.hands||[]).map(hand=>({...hand,hand_order:Number(hand.hand_order),bet:Number(hand.bet||0),payout:hand.payout==null?null:Number(hand.payout),total:Number(hand.total||0),cards:Array.isArray(hand.cards)?hand.cards:[]}))})).sort((a,b)=>a.seat_no-b.seat_no)
+  };
+}
+
+async function loadLevels(){
+  const{data,error}=await supabase.from("levels").select("level,xp_required").order("level");
+  if(error)throw error;
+  levels=data||[];
+}
+
+function updateXp(xp,level){
+  xp=Number(xp||0);level=Number(level||1);$("#xpLevel").textContent=level;
+  if(level>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmt(xp)} XP · MAX`;return}
+  const current=levels.find(x=>Number(x.level)===level),next=levels.find(x=>Number(x.level)===level+1);
+  const currentXp=current?Number(current.xp_required):(level===1?0:null),nextXp=next?Number(next.xp_required):null;
+  if(currentXp==null||nextXp==null){$("#xpText").textContent=`${fmt(xp)} XP`;return}
+  const into=Math.max(0,xp-currentXp),needed=Math.max(1,nextXp-currentXp);
+  $("#xpFill").style.width=`${Math.max(0,Math.min(100,into/needed*100))}%`;
+  $("#xpText").textContent=`${fmt(into)} / ${fmt(needed)} XP`;
+}
+
+async function loadProfile(){
+  const uid=session.user.id;
+  const[{data:profile,error:profileError},{data:progression,error:progressionError}]=await Promise.all([
+    supabase.from("profiles").select("username,chips").eq("user_id",uid).single(),
+    supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle()
+  ]);
+  if(profileError)throw profileError;
+  if(progressionError)throw progressionError;
+  $("#usernameValue").textContent=profile.username||"—";
+  $("#balanceValue").textContent=fmt(profile.chips);
+  updateXp(progression?.xp||0,progression?.level||1);
+}
+
+async function refreshProfileAndLevelUp(){
+  try{
+    if(window.CasinoLevelUp?.check){
+      const result=await window.CasinoLevelUp.check();
+      if(result?.balance!=null)$("#balanceValue").textContent=fmt(result.balance);
+    }
+    await loadProfile();
+  }catch(error){console.error("Aggiornamento XP/Level:",error)}
+}
+
+function broadcastBalance(){
+  try{const channel=new BroadcastChannel("slot-machine-sync");channel.postMessage({type:"balance-changed"});channel.close()}catch{}
+}
+
+function cardInfo(code){
+  if(!code)return null;
+  const match=String(code).match(/^(A|[2-9]|10|J|Q|K)([CDHS])$/);
+  if(!match)return{rank:String(code),suit:"",red:false};
+  const suits={C:"♣",D:"♦",H:"♥",S:"♠"};
+  return{rank:match[1],suit:suits[match[2]],red:match[2]==="D"||match[2]==="H"};
+}
+
+function cardHtml(code,options={}){
+  const animationClass=options.animationClass||"";
+  const delay=Number(options.delay||0);
+  const dealX=Number(options.dealX??150);
+  const dealY=Number(options.dealY??-170);
+  const splitX=Number(options.splitX??-65);
+
+  const style=[
+    `--delay:${delay}ms`,
+    `--deal-x:${dealX}px`,
+    `--deal-y:${dealY}px`,
+    `--split-x:${splitX}px`
+  ].join(";");
+
+  if(code==null){
+    return`
+      <div
+        class="playing-card back ${animationClass}"
+        style="${style}"
+        aria-label="Carta coperta"
+      ></div>
+    `;
+  }
+
+  const card=cardInfo(code);
+
+  return`
+    <div
+      class="playing-card ${card.red?"red":""} ${animationClass}"
+      style="${style}"
+      title="${card.rank}${card.suit}"
+    >
+      <div class="rank">${card.rank}</div>
+      <div class="suit">${card.suit}</div>
+      <div class="foot">${card.rank}</div>
+    </div>
+  `;
+}
+
+function getSpot(seatNo){return state.round?.spots?.find(spot=>Number(spot.seat_no)===Number(seatNo))||null}
+
+function activeHand(){
+  if(!state.round?.active_hand_id)return null;
+  for(const spot of state.round.spots||[]){
+    const hand=(spot.hands||[]).find(item=>item.hand_id===state.round.active_hand_id);
+    if(hand)return{spot,hand};
+  }
+  return null;
+}
+
+function resultClass(hand){
+  if(hand.result==="WIN"||hand.result==="BLACKJACK")return"win";
+  if(hand.result==="LOSE")return"loss";
+  if(hand.result==="PUSH")return"push";
+  return"";
+}
+
+function resultLabel(hand){
+  if(hand.result==="BLACKJACK")return"BLACKJACK";
+  if(hand.result==="WIN")return"VINTA";
+  if(hand.result==="PUSH")return"PAREGGIO";
+  if(hand.result==="LOSE")return"PERSA";
+  if(hand.status==="BLACKJACK")return"BLACKJACK";
+  if(hand.status==="BUST")return"SBALLATO";
+  if(hand.status==="STOOD")return"STAI";
+  if(hand.status==="ACTIVE")return"TOCCA A QUESTA";
+  if(hand.status==="WAITING")return"IN ATTESA";
+  return hand.status||"";
+}
+
+function renderDealer(){
+  const dealer=state.round?.dealer;
+
+  if(!dealer){
+    $("#dealerCards").innerHTML=
+      cardHtml(null)+cardHtml(null);
+
+    $("#dealerTotal").textContent="—";
+    return;
+  }
+
+  const animation=state.animation;
+  const seats=Math.max(1,state.round?.spots?.length||1);
+
+  $("#dealerCards").innerHTML=
+    (dealer.cards||[]).map((code,index)=>{
+      let options={};
+
+      if(animation?.kind==="initial"){
+        /*
+         * Ordine reale del deal:
+         * prima carta a tutti -> dealer scoperta ->
+         * seconda carta a tutti -> dealer coperta.
+         */
+        const delay=
+          index===0
+            ?seats*115
+            :((2*seats)+1)*115;
+
+        options={
+          animationClass:"deal-in",
+          delay,
+          dealX:170,
+          dealY:-35
+        };
+      }
+
+      if(animation?.dealerReveal){
+        if(index===1){
+          options={
+            animationClass:"flip-reveal",
+            delay:120
+          };
+        }else if(index>=2){
+          options={
+            animationClass:"deal-in",
+            delay:260+(index-2)*210,
+            dealX:165,
+            dealY:-35
+          };
+        }
+      }
+
+      return cardHtml(
+        code,
+        options
+      );
+    }).join("");
+
+  if(state.round.status==="COMPLETED"){
+    let label=dealer.total==null
+      ?"—"
+      :`${dealer.total}`;
+
+    if(dealer.blackjack){
+      label+=" · BLACKJACK";
+    }else if(dealer.total>21){
+      label+=" · SBALLATO";
+    }else if(dealer.soft){
+      label+=" · SOFT";
+    }
+
+    $("#dealerTotal").textContent=
+      animation?.dealerReveal
+        ?`Il dealer gioca… · ${label}`
+        :label;
+
+  }else{
+    $("#dealerTotal").textContent=
+      state.animating
+        ?"Distribuzione…"
+        :"Carta coperta";
+  }
+}
+
+function handHtml(hand,spot){
+  const isActive=
+    hand.hand_id===state.round?.active_hand_id;
+
+  const klass=
+    resultClass(hand);
+
+  const animation=
+    state.animation;
+
+  const seatIndex=
+    Math.max(
+      0,
+      (state.round?.spots||[])
+        .findIndex(item=>item.seat_no===spot.seat_no)
+    );
+
+  const seats=
+    Math.max(
+      1,
+      state.round?.spots?.length||1
+    );
+
+  const specificAnimations=
+    animation?.cardAnimations?.[hand.hand_id]
+    ||[];
+
+  const cardsHtml=
+    hand.cards.map((code,index)=>{
+      let options={};
+
+      if(animation?.kind==="initial"){
+        const delay=
+          index===0
+            ?seatIndex*115
+            :(seats+1+seatIndex)*115;
+
+        options={
+          animationClass:"deal-in",
+          delay,
+          dealX:(6-Number(spot.seat_no))*48,
+          dealY:-185
+        };
+      }else{
+        const item=
+          specificAnimations.find(
+            entry=>entry.index===index
+          );
+
+        if(item){
+          options={
+            animationClass:item.kind,
+            delay:item.delay,
+            dealX:(6-Number(spot.seat_no))*48,
+            dealY:-185,
+            splitX:-72
+          };
+        }
+      }
+
+      return cardHtml(
+        code,
+        options
+      );
+    }).join("");
+
+  return`
+    <div class="hand ${isActive?"active":""} ${klass}">
+      <div class="hand-title">
+        <strong>Mano ${hand.hand_order}</strong>
+        <span>${hand.doubled?"DOUBLE":hand.from_split?"SPLIT":""}</span>
+      </div>
+
+      <div class="hand-cards">
+        ${cardsHtml}
+      </div>
+
+      <div class="hand-total-badge" title="Totale carte">
+        ${hand.total}${hand.soft&&hand.total<=21?"s":""}
+      </div>
+
+      <div class="hand-result ${klass}">
+        ${resultLabel(hand)}
+      </div>
+
+      <div class="hand-bet-total">
+        Puntata <strong>${fmt(hand.bet)}</strong>
+      </div>
+    </div>
+  `;
+}
+
+function renderSeats(){
+  const root=$("#seats");
+  root.innerHTML="";
+  const roundOpen=state.round&&state.round.status!=="COMPLETED";
+
+  for(let seatNo=1;seatNo<=5;seatNo++){
+    const spot=getSpot(seatNo);
+    const enabled=roundOpen?Boolean(spot):Boolean(state.enabled[seatNo]);
+    const activeSeat=spot?.hands?.some(hand=>hand.hand_id===state.round?.active_hand_id);
+    const seat=document.createElement("section");
+    seat.className="seat"+(enabled?" enabled":"")+(activeSeat?" active-turn":"")+(state.round?.status==="COMPLETED"&&spot?" completed":"");
+
+    const betOptions=(config?.allowed_bets||[]).map(value=>`<option value="${value}" ${Number(state.selectedBets[seatNo])===Number(value)?"selected":""}>${fmt(value)}</option>`).join("");
+    const emptyMessage=enabled?"Le carte verranno distribuite qui.":"Attiva questa postazione per giocare.";
+
+    const displayedBet=
+      roundOpen && spot
+        ?Number(spot.initial_bet||0)
+        :Number(state.selectedBets[seatNo]||0);
+
+    seat.innerHTML=`
+      <div class="seat-head">
+        <span class="seat-title">POSTO ${seatNo}</span>
+        <button type="button" class="seat-toggle ${enabled?"on":""}" data-seat-toggle="${seatNo}" ${roundOpen||state.busy||state.animating?"disabled":""}>${enabled?"ON":"OFF"}</button>
+      </div>
+      <div class="bet-row">
+        <div
+          class="bet-chip ${enabled?"live":""}"
+          data-seat-chip="${seatNo}"
+          aria-hidden="true"
+        >
+          <img
+            src="../roulette/assets/chips/${displayedBet}.webp"
+            alt=""
+            onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"
+          >
+          <span class="chip-fallback" style="display:none">
+            ${compactAmount(displayedBet)}
+          </span>
+        </div>
+
+        <select
+          data-seat-bet="${seatNo}"
+          ${!enabled||roundOpen||state.busy||state.animating?"disabled":""}
+          aria-label="Puntata posto ${seatNo}"
+        >
+          ${betOptions}
+        </select>
+      </div>
+      <div class="seat-stake">${
+        roundOpen && spot
+          ?`Puntata attuale ${fmt(spot.initial_bet)}`
+          :enabled
+            ?`Prossima puntata ${fmt(state.selectedBets[seatNo]||0)}`
+            :"Esclusa dalla prossima mano"
+      }</div>
+      ${
+        state.round?.status==="COMPLETED" && spot?.hands?.length
+          ?`<div style="margin:1px 0 5px;color:#ffffff70;font-size:9px;font-weight:900;text-transform:uppercase">Ultima mano</div>`
+          :""
+      }
+      <div class="hands-wrap">${spot?.hands?.length?spot.hands.map(hand=>handHtml(hand,spot)).join(""):`<div class="empty-seat">${emptyMessage}</div>`}</div>
+    `;
+    root.appendChild(seat);
+  }
+
+  root.querySelectorAll("[data-seat-toggle]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      if(state.round&&state.round.status!=="COMPLETED")return;
+      const seat=Number(button.dataset.seatToggle);
+      state.enabled[seat]=!state.enabled[seat];
+      if(!Object.values(state.enabled).some(Boolean))state.enabled[seat]=true;
+      saveBetPreferences();
+      renderAll();
+    });
+  });
+
+  root.querySelectorAll("[data-seat-bet]").forEach(select=>{
+    select.addEventListener("change",()=>{
+      const seat=Number(select.dataset.seatBet);
+      state.selectedBets[seat]=Number(select.value);
+      saveBetPreferences();
+      renderAll();
+
+      const chip=
+        document.querySelector(
+          `[data-seat-chip="${seat}"]`
+        );
+
+      if(chip){
+        chip.classList.remove("pop");
+        void chip.offsetWidth;
+        chip.classList.add("pop");
+      }
+    });
+  });
+}
+
+function currentInitialBet(){
+  if(state.round&&state.round.status!=="COMPLETED")return state.round.initial_staked;
+  let total=0;
+  for(let seat=1;seat<=5;seat++)if(state.enabled[seat])total+=Number(state.selectedBets[seat]||0);
+  return total;
+}
+
+function renderSummary(){
+  const roundLive=state.round&&state.round.status!=="COMPLETED";
+  const enabledCount=roundLive?state.round.spots.length:Object.values(state.enabled).filter(Boolean).length;
+  $("#enabledSeats").textContent=enabledCount;
+  $("#initialBet").textContent=fmt(roundLive?state.round.initial_staked:currentInitialBet());
+  $("#totalStaked").textContent=fmt(roundLive?state.round.total_staked:currentInitialBet());
+
+  if(state.round?.status==="COMPLETED"){
+    $("#resultStrip").classList.remove("hidden");
+    $("#resultStake").textContent=fmt(state.round.total_staked);
+    $("#resultReturn").textContent=fmt(state.round.total_return);
+    const net=Number(state.round.net_result||0);
+    $("#resultNet").textContent=`${net>=0?"+":""}${fmt(net)}`;
+    $("#resultNet").style.color=net>0?"var(--good)":net<0?"var(--bad)":"var(--blue)";
+    $("#resultDealer").textContent=state.round.dealer?.blackjack?"BLACKJACK":state.round.dealer?.total>21?"SBALLATO":String(state.round.dealer?.total??"—");
+  }else{
+    $("#resultStrip").classList.add("hidden");
+  }
+}
+
+function renderRoundBadge(){
+  const round=state.round;
+
+  $("#roundBadge").classList.toggle(
+    "dealing",
+    state.animating
+  );
+
+  if(!round){
+    $("#roundBadge").textContent="PRONTO";
+    return;
+  }
+  if(round.status==="PLAYER_TURN"){
+    const active=activeHand();
+    $("#roundBadge").textContent=active?`POSTO ${active.spot.seat_no} · MANO ${active.hand.hand_order}`:"GIOCATORE";
+    return;
+  }
+  if(round.status==="DEALER_TURN"){$("#roundBadge").textContent="DEALER";return}
+  $("#roundBadge").textContent="MANO CONCLUSA";
+}
+
+function renderControls(){
+  const round=state.round;
+  const playing=round&&round.status==="PLAYER_TURN";
+  const allowed=new Set(round?.allowed_actions||[]);
+  const active=activeHand()?.hand||null;
+  const balance=Number(round?.balance??0);
+
+  $("#hitBtn").disabled=state.busy||state.animating||!playing||!allowed.has("HIT");
+  $("#standBtn").disabled=state.busy||state.animating||!playing||!allowed.has("STAND");
+  $("#doubleBtn").disabled=state.busy||state.animating||!playing||!allowed.has("DOUBLE")||!active||balance<Number(active.bet||0);
+  $("#splitBtn").disabled=state.busy||state.animating||!playing||!allowed.has("SPLIT")||!active||balance<Number(active.bet||0);
+
+  const canDeal=!state.busy&&!state.animating&&(!round||round.status==="COMPLETED")&&currentInitialBet()>0;
+  $("#dealBtn").disabled=!canDeal;
+  $("#dealBtn").textContent="DISTRIBUISCI";
+}
+
+function renderAll(){
+  renderDealer();
+  renderSeats();
+  renderSummary();
+  renderRoundBadge();
+  renderControls();
+  if(state.round?.balance!=null)$("#balanceValue").textContent=fmt(state.round.balance);
+}
+
+function betsPayload(){
+  const bets=[];
+  for(let seat=1;seat<=5;seat++){
+    if(!state.enabled[seat])continue;
+    const bet=Number(state.selectedBets[seat]||0);
+    if(bet>0)bets.push({seat,bet});
+  }
+  return bets;
+}
+
+function initializeBetSelections(){
+  const allowed=config?.allowed_bets||[];
+  if(!allowed.length)return;
+  for(let seat=1;seat<=5;seat++){
+    if(!allowed.includes(Number(state.selectedBets[seat])))state.selectedBets[seat]=allowed[0];
+  }
+  saveBetPreferences();
+}
+
+async function getRoundState(roundId){
+  const{data,error}=await supabase.rpc("get_blackjack_round_state",{p_round_id:roundId});
+  if(error)throw error;
+  return normalizeRound(data);
+}
+
+async function loadConfig(){
+  const{data,error}=await supabase.rpc("get_blackjack_config");
+  if(error)throw error;
+  config=normalizeConfig(data);
+  initializeBetSelections();
+  if(data.balance!=null)$("#balanceValue").textContent=fmt(data.balance);
+  return data.open_round_id||null;
+}
+
+async function startRound(){
+  if(state.busy||state.animating)return;
+
+  if(state.round?.status==="COMPLETED"){
+    state.round=null;
+    state.animation=null;
+    state.animating=false;
+    state.resultShownFor=null;
+    renderAll();
+  }
+
+  const bets=betsPayload();
+  if(!bets.length){status("Attiva almeno una postazione.",true);return}
+
+  const total=bets.reduce((sum,item)=>sum+item.bet,0);
+  const visibleBalance=Number(String($("#balanceValue").textContent).replace(/\./g,"").replace(/,/g,"."))||0;
+  if(visibleBalance<total){status(`Fiche insufficienti: servono ${fmt(total)}.`,true);return}
+
+  const requestId=crypto.randomUUID();
+  setBusy(true,"Distribuzione in corso…");
+
+  try{
+    const{data,error}=await supabase.rpc("start_blackjack_round",{p_bets:bets,p_request_id:requestId});
+    if(error)throw error;
+
+    state.round=normalizeRound(data);
+
+    $("#balanceValue").textContent=
+      fmt(state.round.balance);
+
+    /*
+     * Il risultato è già deciso dal server, ma il browser
+     * lo presenta come una distribuzione reale carta per carta.
+     */
+    state.animation={
+      kind:"initial"
+    };
+
+    state.animating=true;
+
+    renderAll();
+
+    await sleep(
+      animationDuration(
+        state.animation,
+        state.round
+      )
+    );
+
+    state.animation=null;
+    state.animating=false;
+
+    renderDealer();
+    renderRoundBadge();
+    renderControls();
+
+    const active=activeHand();
+
+    status(
+      state.round.status==="COMPLETED"
+        ?"Mano conclusa."
+        :active
+          ?`Tocca al Posto ${active.spot.seat_no}, Mano ${active.hand.hand_order}.`
+          :"Mano avviata."
+    );
+
+    broadcastBalance();
+
+    if(data?.xp){
+      await refreshProfileAndLevelUp();
+    }
+
+    maybeShowResult();
+
+  }catch(error){
+    console.error("Start Blackjack:",error);
+    try{
+      const openRoundId=await loadConfig();
+      if(openRoundId){
+        state.round=await getRoundState(openRoundId);
+        renderAll();
+        status("Round recuperato dopo la richiesta.");
+        return;
+      }
+    }catch(recoveryError){console.error("Recupero round:",recoveryError)}
+    status(error?.details||error?.message||String(error),true);
+  }finally{
+    setBusy(false);
+  }
+}
+
+async function doAction(action){
+  if(state.busy||state.animating)return;
+  const round=state.round;
+  const hand=activeHand()?.hand;
+  if(!round||!hand)return;
+
+  /*
+   * Snapshot dello stato precedente per capire quali carte
+   * sono realmente nuove nella risposta server.
+   */
+  const previousRound=
+    structuredClone(round);
+
+  const actedHandId=
+    hand.hand_id;
+
+  const requestId=crypto.randomUUID();
+  setBusy(true,action==="HIT"?"Pesco una carta…":action==="STAND"?"Passo la mano…":action==="DOUBLE"?"Double…":"Split…");
+
+  try{
+    const{data,error}=await supabase.rpc("blackjack_action",{p_round_id:round.round_id,p_hand_id:hand.hand_id,p_action:action,p_request_id:requestId});
+    if(error)throw error;
+
+    state.round=
+      normalizeRound(data);
+
+    $("#balanceValue").textContent=
+      fmt(state.round.balance);
+
+    state.animation=
+      buildActionAnimation(
+        previousRound,
+        state.round,
+        action,
+        actedHandId
+      );
+
+    state.animating=true;
+
+    renderAll();
+
+    await sleep(
+      animationDuration(
+        state.animation,
+        state.round
+      )
+    );
+
+    state.animation=null;
+    state.animating=false;
+
+    /*
+     * Rimuove le classi di animazione e mostra il totale dealer
+     * definitivo, senza cambiare lo stato del gioco.
+     */
+    renderDealer();
+    renderSeats();
+    renderRoundBadge();
+    renderControls();
+
+    const next=activeHand();
+
+    if(state.round.status==="COMPLETED"){
+      status("Tavolo concluso.");
+    }else if(next){
+      status(
+        `Tocca al Posto ${next.spot.seat_no}, Mano ${next.hand.hand_order}.`
+      );
+    }
+
+    if(action==="DOUBLE"||action==="SPLIT"){
+      broadcastBalance();
+
+      if(data?.xp){
+        await refreshProfileAndLevelUp();
+      }
+    }
+
+    if(state.round.status==="COMPLETED"){
+      broadcastBalance();
+      await refreshProfileAndLevelUp();
+    }
+
+    maybeShowResult();
+
+  }catch(error){
+    console.error("Azione Blackjack:",error);
+    try{
+      state.round=await getRoundState(round.round_id);
+      renderAll();
+      if(state.round.status==="COMPLETED")maybeShowResult();
+      status(state.round.status==="COMPLETED"?"Stato della mano recuperato.":"Stato sincronizzato.");
+    }catch(recoveryError){
+      console.error("Recupero stato Blackjack:",recoveryError);
+      status(error?.details||error?.message||String(error),true);
+    }
+  }finally{
+    setBusy(false);
+  }
+}
+
+function maybeShowResult(){
+  const round=state.round;
+  if(!round||round.status!=="COMPLETED"||state.resultShownFor===round.round_id)return;
+
+  state.resultShownFor=round.round_id;
+  $("#modalStake").textContent=fmt(round.total_staked);
+  $("#modalReturn").textContent=fmt(round.total_return);
+
+  const net=Number(round.net_result||0);
+  $("#modalNet").textContent=`${net>=0?"+":""}${fmt(net)}`;
+  $("#modalNet").style.color=net>0?"var(--good)":net<0?"var(--bad)":"var(--blue)";
+
+  $("#modalDealer").textContent=`Dealer: ${round.dealer?.total??"—"}${round.dealer?.blackjack?" · BLACKJACK":round.dealer?.total>21?" · SBALLATO":""}`;
+
+  const rows=[];
+  for(const spot of round.spots||[]){
+    for(const hand of spot.hands||[]){
+      const klass=resultClass(hand);
+      rows.push(`<div class="modal-row ${klass}"><strong>Posto ${spot.seat_no} · Mano ${hand.hand_order}</strong><span class="result-word">${resultLabel(hand)} · ${hand.total}</span><span>${fmt(hand.bet)} → <strong>${fmt(hand.payout||0)}</strong></span></div>`);
+    }
+  }
+  $("#modalHands").innerHTML=rows.join("");
+  $("#resultModal").classList.remove("hidden");
+}
+
+function closeResultModal(){$("#resultModal").classList.add("hidden")}
+
+async function restoreOpenRound(openRoundId){
+  if(!openRoundId)return false;
+  try{
+    state.round=await getRoundState(openRoundId);
+    renderAll();
+    const active=activeHand();
+    status(active?`Round ripristinato · Posto ${active.spot.seat_no}, Mano ${active.hand.hand_order}.`:"Round ripristinato.");
+    return true;
+  }catch(error){
+    console.error("Ripristino Blackjack:",error);
+    return false;
+  }
+}
+
+async function init(){
+  showLoading("Caricamento Blackjack…");
+
+  const{data:sessionData,error:sessionError}=await supabase.auth.getSession();
+  if(sessionError)throw sessionError;
+
+  session=sessionData.session;
+  if(!session){location.href="../index.html";return}
+
+  loadBetPreferences();
+
+  if(window.CasinoLevelUp?.init){
+    window.CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
+  }
+
+  await Promise.all([loadLevels(),loadProfile()]);
+  const openRoundId=await loadConfig();
+  await restoreOpenRound(openRoundId);
+
+  renderAll();
+  if(!state.round)status("Scegli le postazioni e distribuisci.");
+  hideLoading();
+}
+
+
+
+/* ============================================================
+   DEBUG POSIZIONI TAVOLO
+   Attiva con ?debug=1
+   ============================================================ */
+
+const BJ_DEFAULT_POSITIONS={
+  1:{x:12,y:60.1},
+  2:{x:29.6,y:73.7},
+  3:{x:50,y:75.7},
+  4:{x:70.6,y:73},
+  5:{x:88.9,y:61.5},
+  dealer:{x:50,y:26.2}
+};
+
+const BJ_DEBUG_STORAGE="blackjack-debug-positions-v1";
+
+function bjLoadDebugPositions(){
+  try{
+    const saved=JSON.parse(
+      localStorage.getItem(BJ_DEBUG_STORAGE)
+      ||"null"
+    );
+
+    return saved
+      ?structuredClone(saved)
+      :structuredClone(BJ_DEFAULT_POSITIONS);
+
+  }catch{
+    return structuredClone(BJ_DEFAULT_POSITIONS);
+  }
+}
+
+function bjApplyDebugPositions(positions){
+  for(let seat=1;seat<=5;seat++){
+    const el=document.querySelector(
+      `.seat:nth-child(${seat})`
+    );
+
+    if(!el)continue;
+
+    el.style.setProperty(
+      "--x",
+      `${positions[seat].x}%`
+    );
+
+    el.style.setProperty(
+      "--y",
+      `${positions[seat].y}%`
+    );
+  }
+
+  const dealer=$(".dealer-zone");
+
+  if(dealer){
+    dealer.style.left=
+      `${positions.dealer.x}%`;
+
+    dealer.style.top=
+      `${positions.dealer.y}%`;
+  }
+
+  bjRenderDebugCrosses(
+    positions
+  );
+}
+
+function bjRenderDebugCrosses(positions){
+  const table=$(".table-inner");
+
+  if(!table)return;
+
+  table
+    .querySelectorAll(".bj-debug-cross")
+    .forEach(el=>el.remove());
+
+  for(let seat=1;seat<=5;seat++){
+    const p=positions[seat];
+
+    const cross=
+      document.createElement("div");
+
+    cross.className=
+      "bj-debug-cross";
+
+    cross.style.left=
+      `${p.x}%`;
+
+    cross.style.top=
+      `${p.y}%`;
+
+    cross.innerHTML=
+      `<span>P${seat} ${p.x.toFixed(1)}, ${p.y.toFixed(1)}</span>`;
+
+    table.appendChild(cross);
+  }
+
+  const d=positions.dealer;
+
+  const cross=
+    document.createElement("div");
+
+  cross.className=
+    "bj-debug-cross";
+
+  cross.style.left=
+    `${d.x}%`;
+
+  cross.style.top=
+    `${d.y}%`;
+
+  cross.innerHTML=
+    `<span>DEALER ${d.x.toFixed(1)}, ${d.y.toFixed(1)}</span>`;
+
+  table.appendChild(cross);
+}
+
+function bjDebugCss(positions){
+  return [
+    `.seat:nth-child(1){--x:${positions[1].x}%;--y:${positions[1].y}%}`,
+    `.seat:nth-child(2){--x:${positions[2].x}%;--y:${positions[2].y}%}`,
+    `.seat:nth-child(3){--x:${positions[3].x}%;--y:${positions[3].y}%}`,
+    `.seat:nth-child(4){--x:${positions[4].x}%;--y:${positions[4].y}%}`,
+    `.seat:nth-child(5){--x:${positions[5].x}%;--y:${positions[5].y}%}`,
+    `.dealer-zone{left:${positions.dealer.x}%;top:${positions.dealer.y}%}`
+  ].join("\n");
+}
+
+function initBlackjackPositionDebug(){
+  const params=
+    new URLSearchParams(
+      location.search
+    );
+
+  if(params.get("debug")!=="1"){
+    return;
+  }
+
+  const positions=
+    bjLoadDebugPositions();
+
+  const panel=
+    document.createElement("div");
+
+  panel.className=
+    "bj-debug-panel";
+
+  panel.innerHTML=`
+    <h3>DEBUG POSIZIONI</h3>
+
+    <div style="margin-bottom:8px;color:#aebdb5">
+      Modifica X/Y in percentuale. Le croci rosse indicano il centro reale.
+    </div>
+
+    ${[1,2,3,4,5].map(seat=>`
+      <div class="bj-debug-row">
+        <strong>P${seat}</strong>
+        <span>X</span>
+        <input
+          type="number"
+          step="0.1"
+          data-debug-x="${seat}"
+          value="${positions[seat].x}"
+        >
+        <span>Y</span>
+        <input
+          type="number"
+          step="0.1"
+          data-debug-y="${seat}"
+          value="${positions[seat].y}"
+        >
+      </div>
+    `).join("")}
+
+    <div class="bj-debug-row">
+      <strong>Dealer</strong>
+      <span>X</span>
+      <input
+        type="number"
+        step="0.1"
+        data-debug-x="dealer"
+        value="${positions.dealer.x}"
+      >
+      <span>Y</span>
+      <input
+        type="number"
+        step="0.1"
+        data-debug-y="dealer"
+        value="${positions.dealer.y}"
+      >
+    </div>
+
+    <div class="bj-debug-actions">
+      <button type="button" id="bjDebugSave">SALVA</button>
+      <button type="button" id="bjDebugReset">RESET</button>
+      <button type="button" id="bjDebugCopy">COPIA CSS</button>
+    </div>
+
+    <textarea
+      id="bjDebugOutput"
+      class="bj-debug-output"
+      readonly
+    ></textarea>
+  `;
+
+  document.body.appendChild(panel);
+
+  function readPanel(){
+    for(const key of [1,2,3,4,5,"dealer"]){
+      positions[key].x=
+        Number(
+          panel.querySelector(
+            `[data-debug-x="${key}"]`
+          ).value
+        );
+
+      positions[key].y=
+        Number(
+          panel.querySelector(
+            `[data-debug-y="${key}"]`
+          ).value
+        );
+    }
+
+    bjApplyDebugPositions(
+      positions
+    );
+
+    $("#bjDebugOutput").value=
+      bjDebugCss(
+        positions
+      );
+  }
+
+  panel
+    .querySelectorAll('input[type="number"]')
+    .forEach(input=>{
+      input.addEventListener(
+        "input",
+        readPanel
+      );
+    });
+
+  $("#bjDebugSave").onclick=()=>{
+    readPanel();
+
+    localStorage.setItem(
+      BJ_DEBUG_STORAGE,
+      JSON.stringify(positions)
+    );
+
+    status(
+      "Posizioni debug salvate."
+    );
+  };
+
+  $("#bjDebugReset").onclick=()=>{
+    localStorage.removeItem(
+      BJ_DEBUG_STORAGE
+    );
+
+    Object.assign(
+      positions,
+      structuredClone(
+        BJ_DEFAULT_POSITIONS
+      )
+    );
+
+    for(const key of [1,2,3,4,5,"dealer"]){
+      panel.querySelector(
+        `[data-debug-x="${key}"]`
+      ).value=
+        positions[key].x;
+
+      panel.querySelector(
+        `[data-debug-y="${key}"]`
+      ).value=
+        positions[key].y;
+    }
+
+    readPanel();
+  };
+
+  $("#bjDebugCopy").onclick=async()=>{
+    readPanel();
+
+    const css=
+      bjDebugCss(
+        positions
+      );
+
+    try{
+      await navigator.clipboard.writeText(
+        css
+      );
+
+      status(
+        "CSS posizioni copiato."
+      );
+    }catch{
+      $("#bjDebugOutput").select();
+    }
+  };
+
+  bjApplyDebugPositions(
+    positions
+  );
+
+  readPanel();
+}
+
+
+$("#dealBtn").addEventListener("click",startRound);
+$("#hitBtn").addEventListener("click",()=>doAction("HIT"));
+$("#standBtn").addEventListener("click",()=>doAction("STAND"));
+$("#doubleBtn").addEventListener("click",()=>doAction("DOUBLE"));
+$("#splitBtn").addEventListener("click",()=>doAction("SPLIT"));
+$("#resultModalClose").addEventListener("click",closeResultModal);
+$("#resultModal").addEventListener("click",event=>{if(event.target.id==="resultModal")closeResultModal()});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")closeResultModal()});
+$("#homeBtn").addEventListener("click",()=>location.href="../index.html");
+$("#fullscreenBtn").addEventListener("click",async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(error){status("Fullscreen non disponibile.",true)}});
+
+window.addEventListener("storage",event=>{
+  if(event.key===STORAGE_KEY){
+    loadBetPreferences();
+    if(!state.round||state.round.status==="COMPLETED")renderAll();
+  }
+});
+
+try{
+  const channel=new BroadcastChannel("slot-machine-sync");
+  channel.addEventListener("message",event=>{if(event.data?.type==="balance-changed")loadProfile().catch(console.error)});
+}catch{}
+
+initBlackjackPositionDebug();
+
+init().catch(fail);
+</script>
+</body>
+</html>
