@@ -1,0 +1,5577 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#081a24" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="screen-orientation" content="landscape" />
+
+  <title>Fraudulent Bankruptcy</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="../shared/designer.css" />
+
+  <style>
+    :root {
+      --stage-w: 2560;
+      --stage-h: 1440;
+
+      /*
+       * POSIZIONAMENTO GRAFICA
+       * --------------------------------------------------------
+       * Tutti i valori sono percentuali dello stage 16:9.
+       * Questi sono pensati sul layout mostrato:
+       *
+       * - frame principale a sinistra
+       * - lines / bet / total a destra
+       * - winnings sotto i rulli
+       *
+       * Basta ritoccare questi valori per l'allineamento finale.
+       */
+
+  --frame-left: 12.737%;
+  --frame-top: 18.878%;
+  --frame-width: 72.171%;
+  --reels-left: 29.792%;
+  --reels-top: 29.717%;
+  --reels-width: 38.442%;
+  --reels-height: 54.501%;
+  --lines-left: 81.030%;
+  --lines-top: 18.518%;
+  --lines-width: 17.600%;
+  --bet-left: 80.707%;
+  --bet-top: 33.655%;
+  --bet-width: 18.400%;
+  --total-left: 80.651%;
+  --total-top: 49.269%;
+  --total-width: 18.500%;
+  --winnings-left: 80.811%;
+  --winnings-top: 64.054%;
+  --winnings-width: 18.667%;
+  --spin-left: 90.174%;
+  --spin-top: 86.889%;
+  --spin-size: 17.999%;
+
+      --gold: #f5c95c;
+      --gold2: #9a5b14;
+      --ink: #071117;
+      --panel: rgba(6, 25, 35, 0.86);
+      --danger: #ff5d5d;
+      --ok: #7cff8c;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      margin: 0;
+      overflow: hidden;
+      background: #03080c;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: white;
+      overscroll-behavior: none;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      touch-action: manipulation;
+    }
+
+    #portraitBlocker {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      background:
+        radial-gradient(circle at center, #17394b 0%, #061018 70%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #portraitBlocker .rotate-card {
+      max-width: 440px;
+      border: 2px solid var(--gold);
+      border-radius: 24px;
+      padding: 28px;
+      background: rgba(0,0,0,.46);
+      box-shadow: 0 15px 60px rgba(0,0,0,.55);
+    }
+
+    #portraitBlocker .phone {
+      font-size: 64px;
+      display: block;
+      margin-bottom: 12px;
+      transform: rotate(90deg);
+    }
+@font-face {
+  font-family: "SlotFont";
+  src: url("./assets/fonts/slot.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
+#stage,
+#stage button,
+#stage input {
+  font-family: "SlotFont", system-ui, sans-serif;
+}
+
+
+    @media (orientation: portrait) {
+      #portraitBlocker {
+        display: flex;
+      }
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      height: 100vh;
+      height: 100dvh;
+      display: grid;
+      place-items: center;
+      background: #020609;
+    }
+
+    #stage {
+      position: relative;
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      width: min(100vw, calc(100dvh * 16 / 9));
+      height: min(100dvh, calc(100vw * 9 / 16));
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #0a2230;
+      isolation: isolate;
+    }
+
+    #backgroundLayer,
+    #frameLayer,
+    #logoLayer {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #backgroundLayer {
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /*
+     * frame.webp contiene la cornice principale 3x3.
+     * I quattro pannelli sono immagini separate.
+     */
+    #frameLayer {
+      left: var(--frame-left);
+      top: var(--frame-top);
+      width: var(--frame-width);
+      height: auto;
+      object-fit: contain;
+      z-index: 20;
+    }
+
+    #logoLayer {
+      width: 30%;
+      left: 50%;
+      top: 1.2%;
+      transform: translateX(-50%);
+      object-fit: contain;
+      z-index: 25;
+    }
+
+    #reelsWrap {
+      position: absolute;
+      left: var(--reels-left);
+      top: var(--reels-top);
+      width: var(--reels-width);
+      height: var(--reels-height);
+      z-index: 10;
+      overflow: hidden;
+      border-radius: 1.2vw;
+      background:
+        linear-gradient(rgba(5,17,22,.28), rgba(5,17,22,.28)),
+        radial-gradient(circle at 50% 30%, rgba(255,255,255,.13), transparent 55%),
+        rgba(10, 30, 38, .84);
+      box-shadow:
+        inset 0 0 2.2vw rgba(0,0,0,.82),
+        0 0 1.4vw rgba(0,0,0,.55);
+    }
+
+    #reels {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 0.35%;
+      padding: 0.55%;
+    }
+
+    .reel-cell {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: .55vw;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.09), rgba(0,0,0,.08));
+      transition:
+        filter .15s ease,
+        transform .15s ease,
+        box-shadow .15s ease;
+    }
+
+    .reel-cell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .reel-cell img {
+      width: 88%;
+      height: 88%;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 .18vw .18vw rgba(0,0,0,.48));
+    }
+
+    .reel-cell.spinning img {
+      filter:
+        blur(.10vw)
+        drop-shadow(0 .18vw .18vw rgba(0,0,0,.40));
+      transform: scale(1.05);
+    }
+
+    .reel-cell.winner {
+      z-index: 4;
+      box-shadow:
+        inset 0 0 0 .25vw rgba(255, 222, 92, .95),
+        0 0 1.25vw rgba(255, 208, 50, .95);
+      animation: winnerPulse .72s ease-in-out infinite alternate;
+    }
+
+    @keyframes winnerPulse {
+      from {
+        filter: brightness(1);
+        transform: scale(1);
+      }
+      to {
+        filter: brightness(1.35);
+        transform: scale(1.025);
+      }
+    }
+
+    #topBar {
+      position: absolute;
+      z-index: 40;
+      top: 2.2%;
+      right: 1.7%;
+      display: flex;
+      gap: .7vw;
+      align-items: center;
+    }
+
+    .top-pill {
+      min-width: 8vw;
+      padding: .45vw .8vw;
+      border: .12vw solid rgba(245,201,92,.7);
+      border-radius: 100vw;
+      background: rgba(2, 14, 20, .78);
+      box-shadow: 0 .25vw .65vw rgba(0,0,0,.45);
+      font-size: clamp(10px, 1vw, 19px);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .topbar-info-btn {
+      min-height: 2.9vw;
+      padding: .42vw .78vw;
+      border: .12vw solid rgba(245,201,92,.72);
+      border-radius: 100vw;
+      background: rgba(2,14,20,.82);
+      color: white;
+      cursor: pointer;
+      font-size: clamp(9px, .82vw, 16px);
+      font-weight: 900;
+      letter-spacing: .035em;
+      white-space: nowrap;
+    }
+
+    .topbar-info-btn:disabled {
+      opacity: .42;
+      cursor: default;
+    }
+
+    #fullscreenBtn,
+    #logoutBtn {
+      border: .12vw solid rgba(245,201,92,.72);
+      background: rgba(2,14,20,.82);
+      color: white;
+      border-radius: 100vw;
+      width: 2.9vw;
+      height: 2.9vw;
+      min-width: 30px;
+      min-height: 30px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: clamp(12px, 1.15vw, 22px);
+    }
+
+    #infoOverlay {
+      z-index: 340;
+    }
+
+    .info-dialog {
+      width: min(92%, 1180px);
+      max-height: 94%;
+    }
+
+    .info-dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1vw;
+      margin-bottom: 12px;
+    }
+
+    .info-dialog-head h2 {
+      margin: 0;
+      text-align: left;
+    }
+
+    #infoCloseBtn {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      border: .12vw solid rgba(245,201,92,.72);
+      border-radius: 50%;
+      background: rgba(2,14,20,.82);
+      color: white;
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    #infoImage {
+      display: block;
+      max-width: 100%;
+      max-height: calc(90vh - 100px);
+      margin: 0 auto;
+      object-fit: contain;
+    }
+
+    #infoError {
+      padding: 30px 15px;
+      color: #ffd58a;
+      text-align: center;
+    }
+
+    #infoError.hidden,
+    #infoImage.hidden {
+      display: none;
+    }
+
+
+    /* ========================================================
+       PANNELLI GRAFICI
+       ======================================================== */
+
+    #controls {
+      position: absolute;
+      inset: 0;
+      z-index: 45;
+      pointer-events: none;
+    }
+
+    .art-panel {
+      position: absolute;
+      pointer-events: auto;
+    }
+
+
+    .panel-label {
+      position: absolute;
+      z-index: 3;
+      left: 50%;
+      top: -17%;
+      transform: translateX(-50%);
+      width: 130%;
+      text-align: center;
+      color: #ffe3a0;
+      font-size: clamp(10px, .95vw, 19px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      text-shadow:
+        0 2px 3px rgba(0,0,0,.95),
+        0 0 .5vw rgba(0,0,0,.7);
+      pointer-events: none;
+    }
+
+    .art-panel > img {
+      display: block;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+      filter: drop-shadow(0 .35vw .5vw rgba(0,0,0,.45));
+    }
+
+    /*
+     * L'area numerica è centrata nel rettangolo interno del pannello.
+     * Le immagini possono avere l'etichetta già incorporata.
+     */
+    .art-panel .panel-value {
+      position: absolute;
+      left: 50%;
+      top: 53%;
+      transform: translate(-50%, -50%);
+      width: 58%;
+      text-align: center;
+      color: #241406;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(14px, 1.55vw, 31px);
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow:
+        0 1px rgba(255,255,255,.58),
+        0 0 .12vw rgba(255,232,178,.55);
+      white-space: nowrap;
+    }
+
+    /*
+     * Pulsanti invisibili/semotrasparenti ai lati della pergamena.
+     * Restano grandi da premere su smartphone.
+     */
+    .art-panel .panel-arrow {
+      position: absolute;
+      top: 26%;
+      bottom: 13%;
+      width: 20%;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      background: transparent;
+      color: #4c2606;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(18px, 2vw, 40px);
+      font-weight: 1000;
+      line-height: 1;
+      opacity: .72;
+      text-shadow:
+        0 1px rgba(255,235,178,.9),
+        0 2px 2px rgba(0,0,0,.28);
+      pointer-events: auto;
+    }
+
+    .art-panel .panel-arrow:hover:not(:disabled) {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+
+    .art-panel .panel-arrow:disabled {
+      opacity: .18;
+      cursor: default;
+    }
+
+    .art-panel .panel-arrow.prev {
+      left: 5%;
+    }
+
+    .art-panel .panel-arrow.next {
+      right: 5%;
+    }
+
+    #linesPanel {
+      left: var(--lines-left);
+      top: var(--lines-top);
+      width: var(--lines-width);
+    }
+
+    #betPanel {
+      left: var(--bet-left);
+      top: var(--bet-top);
+      width: var(--bet-width);
+    }
+
+    #totalPanel {
+      left: var(--total-left);
+      top: var(--total-top);
+      width: var(--total-width);
+    }
+
+    #winningsPanel {
+      left: var(--winnings-left);
+      top: var(--winnings-top);
+      width: var(--winnings-width);
+    }
+
+    /*
+     * I pannelli total/winnings non hanno frecce.
+     */
+    #totalPanel .panel-value,
+    #winningsPanel .panel-value {
+      width: 72%;
+    }
+
+    #spinBtn {
+      position: absolute;
+      z-index: 48;
+      touch-action: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      left: var(--spin-left);
+      top: var(--spin-top);
+      width: var(--spin-size);
+      aspect-ratio: 1 / 1;
+      transform: translate(-50%, -50%);
+
+      border: 0;
+      border-radius: 0;
+
+      background-color: transparent;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+
+      color: transparent;
+      font-size: 0;
+      text-shadow: none;
+
+      cursor: pointer;
+      box-shadow: none;
+      transition: transform .08s ease, filter .1s ease;
+      pointer-events: auto;
+    }
+
+    #spinBtn:active:not(:disabled) {
+      transform: translate(-50%, -50%) scale(.96);
+    }
+
+    #spinBtn:disabled {
+      cursor: default;
+      filter: brightness(.72);
+    }
+
+
+    /*
+     * AUTOSPIN:
+     * pressione lunga sul pulsante SPIN.
+     * Durante AUTO compare un piccolo badge con gli spin residui.
+     */
+    #spinBtn.auto-active {
+      filter:
+        brightness(1.08)
+        drop-shadow(0 0 .65vw rgba(255,190,57,.42));
+    }
+
+    #spinBtn.auto-active::after {
+      content: attr(data-auto-label);
+      position: absolute;
+      left: 50%;
+      bottom: -13%;
+      transform: translateX(-50%);
+      min-width: 68%;
+      padding: .25em .55em;
+      border: .1vw solid rgba(245,201,92,.82);
+      border-radius: 100vw;
+      background: rgba(5,20,27,.94);
+      color: #ffe3a0;
+      font-family: "SlotFont", system-ui, sans-serif;
+      font-size: clamp(8px, .7vw, 14px);
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: .035em;
+      text-align: center;
+      white-space: nowrap;
+      box-shadow:
+        0 .16vw .4vw rgba(0,0,0,.5),
+        0 0 .55vw rgba(255,190,57,.18);
+      pointer-events: none;
+    }
+
+    #freeBanner {
+      display: none;
+      position: absolute;
+      z-index: 55;
+      top: 19%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: .55vw 1.5vw;
+      border-radius: 100vw;
+      border: .15vw solid #87e9ff;
+      background: rgba(0, 63, 91, .88);
+      box-shadow: 0 0 1vw rgba(84,222,255,.6);
+      font-weight: 1000;
+      font-size: clamp(12px, 1.2vw, 23px);
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    #freeBanner.visible {
+      display: block;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(21,68,78,.86), rgba(0,0,0,.92));
+      backdrop-filter: blur(5px);
+    }
+
+    .overlay.visible {
+      display: flex;
+    }
+
+    .dialog {
+      position: relative;
+      width: min(88%, 930px);
+      max-height: 92%;
+      overflow: auto;
+      border: 2px solid #dfaa49;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(19,48,57,.98), rgba(6,18,24,.98));
+      box-shadow:
+        0 25px 80px rgba(0,0,0,.65),
+        inset 0 0 26px rgba(255,192,71,.12);
+      padding: 24px;
+    }
+
+    .dialog h1,
+    .dialog h2 {
+      margin: 0 0 14px;
+      color: #ffe29a;
+      text-align: center;
+    }
+
+    .dialog p {
+      text-align: center;
+      opacity: .9;
+    }
+
+    .auth-grid {
+      display: grid;
+      gap: 12px;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    .auth-grid input {
+      width: 100%;
+      padding: 13px 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,224,145,.45);
+      background: rgba(0,0,0,.35);
+      color: white;
+      user-select: text;
+      outline: none;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid #e3ae4b;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .primary-btn {
+      background: linear-gradient(#e6aa40, #8c4814);
+      color: white;
+    }
+
+    .secondary-btn {
+      background: rgba(0,0,0,.28);
+      color: white;
+    }
+
+    .auth-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    #authStatus {
+      min-height: 1.4em;
+      text-align: center;
+      color: #ffd58a;
+      font-size: 14px;
+    }
+
+    #loadingOverlay {
+      z-index: 250;
+      background: #06151c;
+    }
+
+    .loader {
+      width: 62px;
+      height: 62px;
+      border: 6px solid rgba(255,255,255,.16);
+      border-top-color: #f0bf54;
+      border-radius: 50%;
+      animation: spinLoader .8s linear infinite;
+      margin: 0 auto 18px;
+    }
+
+    @keyframes spinLoader {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ========================================================
+       BONUS VALIGETTE - FRAUDULENT BANKRUPTCY
+       ======================================================== */
+
+    #bonusOverlay {
+      z-index: 300;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding:
+        max(6px, env(safe-area-inset-top))
+        max(6px, env(safe-area-inset-right))
+        max(6px, env(safe-area-inset-bottom))
+        max(6px, env(safe-area-inset-left));
+      background:
+        radial-gradient(circle at 50% 38%, rgba(231,169,67,.18), transparent 23%),
+        radial-gradient(circle at 50% 50%, rgba(31,69,69,.42), rgba(0,0,0,.94) 72%),
+        linear-gradient(180deg, rgba(5,19,24,.72), rgba(0,0,0,.96));
+    }
+
+    #bonusOverlay::before {
+      content: "";
+      position: absolute;
+      inset: -10%;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 40%, transparent 0 35%, rgba(0,0,0,.62) 74%),
+        repeating-radial-gradient(
+          ellipse at center,
+          rgba(255,216,128,.025) 0 2px,
+          transparent 2px 7px
+        );
+      opacity: .9;
+    }
+
+    .bonus-dialog {
+      position: relative;
+      width: min(88%, 1050px);
+      max-height: calc(100% - 4px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding: clamp(15px, 1.5vw, 28px);
+      border: clamp(3px, .28vw, 6px) solid #8a541d;
+      border-radius: clamp(18px, 1.5vw, 30px);
+      background:
+        linear-gradient(180deg, rgba(71,42,17,.96), rgba(29,18,11,.98)),
+        #2a180d;
+      box-shadow:
+        0 0 0 .18vw #d5a84e,
+        0 0 0 .42vw rgba(56,30,12,.95),
+        0 1.2vw 3vw rgba(0,0,0,.72),
+        inset 0 .22vw .35vw rgba(255,225,157,.15),
+        inset 0 -.5vw 1.1vw rgba(0,0,0,.55);
+    }
+
+    .bonus-dialog::before,
+    .bonus-dialog::after {
+      content: "✦";
+      position: absolute;
+      top: .65vw;
+      color: #d3a64d;
+      font-size: clamp(16px, 1.5vw, 30px);
+      text-shadow: 0 2px 2px #000;
+    }
+
+    .bonus-dialog::before {
+      left: .9vw;
+    }
+
+    .bonus-dialog::after {
+      right: .9vw;
+    }
+
+    #bonusTitle {
+      margin: 0;
+      color: #ffe3a0;
+      text-align: center;
+      font-size: clamp(24px, 2.4vw, 48px);
+      font-weight: 1000;
+      letter-spacing: .055em;
+      text-transform: uppercase;
+      text-shadow:
+        0 .15vw .12vw #2b1205,
+        0 .28vw .35vw rgba(0,0,0,.9),
+        0 0 1vw rgba(255,181,58,.22);
+    }
+
+    #bonusTitle::before,
+    #bonusTitle::after {
+      content: " 💼 ";
+      color: #d5a84e;
+      opacity: .9;
+      font-size: .74em;
+    }
+
+    #bonusSubtitle {
+      width: fit-content;
+      min-width: 30%;
+      margin: .55vw auto .95vw;
+      padding: .38vw 1.2vw;
+      border: .1vw solid rgba(227,183,91,.45);
+      border-radius: 100vw;
+      background: rgba(5,10,9,.36);
+      color: #f5dfb2;
+      text-align: center;
+      font-size: clamp(11px, 1vw, 19px);
+      font-weight: 800;
+      box-shadow: inset 0 0 .5vw rgba(255,215,130,.06);
+    }
+
+    #chests {
+      width: min(88vw, 980px);
+      max-height: 63vh;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: clamp(8px, 1.25vw, 18px);
+      perspective: 1200px;
+    }
+
+    .chest {
+      position: relative;
+      aspect-ratio: 1.46 / 1;
+      border: 0;
+      border-radius: 14%;
+      cursor: pointer;
+      overflow: visible;
+      background: transparent;
+      box-shadow: none;
+      transform-style: preserve-3d;
+      transition:
+        transform .16s ease,
+        filter .16s ease;
+    }
+
+    .chest-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+      transition:
+        opacity .26s ease,
+        transform .26s ease,
+        filter .26s ease;
+      filter:
+        drop-shadow(0 .45vw .55vw rgba(0,0,0,.52));
+    }
+
+    .chest-image.closed {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .chest-image.opened {
+      opacity: 0;
+      transform: scale(.97);
+      filter:
+        drop-shadow(0 .45vw .55vw rgba(0,0,0,.52))
+        drop-shadow(0 0 1.15vw rgba(255,196,47,.08));
+    }
+
+    .chest-value {
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      display: block;
+      min-width: 42%;
+      padding: .18em .35em;
+      border-radius: .55em;
+      background: rgba(0,0,0,.28);
+      color: #fff1ac;
+      text-align: center;
+      font-size: clamp(22px, 2.35vw, 48px);
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: .02em;
+      text-shadow:
+        0 .15vw .2vw rgba(0,0,0,.95),
+        0 0 .75vw rgba(255,220,77,.82);
+      opacity: 0;
+      transition:
+        opacity .22s ease,
+        transform .22s ease;
+      pointer-events: none;
+      box-shadow:
+        0 .15vw .3vw rgba(0,0,0,.45);
+    }
+
+    .chest:hover:not(:disabled) {
+      transform: translateY(-5%) scale(1.035) rotateX(2deg);
+      filter: brightness(1.08) saturate(1.05);
+    }
+
+    .chest:hover:not(:disabled) .chest-image.closed {
+      filter:
+        drop-shadow(0 .55vw .7vw rgba(0,0,0,.58))
+        drop-shadow(0 0 .7vw rgba(255,193,69,.18));
+    }
+
+    .chest:active:not(:disabled) {
+      transform: translateY(-1%) scale(.98);
+    }
+
+    .chest.open {
+      animation: chestReveal .32s ease-out both;
+    }
+
+    .chest.open .chest-image.closed {
+      opacity: 0;
+      transform: scale(1.02);
+    }
+
+    .chest.open .chest-image.opened {
+      opacity: 1;
+      transform: scale(1);
+      filter:
+        drop-shadow(0 .45vw .55vw rgba(0,0,0,.52))
+        drop-shadow(0 0 1.5vw rgba(255,196,47,.7))
+        drop-shadow(0 0 3vw rgba(255,144,28,.22));
+    }
+
+    .chest.open .chest-value {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .chest.open.unpicked {
+      opacity: .54;
+      filter: grayscale(.15) brightness(.74);
+      animation: none;
+    }
+
+    .chest.open.unpicked .chest-image.opened {
+      filter:
+        drop-shadow(0 .35vw .45vw rgba(0,0,0,.45));
+    }
+
+    @keyframes chestReveal {
+      0% {
+        transform: scale(.86);
+        filter: brightness(2);
+      }
+      62% {
+        transform: scale(1.065);
+      }
+      100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+    }
+
+    #bonusInfo {
+      width: fit-content;
+      min-width: 42%;
+      max-width: 94%;
+      margin: clamp(9px, .9vw, 15px) auto 0;
+      padding: .48vw 1.35vw;
+      border-radius: 100vw;
+      border: .1vw solid rgba(226,181,88,.46);
+      background:
+        linear-gradient(180deg, rgba(14,12,8,.58), rgba(0,0,0,.44));
+      color: #ffe4a0;
+      text-align: center;
+      font-weight: 900;
+      font-size: clamp(12px, 1.1vw, 21px);
+      min-height: 1.5em;
+      box-shadow:
+        inset 0 0 .7vw rgba(255,209,108,.045),
+        0 .2vw .35vw rgba(0,0,0,.32);
+    }
+
+    #bonusContinue {
+      display: none;
+      position: sticky;
+      z-index: 12;
+      bottom: 4px;
+      margin: clamp(10px, 1vw, 16px) auto 0;
+      min-width: 180px;
+      padding-left: 2.2em;
+      padding-right: 2.2em;
+      border-color: #f1d079;
+      background:
+        linear-gradient(180deg, #c78932, #6e3512);
+      box-shadow:
+        inset 0 .12vw .15vw rgba(255,255,255,.18),
+        0 .3vw .7vw rgba(0,0,0,.45);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    #bonusContinue.visible {
+      display: block;
+    }
+
+    #fatalError {
+      color: #ff9c9c;
+      white-space: pre-wrap;
+      user-select: text;
+      text-align: left;
+    }
+
+
+    #autoSpinOverlay {
+      z-index: 280;
+    }
+
+    .auto-spin-dialog {
+      width: min(76%, 520px);
+      max-height: 88%;
+      padding: clamp(14px, 1.5vw, 24px);
+    }
+
+    .auto-spin-dialog h2 {
+      margin-bottom: 6px;
+    }
+
+    .auto-spin-dialog p {
+      margin: 0 0 14px;
+      color: #d7e2e5;
+      font-size: clamp(10px, .9vw, 15px);
+    }
+
+    .auto-spin-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(8px, .8vw, 12px);
+      margin-top: 12px;
+    }
+
+    .auto-spin-option {
+      min-height: 48px;
+      border: .12vw solid rgba(245,201,92,.68);
+      border-radius: 12px;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(190,122,38,.96),
+          rgba(95,47,15,.96)
+        );
+      color: white;
+      font-size: clamp(15px, 1.3vw, 22px);
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    #autoSpinClose {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    @media (max-height: 430px) and (orientation: landscape) {
+      .auto-spin-dialog {
+        width: min(78%, 470px);
+        padding: 9px 12px;
+      }
+
+      .auto-spin-dialog p {
+        margin-bottom: 7px;
+      }
+
+      .auto-spin-options {
+        gap: 6px;
+        margin-top: 7px;
+      }
+
+      .auto-spin-option {
+        min-height: 36px;
+      }
+
+      #autoSpinClose {
+        margin-top: 6px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+      }
+    }
+
+    @media (max-height: 600px) and (orientation: landscape) {
+      #bonusOverlay {
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      .bonus-dialog {
+        width: min(96vw, 920px);
+        max-height: calc(100dvh - 12px);
+        margin: auto;
+        padding: clamp(7px, 1.5vh, 12px);
+        border-radius: clamp(12px, 2vh, 20px);
+      }
+
+      #bonusTitle {
+        font-size: clamp(18px, 5.2vh, 30px);
+        line-height: 1;
+      }
+
+      #bonusTitle::before,
+      #bonusTitle::after {
+        font-size: .62em;
+      }
+
+      #bonusSubtitle {
+        margin: clamp(3px, .7vh, 6px) auto clamp(4px, 1vh, 8px);
+        padding: .18em .8em;
+        font-size: clamp(9px, 2.8vh, 14px);
+      }
+
+      #chests {
+        width: min(90vw, 900px, calc(50dvh * 3.65));
+        max-height: none;
+        gap: clamp(3px, .8vh, 7px);
+      }
+
+      .chest {
+        border-radius: 9%;
+      }
+
+      .chest-value {
+        font-size: clamp(15px, 5vh, 27px);
+      }
+
+      #bonusInfo {
+        min-width: 34%;
+        margin: clamp(4px, 1vh, 8px) auto 0;
+        padding: .25em .9em;
+        font-size: clamp(10px, 3vh, 15px);
+      }
+
+      #bonusContinue {
+        bottom: 2px;
+        margin: clamp(4px, 1vh, 8px) auto 0;
+        min-width: 145px;
+        padding: .55em 1.5em;
+        font-size: clamp(10px, 3vh, 15px);
+      }
+    }
+
+    @media (max-height: 430px) and (orientation: landscape) {
+      .bonus-dialog {
+        width: min(98vw, 900px);
+        max-height: calc(100dvh - 6px);
+        padding: 5px 8px 6px;
+      }
+
+      .bonus-dialog::before,
+      .bonus-dialog::after {
+        display: none;
+      }
+
+      #bonusTitle {
+        font-size: clamp(16px, 5vh, 22px);
+      }
+
+      #bonusSubtitle {
+        margin: 2px auto 4px;
+      }
+
+      #chests {
+        width: min(92vw, 860px, calc(46dvh * 3.65));
+        gap: 2px 4px;
+      }
+
+      #bonusInfo {
+        margin-top: 3px;
+      }
+
+      #bonusContinue {
+        margin-top: 3px;
+      }
+    }
+  
+
+    /* ========================================================
+       PAYLINES VINCENTI
+       ======================================================== */
+
+    #paylineOverlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 60;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .payline-win {
+      fill: none;
+      stroke-width: clamp(4px, .34vw, 8px);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+      opacity: .88;
+      filter:
+        drop-shadow(0 0 2px rgba(255,255,255,.95))
+        drop-shadow(0 0 7px currentColor);
+      animation: paylinePulse .62s ease-in-out infinite alternate;
+    }
+
+    @keyframes paylinePulse {
+      from { opacity: .58; }
+      to { opacity: 1; }
+    }
+
+    /* ========================================================
+       FIX V5 - ORDINE LIVELLI GRAFICI
+       ========================================================
+       background  1
+       frame       5
+       rulli      30
+       logo       40
+       controlli  45+
+       ======================================================== */
+
+    #backgroundLayer {
+      z-index: 1 !important;
+    }
+
+    #frameLayer {
+      z-index: 5 !important;
+    }
+
+    #reelsWrap {
+      z-index: 30 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    #reels {
+      position: relative;
+      z-index: 31 !important;
+      background: transparent !important;
+    }
+
+    .reel-cell {
+      z-index: 32 !important;
+      background: transparent !important;
+    }
+
+    .reel-cell::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    .reel-cell img {
+      position: relative;
+      z-index: 33 !important;
+      width: 82%;
+      height: 82%;
+    }
+
+    #logoLayer {
+      z-index: 40 !important;
+    }
+
+  
+
+    /* ========================================================
+       XP BAR
+       ======================================================== */
+
+    #xpHud {
+      position: absolute;
+      z-index: 44;
+      top: 2.15%;
+      left: 1.7%;
+      width: min(27%, 520px);
+      min-width: 180px;
+      padding: .42vw .62vw .5vw;
+      border: .11vw solid rgba(245,201,92,.64);
+      border-radius: .72vw;
+      background: rgba(2,14,20,.80);
+      box-shadow: 0 .25vw .65vw rgba(0,0,0,.42);
+      pointer-events: none;
+    }
+
+    .xp-hud-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .7vw;
+      margin-bottom: .28vw;
+      color: #eef6f8;
+      font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+      font-size: clamp(8px,.72vw,14px);
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .xp-hud-head strong {
+      color: #ffe39a;
+      font-size: 1.15em;
+    }
+
+    #xpText {
+      max-width: 68%;
+      overflow: hidden;
+      color: #cad7dc;
+      text-overflow: ellipsis;
+    }
+
+    .xp-hud-bar {
+      height: clamp(7px,.62vw,12px);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.44);
+      border-radius: 100vw;
+      background: rgba(0,0,0,.58);
+    }
+
+    #xpFill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg,#2769ff,#6f5cff,#c255ff);
+      transition: width .45s ease;
+    }
+
+    @media (orientation: landscape) and (max-height: 520px) {
+      #xpHud {
+        top: 1.3%;
+        left: 1.1%;
+        width: 25%;
+        min-width: 150px;
+        padding: 3px 5px 4px;
+        border-radius: 7px;
+      }
+
+      .xp-hud-head {
+        margin-bottom: 2px;
+        font-size: clamp(7px,1.8vh,10px);
+      }
+
+      .xp-hud-bar {
+        height: 7px;
+      }
+    }
+
+</style>
+</head>
+
+
+<body>
+
+  <div id="portraitBlocker">
+    <div class="rotate-card">
+      <span class="phone">📱</span>
+      <h2>Ruota il dispositivo</h2>
+      <p>Fraudulent Bankruptcy è progettata per essere giocata in orizzontale.</p>
+    </div>
+  </div>
+
+  <div id="app">
+    <main id="stage">
+
+      <img id="backgroundLayer" alt="" />
+      <img id="logoLayer" alt="Fraudulent Bankruptcy" />
+      <img id="frameLayer" alt="" />
+
+      <div id="reelsWrap">
+        <div id="reels"></div>
+
+        <svg
+          id="paylineOverlay"
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        ></svg>
+      </div>
+
+
+      <div id="xpHud" aria-label="Progressione esperienza">
+        <div class="xp-hud-head">
+          <span>LIVELLO <strong id="xpLevel">1</strong></span>
+          <span id="xpText">0 / 20K XP</span>
+        </div>
+        <div class="xp-hud-bar">
+          <div id="xpFill"></div>
+        </div>
+      </div>
+
+      <div id="topBar">
+        <div class="top-pill">
+          Saldo: <strong id="balanceValue">0</strong>
+        </div>
+
+        <button id="paylinesBtn" class="topbar-info-btn" type="button">LINEE</button>
+        <button id="payoutBtn" class="topbar-info-btn" type="button">PAYOUT</button>
+
+        <button id="fullscreenBtn" type="button" aria-label="Schermo intero">⛶</button>
+        <button id="logoutBtn" type="button" aria-label="Torna alla home" title="Torna alla home">↪</button>
+      </div>
+
+      <div id="freeBanner">
+        FREE SPIN: <span id="freeRemainingValue">0</span>
+      </div>
+
+      <section id="controls">
+
+        <div id="linesPanel" class="art-panel">
+          <div class="panel-label">LINEE</div>
+          <img id="linesPanelImage" src="" alt="Linee" />
+          <button id="linesPrev" class="panel-arrow prev" type="button" aria-label="Meno linee">−</button>
+          <div id="linesValue" class="panel-value">5</div>
+          <button id="linesNext" class="panel-arrow next" type="button" aria-label="Più linee">+</button>
+        </div>
+
+        <div id="betPanel" class="art-panel">
+          <div class="panel-label">PUNTATA</div>
+          <img id="betPanelImage" src="" alt="Puntata" />
+          <button id="betPrev" class="panel-arrow prev" type="button" aria-label="Puntata precedente">−</button>
+          <div id="betValue" class="panel-value">1</div>
+          <button id="betNext" class="panel-arrow next" type="button" aria-label="Puntata successiva">+</button>
+        </div>
+
+        <div id="totalPanel" class="art-panel">
+          <div class="panel-label">TOTALE GIOCATA</div>
+          <img id="totalPanelImage" src="" alt="Totale giocata" />
+          <div id="totalBetValue" class="panel-value">5</div>
+        </div>
+
+        <div id="winningsPanel" class="art-panel">
+          <div class="panel-label">VINCITA TOTALE</div>
+          <img id="winningsPanelImage" src="" alt="Vincita totale" />
+          <div id="winValue" class="panel-value">0</div>
+        </div>
+
+        <button
+          id="spinBtn"
+          type="button"
+          disabled
+          title="Tieni premuto per Autospin"
+        >
+          SPIN
+        </button>
+
+      </section>
+
+      <!-- AUTOSPIN -->
+      <div id="autoSpinOverlay" class="overlay">
+        <div class="dialog auto-spin-dialog">
+          <h2>AUTOSPIN</h2>
+
+          <p>
+            Scegli quanti spin pagati eseguire.
+            FREE e BONUS non consumano il contatore.
+            Tocca SPIN durante l'autospin per fermarlo.
+          </p>
+
+          <div class="auto-spin-options">
+            <button class="auto-spin-option" type="button" data-auto-count="10">10</button>
+            <button class="auto-spin-option" type="button" data-auto-count="25">25</button>
+            <button class="auto-spin-option" type="button" data-auto-count="50">50</button>
+            <button class="auto-spin-option" type="button" data-auto-count="100">100</button>
+          </div>
+
+          <button id="autoSpinClose" class="secondary-btn" type="button">
+            Annulla
+          </button>
+        </div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="authOverlay" class="overlay visible">
+        <div class="dialog">
+          <h1>Fraudulent Bankruptcy</h1>
+          <p>Accedi per giocare con le tue fiche.</p>
+
+          <div class="auth-grid">
+            <input id="usernameInput" type="text" autocomplete="username" placeholder="Username (solo registrazione)" />
+            <input id="emailInput" type="email" autocomplete="email" placeholder="Email" />
+            <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Password" />
+
+            <div class="auth-actions">
+              <button id="loginBtn" class="primary-btn" type="button">Accedi</button>
+              <button id="signupBtn" class="secondary-btn" type="button">Registrati</button>
+            </div>
+
+            <div id="authStatus"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div id="loadingOverlay" class="overlay">
+        <div class="dialog" style="width:min(440px,85%)">
+          <div class="loader"></div>
+          <h2 id="loadingText">Caricamento...</h2>
+          <div id="fatalError"></div>
+        </div>
+      </div>
+
+      <!-- BONUS -->
+      <div id="bonusOverlay" class="overlay">
+        <div class="dialog bonus-dialog">
+          <h1 id="bonusTitle">BONUS VALIGETTE</h1>
+          <p id="bonusSubtitle">Scegli 1 valigetta</p>
+
+          <div id="chests"></div>
+
+          <div id="bonusInfo"></div>
+
+          <button id="bonusContinue" class="primary-btn" type="button">
+            Continua
+          </button>
+        </div>
+      </div>
+
+      <!-- TABELLE LINEE / PAYOUT -->
+      <div id="infoOverlay" class="overlay">
+        <div class="dialog info-dialog">
+          <div class="info-dialog-head">
+            <h2 id="infoTitle">Informazioni</h2>
+            <button id="infoCloseBtn" type="button" aria-label="Chiudi">×</button>
+          </div>
+
+          <img id="infoImage" alt="" />
+          <div id="infoError" class="hidden">Immagine non disponibile.</div>
+        </div>
+      </div>
+
+      <!-- RIEPILOGO FREE SPIN -->
+      <div id="freeSummaryOverlay" class="overlay">
+        <div class="dialog free-summary-dialog">
+          <h1>FREE SPIN COMPLETATI</h1>
+
+          <div class="free-summary-label">
+            Vincita totale
+          </div>
+
+          <div id="freeSummaryValue">0</div>
+
+          <div id="freeSummaryDetails"></div>
+
+          <button id="freeSummaryContinue" class="primary-btn" type="button">
+            Continua
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../shared/level-up-modal.js"></script>
+
+  <script type="module">
+
+    import {
+      createClient
+    } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+
+    // ========================================================
+    // CONFIGURAZIONE
+    // ========================================================
+
+    const SUPABASE_URL =
+      "https://jhpppwqdaceratwjnbzi.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
+
+
+    const GAME_ID =
+      "bankrupt";
+
+    const ASSET_ROOT =
+      "./assets";
+
+
+    // ========================================================
+    // SUPABASE
+    // ========================================================
+
+    const supabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+
+    CasinoLevelUp.init(
+      supabase,
+      {
+        balanceSelector: "#balanceValue",
+        levelSelector: "#xpLevel"
+      }
+    );
+
+
+    // ========================================================
+    // SINCRONIZZAZIONE SALDO
+    // ========================================================
+
+    const balanceSyncChannel =
+      "BroadcastChannel"
+      in window
+      ? new BroadcastChannel(
+          "slot-machine-sync"
+        )
+      : null;
+
+
+    function notifyBalanceChanged() {
+
+      balanceSyncChannel
+        ?.postMessage(
+          {
+            type:
+              "balance-changed"
+          }
+        );
+
+
+      /*
+       * Fallback per browser senza BroadcastChannel.
+       */
+      try {
+
+        localStorage.setItem(
+          "slot-machine-balance-sync",
+          String(
+            Date.now()
+          )
+        );
+
+      } catch {
+        // Nessun blocco del gioco se localStorage non è disponibile.
+      }
+    }
+
+
+    // ========================================================
+    // STATO
+    // ========================================================
+
+    const state = {
+
+      session: null,
+
+      config: null,
+
+      symbols: [],
+
+      symbolsByCode:
+        new Map(),
+
+      symbolCodes: [],
+
+      paylinesByNo:
+        new Map(),
+
+      betIndex: 0,
+
+      linesIndex: 0,
+
+      balance: 0,
+
+      spinning: false,
+
+      autoSpinActive: false,
+
+      autoSpinRemaining: 0,
+
+      autoSpinTotal: 0,
+
+      autoMenuOpen: false,
+
+      bonusOpen: false,
+
+      infoOpen: false,
+
+      freeSessionId: null,
+
+      freeRemaining: 0,
+
+      currentWin: 0,
+
+      freeSummaryOpen: false,
+
+      pendingFreeSummarySessionId: null,
+
+      reelIntervals: []
+    };
+
+
+    // ========================================================
+    // DOM
+    // ========================================================
+
+    const $ =
+      (selector) =>
+        document.querySelector(selector);
+
+
+    const backgroundLayer =
+      $("#backgroundLayer");
+
+    const frameLayer =
+      $("#frameLayer");
+
+    const logoLayer =
+      $("#logoLayer");
+
+    const betPanelImage =
+      $("#betPanelImage");
+
+    const linesPanelImage =
+      $("#linesPanelImage");
+
+    const totalPanelImage =
+      $("#totalPanelImage");
+
+    const winningsPanelImage =
+      $("#winningsPanelImage");
+
+    const reelsEl =
+      $("#reels");
+
+    const reelsWrap =
+      $("#reelsWrap");
+
+    const paylineOverlay =
+      $("#paylineOverlay");
+
+    const balanceValue =
+      $("#balanceValue");
+
+    const betValue =
+      $("#betValue");
+
+    const linesValue =
+      $("#linesValue");
+
+    const totalBetValue =
+      $("#totalBetValue");
+
+    const winValue =
+      $("#winValue");
+
+    const spinBtn =
+      $("#spinBtn");
+
+    const autoSpinOverlay =
+      $("#autoSpinOverlay");
+
+    const autoSpinClose =
+      $("#autoSpinClose");
+
+    const autoSpinOptions =
+      [
+        ...document.querySelectorAll(
+          ".auto-spin-option"
+        )
+      ];
+
+    const betPrev =
+      $("#betPrev");
+
+    const betNext =
+      $("#betNext");
+
+    const linesPrev =
+      $("#linesPrev");
+
+    const linesNext =
+      $("#linesNext");
+
+    const freeBanner =
+      $("#freeBanner");
+
+    const freeRemainingValue =
+      $("#freeRemainingValue");
+
+    const authOverlay =
+      $("#authOverlay");
+
+    const loadingOverlay =
+      $("#loadingOverlay");
+
+    const loadingText =
+      $("#loadingText");
+
+    const fatalError =
+      $("#fatalError");
+
+    const emailInput =
+      $("#emailInput");
+
+    const passwordInput =
+      $("#passwordInput");
+
+    const usernameInput =
+      $("#usernameInput");
+
+    const authStatus =
+      $("#authStatus");
+
+    const loginBtn =
+      $("#loginBtn");
+
+    const signupBtn =
+      $("#signupBtn");
+
+    const logoutBtn =
+      $("#logoutBtn");
+
+    const fullscreenBtn =
+      $("#fullscreenBtn");
+
+    const paylinesBtn = $("#paylinesBtn");
+    const payoutBtn = $("#payoutBtn");
+    const infoOverlay = $("#infoOverlay");
+    const infoTitle = $("#infoTitle");
+    const infoImage = $("#infoImage");
+    const infoError = $("#infoError");
+    const infoCloseBtn = $("#infoCloseBtn");
+
+    const bonusOverlay =
+      $("#bonusOverlay");
+
+    const bonusTitle =
+      $("#bonusTitle");
+
+    const bonusSubtitle =
+      $("#bonusSubtitle");
+
+    const bonusInfo =
+      $("#bonusInfo");
+
+    const bonusContinue =
+      $("#bonusContinue");
+
+    const chestsEl =
+      $("#chests");
+
+    const freeSummaryOverlay =
+      $("#freeSummaryOverlay");
+
+    const freeSummaryValue =
+      $("#freeSummaryValue");
+
+    const freeSummaryDetails =
+      $("#freeSummaryDetails");
+
+    const freeSummaryContinue =
+      $("#freeSummaryContinue");
+
+
+    // ========================================================
+    // FORMAT
+    // ========================================================
+
+    const nf =
+      new Intl.NumberFormat(
+        "it-IT"
+      );
+
+
+    function formatChips(value) {
+
+      return nf.format(
+        Number(value || 0)
+      );
+    }
+
+
+
+    // ========================================================
+    // XP / LEVEL UP
+    // ========================================================
+
+    let levels = [];
+
+    const compactXpFormatter =
+      new Intl.NumberFormat(
+        "it-IT",
+        {
+          notation: "compact",
+          maximumFractionDigits: 1
+        }
+      );
+
+
+    async function loadLevels() {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from("levels")
+          .select("level,xp_required")
+          .order("level");
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      levels =
+        data || [];
+    }
+
+
+    function updateXp(
+      xp,
+      level
+    ) {
+
+      xp =
+        Number(xp || 0);
+
+      level =
+        Number(level || 1);
+
+
+      const levelEl =
+        document.getElementById(
+          "xpLevel"
+        );
+
+      const textEl =
+        document.getElementById(
+          "xpText"
+        );
+
+      const fillEl =
+        document.getElementById(
+          "xpFill"
+        );
+
+
+      if (
+        !levelEl
+        ||
+        !textEl
+        ||
+        !fillEl
+      ) {
+        return;
+      }
+
+
+      levelEl.textContent =
+        String(level);
+
+
+      if (level >= 500) {
+
+        fillEl.style.width =
+          "100%";
+
+        textEl.textContent =
+          `${compactXpFormatter.format(xp)} XP · MAX`;
+
+        textEl.title =
+          `${nf.format(xp)} XP · MAX`;
+
+        return;
+      }
+
+
+      const current =
+        levels.find(
+          row =>
+            Number(row.level) === level
+        );
+
+      const next =
+        levels.find(
+          row =>
+            Number(row.level) === level + 1
+        );
+
+      const currentXp =
+        current
+        ? Number(current.xp_required)
+        : level === 1
+          ? 0
+          : null;
+
+      const nextXp =
+        next
+        ? Number(next.xp_required)
+        : null;
+
+
+      if (
+        currentXp == null
+        ||
+        nextXp == null
+      ) {
+
+        textEl.textContent =
+          `${compactXpFormatter.format(xp)} XP`;
+
+        textEl.title =
+          `${nf.format(xp)} XP`;
+
+        return;
+      }
+
+
+      const into =
+        Math.max(
+          0,
+          xp - currentXp
+        );
+
+      const need =
+        Math.max(
+          1,
+          nextXp - currentXp
+        );
+
+      const percent =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            into / need * 100
+          )
+        );
+
+
+      fillEl.style.width =
+        `${percent}%`;
+
+      textEl.textContent =
+        `${compactXpFormatter.format(into)} / ${compactXpFormatter.format(need)} XP`;
+
+      textEl.title =
+        `${nf.format(into)} / ${nf.format(need)} XP`;
+    }
+
+
+    async function loadProgress() {
+
+      if (!state.session) {
+        return;
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from("user_progression")
+          .select("xp,level")
+          .eq(
+            "user_id",
+            state.session.user.id
+          )
+          .maybeSingle();
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      updateXp(
+        data?.xp || 0,
+        data?.level || 1
+      );
+    }
+
+
+    async function refreshProgressSafely() {
+
+      try {
+        await loadProgress();
+      } catch (error) {
+        console.error(
+          "Aggiornamento XP:",
+          error
+        );
+      }
+    }
+
+
+    async function checkLevelUp() {
+
+      await refreshProgressSafely();
+
+
+      try {
+
+        const result =
+          await CasinoLevelUp.check();
+
+
+        if (
+          result?.balance != null
+        ) {
+
+          state.balance =
+            Number(
+              result.balance
+            );
+
+          updateControls();
+        }
+
+
+        await refreshProgressSafely();
+
+        return result;
+
+      } catch (error) {
+
+        console.error(
+          "Level-up:",
+          error
+        );
+
+        return null;
+      }
+    }
+
+
+    // ========================================================
+    // PUNTATA / LINEE - PERSISTENZA PER SLOT
+    // ========================================================
+
+    function stakeStorageKey() {
+      return `slot-machine-stake:${GAME_ID}`;
+    }
+
+    function saveStakeSelection() {
+      if (!state.config) {
+        return;
+      }
+
+      const bets = state.config.game.allowed_bets.map(Number);
+      const lines = state.config.game.allowed_lines.map(Number);
+      const bet = bets[state.betIndex];
+      const activeLines = lines[state.linesIndex];
+
+      if (!Number.isFinite(bet) || !Number.isFinite(activeLines)) {
+        return;
+      }
+
+      try {
+        localStorage.setItem(
+          stakeStorageKey(),
+          JSON.stringify({ bet, activeLines })
+        );
+      } catch {
+        // La slot continua a funzionare anche senza localStorage.
+      }
+    }
+
+    function getSavedStakeSelection() {
+      try {
+        const raw = localStorage.getItem(stakeStorageKey());
+
+        if (!raw) {
+          return null;
+        }
+
+        const parsed = JSON.parse(raw);
+
+        return {
+          bet: Number(parsed.bet),
+          activeLines: Number(parsed.activeLines)
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    // ========================================================
+    // UI GENERALE
+    // ========================================================
+
+    function showLoading(
+      text = "Caricamento..."
+    ) {
+
+      loadingText.textContent =
+        text;
+
+      fatalError.textContent =
+        "";
+
+      loadingOverlay.classList.add(
+        "visible"
+      );
+    }
+
+
+    function hideLoading() {
+
+      loadingOverlay.classList.remove(
+        "visible"
+      );
+    }
+
+
+    function fatal(
+      error
+    ) {
+
+      console.error(error);
+
+      loadingText.textContent =
+        "Errore";
+
+      fatalError.textContent =
+        error?.message
+        || String(error);
+
+      loadingOverlay.classList.add(
+        "visible"
+      );
+    }
+
+
+
+    function updateControls() {
+
+      if (!state.config) {
+        return;
+      }
+
+
+      const bets =
+        state.config.game.allowed_bets
+          .map(Number);
+
+
+      const lines =
+        state.config.game.allowed_lines
+          .map(Number);
+
+
+      const bet =
+        bets[state.betIndex];
+
+
+      const activeLines =
+        lines[state.linesIndex];
+
+
+      betValue.textContent =
+        formatChips(bet);
+
+
+      linesValue.textContent =
+        activeLines;
+
+
+      totalBetValue.textContent =
+        formatChips(
+          bet
+          * activeLines
+        );
+
+
+      balanceValue.textContent =
+        formatChips(
+          state.balance
+        );
+
+
+      winValue.textContent =
+        formatChips(
+          state.currentWin
+        );
+
+
+      freeRemainingValue.textContent =
+        state.freeRemaining;
+
+
+      freeBanner.classList.toggle(
+        "visible",
+        state.freeRemaining > 0
+      );
+
+
+      const locked =
+        state.spinning
+        || state.autoSpinActive
+        || state.autoMenuOpen
+        || state.bonusOpen
+        || state.infoOpen
+        || state.freeSummaryOpen
+        || state.freeRemaining > 0;
+
+
+      betPrev.disabled =
+        locked
+        || bets.length <= 1;
+
+      betNext.disabled =
+        locked
+        || bets.length <= 1;
+
+      linesPrev.disabled =
+        locked;
+
+      linesNext.disabled =
+        locked;
+
+      paylinesBtn.disabled =
+        locked;
+
+      payoutBtn.disabled =
+        locked;
+
+
+      const canAfford =
+        state.freeRemaining > 0
+        ||
+        state.balance >= bet * activeLines;
+
+
+      /*
+       * Durante AUTOSPIN SPIN rimane cliccabile anche mentre
+       * gira: un tap significa "fermati dopo lo spin corrente".
+       */
+      spinBtn.disabled =
+        !state.autoSpinActive
+        &&
+        (
+          state.spinning
+          || state.autoMenuOpen
+          || state.bonusOpen
+          || state.infoOpen
+          || state.freeSummaryOpen
+          || !state.session
+          || !canAfford
+        );
+
+
+      spinBtn.classList.toggle(
+        "auto-active",
+        state.autoSpinActive
+      );
+
+
+      spinBtn.dataset.autoLabel =
+        state.autoSpinActive
+        ? `STOP · ${state.autoSpinRemaining}`
+        : "";
+
+
+      spinBtn.textContent =
+        state.freeRemaining > 0
+        ? "FREE"
+        : "SPIN";
+    }
+
+
+    function paylineTableUrl() {
+
+      if (!state.config?.game) {
+        return "";
+      }
+
+      const game = state.config.game;
+      const version = game.asset_version || 1;
+
+      const fileName =
+        `${Number(game.reels)}x${Number(game.rows)}_${Number(game.max_lines)}.webp`;
+
+      return (
+        `../${fileName}` +
+        `?v=${encodeURIComponent(version)}`
+      );
+    }
+
+
+    function openInfoImage(title, url) {
+
+      if (
+        state.spinning
+        ||
+        state.bonusOpen
+        ||
+        state.freeSummaryOpen
+        ||
+        state.freeRemaining > 0
+      ) {
+        return;
+      }
+
+      state.infoOpen = true;
+      infoTitle.textContent = title;
+
+      infoError.classList.add("hidden");
+      infoImage.classList.remove("hidden");
+      infoImage.alt = title;
+
+      infoImage.onerror = () => {
+        infoImage.classList.add("hidden");
+        infoError.classList.remove("hidden");
+      };
+
+      infoImage.src = url;
+      infoOverlay.classList.add("visible");
+      updateControls();
+    }
+
+
+    function closeInfoImage() {
+      infoOverlay.classList.remove("visible");
+      infoImage.removeAttribute("src");
+      state.infoOpen = false;
+      updateControls();
+    }
+
+
+    paylinesBtn.addEventListener("click", () => {
+      openInfoImage(
+        "Linee vincenti",
+        paylineTableUrl()
+      );
+    });
+
+
+    payoutBtn.addEventListener("click", () => {
+      openInfoImage(
+        "Tabella payout",
+        assetUrl("payouttable.webp")
+      );
+    });
+
+
+    infoCloseBtn.addEventListener("click", closeInfoImage);
+
+    infoOverlay.addEventListener("click", event => {
+      if (event.target === infoOverlay) {
+        closeInfoImage();
+      }
+    });
+
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape" && state.infoOpen) {
+        closeInfoImage();
+      }
+    });
+
+
+    // ========================================================
+    // ASSET
+    // ========================================================
+
+    function assetUrl(
+      relativePath
+    ) {
+
+      const version =
+        state.config?.game
+          ?.asset_version
+        || 1;
+
+
+      return (
+        `${ASSET_ROOT}/${relativePath}` +
+        `?v=${encodeURIComponent(version)}`
+      );
+    }
+
+
+    async function preloadImage(
+      url
+    ) {
+
+      return new Promise(
+        (resolve) => {
+
+          const image =
+            new Image();
+
+
+          image.onload =
+            () =>
+              resolve(true);
+
+
+          image.onerror =
+            () => {
+              console.warn(
+                "Asset non trovato:",
+                url
+              );
+
+              resolve(false);
+            };
+
+
+          image.src =
+            url;
+        }
+      );
+    }
+
+
+    async function preloadAssets() {
+
+      const urls = [
+
+        assetUrl(
+          "background.webp"
+        ),
+
+        assetUrl(
+          "frame.webp"
+        ),
+
+        assetUrl(
+          "logo.webp"
+        ),
+
+        assetUrl(
+          "bet.webp"
+        ),
+
+        assetUrl(
+          "lines.webp"
+        ),
+
+        assetUrl(
+          "total.webp"
+        ),
+
+        assetUrl(
+          "winnings.webp"
+        ),
+
+        assetUrl(
+          "spin.webp"
+        ),
+
+        assetUrl(
+          "bonus1.webp"
+        ),
+
+        assetUrl(
+          "bonus2.webp"
+        ),
+
+        assetUrl(
+          "payouttable.webp"
+        ),
+
+        paylineTableUrl(),
+
+        ...state.symbols.map(
+          symbol =>
+            assetUrl(
+              `symbols/${symbol.image_file}`
+            )
+        )
+      ];
+
+
+      await Promise.all(
+        urls.map(
+          preloadImage
+        )
+      );
+    }
+
+
+    function applyMainAssets() {
+
+      backgroundLayer.src =
+        assetUrl(
+          "background.webp"
+        );
+
+
+      frameLayer.src =
+        assetUrl(
+          "frame.webp"
+        );
+
+
+      logoLayer.src =
+        assetUrl(
+          "logo.webp"
+        );
+
+
+      betPanelImage.src =
+        assetUrl(
+          "bet.webp"
+        );
+
+
+      linesPanelImage.src =
+        assetUrl(
+          "lines.webp"
+        );
+
+
+      totalPanelImage.src =
+        assetUrl(
+          "total.webp"
+        );
+
+
+      winningsPanelImage.src =
+        assetUrl(
+          "winnings.webp"
+        );
+
+
+      spinBtn.style.backgroundImage =
+        `url("${assetUrl("spin.webp")}")`;
+    }
+
+
+    // ========================================================
+    // GRID
+    // ========================================================
+
+    function buildGrid() {
+
+      const rows =
+        Number(
+          state.config.game.rows
+        );
+
+
+      const reels =
+        Number(
+          state.config.game.reels
+        );
+
+
+      reelsEl.style.gridTemplateColumns =
+        `repeat(${reels}, 1fr)`;
+
+
+      reelsEl.style.gridTemplateRows =
+        `repeat(${rows}, 1fr)`;
+
+
+      reelsEl.innerHTML =
+        "";
+
+
+      /*
+        DOM row-major:
+        row 0: reel 0..2
+        row 1: reel 0..2
+        row 2: reel 0..2
+      */
+
+      for (
+        let row = 0;
+        row < rows;
+        row++
+      ) {
+
+        for (
+          let reel = 0;
+          reel < reels;
+          reel++
+        ) {
+
+          const cell =
+            document.createElement(
+              "div"
+            );
+
+
+          cell.className =
+            "reel-cell";
+
+
+          cell.dataset.row =
+            row;
+
+
+          cell.dataset.reel =
+            reel;
+
+
+          const img =
+            document.createElement(
+              "img"
+            );
+
+
+          img.alt =
+            "";
+
+
+          cell.appendChild(
+            img
+          );
+
+
+          reelsEl.appendChild(
+            cell
+          );
+
+        }
+      }
+    }
+
+
+    function getCell(
+      row,
+      reel
+    ) {
+
+      return reelsEl.querySelector(
+        `.reel-cell[data-row="${row}"][data-reel="${reel}"]`
+      );
+    }
+
+
+    function setCellSymbol(
+      row,
+      reel,
+      code
+    ) {
+
+      const cell =
+        getCell(
+          row,
+          reel
+        );
+
+
+      if (!cell) {
+        return;
+      }
+
+
+      const symbol =
+        state.symbolsByCode.get(
+          code
+        );
+
+
+      const img =
+        cell.querySelector(
+          "img"
+        );
+
+
+      if (!symbol) {
+
+        img.removeAttribute(
+          "src"
+        );
+
+        img.alt =
+          code || "";
+
+        return;
+      }
+
+
+      img.src =
+        assetUrl(
+          `symbols/${symbol.image_file}`
+        );
+
+
+      img.alt =
+        symbol.code;
+
+
+      cell.dataset.code =
+        code;
+    }
+
+
+    function fillRandomGrid() {
+
+      const rows =
+        Number(
+          state.config.game.rows
+        );
+
+      const reels =
+        Number(
+          state.config.game.reels
+        );
+
+
+      for (
+        let row = 0;
+        row < rows;
+        row++
+      ) {
+
+        for (
+          let reel = 0;
+          reel < reels;
+          reel++
+        ) {
+
+          setCellSymbol(
+            row,
+            reel,
+            randomSymbolCode()
+          );
+
+        }
+      }
+    }
+
+
+    function randomSymbolCode() {
+
+      return state.symbolCodes[
+        Math.floor(
+          Math.random()
+          * state.symbolCodes.length
+        )
+      ];
+    }
+
+
+    // ========================================================
+    // ANIMAZIONE RULLI
+    // ========================================================
+
+    function clearWinnerHighlights() {
+
+      reelsEl
+        .querySelectorAll(
+          ".winner"
+        )
+        .forEach(
+          cell =>
+            cell.classList.remove(
+              "winner"
+            )
+        );
+
+
+      paylineOverlay.replaceChildren();
+    }
+
+
+    function startReelAnimation() {
+
+      clearWinnerHighlights();
+
+
+      state.reelIntervals.forEach(
+        clearInterval
+      );
+
+
+      state.reelIntervals =
+        [];
+
+
+      const rows =
+        Number(
+          state.config.game.rows
+        );
+
+      const reels =
+        Number(
+          state.config.game.reels
+        );
+
+
+      for (
+        let reel = 0;
+        reel < reels;
+        reel++
+      ) {
+
+        for (
+          let row = 0;
+          row < rows;
+          row++
+        ) {
+
+          getCell(
+            row,
+            reel
+          )?.classList.add(
+            "spinning"
+          );
+        }
+
+
+        const interval =
+          setInterval(
+            () => {
+
+              for (
+                let row = 0;
+                row < rows;
+                row++
+              ) {
+
+                setCellSymbol(
+                  row,
+                  reel,
+                  randomSymbolCode()
+                );
+              }
+
+            },
+            70 + reel * 6
+          );
+
+
+        state.reelIntervals[
+          reel
+        ] = interval;
+      }
+    }
+
+
+    async function stopReels(
+      matrix
+    ) {
+
+      const reels =
+        Number(
+          state.config.game.reels
+        );
+
+
+      const rows =
+        Number(
+          state.config.game.rows
+        );
+
+
+      for (
+        let reel = 0;
+        reel < reels;
+        reel++
+      ) {
+
+        await sleep(
+          reel === 0
+          ? 420
+          : 190
+        );
+
+
+        clearInterval(
+          state.reelIntervals[
+            reel
+          ]
+        );
+
+
+        for (
+          let row = 0;
+          row < rows;
+          row++
+        ) {
+
+          setCellSymbol(
+            row,
+            reel,
+            matrix[row][reel]
+          );
+
+
+          getCell(
+            row,
+            reel
+          )?.classList.remove(
+            "spinning"
+          );
+        }
+      }
+
+
+      state.reelIntervals =
+        [];
+    }
+
+
+
+    function drawWinningPaylines(
+      winningLines
+    ) {
+
+      paylineOverlay.replaceChildren();
+
+      if (
+        !Array.isArray(winningLines)
+        || winningLines.length === 0
+        || !state.config
+      ) {
+        return;
+      }
+
+      const reels = Number(state.config.game.reels);
+      const wrapRect = reelsWrap.getBoundingClientRect();
+
+      if (wrapRect.width <= 0 || wrapRect.height <= 0) {
+        return;
+      }
+
+      const colors = [
+        '#ffd84a',
+        '#ff5d5d',
+        '#52e5ff',
+        '#7cff8c',
+        '#ff83e6',
+        '#ff9f43',
+        '#b69cff',
+        '#ffffff'
+      ];
+
+      winningLines.forEach((win, winIndex) => {
+        const line = state.paylinesByNo.get(Number(win.line_no));
+
+        if (!line) {
+          return;
+        }
+
+        const points = [];
+
+        /*
+         * Disegniamo tutta la forma della payline, non soltanto
+         * i simboli consecutivi che hanno pagato. Così si vede
+         * chiaramente quale linea ha vinto.
+         */
+        for (let reel = 0; reel < reels; reel++) {
+          const row = Number(line.pattern[reel]);
+          const cell = getCell(row, reel);
+
+          if (!cell) {
+            continue;
+          }
+
+          const rect = cell.getBoundingClientRect();
+          const x = ((rect.left + rect.width / 2 - wrapRect.left) / wrapRect.width) * 1000;
+          const y = ((rect.top + rect.height / 2 - wrapRect.top) / wrapRect.height) * 1000;
+
+          points.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+        }
+
+        if (points.length < 2) {
+          return;
+        }
+
+        const polyline = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'polyline'
+        );
+
+        polyline.setAttribute('points', points.join(' '));
+        polyline.setAttribute('class', 'payline-win');
+        polyline.setAttribute('stroke', colors[winIndex % colors.length]);
+        polyline.dataset.lineNo = String(win.line_no);
+        paylineOverlay.appendChild(polyline);
+      });
+    }
+
+    function highlightWinningLines(
+      winningLines
+    ) {
+
+      clearWinnerHighlights();
+
+
+      if (
+        !Array.isArray(
+          winningLines
+        )
+        ||
+        winningLines.length === 0
+      ) {
+
+        return;
+      }
+
+
+      for (
+        const win
+        of winningLines
+      ) {
+
+        const line =
+          state.paylinesByNo.get(
+            Number(
+              win.line_no
+            )
+          );
+
+
+        if (!line) {
+          continue;
+        }
+
+
+        const count =
+          Number(
+            win.count || 0
+          );
+
+
+        for (
+          let reel = 0;
+          reel < count;
+          reel++
+        ) {
+
+          const row =
+            Number(
+              line.pattern[
+                reel
+              ]
+            );
+
+
+          getCell(
+            row,
+            reel
+          )?.classList.add(
+            "winner"
+          );
+        }
+      }
+
+
+      drawWinningPaylines(
+        winningLines
+      );
+    }
+
+
+    function sleep(ms) {
+
+      return new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            ms
+          )
+      );
+    }
+
+
+    // ========================================================
+    // CONFIG SLOT
+    // ========================================================
+
+    async function loadGame() {
+
+      const previousBets =
+        state.config?.game
+          ?.allowed_bets
+          ?.map(Number)
+        || [];
+
+
+      const previousLines =
+        state.config?.game
+          ?.allowed_lines
+          ?.map(Number)
+        || [];
+
+
+      const previousBet =
+        previousBets[
+          state.betIndex
+        ];
+
+
+      const previousActiveLines =
+        previousLines[
+          state.linesIndex
+        ];
+
+
+      showLoading(
+        "Caricamento Fraudulent Bankruptcy..."
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "get_slot_config",
+          {
+            p_game_id:
+              GAME_ID
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      if (!data?.game) {
+
+        throw new Error(
+          "Configurazione slot non valida."
+        );
+      }
+
+
+      state.config =
+        data;
+
+
+      state.symbols =
+        data.symbols || [];
+
+
+      state.symbolsByCode =
+        new Map(
+          state.symbols.map(
+            symbol => [
+              symbol.code,
+              symbol
+            ]
+          )
+        );
+
+
+      state.symbolCodes =
+        state.symbols.map(
+          symbol =>
+            symbol.code
+        );
+
+
+      state.paylinesByNo =
+        new Map(
+          (data.paylines || [])
+            .map(
+              line => [
+                Number(
+                  line.line_no
+                ),
+                {
+                  ...line,
+                  pattern:
+                    line.pattern
+                      .map(Number)
+                }
+              ]
+            )
+        );
+
+
+      state.balance =
+        Number(
+          data.balance || 0
+        );
+
+
+      state.freeSessionId =
+        data.free?.session_id
+        || null;
+
+
+      state.freeRemaining =
+        Number(
+          data.free?.remaining
+          || 0
+        );
+
+
+      const bets =
+        data.game.allowed_bets
+          .map(Number);
+
+
+      const lines =
+        data.game.allowed_lines
+          .map(Number);
+
+
+      if (
+        state.freeSessionId
+        &&
+        state.freeRemaining > 0
+      ) {
+
+        const freeBet =
+          Number(
+            data.free
+              ?.bet_per_line
+          );
+
+
+        const freeLines =
+          Number(
+            data.free
+              ?.active_lines
+          );
+
+
+        const restoredBetIndex =
+          bets.indexOf(
+            freeBet
+          );
+
+
+        const restoredLinesIndex =
+          lines.indexOf(
+            freeLines
+          );
+
+
+        state.betIndex =
+          restoredBetIndex >= 0
+          ? restoredBetIndex
+          : 0;
+
+
+        state.linesIndex =
+          restoredLinesIndex >= 0
+          ? restoredLinesIndex
+          : Math.max(
+              0,
+              lines.length - 1
+            );
+
+      } else {
+
+        const savedStake =
+          getSavedStakeSelection();
+
+
+        const preferredBet =
+          Number.isFinite(
+            previousBet
+          )
+          ? previousBet
+          : savedStake?.bet;
+
+
+        const preferredLines =
+          Number.isFinite(
+            previousActiveLines
+          )
+          ? previousActiveLines
+          : savedStake?.activeLines;
+
+
+        const restoredBetIndex =
+          bets.indexOf(
+            Number(
+              preferredBet
+            )
+          );
+
+
+        const restoredLinesIndex =
+          lines.indexOf(
+            Number(
+              preferredLines
+            )
+          );
+
+
+        state.betIndex =
+          restoredBetIndex >= 0
+          ? restoredBetIndex
+          : 0;
+
+
+        state.linesIndex =
+          restoredLinesIndex >= 0
+          ? restoredLinesIndex
+          : Math.max(
+              0,
+              lines.length - 1
+            );
+
+      }
+
+
+      saveStakeSelection();
+
+
+      buildGrid();
+
+      applyMainAssets();
+
+      fillRandomGrid();
+
+      updateControls();
+
+
+      await preloadAssets();
+
+
+      hideLoading();
+
+
+      const pendingBonus =
+        data.bonus
+          ?.pending_session_id;
+
+
+      if (pendingBonus) {
+
+        await openBonus(
+          pendingBonus
+        );
+
+      }
+    }
+
+
+
+    // ========================================================
+    // AUTOSPIN
+    // ========================================================
+
+    function openAutoSpinMenu() {
+
+      if (
+        state.autoSpinActive
+        ||
+        state.spinning
+        ||
+        state.bonusOpen
+        ||
+        state.infoOpen
+        ||
+        state.freeSummaryOpen
+        ||
+        state.freeRemaining > 0
+        ||
+        !state.session
+        ||
+        !state.config
+      ) {
+
+        return;
+      }
+
+
+      state.autoMenuOpen =
+        true;
+
+
+      autoSpinOverlay.classList.add(
+        "visible"
+      );
+
+
+      updateControls();
+    }
+
+
+    function closeAutoSpinMenu() {
+
+      autoSpinOverlay.classList.remove(
+        "visible"
+      );
+
+
+      state.autoMenuOpen =
+        false;
+
+
+      updateControls();
+    }
+
+
+    function stopAutoSpin() {
+
+      state.autoSpinActive =
+        false;
+
+
+      state.autoSpinRemaining =
+        0;
+
+
+      state.autoSpinTotal =
+        0;
+
+
+      updateControls();
+    }
+
+
+    function canAffordNextPaidSpin() {
+
+      if (!state.config) {
+        return false;
+      }
+
+
+      const bets =
+        state.config.game.allowed_bets
+          .map(Number);
+
+
+      const lines =
+        state.config.game.allowed_lines
+          .map(Number);
+
+
+      const bet =
+        bets[state.betIndex];
+
+
+      const activeLines =
+        lines[state.linesIndex];
+
+
+      return (
+        state.balance
+        >=
+        bet * activeLines
+      );
+    }
+
+
+    async function scheduleNextAutoSpin(
+      delay = 650
+    ) {
+
+      if (
+        !state.autoSpinActive
+        ||
+        state.autoSpinRemaining <= 0
+      ) {
+
+        return;
+      }
+
+
+      /*
+       * FREE, BONUS e riepiloghi gestiscono autonomamente
+       * il proprio flusso. AUTO riprenderà alla loro chiusura.
+       */
+      if (
+        state.spinning
+        ||
+        state.bonusOpen
+        ||
+        state.infoOpen
+        ||
+        state.freeSummaryOpen
+        ||
+        state.freeRemaining > 0
+      ) {
+
+        return;
+      }
+
+
+      if (
+        !canAffordNextPaidSpin()
+      ) {
+
+        stopAutoSpin();
+
+        return;
+      }
+
+
+      await sleep(
+        delay
+      );
+
+
+      if (
+        state.autoSpinActive
+        &&
+        state.autoSpinRemaining > 0
+        &&
+        !state.spinning
+        &&
+        !state.bonusOpen
+        &&
+        !state.infoOpen
+        &&
+        !state.freeSummaryOpen
+        &&
+        state.freeRemaining <= 0
+      ) {
+
+        await doSpin();
+      }
+    }
+
+
+    function startAutoSpin(
+      count
+    ) {
+
+      const parsedCount =
+        Number(
+          count
+        );
+
+
+      if (
+        !Number.isInteger(
+          parsedCount
+        )
+        ||
+        parsedCount <= 0
+        ||
+        !canAffordNextPaidSpin()
+      ) {
+
+        closeAutoSpinMenu();
+
+        return;
+      }
+
+
+      state.autoSpinActive =
+        true;
+
+
+      state.autoSpinRemaining =
+        parsedCount;
+
+
+      state.autoSpinTotal =
+        parsedCount;
+
+
+      closeAutoSpinMenu();
+
+
+      updateControls();
+
+
+      scheduleNextAutoSpin(
+        120
+      );
+    }
+
+
+    const SPIN_LONG_PRESS_MS =
+      550;
+
+
+    let spinLongPressTimer =
+      null;
+
+
+    let spinLongPressTriggered =
+      false;
+
+
+    let ignoreSpinClickUntil =
+      0;
+
+
+    function clearSpinLongPressTimer() {
+
+      if (
+        spinLongPressTimer
+      ) {
+
+        clearTimeout(
+          spinLongPressTimer
+        );
+
+
+        spinLongPressTimer =
+          null;
+      }
+    }
+
+
+    function startSpinLongPressTimer() {
+
+      if (
+        state.autoSpinActive
+        ||
+        spinBtn.disabled
+      ) {
+
+        return;
+      }
+
+
+      spinLongPressTriggered =
+        false;
+
+
+      clearSpinLongPressTimer();
+
+
+      spinLongPressTimer =
+        setTimeout(
+          () => {
+
+            spinLongPressTimer =
+              null;
+
+
+            spinLongPressTriggered =
+              true;
+
+
+            navigator.vibrate?.(
+              35
+            );
+
+
+            openAutoSpinMenu();
+
+          },
+          SPIN_LONG_PRESS_MS
+        );
+    }
+
+
+    // ========================================================
+    // TOUCH - SMARTPHONE / TABLET
+    // ========================================================
+
+    spinBtn.addEventListener(
+      "touchstart",
+      event => {
+
+        event.preventDefault();
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          return;
+        }
+
+
+        startSpinLongPressTimer();
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "touchend",
+      async event => {
+
+        event.preventDefault();
+
+
+        ignoreSpinClickUntil =
+          Date.now()
+          + 700;
+
+
+        clearSpinLongPressTimer();
+
+
+        if (
+          spinLongPressTriggered
+        ) {
+
+          spinLongPressTriggered =
+            false;
+
+          return;
+        }
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+
+          return;
+        }
+
+
+        if (
+          !spinBtn.disabled
+        ) {
+
+          await doSpin();
+        }
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "touchcancel",
+      event => {
+
+        event.preventDefault();
+
+
+        clearSpinLongPressTimer();
+
+
+        spinLongPressTriggered =
+          false;
+      },
+      {
+        passive: false
+      }
+    );
+
+
+    // ========================================================
+    // MOUSE / PEN - DESKTOP
+    // ========================================================
+
+    spinBtn.addEventListener(
+      "pointerdown",
+      event => {
+
+        if (
+          event.pointerType
+          === "touch"
+        ) {
+
+          return;
+        }
+
+
+        if (
+          state.autoSpinActive
+          ||
+          spinBtn.disabled
+        ) {
+
+          return;
+        }
+
+
+        startSpinLongPressTimer();
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "pointerup",
+      event => {
+
+        if (
+          event.pointerType
+          !== "touch"
+        ) {
+
+          clearSpinLongPressTimer();
+        }
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "pointercancel",
+      event => {
+
+        if (
+          event.pointerType
+          !== "touch"
+        ) {
+
+          clearSpinLongPressTimer();
+
+
+          spinLongPressTriggered =
+            false;
+        }
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "contextmenu",
+      event => {
+
+        event.preventDefault();
+      }
+    );
+
+
+    autoSpinOptions.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            startAutoSpin(
+              button.dataset.autoCount
+            );
+          }
+        );
+      }
+    );
+
+
+    autoSpinClose.addEventListener(
+      "click",
+      closeAutoSpinMenu
+    );
+
+
+    autoSpinOverlay.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target
+          === autoSpinOverlay
+        ) {
+
+          closeAutoSpinMenu();
+        }
+      }
+    );
+
+
+    // ========================================================
+    // RIEPILOGO FREE SPIN
+    // ========================================================
+
+    async function openFreeSummary(
+      sessionId
+    ) {
+
+      if (!sessionId) {
+        return;
+      }
+
+
+      state.freeSummaryOpen =
+        true;
+
+
+      updateControls();
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "get_free_spin_summary",
+          {
+            p_session_id:
+              sessionId
+          }
+        );
+
+
+      if (error) {
+
+        state.freeSummaryOpen =
+          false;
+
+        updateControls();
+
+        fatal(error);
+
+        return;
+      }
+
+
+      freeSummaryValue.textContent =
+        formatChips(
+          data.total_win
+          || 0
+        );
+
+
+      freeSummaryDetails.textContent =
+        `${Number(data.spins_played || 0)} free spin giocati`;
+
+
+      freeSummaryOverlay.classList.add(
+        "visible"
+      );
+    }
+
+
+    freeSummaryContinue.addEventListener(
+      "click",
+      async () => {
+
+        freeSummaryOverlay.classList.remove(
+          "visible"
+        );
+
+
+        state.freeSummaryOpen =
+          false;
+
+
+        state.pendingFreeSummarySessionId =
+          null;
+
+
+        updateControls();
+
+
+        await checkLevelUp();
+
+
+        if (
+          state.autoSpinActive
+          &&
+          state.autoSpinRemaining > 0
+        ) {
+
+          await scheduleNextAutoSpin(
+            350
+          );
+        }
+      }
+    );
+
+
+    // ========================================================
+    // SPIN
+    // ========================================================
+
+    async function doSpin() {
+
+      if (
+        state.spinning
+        ||
+        state.bonusOpen
+        ||
+        state.infoOpen
+        ||
+        state.autoMenuOpen
+        ||
+        !state.config
+      ) {
+
+        return;
+      }
+
+
+      const bets =
+        state.config.game.allowed_bets
+          .map(Number);
+
+
+      const lines =
+        state.config.game.allowed_lines
+          .map(Number);
+
+
+      const bet =
+        bets[state.betIndex];
+
+
+      const activeLines =
+        lines[state.linesIndex];
+
+
+      /*
+       * Salviamo la sessione PRIMA dello spin.
+       * Alla risposta la sessione può risultare già completata.
+       */
+      const freeSessionUsed =
+        state.freeRemaining > 0
+        ? state.freeSessionId
+        : null;
+
+
+      if (
+        state.freeRemaining <= 0
+        &&
+        state.balance < bet * activeLines
+      ) {
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+        }
+
+        return;
+      }
+
+
+      state.spinning =
+        true;
+
+
+      state.currentWin =
+        0;
+
+
+      updateControls();
+
+      startReelAnimation();
+
+
+      let data;
+
+
+      try {
+
+        const response =
+          await supabase.rpc(
+            "spin_slot_safe",
+            {
+              p_game_id:
+                GAME_ID,
+
+              p_bet_per_line:
+                bet,
+
+              p_active_lines:
+                activeLines,
+
+              p_free_spin_session_id:
+                state.freeRemaining > 0
+                ? state.freeSessionId
+                : null
+            }
+          );
+
+
+        if (response.error) {
+          throw response.error;
+        }
+
+
+        data =
+          response.data;
+
+
+        await stopReels(
+          data.matrix
+        );
+
+
+      } catch (error) {
+
+        state.reelIntervals.forEach(
+          clearInterval
+        );
+
+
+        state.reelIntervals =
+          [];
+
+
+        reelsEl
+          .querySelectorAll(
+            ".spinning"
+          )
+          .forEach(
+            cell =>
+              cell.classList.remove(
+                "spinning"
+              )
+          );
+
+
+        state.spinning =
+          false;
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+        }
+
+
+        updateControls();
+
+
+        console.error(error);
+
+
+        if (
+          String(
+            error?.message
+            || ""
+          ).includes(
+            "SPIN_ALREADY_IN_PROGRESS"
+          )
+        ) {
+
+          /*
+           * Un'altra tab/dispositivo sta completando uno spin.
+           * Non mostriamo un errore fatale: aspettiamo un attimo
+           * e rileggiamo saldo / FREE / BONUS dal server.
+           */
+          await sleep(700);
+
+
+          try {
+
+            await loadGame();
+
+          } catch (
+            syncError
+          ) {
+
+            console.error(
+              syncError
+            );
+          }
+
+
+          return;
+        }
+
+
+        fatal(
+          error
+        );
+
+        return;
+      }
+
+
+      state.balance =
+        Number(
+          data.balance
+          || 0
+        );
+
+
+      notifyBalanceChanged();
+
+
+      if (!freeSessionUsed) {
+        await refreshProgressSafely();
+      }
+
+
+      state.currentWin =
+        Number(
+          data.total_win
+          || 0
+        );
+
+
+      state.freeSessionId =
+        data.free
+          ?.session_id
+        || null;
+
+
+      state.freeRemaining =
+        Number(
+          data.free
+            ?.remaining
+          || 0
+        );
+
+
+      const freeJustEnded =
+        Boolean(
+          freeSessionUsed
+        )
+        &&
+        state.freeRemaining === 0;
+
+
+      /*
+       * Il contatore AUTO scala SOLO dopo uno spin pagato
+       * completato con successo. FREE e BONUS non lo consumano.
+       */
+      if (
+        !freeSessionUsed
+        &&
+        state.autoSpinActive
+      ) {
+
+        state.autoSpinRemaining =
+          Math.max(
+            0,
+            state.autoSpinRemaining - 1
+          );
+
+
+        if (
+          state.autoSpinRemaining <= 0
+        ) {
+
+          state.autoSpinActive =
+            false;
+
+
+          state.autoSpinTotal =
+            0;
+        }
+      }
+
+
+      highlightWinningLines(
+        data.winning_lines
+        || []
+      );
+
+
+      state.spinning =
+        false;
+
+
+      updateControls();
+
+
+
+
+      // ======================================================
+      // BONUS HA PRIORITA'
+      // ======================================================
+
+      const bonusSessionId =
+        data.bonus
+          ?.session_id;
+
+
+      if (bonusSessionId) {
+
+        if (
+          freeJustEnded
+        ) {
+
+          /*
+           * Il riepilogo deve comparire DOPO aver completato
+           * l'eventuale bonus attivato dall'ultimo free spin.
+           */
+          state.pendingFreeSummarySessionId =
+            freeSessionUsed;
+        }
+
+
+        await sleep(650);
+
+        await openBonus(
+          bonusSessionId
+        );
+
+        return;
+      }
+
+
+      if (
+        freeJustEnded
+      ) {
+
+        await sleep(500);
+
+        await openFreeSummary(
+          freeSessionUsed
+        );
+
+        return;
+      }
+
+
+      // ======================================================
+      // FREE SPIN AUTOMATICO
+      // ======================================================
+
+      if (
+        state.freeRemaining > 0
+      ) {
+
+        await sleep(900);
+
+        await doSpin();
+
+        return;
+      }
+
+
+      // ======================================================
+      // LEVEL UP
+      // ======================================================
+
+      await checkLevelUp();
+
+
+      // ======================================================
+      // PROSSIMO AUTOSPIN PAGATO
+      // ======================================================
+
+      if (
+        state.autoSpinActive
+        &&
+        state.autoSpinRemaining > 0
+      ) {
+
+        await scheduleNextAutoSpin(
+          650
+        );
+      }
+    }
+
+
+    // ========================================================
+    // BONUS BANKRUPT - 10 VALIGETTE, 1 SCELTA
+    // ========================================================
+
+    function buildChests() {
+
+      chestsEl.innerHTML =
+        "";
+
+
+      for (
+        let i = 1;
+        i <= 10;
+        i++
+      ) {
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.type =
+          "button";
+
+
+        button.className =
+          "chest";
+
+
+        button.dataset.index =
+          i;
+
+
+        const closedImg =
+          document.createElement(
+            "img"
+          );
+
+        closedImg.className =
+          "chest-image closed";
+
+        closedImg.alt =
+          "";
+
+        closedImg.draggable =
+          false;
+
+        closedImg.src =
+          assetUrl(
+            "bonus1.webp"
+          );
+
+
+        const openImg =
+          document.createElement(
+            "img"
+          );
+
+        openImg.className =
+          "chest-image opened";
+
+        openImg.alt =
+          "";
+
+        openImg.draggable =
+          false;
+
+        openImg.src =
+          assetUrl(
+            "bonus2.webp"
+          );
+
+
+        const value =
+          document.createElement(
+            "span"
+          );
+
+        value.className =
+          "chest-value";
+
+
+        button.appendChild(
+          closedImg
+        );
+
+        button.appendChild(
+          openImg
+        );
+
+        button.appendChild(
+          value
+        );
+
+
+        button.addEventListener(
+          "click",
+          () =>
+            pickChest(
+              i
+            )
+        );
+
+
+        chestsEl.appendChild(
+          button
+        );
+      }
+    }
+
+
+    async function openBonus(
+      sessionId
+    ) {
+
+      state.bonusOpen =
+        true;
+
+
+      updateControls();
+
+
+      buildChests();
+
+
+      bonusContinue.classList.remove(
+        "visible"
+      );
+
+
+      bonusInfo.textContent =
+        "";
+
+
+      bonusOverlay.classList.add(
+        "visible"
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "get_bankrupt_bonus_state",
+          {
+            p_session_id:
+              sessionId
+          }
+        );
+
+
+      if (error) {
+
+        console.error(error);
+
+        bonusInfo.textContent =
+          error.message;
+
+        return;
+      }
+
+
+      state.currentBonusSessionId =
+        sessionId;
+
+
+      renderBonusState(
+        data
+      );
+    }
+
+
+    function renderBonusState(
+      data
+    ) {
+
+      const pickedIndexes =
+        (data.picked_indexes || [])
+          .map(Number);
+
+
+      const pickedValues =
+        (data.picked_values || [])
+          .map(Number);
+
+
+      bonusTitle.textContent =
+        "BONUS VALIGETTE";
+
+
+      bonusSubtitle.textContent =
+        data.status === "completed"
+        || data.completed === true
+        ? "Valigetta scelta!"
+        : "Scegli 1 valigetta";
+
+
+      const allCases =
+        data.all_cases
+        || null;
+
+
+      for (
+        let index = 1;
+        index <= 10;
+        index++
+      ) {
+
+        const button =
+          chestsEl.querySelector(
+            `.chest[data-index="${index}"]`
+          );
+
+
+        const valueEl =
+          button.querySelector(
+            ".chest-value"
+          );
+
+
+        button.classList.remove(
+          "open",
+          "unpicked"
+        );
+
+
+        const pickedAt =
+          pickedIndexes.indexOf(
+            index
+          );
+
+
+        if (
+          pickedAt >= 0
+        ) {
+
+          button.classList.add(
+            "open"
+          );
+
+
+          valueEl.textContent =
+            `×${pickedValues[pickedAt]}`;
+
+
+          button.disabled =
+            true;
+
+        } else if (
+          allCases
+        ) {
+
+          button.classList.add(
+            "open",
+            "unpicked"
+          );
+
+
+          valueEl.textContent =
+            `×${allCases[index - 1]}`;
+
+
+          button.disabled =
+            true;
+
+        } else {
+
+          valueEl.textContent =
+            "";
+
+          button.disabled =
+            false;
+        }
+      }
+
+
+      if (
+        data.status === "completed"
+        || data.completed === true
+      ) {
+
+        const win =
+          Number(
+            data.win || 0
+          );
+
+
+        if (
+          data.balance != null
+        ) {
+
+          state.balance =
+            Number(
+              data.balance
+            );
+
+
+          notifyBalanceChanged();
+        }
+
+
+        const multiplier =
+          Number(
+            data.chosen_multiplier
+            || data.sum_multiplier
+            || 0
+          );
+
+
+        bonusInfo.textContent =
+          `VALIGETTA ×${multiplier}  ·  VINCITA ${formatChips(win)}`;
+
+
+        bonusContinue.classList.add(
+          "visible"
+        );
+
+
+        updateControls();
+
+      } else {
+
+        bonusInfo.textContent =
+          `Puntata totale ${formatChips(data.total_bet || 0)} · scegli una valigetta`;
+
+      }
+    }
+
+
+    async function pickChest(
+      index
+    ) {
+
+      if (
+        !state.bonusOpen
+        ||
+        !state.currentBonusSessionId
+      ) {
+
+        return;
+      }
+
+
+      const button =
+        chestsEl.querySelector(
+          `.chest[data-index="${index}"]`
+        );
+
+
+      if (
+        !button
+        ||
+        button.disabled
+      ) {
+
+        return;
+      }
+
+
+      /*
+       * Una sola scelta: disabilitiamo tutte le valigette
+       * mentre la RPC server-side decide e accredita il premio.
+       */
+      chestsEl
+        .querySelectorAll(
+          ".chest"
+        )
+        .forEach(
+          chest =>
+            chest.disabled = true
+        );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "pick_bankrupt_briefcase",
+          {
+            p_session_id:
+              state.currentBonusSessionId,
+
+            p_case_index:
+              index
+          }
+        );
+
+
+      if (error) {
+
+        console.error(error);
+
+        bonusInfo.textContent =
+          error.message;
+
+
+        const stateResult =
+          await supabase.rpc(
+            "get_bankrupt_bonus_state",
+            {
+              p_session_id:
+                state.currentBonusSessionId
+            }
+          );
+
+
+        if (!stateResult.error) {
+
+          renderBonusState(
+            stateResult.data
+          );
+        }
+
+        return;
+      }
+
+
+      renderBonusState(
+        data
+      );
+    }
+
+
+    bonusContinue.addEventListener(
+      "click",
+      async () => {
+
+        bonusOverlay.classList.remove(
+          "visible"
+        );
+
+
+        state.bonusOpen =
+          false;
+
+
+        state.currentBonusSessionId =
+          null;
+
+
+        updateControls();
+
+
+        /*
+          Se il bonus era stato attivato durante un FREE,
+          riprendiamo automaticamente la sessione.
+        */
+
+        if (
+          state.pendingFreeSummarySessionId
+          &&
+          state.freeRemaining === 0
+        ) {
+
+          const summarySessionId =
+            state.pendingFreeSummarySessionId;
+
+
+          state.pendingFreeSummarySessionId =
+            null;
+
+
+          await sleep(350);
+
+          await openFreeSummary(
+            summarySessionId
+          );
+
+          return;
+        }
+
+
+        if (
+          state.freeRemaining > 0
+        ) {
+
+          await sleep(500);
+
+          await doSpin();
+
+          return;
+        }
+
+
+        await checkLevelUp();
+
+
+        if (
+          state.autoSpinActive
+          &&
+          state.autoSpinRemaining > 0
+        ) {
+
+          await scheduleNextAutoSpin(
+            400
+          );
+        }
+      }
+    );
+
+
+    // ========================================================
+    // CONTROLLI BET / LINEE
+    // ========================================================
+
+    betPrev.addEventListener(
+      "click",
+      () => {
+
+        const bets =
+          state.config.game
+            .allowed_bets;
+
+
+        state.betIndex =
+          (
+            state.betIndex
+            - 1
+            + bets.length
+          )
+          % bets.length;
+
+
+        saveStakeSelection();
+
+        updateControls();
+      }
+    );
+
+
+    betNext.addEventListener(
+      "click",
+      () => {
+
+        const bets =
+          state.config.game
+            .allowed_bets;
+
+
+        state.betIndex =
+          (
+            state.betIndex
+            + 1
+          )
+          % bets.length;
+
+
+        saveStakeSelection();
+
+        updateControls();
+      }
+    );
+
+
+    linesPrev.addEventListener(
+      "click",
+      () => {
+
+        const lines =
+          state.config.game
+            .allowed_lines;
+
+
+        state.linesIndex =
+          (
+            state.linesIndex
+            - 1
+            + lines.length
+          )
+          % lines.length;
+
+
+        saveStakeSelection();
+
+        updateControls();
+      }
+    );
+
+
+    linesNext.addEventListener(
+      "click",
+      () => {
+
+        const lines =
+          state.config.game
+            .allowed_lines;
+
+
+        state.linesIndex =
+          (
+            state.linesIndex
+            + 1
+          )
+          % lines.length;
+
+
+        saveStakeSelection();
+
+        updateControls();
+      }
+    );
+
+
+    spinBtn.addEventListener(
+      "click",
+      async () => {
+
+        if (
+          Date.now()
+          <
+          ignoreSpinClickUntil
+        ) {
+
+          return;
+        }
+
+
+        if (
+          spinLongPressTriggered
+        ) {
+
+          spinLongPressTriggered =
+            false;
+
+          return;
+        }
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+
+          return;
+        }
+
+
+        await doSpin();
+      }
+    );
+
+
+    // ========================================================
+    // AUTH
+    // ========================================================
+
+    async function login() {
+
+      authStatus.textContent =
+        "Accesso...";
+
+
+      const {
+        error
+      } =
+        await supabase.auth
+          .signInWithPassword(
+            {
+              email:
+                emailInput.value
+                  .trim(),
+
+              password:
+                passwordInput.value
+            }
+          );
+
+
+      if (error) {
+
+        authStatus.textContent =
+          error.message;
+
+        return;
+      }
+
+
+      authStatus.textContent =
+        "";
+    }
+
+
+    async function signup() {
+
+      const username =
+        usernameInput.value
+          .trim();
+
+
+      const email =
+        emailInput.value
+          .trim();
+
+
+      const password =
+        passwordInput.value;
+
+
+      if (!username) {
+
+        authStatus.textContent =
+          "Inserisci uno username.";
+
+        return;
+      }
+
+
+      authStatus.textContent =
+        "Registrazione...";
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.auth
+          .signUp(
+            {
+              email,
+
+              password,
+
+              options: {
+
+                data: {
+                  username
+                }
+              }
+            }
+          );
+
+
+      if (error) {
+
+        authStatus.textContent =
+          error.message;
+
+        return;
+      }
+
+
+      if (!data.session) {
+
+        authStatus.textContent =
+          "Registrazione completata. Controlla l'email se la conferma è attiva.";
+
+      } else {
+
+        authStatus.textContent =
+          "";
+      }
+    }
+
+
+    loginBtn.addEventListener(
+      "click",
+      login
+    );
+
+
+    signupBtn.addEventListener(
+      "click",
+      signup
+    );
+
+
+    logoutBtn.addEventListener(
+      "click",
+      () => {
+
+        if (
+          state.spinning
+          ||
+          state.bonusOpen
+        ) {
+
+          return;
+        }
+
+
+        if (
+          state.autoSpinActive
+        ) {
+
+          stopAutoSpin();
+        }
+
+
+        /*
+         * Torna alla home mantenendo attiva
+         * la sessione Supabase.
+         */
+        window.location.href =
+          "../index.html";
+      }
+    );
+
+
+    // ========================================================
+    // FULLSCREEN / ORIENTATION
+    // ========================================================
+
+    fullscreenBtn.addEventListener(
+      "click",
+      async () => {
+
+        try {
+
+          if (
+            !document.fullscreenElement
+          ) {
+
+            await document.documentElement
+              .requestFullscreen?.();
+
+
+            await screen.orientation
+              ?.lock?.(
+                "landscape"
+              );
+
+          } else {
+
+            await document
+              .exitFullscreen?.();
+
+          }
+
+        } catch (error) {
+
+          console.warn(
+            "Fullscreen/orientation lock non disponibile:",
+            error
+          );
+        }
+      }
+    );
+
+
+    // ========================================================
+    // BLOCCO REFRESH ACCIDENTALE DURANTE GIOCO
+    // ========================================================
+
+    window.addEventListener(
+      "beforeunload",
+      (event) => {
+
+        if (
+          state.spinning
+          ||
+          state.autoSpinActive
+          ||
+          state.bonusOpen
+          ||
+          state.freeRemaining > 0
+        ) {
+
+          event.preventDefault();
+
+          event.returnValue =
+            "";
+        }
+      }
+    );
+
+
+    // ========================================================
+    // SERVICE WORKER
+    // ========================================================
+
+    if (
+      "serviceWorker"
+      in navigator
+      &&
+      location.protocol
+      !== "file:"
+    ) {
+
+      navigator.serviceWorker
+        .register(
+          "./sw.js"
+        )
+        .catch(
+          error =>
+            console.warn(
+              "Service Worker:",
+              error
+            )
+        );
+    }
+
+
+    // ========================================================
+    // SESSIONE
+    // ========================================================
+
+    let bootToken = 0;
+
+
+    async function handleSession(
+      session
+    ) {
+
+      const token =
+        ++bootToken;
+
+
+      state.session =
+        session;
+
+
+      if (!session) {
+
+        authOverlay.classList.add(
+          "visible"
+        );
+
+
+        spinBtn.disabled =
+          true;
+
+
+        return;
+      }
+
+
+      authOverlay.classList.remove(
+        "visible"
+      );
+
+
+      try {
+
+        await Promise.all([
+          loadLevels(),
+          loadProgress()
+        ]);
+
+        await loadGame();
+
+
+        if (
+          token !== bootToken
+        ) {
+
+          return;
+        }
+
+
+        if (
+          !state.bonusOpen
+          &&
+          !state.freeSummaryOpen
+          &&
+          state.freeRemaining <= 0
+        ) {
+
+          await checkLevelUp();
+        }
+
+      } catch (error) {
+
+        fatal(error);
+      }
+    }
+
+
+    const initial =
+      await supabase.auth
+        .getSession();
+
+
+    await handleSession(
+      initial.data.session
+    );
+
+
+    supabase.auth
+      .onAuthStateChange(
+        async (
+          event,
+          session
+        ) => {
+
+          if (
+            event === "INITIAL_SESSION"
+          ) {
+            return;
+          }
+
+
+          if (
+            event === "SIGNED_OUT"
+          ) {
+
+            state.config =
+              null;
+
+            state.session =
+              null;
+
+            state.balance =
+              0;
+
+            state.autoSpinActive =
+              false;
+
+            state.autoSpinRemaining =
+              0;
+
+            state.autoSpinTotal =
+              0;
+
+            state.autoMenuOpen =
+              false;
+
+            state.freeRemaining =
+              0;
+
+            state.freeSessionId =
+              null;
+
+            state.currentWin =
+              0;
+
+
+            updateControls();
+
+
+            authOverlay.classList.add(
+              "visible"
+            );
+
+            return;
+          }
+
+
+          if (
+            event === "SIGNED_IN"
+          ) {
+
+            /*
+             * Supabase può emettere SIGNED_IN anche tornando
+             * sulla scheda già autenticata. Se il gioco è già
+             * caricato aggiorniamo soltanto la sessione.
+             */
+            state.session =
+              session;
+
+
+            if (
+              !state.config
+            ) {
+
+              await handleSession(
+                session
+              );
+            }
+
+
+            return;
+          }
+
+
+          if (
+            event === "USER_UPDATED"
+          ) {
+
+            await handleSession(
+              session
+            );
+
+
+            return;
+          }
+
+
+          if (
+            event === "TOKEN_REFRESHED"
+          ) {
+
+            state.session =
+              session;
+          }
+        }
+      );
+
+  </script>
+
+  <script src="../shared/designer.js" defer></script>
+<script src="../shared/screen-wake-lock.js" defer></script>
+</body>
+</html>
