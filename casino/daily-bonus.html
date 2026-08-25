@@ -207,6 +207,60 @@
       gap: 18px;
     }
 
+    .side-column {
+      display: grid;
+      gap: 14px;
+      align-self: stretch;
+    }
+
+    .level-bonus-card {
+      padding: 16px 18px;
+      border: 1px solid rgba(244,201,93,.30);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(111,92,255,.16), transparent 52%),
+        var(--panel);
+      box-shadow: 0 18px 45px rgba(0,0,0,.28);
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto;
+      gap: 7px 14px;
+      align-items: center;
+    }
+
+    .level-bonus-title {
+      color: var(--gold-light);
+      font-size: 16px;
+      font-weight: 1000;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+
+    #levelBonusLevel {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    #levelBonusMultiplier {
+      color: #cbb8ff;
+      font-size: clamp(28px,3vw,43px);
+      font-weight: 1000;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 18px rgba(111,92,255,.24);
+      white-space: nowrap;
+    }
+
+    #levelBonusText {
+      grid-column: 1 / -1;
+      padding-top: 7px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .base-box {
       padding: 15px;
       border-radius: 16px;
@@ -458,6 +512,7 @@
         </div>
       </section>
 
+      <div class="side-column">
       <aside class="info-card">
         <div class="base-box">
           <small>Fiche base</small>
@@ -484,6 +539,20 @@
           <div><span>1 spicchio ×100</span><strong>2%</strong></div>
         </div>
       </aside>
+
+      <section class="level-bonus-card" aria-label="Moltiplicatore bonus livello">
+        <div>
+          <div class="level-bonus-title">Bonus livello</div>
+          <div id="levelBonusLevel">Livello 1</div>
+        </div>
+
+        <div id="levelBonusMultiplier">×1,00</div>
+
+        <div id="levelBonusText">
+          Il moltiplicatore del livello viene applicato al premio della ruota.
+        </div>
+      </section>
+      </div>
     </main>
 
     <section class="weekly-prize-card">
@@ -552,6 +621,10 @@
     const loading = $("#loading");
     const loadingText = $("#loadingText");
 
+    const levelBonusLevel = $("#levelBonusLevel");
+    const levelBonusMultiplier = $("#levelBonusMultiplier");
+    const levelBonusText = $("#levelBonusText");
+
     const weeklyPrizePosition = $("#weeklyPrizePosition");
     const weeklyPrizeAmount = $("#weeklyPrizeAmount");
     const weeklyPrizeDetail = $("#weeklyPrizeDetail");
@@ -569,6 +642,8 @@
       rotation: 0,
       result: null,
       nextAvailableAt: null,
+      currentLevel: 1,
+      levelMultiplier: 1,
       weeklyPrize: null,
       weeklyClaimRunning: false
     };
@@ -614,6 +689,41 @@
 
     function formatChips(value) {
       return nf.format(Number(value || 0));
+    }
+
+    function formatLevelMultiplier(value) {
+      return Number(value || 1)
+        .toLocaleString(
+          "it-IT",
+          {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }
+        );
+    }
+
+    function renderLevelBonus() {
+      const multiplier =
+        Number(state.levelMultiplier || 1);
+
+      const level =
+        Number(state.currentLevel || 1);
+
+      levelBonusLevel.textContent =
+        `Livello ${level}`;
+
+      levelBonusMultiplier.textContent =
+        `×${formatLevelMultiplier(multiplier)}`;
+
+      const boostedBase =
+        Math.round(
+          Number(state.baseAmount || 0)
+          * multiplier
+        );
+
+      levelBonusText.textContent =
+        `${formatChips(state.baseAmount)} fiche base × ${formatLevelMultiplier(multiplier)} = ` +
+        `${formatChips(boostedBase)} fiche, prima del moltiplicatore della ruota.`;
     }
 
     function polar(cx, cy, radius, angleDegrees) {
@@ -1037,8 +1147,23 @@
       state.result = data.result || null;
       state.nextAvailableAt = data.next_available_at || null;
 
+      state.currentLevel =
+        Number(
+          data.current_level
+          ?? data.result?.player_level
+          ?? 1
+        );
+
+      state.levelMultiplier =
+        Number(
+          data.current_daily_bonus_multiplier
+          ?? data.result?.daily_bonus_multiplier
+          ?? 1
+        );
+
       baseAmountEl.textContent = formatChips(state.baseAmount);
 
+      renderLevelBonus();
       buildWheel();
 
       if (state.result) {
@@ -1080,6 +1205,22 @@
       state.available = false;
       state.result = data;
       state.nextAvailableAt = data.next_available_at || null;
+
+      state.currentLevel =
+        Number(
+          data.player_level
+          ?? state.currentLevel
+          ?? 1
+        );
+
+      state.levelMultiplier =
+        Number(
+          data.daily_bonus_multiplier
+          ?? state.levelMultiplier
+          ?? 1
+        );
+
+      renderLevelBonus();
 
 
       if (
