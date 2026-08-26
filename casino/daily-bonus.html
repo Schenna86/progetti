@@ -691,6 +691,48 @@
       return nf.format(Number(value || 0));
     }
 
+    function formatWeeklyPrizeReward(data) {
+      if (!data) return "";
+
+      const chips =
+        Number(
+          data.chips_reward
+          ?? data.reward
+          ?? 0
+        );
+
+      const packName =
+        data.pack_name
+        || data.pack_reward
+        || "";
+
+      const packQuantity =
+        Number(
+          data.pack_quantity
+          || 0
+        );
+
+      const parts = [];
+
+      if (chips > 0) {
+        parts.push(
+          `${formatChips(chips)} fiche`
+        );
+      }
+
+      if (
+        packName
+        &&
+        packQuantity > 0
+      ) {
+        parts.push(
+          `${packName} ×${packQuantity}`
+        );
+      }
+
+      return parts.join(" + ");
+    }
+
     function formatLevelMultiplier(value) {
       return Number(value || 1)
         .toLocaleString(
@@ -977,7 +1019,7 @@
 
 
       weeklyPrizeAmount.textContent =
-        `Premio: ${formatChips(data.reward)} fiche`;
+        `Premio: ${formatWeeklyPrizeReward(data)}`;
 
 
       if (data.claimed) {
@@ -1090,7 +1132,7 @@
 
 
         weeklyPrizeStatus.textContent =
-          `Premio riscosso: +${formatChips(data.reward)} fiche. Nuovo saldo: ${formatChips(data.balance)}.`;
+          `Premio riscosso: ${formatWeeklyPrizeReward(data)}. Nuovo saldo: ${formatChips(data.balance)} fiche.`;
 
 
         notifyBalanceChanged();
