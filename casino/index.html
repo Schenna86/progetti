@@ -1259,7 +1259,22 @@
 
     let currentSession =
       null;
-	let levelTable = [];
+
+    let levelTable = [];
+
+    /*
+     * Cache condivisa con Slot / Roulette / Blackjack / Tombola / Carte.
+     * La curva livelli cambia raramente, quindi evitiamo di scaricare
+     * fino a 500 righe ad ogni apertura della Home.
+     */
+    const LEVELS_CACHE_VERSION =
+      "v1";
+
+    const LEVELS_CACHE_KEY =
+      `casino-levels:${LEVELS_CACHE_VERSION}`;
+
+    const LEVELS_CACHE_TTL_MS =
+      7 * 24 * 60 * 60 * 1000;
 
     // ========================================================
     // SINCRONIZZAZIONE SALDO
@@ -1452,10 +1467,81 @@
 
 async function loadLevelTable(force = false) {
 
-    if (levelTable.length && !force) {
+    /*
+     * 1) Se è già caricata in memoria, non facciamo nulla.
+     */
+    if (
+        levelTable.length
+        &&
+        !force
+    ) {
         return levelTable;
     }
 
+
+    /*
+     * 2) Prova la cache condivisa nel browser.
+     *    force=true salta la cache e forza il download dal server.
+     */
+    if (!force) {
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    LEVELS_CACHE_KEY
+                );
+
+
+            if (raw) {
+
+                const cached =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                const age =
+                    Date.now()
+                    -
+                    Number(
+                        cached?.savedAt || 0
+                    );
+
+
+                if (
+                    Array.isArray(
+                        cached?.levels
+                    )
+                    &&
+                    cached.levels.length > 0
+                    &&
+                    age >= 0
+                    &&
+                    age < LEVELS_CACHE_TTL_MS
+                ) {
+
+                    levelTable =
+                        cached.levels;
+
+                    return levelTable;
+                }
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Cache livelli non leggibile:",
+                error
+            );
+        }
+    }
+
+
+    /*
+     * 3) Cache assente/scaduta o refresh forzato:
+     *    scarica la curva livelli da Supabase.
+     */
     const { data, error } = await supabase
         .from("levels")
         .select("level, xp_required")
@@ -1464,7 +1550,9 @@ async function loadLevelTable(force = false) {
         })
         .range(0, 499);
 
+
     if (error) {
+
         console.error(
             "Errore caricamento livelli:",
             error
@@ -1473,13 +1561,45 @@ async function loadLevelTable(force = false) {
         throw error;
     }
 
-    levelTable = data || [];
+
+    levelTable =
+        data || [];
+
 
     if (!levelTable.length) {
+
         throw new Error(
             "La tabella levels non contiene livelli accessibili."
         );
     }
+
+
+    /*
+     * 4) Aggiorna la cache condivisa.
+     */
+    try {
+
+        localStorage.setItem(
+            LEVELS_CACHE_KEY,
+            JSON.stringify(
+                {
+                    savedAt:
+                        Date.now(),
+
+                    levels:
+                        levelTable
+                }
+            )
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Cache livelli non salvabile:",
+            error
+        );
+    }
+
 
     return levelTable;
 }
