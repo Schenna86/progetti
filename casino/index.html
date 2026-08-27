@@ -1019,17 +1019,33 @@
     }
 
     .jackpot-ticker-track {
-      display: flex;
+      display: inline-flex;
+      flex: 0 0 auto;
+      flex-wrap: nowrap;
       align-items: center;
       width: max-content;
-      min-width: max-content;
       white-space: nowrap;
+
+      /*
+       * translate3d + prefisso WebKit rendono il marquee stabile
+       * anche sui browser mobile/iOS.
+       */
+      transform: translate3d(0,0,0);
+      -webkit-transform: translate3d(0,0,0);
       will-change: transform;
-      animation: jackpotTickerScroll 22s linear infinite;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+
+      animation: jackpotTickerScroll 18s linear infinite;
+      -webkit-animation: jackpotTickerScroll 18s linear infinite;
+      animation-play-state: running;
+      -webkit-animation-play-state: running;
     }
 
     .jackpot-ticker-item {
-      display: inline-block;
+      display: block;
+      flex: 0 0 auto;
+      min-width: max-content;
       padding-right: 90px;
       color: #fff2bd;
       font-size: 14px;
@@ -1044,17 +1060,34 @@
     }
 
     @keyframes jackpotTickerScroll {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
+      0% {
+        transform: translate3d(0,0,0);
+      }
+
+      100% {
+        transform: translate3d(-50%,0,0);
+      }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .jackpot-ticker-track {
-        animation: none;
-        transform: none;
+    @-webkit-keyframes jackpotTickerScroll {
+      0% {
+        -webkit-transform: translate3d(0,0,0);
       }
-      .jackpot-ticker-item:nth-child(2) {
-        display: none;
+
+      100% {
+        -webkit-transform: translate3d(-50%,0,0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .jackpot-ticker-track {
+        animation-duration: 14s;
+        -webkit-animation-duration: 14s;
+      }
+
+      .jackpot-ticker-item {
+        padding-right: 60px;
+        font-size: 13px;
       }
     }
 

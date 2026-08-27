@@ -30,17 +30,10 @@
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
 
-    body {
-      padding:16px;
-    }
+    body { padding:16px; }
 
-    button,input {
-      font:inherit;
-    }
-
-    button {
-      cursor:pointer;
-    }
+    button,input { font:inherit; }
+    button { cursor:pointer; }
 
     .shell {
       width:min(1250px,100%);
@@ -113,9 +106,7 @@
       font-size:18px;
     }
 
-    .panel-head small {
-      color:var(--muted);
-    }
+    .panel-head small { color:var(--muted); }
 
     .profile-grid {
       display:grid;
@@ -183,9 +174,7 @@
       outline:none;
     }
 
-    input:focus {
-      border-color:rgba(255,225,154,.75);
-    }
+    input:focus { border-color:rgba(255,225,154,.75); }
 
     .form-help,
     #usernameStatus {
@@ -193,13 +182,8 @@
       font-size:12px;
     }
 
-    #usernameStatus.error {
-      color:var(--red);
-    }
-
-    #usernameStatus.ok {
-      color:var(--green);
-    }
+    #usernameStatus.error { color:var(--red); }
+    #usernameStatus.ok { color:var(--green); }
 
     .setup-banner {
       margin:0 16px 16px;
@@ -210,9 +194,7 @@
       color:#ffe7a8;
     }
 
-    .hidden {
-      display:none !important;
-    }
+    .hidden { display:none !important; }
 
     .stats-grid {
       display:grid;
@@ -245,40 +227,11 @@
       white-space:nowrap;
     }
 
-    .history-wrap {
-      overflow:auto;
-      padding:0 15px 15px;
-    }
-
-    table {
-      width:100%;
-      min-width:760px;
-      border-collapse:collapse;
-    }
-
-    th,td {
-      padding:8px 9px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      text-align:right;
-      font-size:12px;
-      white-space:nowrap;
-    }
-
-    th {
+    .stat-note {
+      margin-top:3px;
       color:var(--muted);
-      font-size:10px;
-      text-transform:uppercase;
+      font-size:9px;
     }
-
-    th:first-child,
-    td:first-child,
-    th:nth-child(2),
-    td:nth-child(2) {
-      text-align:left;
-    }
-
-    .win { color:var(--green); }
-    .loss { color:var(--red); }
 
     .achievement-grid {
       display:grid;
@@ -359,6 +312,27 @@
       font-variant-numeric:tabular-nums;
     }
 
+    /*
+     * Gli achievement inversi (oggi tombola_best_ball) non hanno
+     * una progressione lineare sensata: 90 -> 80 -> 70 non è una
+     * percentuale. Mostriamo soltanto lo stato reale.
+     */
+    .achievement-inverse-status {
+      margin-top:9px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(0,0,0,.16);
+      color:var(--muted);
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .achievement.unlocked .achievement-inverse-status {
+      border-color:rgba(118,230,148,.28);
+      color:var(--green);
+    }
+
     .loading {
       position:fixed;
       inset:0;
@@ -380,13 +354,8 @@
     @keyframes spin { to { transform:rotate(360deg); } }
 
     @media(max-width:800px) {
-      .profile-grid {
-        grid-template-columns:1fr;
-      }
-
-      .stats-grid {
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
+      .profile-grid { grid-template-columns:1fr; }
+      .stats-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
 
     @media(max-width:520px) {
@@ -397,9 +366,7 @@
         flex-direction:column;
       }
 
-      .username-row {
-        grid-template-columns:1fr;
-      }
+      .username-row { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -474,40 +441,96 @@
     <div class="panel-head">
       <div>
         <h2>Le mie statistiche</h2>
-        <small>Slot e Roulette</small>
+        <small>Slot · Roulette · Blackjack · Tombola · Carte · Mega Jackpot</small>
       </div>
 
       <button id="refreshStatsBtn" class="btn" type="button">↻ Aggiorna</button>
     </div>
 
     <div class="stats-grid">
-      <div class="stat"><div class="stat-label">Giocate totali</div><div id="statTotalPlays" class="stat-value">0</div></div>
-      <div class="stat"><div class="stat-label">Totale giocato</div><div id="statTotalBet" class="stat-value">0</div></div>
-      <div class="stat"><div class="stat-label">Totale vinto</div><div id="statTotalWin" class="stat-value">0</div></div>
-      <div class="stat"><div class="stat-label">Netto gioco</div><div id="statNet" class="stat-value">0</div></div>
-      <div class="stat"><div class="stat-label">Spin slot</div><div id="statSlotSpins" class="stat-value">0</div></div>
-      <div class="stat"><div class="stat-label">Giri roulette</div><div id="statRouletteSpins" class="stat-value">0</div></div>
-      <div class="stat"><div class="stat-label">Bonus slot</div><div id="statBonusCount" class="stat-value">0</div></div>
-      <div class="stat"><div class="stat-label">Miglior vincita</div><div id="statBestWin" class="stat-value">0</div></div>
-    </div>
+      <div class="stat">
+        <div class="stat-label">Giocate casinò</div>
+        <div id="statCasinoPlays" class="stat-value">0</div>
+      </div>
 
-    <div class="history-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Quando</th>
-            <th>Gioco</th>
-            <th>Tipo</th>
-            <th>Esito</th>
-            <th>Giocato</th>
-            <th>Vincita</th>
-            <th>Netto</th>
-          </tr>
-        </thead>
-        <tbody id="historyBody">
-          <tr><td colspan="7">Nessuna giocata.</td></tr>
-        </tbody>
-      </table>
+      <div class="stat">
+        <div class="stat-label">Fiche giocate</div>
+        <div id="statChipsWagered" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Spin slot</div>
+        <div id="statSlotSpins" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Big Win slot</div>
+        <div id="statSlotBigWins" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Giri roulette</div>
+        <div id="statRouletteSpins" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Zero alla roulette</div>
+        <div id="statRouletteZeroHits" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Mani Blackjack</div>
+        <div id="statBlackjackHands" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Vittorie Blackjack</div>
+        <div id="statBlackjackWins" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Partite Tombola</div>
+        <div id="statTombolaGames" class="stat-value">0</div>
+        <div class="stat-note">Bot + PvP valido</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Tombole PvP vinte</div>
+        <div id="statTombolaWins" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Cartelle Tombola</div>
+        <div id="statTombolaCards" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Miglior Tombola</div>
+        <div id="statTombolaBestBall" class="stat-value">—</div>
+        <div class="stat-note">Pallina più bassa</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Pacchetti aperti</div>
+        <div id="statPacksOpened" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Sistemi Mega Jackpot</div>
+        <div id="statMegaSystems" class="stat-value">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Combinazioni Mega</div>
+        <div id="statMegaCombinations" class="stat-value">0</div>
+        <div class="stat-note">Combinazioni partecipanti alle estrazioni</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Vincite Mega Jackpot</div>
+        <div id="statMegaWin" class="stat-value">0</div>
+        <div class="stat-note">Fiche vinte 4/6 + 5/6 + 6/6</div>
+      </div>
     </div>
   </section>
 
@@ -540,8 +563,6 @@ import {
 
     const SUPABASE_URL = "https://jhpppwqdaceratwjnbzi.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
-
-
 
 
 const supabase =
@@ -586,7 +607,6 @@ let session = null;
 function formatNumber(
   value
 ) {
-
   return nf.format(
     Number(
       value
@@ -599,7 +619,6 @@ function formatNumber(
 function escapeHtml(
   value
 ) {
-
   return String(
     value
     ?? ""
@@ -653,16 +672,12 @@ async function loadAccount() {
     );
 
 
-  if (
-    profileResult.error
-  ) {
+  if (profileResult.error) {
     throw profileResult.error;
   }
 
 
-  if (
-    progressionResult.error
-  ) {
+  if (progressionResult.error) {
     throw progressionResult.error;
   }
 
@@ -755,9 +770,7 @@ async function saveUsername() {
     );
 
 
-  if (
-    error
-  ) {
+  if (error) {
 
     status.className =
       "error";
@@ -793,9 +806,7 @@ async function saveUsername() {
     false;
 
 
-  if (
-    setupMode
-  ) {
+  if (setupMode) {
 
     setTimeout(
       () => {
@@ -817,75 +828,41 @@ async function loadStats() {
     error
   } =
     await supabase.rpc(
-      "get_player_game_history",
-      {
-        p_limit: 20
-      }
+      "get_my_profile_stats"
     );
 
 
-  if (
-    error
-  ) {
+  if (error) {
     throw error;
   }
 
 
   const s =
-    data?.summary
+    data
     || {};
 
 
-  $("#statTotalPlays").textContent =
+  $("#statCasinoPlays").textContent =
     formatNumber(
-      s.total_plays
-      ?? s.total_spins
+      s.casino_plays
     );
 
 
-  $("#statTotalBet").textContent =
+  $("#statChipsWagered").textContent =
     formatNumber(
-      s.total_bet
+      s.chips_wagered
     );
-
-
-  $("#statTotalWin").textContent =
-    formatNumber(
-      s.total_win
-    );
-
-
-  const net =
-    Number(
-      s.net
-      || 0
-    );
-
-
-  $("#statNet").textContent =
-    (
-      net > 0
-      ? "+"
-      : ""
-    )
-    +
-    formatNumber(
-      net
-    );
-
-
-  $("#statNet").style.color =
-    net > 0
-    ? "var(--green)"
-    : net < 0
-      ? "var(--red)"
-      : "var(--gold-light)";
 
 
   $("#statSlotSpins").textContent =
     formatNumber(
       s.slot_spins
-      ?? s.total_spins
+    );
+
+
+  $("#statSlotBigWins").textContent =
+    formatNumber(
+      s.slot_big_wins
     );
 
 
@@ -895,116 +872,77 @@ async function loadStats() {
     );
 
 
-  $("#statBonusCount").textContent =
+  $("#statRouletteZeroHits").textContent =
     formatNumber(
-      s.bonus_count
+      s.roulette_zero_hits
     );
 
 
-  $("#statBestWin").textContent =
+  $("#statBlackjackHands").textContent =
     formatNumber(
-      s.best_win
+      s.blackjack_hands
     );
 
 
-  const rows =
-    data?.last_plays
-    || data?.last_spins
-    || [];
-
-
-  if (
-    !rows.length
-  ) {
-
-    $("#historyBody").innerHTML =
-      `<tr><td colspan="7">Nessuna giocata.</td></tr>`;
-
-    return;
-  }
-
-
-  const dt =
-    new Intl.DateTimeFormat(
-      "it-IT",
-      {
-        day:"2-digit",
-        month:"2-digit",
-        hour:"2-digit",
-        minute:"2-digit",
-        timeZone:"Europe/Rome"
-      }
+  $("#statBlackjackWins").textContent =
+    formatNumber(
+      s.blackjack_wins
     );
 
 
-  $("#historyBody").innerHTML =
-    rows
-      .map(
-        row => {
-
-          const wager =
-            Number(
-              row.wager
-              || 0
-            );
+  $("#statTombolaGames").textContent =
+    formatNumber(
+      s.tombola_games
+    );
 
 
-          const win =
-            Number(
-              row.total_win
-              || 0
-            );
+  $("#statTombolaWins").textContent =
+    formatNumber(
+      s.tombola_wins
+    );
 
 
-          const net =
-            win
-            -
-            wager;
+  $("#statTombolaCards").textContent =
+    formatNumber(
+      s.tombola_cards_bought
+    );
 
 
-          const roulette =
-            row.game_type ===
-            "roulette";
+  const bestBall =
+    Number(
+      s.tombola_best_ball
+      || 0
+    );
 
 
-          const type =
-            roulette
-            ? "ROULETTE"
-            : row.play_type === "free"
-              ? "FREE"
-              : "SPIN";
+  $("#statTombolaBestBall").textContent =
+    bestBall > 0
+      ? `${formatNumber(bestBall)}ª`
+      : "—";
 
 
-          const outcome =
-            roulette
-            ? (
-                row.result_number != null
-                ? `Numero ${row.result_number}`
-                : "—"
-              )
-            : (
-                row.active_lines
-                ? `${row.active_lines} linee`
-                : "—"
-              );
+  $("#statPacksOpened").textContent =
+    formatNumber(
+      s.packs_opened
+    );
 
 
-          return `
-            <tr>
-              <td>${escapeHtml(dt.format(new Date(row.created_at)))}</td>
-              <td>${escapeHtml(row.game_name || row.game_id)}</td>
-              <td>${escapeHtml(type)}</td>
-              <td>${escapeHtml(outcome)}</td>
-              <td>${formatNumber(wager)}</td>
-              <td>${win > 0 ? "+" : ""}${formatNumber(win)}</td>
-              <td class="${net > 0 ? "win" : net < 0 ? "loss" : ""}">
-                ${net > 0 ? "+" : ""}${formatNumber(net)}
-              </td>
-            </tr>
-          `;
-        }
-      )
-      .join("");
+  $("#statMegaSystems").textContent =
+    formatNumber(
+      s.mega_systems
+    );
+
+
+  $("#statMegaCombinations").textContent =
+    formatNumber(
+      s.mega_combinations
+    );
+
+
+  $("#statMegaWin").textContent =
+    formatNumber(
+      s.mega_total_win
+    );
 }
 
 
@@ -1019,9 +957,7 @@ async function loadAchievements() {
     );
 
 
-  if (
-    error
-  ) {
+  if (error) {
     throw error;
   }
 
@@ -1030,8 +966,8 @@ async function loadAchievements() {
     Array.isArray(
       data
     )
-    ? data
-    : [];
+      ? data
+      : [];
 
 
   const unlocked =
@@ -1046,14 +982,12 @@ async function loadAchievements() {
     `${unlocked} / ${items.length} sbloccati`;
 
 
-  if (
-    !items.length
-  ) {
+  if (!items.length) {
 
     $("#achievementGrid").innerHTML =
       `<div>Nessun achievement configurato.</div>`;
 
-    return;
+    return items;
   }
 
 
@@ -1079,15 +1013,70 @@ async function loadAchievements() {
             );
 
 
-          const pct =
-            Math.min(
-              100,
-              current
-              /
-              target
-              *
-              100
-            );
+          /*
+           * Il backend V3 espone comparison="lte" per
+           * tombola_best_ball. Manteniamo anche il controllo
+           * sulla metrica per compatibilità.
+           */
+          const inverse =
+            a.comparison === "lte"
+            ||
+            a.metric === "tombola_best_ball";
+
+
+          let progressHtml = "";
+
+
+          if (inverse) {
+
+            /*
+             * Nessuna barra e nessuna percentuale:
+             * per un obiettivo "più basso è meglio" sarebbero
+             * graficamente fuorvianti.
+             */
+            progressHtml =
+              `
+                <div class="achievement-inverse-status">
+                  ${
+                    a.unlocked
+                      ? `✓ SBLOCCATO${
+                          current > 0
+                            ? ` · miglior risultato ${formatNumber(current)}ª pallina`
+                            : ""
+                        }`
+                      : "Non ancora sbloccato"
+                  }
+                </div>
+              `;
+
+          } else {
+
+            const pct =
+              Math.max(
+                0,
+                Math.min(
+                  100,
+                  current
+                  /
+                  target
+                  *
+                  100
+                )
+              );
+
+
+            progressHtml =
+              `
+                <div class="progress">
+                  <div style="width:${pct}%"></div>
+                </div>
+
+                <div class="achievement-progress">
+                  <span>${formatNumber(Math.min(current,target))} / ${formatNumber(target)}</span>
+                  <span>${Math.floor(pct)}%</span>
+                </div>
+              `;
+          }
 
 
           return `
@@ -1100,7 +1089,7 @@ async function loadAchievements() {
                 </div>
 
                 <div class="achievement-state">
-                  ${a.unlocked ? "SBLOCCATO" : "IN CORSO"}
+                  ${a.unlocked ? "SBLOCCATO" : "DA SBLOCCARE"}
                 </div>
               </div>
 
@@ -1108,23 +1097,33 @@ async function loadAchievements() {
                 ${escapeHtml(a.description)}
               </div>
 
-              <div class="progress">
-                <div style="width:${pct}%"></div>
-              </div>
-
-              <div class="achievement-progress">
-                <span>${formatNumber(Math.min(current,target))} / ${formatNumber(target)}</span>
-                <span>${Math.floor(pct)}%</span>
-              </div>
+              ${progressHtml}
             </article>
           `;
         }
       )
       .join("");
+
+
+  /*
+   * Se l'apertura del profilo ha appena erogato una ricompensa
+   * achievement, aggiorniamo il saldo solo in quel caso.
+   */
+  if (
+    items.some(
+      a =>
+        a.reward_granted_now
+    )
+  ) {
+    await loadAccount();
+  }
+
+
+  return items;
 }
 
 
-async function refreshAll() {
+async function refreshProfileData() {
 
   $("#loading")
     .classList
@@ -1137,13 +1136,12 @@ async function refreshAll() {
 
     await loadAccount();
 
-
-    await Promise.all(
-      [
-        loadStats(),
-        loadAchievements()
-      ]
-    );
+    /*
+     * Prima gli achievement: la relativa RPC valuta eventuali
+     * sblocchi. Poi leggiamo i contatori completi.
+     */
+    await loadAchievements();
+    await loadStats();
 
   } catch (
     error
@@ -1188,7 +1186,6 @@ $("#usernameInput")
         event.key ===
         "Enter"
       ) {
-
         saveUsername();
       }
     }
@@ -1216,29 +1213,7 @@ $("#homeBtn")
 $("#refreshStatsBtn")
   .addEventListener(
     "click",
-    async () => {
-
-      try {
-
-        await Promise.all(
-          [
-            loadStats(),
-            loadAchievements()
-          ]
-        );
-
-      } catch (
-        error
-      ) {
-
-        alert(
-          error.message
-          || String(
-            error
-          )
-        );
-      }
-    }
+    refreshProfileData
   );
 
 
@@ -1266,7 +1241,7 @@ if (
     data.session;
 
 
-  await refreshAll();
+  await refreshProfileData();
 }
 
 </script>
