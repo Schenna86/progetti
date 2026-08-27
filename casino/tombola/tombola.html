@@ -20,15 +20,76 @@ header{display:grid;grid-template-columns:auto minmax(280px,1fr) auto;gap:16px;a
 .paytable{max-height:360px;overflow:auto;margin-top:8px}.payrow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:7px 9px;border-bottom:1px solid #ffffff0d;font-size:12px}.payrow.active{background:#7d5b1e35;border-color:#e7b654}.payrow span{color:var(--muted)}.payrow strong{color:var(--gold2)}.fair{margin-top:12px;padding-top:10px;border-top:1px solid #ffffff12;color:var(--muted);font-size:10px}.fair code{display:block;margin-top:3px;color:#cbd6da;overflow-wrap:anywhere}.ok{color:var(--good)}.bad{color:var(--bad)}
 #loadingOverlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px;background:#02080cf0}.loading-card{width:min(420px,100%);padding:24px;border:1px solid #e7b65499;border-radius:18px;background:#071a23;text-align:center}.loader{width:52px;height:52px;margin:0 auto 13px;border:6px solid #ffffff1f;border-top-color:var(--gold);border-radius:50%;animation:loader .8s linear infinite}@keyframes loader{to{transform:rotate(360deg)}}
 @media(max-width:1080px){header{grid-template-columns:1fr auto}.top-progress{grid-column:1/-1;grid-row:2}.layout{grid-template-columns:1fr}.board{grid-template-columns:repeat(10,1fr)}}@media(max-width:680px){#app{padding:8px}header{display:flex;flex-direction:column;align-items:stretch}.header-actions{justify-content:flex-start}.top-stats{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:repeat(10,1fr)}.controls{grid-template-columns:1fr}.actions,.total-box{grid-column:1}.card-grid{gap:3px;padding:7px}.ball-row{grid-template-columns:70px 1fr}.ball{width:66px;height:66px;font-size:27px}}
+
+/* ============================================================
+   MODALITÀ / TOMBOLA ONLINE PVP
+   ============================================================ */
+.mode-switch{display:flex;gap:8px;margin:0 0 12px;padding:5px;border:1px solid rgba(231,182,84,.25);border-radius:14px;background:#0003;width:max-content;max-width:100%}
+.mode-btn{min-height:40px;padding:8px 16px;border:1px solid #ffffff18;border-radius:10px;background:#0003;color:#dce5e9;font-weight:900}
+.mode-btn.active{border-color:var(--gold);background:linear-gradient(#93621e66,#4f310e66);color:var(--gold2);box-shadow:inset 0 0 0 1px #ffe19a18}
+.pvp-room-strip{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:8px;margin-bottom:12px;overflow-x:auto}
+.pvp-room-btn{min-width:150px;padding:10px 11px;border:1px solid #ffffff18;border-radius:13px;background:linear-gradient(#0b2732,#061820);color:white;text-align:left}
+.pvp-room-btn.active{border-color:var(--gold);box-shadow:0 0 0 1px #e7b65444,0 8px 20px #0005}
+.pvp-room-btn b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--gold2);font-size:13px}
+.pvp-room-price{display:block;margin-top:3px;font-size:18px;font-weight:1000}
+.pvp-room-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;color:var(--muted);font-size:10px}
+.live-dot{display:inline-block;width:7px;height:7px;margin-right:4px;border-radius:50%;background:#62dc85;box-shadow:0 0 8px #62dc85}
+.pvp-main-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pvp-main-meta .stat strong{font-size:clamp(14px,2vw,21px)}
+.pvp-countdown{color:var(--gold2);font-variant-numeric:tabular-nums}
+.pvp-purchase-summary{display:grid;gap:8px;margin-bottom:11px}
+.pvp-summary-row{display:flex;justify-content:space-between;gap:12px;padding:8px 9px;border:1px solid #ffffff12;border-radius:10px;background:#0002;font-size:12px}
+.pvp-summary-row span{color:var(--muted)}
+.pvp-summary-row strong{color:var(--gold2);text-align:right}
+.pvp-rules{margin-top:10px;padding:9px 10px;border:1px solid #ffffff12;border-radius:11px;background:#0002;color:var(--muted);font-size:11px;line-height:1.45}
+.pvp-rules strong{color:var(--gold2)}
+.pvp-winners{display:grid;gap:7px;margin-top:10px}
+.pvp-winner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid #4aae754d;border-radius:11px;background:#12372255;font-size:12px}
+.pvp-winner.prize-tombola{border-color:#e7b65480;background:#6d4c163d}
+.pvp-winner-type{color:var(--gold2);font-weight:1000}
+.pvp-winner-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pvp-winner-amount{color:var(--gold2);font-weight:1000;font-variant-numeric:tabular-nums}
+.pvp-empty{padding:20px;border:1px dashed #ffffff1a;border-radius:12px;color:var(--muted);text-align:center}
+.pvp-card-win{border-color:#e7b654!important;background:#77500c66!important}
+.pvp-note{margin-top:8px;color:var(--muted);font-size:10px;line-height:1.4}
+#pvpBuyBtn:disabled{opacity:.45;cursor:default}
+@media(max-width:1080px){.pvp-room-strip{grid-template-columns:repeat(5,minmax(170px,1fr))}}
+@media(max-width:680px){.mode-switch{width:100%;display:grid;grid-template-columns:1fr 1fr}.pvp-room-strip{display:flex}.pvp-main-meta{grid-template-columns:repeat(2,1fr)}}
+
+
+/* ============================================================
+   MODALE PREMI PVP
+   ============================================================ */
+.pvp-prize-modal{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:18px;background:#02080ca8;backdrop-filter:blur(3px)}
+.pvp-prize-card{width:min(420px,100%);overflow:hidden;border:1px solid #e7b65499;border-radius:18px;background:linear-gradient(180deg,#102f3b,#06161e);box-shadow:0 18px 55px #000a;animation:pvpPrizeIn .18s ease-out}
+@keyframes pvpPrizeIn{from{transform:translateY(8px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+.pvp-prize-head{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 15px;border-bottom:1px solid #ffffff12}
+.pvp-prize-head strong{color:var(--gold2);font-size:18px}
+.pvp-prize-close{width:34px;height:34px;border:1px solid #ffffff1f;border-radius:999px;background:#0004;color:white;font-weight:1000}
+.pvp-prize-body{padding:14px}
+.pvp-prize-sub{margin-bottom:10px;color:var(--muted);font-size:12px}
+.pvp-prize-users{display:grid;gap:8px}
+.pvp-prize-user{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 11px;border:1px solid #ffffff14;border-radius:12px;background:#0003}
+.pvp-prize-user b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pvp-prize-user span{color:var(--gold2);font-weight:1000}
+.pvp-prize-foot{margin-top:11px;color:var(--muted);font-size:10px;text-align:center}
+
 </style>
 </head>
 <body>
 <div id="app"><div class="shell">
 <header>
-  <div class="brand"><h1>Tombola</h1><p>15 numeri · fino a 10 cartelle · estrazione server-side</p></div>
+  <div class="brand"><h1>Tombola</h1><p>1–90 · vs Bot · Online PvP</p></div>
   <div class="top-progress"><div class="xp-header"><span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span><span id="xpText">0 XP</span></div><div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div></div>
   <div class="header-actions"><div class="pill">👤 <strong id="usernameValue">—</strong></div><div class="pill">🪙 <strong id="balanceValue">0</strong></div><button id="fullscreenBtn" class="header-btn">⛶</button><button id="homeBtn" class="header-btn">HOME</button></div>
 </header>
+
+<div class="mode-switch" aria-label="Modalità Tombola">
+  <button id="modeBotBtn" class="mode-btn active" type="button">🤖 VS BOT</button>
+  <button id="modePvpBtn" class="mode-btn" type="button">🌐 ONLINE PVP</button>
+</div>
+
+<div id="botMode">
 <div class="layout">
 <section class="panel">
   <div class="panel-head"><div><h2>Tombola vs Bot</h2><small id="gameLimits">Caricamento configurazione…</small></div><strong id="rtpLabel" style="color:var(--gold2)">RTP 97,42%</strong></div>
@@ -58,8 +119,168 @@ header{display:grid;grid-template-columns:auto minmax(280px,1fr) auto;gap:16px;a
     <div class="fair"><b>Commit round</b><code id="seedHash">—</code><div id="revealWrap" class="hidden"><br><b>Seed rivelato</b><code id="seedReveal">—</code><div id="fairStatus"></div></div></div>
   </div>
 </aside>
-</div></div></div>
+
+</div>
+</div>
+
+<div id="pvpMode" class="hidden">
+
+  <div id="pvpRoomStrip" class="pvp-room-strip"></div>
+
+  <div class="layout">
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 id="pvpGameTitle">Tombola Online PvP</h2>
+          <small id="pvpRoundLabel">Seleziona una stanza</small>
+        </div>
+        <strong style="color:var(--gold2)">RTP 95%</strong>
+      </div>
+
+      <div class="game-area">
+
+        <div class="pvp-main-meta">
+          <div class="stat"><small>Giocatori</small><strong id="pvpPlayers">0</strong></div>
+          <div class="stat"><small>Cartelle</small><strong id="pvpTotalCards">0</strong></div>
+          <div class="stat"><small>Cinquina 20%</small><strong id="pvpCinquinaPool">0</strong></div>
+          <div class="stat"><small>Tombola 75%</small><strong id="pvpTombolaPool">0</strong></div>
+        </div>
+
+        <div class="ball-row">
+          <div id="pvpCurrentBall" class="ball">—</div>
+          <div>
+            <div class="phase">
+              <strong id="pvpPhaseText">In attesa</strong>
+              <span id="pvpDrawText">0 / 90</span>
+            </div>
+            <div class="progress">
+              <div id="pvpProgressFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="pvpCardTabs" class="card-tabs"></div>
+        <div id="pvpCardGrid" class="card-grid"></div>
+
+        <div class="card-meta">
+          <span class="mini-pill">Le tue cartelle: <strong id="pvpMyCardsLabel">0</strong></span>
+          <span class="mini-pill">Cinquina: <strong id="pvpCinquinaStatus">Da assegnare</strong></span>
+          <span class="mini-pill">Tombola: <strong id="pvpTombolaStatus">Da assegnare</strong></span>
+          <span class="mini-pill">Cartella attiva: <strong id="pvpActiveCardLabel">—</strong></span>
+        </div>
+
+        <div id="pvpBoard" class="board"></div>
+
+        <div id="pvpWinners" class="pvp-winners"></div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 id="pvpBuyTitle">Prossima partita</h2>
+          <small>Partenze fisse ogni 5 minuti</small>
+        </div>
+      </div>
+
+      <div class="side-body">
+
+        <div class="pvp-purchase-summary">
+          <div class="pvp-summary-row">
+            <span>Stanza</span>
+            <strong id="pvpSelectedRoomName">—</strong>
+          </div>
+
+          <div class="pvp-summary-row">
+            <span>Costo cartella</span>
+            <strong id="pvpCardPrice">—</strong>
+          </div>
+
+          <div class="pvp-summary-row">
+            <span>Partenza</span>
+            <strong id="pvpNextStart">—</strong>
+          </div>
+
+          <div class="pvp-summary-row">
+            <span>Chiusura acquisti</span>
+            <strong id="pvpPurchaseCountdown" class="pvp-countdown">—</strong>
+          </div>
+
+          <div class="pvp-summary-row">
+            <span>Giocatori / cartelle</span>
+            <strong id="pvpNextPlayersCards">0 / 0</strong>
+          </div>
+
+          <div class="pvp-summary-row">
+            <span>Montepremi attuale</span>
+            <strong id="pvpNextPools">0 / 0</strong>
+          </div>
+
+          <div class="pvp-summary-row">
+            <span>Le tue cartelle</span>
+            <strong id="pvpMyNextCards">0 / 50</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="field">
+            <label for="pvpQuantitySelect">Cartelle da acquistare</label>
+            <select id="pvpQuantitySelect"></select>
+          </div>
+
+          <div class="field">
+            <label>Totale acquisto</label>
+            <div class="pill" style="border-radius:10px;width:100%">
+              <strong id="pvpPurchaseTotal">0</strong>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="pvpBuyBtn" class="play-btn" type="button">ACQUISTA CARTELLE</button>
+          </div>
+        </div>
+
+        <div id="pvpStatus" class="status">
+          Scegli una stanza e acquista le cartelle per il prossimo round.
+        </div>
+
+        <div class="pvp-rules">
+          <strong>Regole online</strong><br>
+          Cinquina 20% · Tombola 75% · Banco 5% · RTP 95%.<br>
+          Massimo 50 cartelle per utente. Minimo 2 giocatori distinti.<br>
+          Estrazione automatica server-side ogni 1,25 secondi. La velocità non è modificabile.<br>
+          In caso di pari merito il premio viene diviso per cartella vincente.
+        </div>
+
+        <div class="pvp-note">
+          Durante una partita puoi già acquistare cartelle per quella successiva.
+          Gli XP della spesa vengono assegnati quando il round parte realmente.
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+</div></div>
+
+<div id="pvpPrizeModal" class="pvp-prize-modal hidden" role="dialog" aria-modal="true" aria-labelledby="pvpPrizeTitle">
+  <div class="pvp-prize-card">
+    <div class="pvp-prize-head">
+      <strong id="pvpPrizeTitle">Partita conclusa</strong>
+      <button id="pvpPrizeClose" class="pvp-prize-close" type="button" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="pvp-prize-body">
+      <div id="pvpPrizeSub" class="pvp-prize-sub"></div>
+      <div id="pvpPrizeUsers" class="pvp-prize-users"></div>
+      <div class="pvp-prize-foot">I premi sono già stati accreditati automaticamente.</div>
+    </div>
+  </div>
+</div>
+
 <div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento Tombola…</strong><div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div></div></div>
+<script src="../shared/level-up-modal.js"></script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
@@ -72,9 +293,12 @@ import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+e
 
 const GAME_ID="tombola";
 const STORAGE_KEY="casino-tombola-active-v2";
+const MODE_STORAGE_KEY="casino-tombola-mode-v1";
+const PVP_ROOM_STORAGE_KEY="casino-tombola-pvp-room-v1";
 const nf=new Intl.NumberFormat("it-IT");
 const $=s=>document.querySelector(s);
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
 let session=null,config=null,paytable=[],levels=[],animationTimer=null,paused=false;
 const LEVELS_CACHE_KEY="casino-levels:v1";
 const LEVELS_CACHE_TTL_MS=7*24*60*60*1000;
@@ -90,11 +314,102 @@ function highlightPaytable(d){document.querySelectorAll(".payrow").forEach(e=>e.
 function renderBoard(){const b=$("#board");b.innerHTML="";for(let n=1;n<=90;n++){const e=document.createElement("div");e.className="board-num";e.id=`bn-${n}`;e.textContent=n;b.appendChild(e)}}
 function rowComplete(card,r){const nums=card.grid[r].filter(v=>v!=null);return nums.length===5&&nums.every(n=>card.marked.has(n))}
 function renderCard(){const card=state.cards[state.activeCard];const root=$("#cardGrid");if(!card){root.innerHTML=Array.from({length:27},()=>'<div class="card-cell empty"></div>').join("");$("#activeCardLabel").textContent="—";return}$("#activeCardLabel").textContent=`${card.card_no}/${state.cards.length}`;root.innerHTML="";card.grid.forEach((row,r)=>row.forEach(v=>{const e=document.createElement("div");e.className="card-cell"+(v==null?" empty":"");if(v!=null){e.textContent=v;if(card.marked.has(v))e.classList.add("marked");if(rowComplete(card,r))e.classList.add("rowdone");if(card.marked.size===15)e.classList.add("tombola")}root.appendChild(e)}));$("#coveredCount").textContent=`${card.marked.size}/15`;$("#progressFill").style.width=`${card.marked.size/15*100}%`;$("#remainingText").textContent=card.marked.size<15?`Mancano ${15-card.marked.size}`:"TOMBOLA";$("#cinquinaInfo").textContent=card.cinquina_draw?`${card.cinquina_draw}ª`:(card.grid.some((_,r)=>rowComplete(card,r))?"Fatta":"—");$("#tombolaInfo").textContent=card.tombola_draw?`${card.tombola_draw}ª`:"—";$("#cardPrizeInfo").textContent=card.multiplier==null?"—":`${mult(card.multiplier)} · ${fmt(card.payout)} fiche`}
-function renderTabs(){const root=$("#cardTabs");root.innerHTML="";state.cards.forEach((c,i)=>{const b=document.createElement("button");b.className="card-tab"+(i===state.activeCard?" active":"")+(c.marked.size===15?" done":"");b.innerHTML=`<b>Cartella ${c.card_no}</b><span>${c.marked.size}/15${c.multiplier!=null?" · "+mult(c.multiplier):""}</span>`;b.onclick=()=>{state.activeCard=i;renderTabs();renderCard()};root.appendChild(b)})}
+function renderTabs(){
+  const root=$("#cardTabs");
+  root.innerHTML="";
+
+  /*
+   * VS BOT: ordiniamo solo la visualizzazione delle cartelle.
+   * Lo state.cards originale resta invariato, così non tocchiamo
+   * risultati, restore, fairness o logica server.
+   *
+   * Prima: meno numeri mancanti alla Tombola.
+   * Parità: numero originale della cartella.
+   */
+  const ordered=state.cards
+    .map((card,index)=>({
+      card,
+      index,
+      missing:Math.max(0,15-card.marked.size)
+    }))
+    .sort((a,b)=>
+      a.missing-b.missing
+      ||
+      a.card.card_no-b.card.card_no
+    );
+
+  ordered.forEach(({card:c,index:i,missing})=>{
+    const b=document.createElement("button");
+
+    b.className=
+      "card-tab"+
+      (i===state.activeCard?" active":"")+
+      (c.marked.size===15?" done":"");
+
+    b.innerHTML=
+      `<b>Cartella ${c.card_no}</b>`+
+      `<span>${c.marked.size}/15 · mancano ${missing}`+
+      `${c.multiplier!=null?" · "+mult(c.multiplier):""}</span>`;
+
+    b.onclick=()=>{
+      /*
+       * Conserviamo l'indice originale della cartella.
+       * Quindi se l'ordine cambia dopo un'estrazione,
+       * rimane selezionata la stessa cartella.
+       */
+      state.activeCard=i;
+      renderTabs();
+      renderCard();
+    };
+
+    root.appendChild(b);
+  });
+}
 function updateControls(){const bet=Number($("#betSelect").value||0),count=Number($("#cardCountSelect").value||1);$("#totalBetValue").textContent=`${fmt(bet*count)} fiche`}
-async function loadLevels(){try{const raw=localStorage.getItem(LEVELS_CACHE_KEY);if(raw){const cached=JSON.parse(raw),age=Date.now()-Number(cached?.savedAt||0);if(Array.isArray(cached?.levels)&&cached.levels.length>0&&age>=0&&age<LEVELS_CACHE_TTL_MS){levels=cached.levels;return}}}catch(e){console.warn("Cache livelli:",e)}const{data,error}=await supabase.from("levels").select("level,xp_required").order("level");if(error)throw error;levels=data||[];try{localStorage.setItem(LEVELS_CACHE_KEY,JSON.stringify({savedAt:Date.now(),levels:levels}))}catch(e){console.warn("Cache livelli:",e)}}
+async function loadLevels(){
+  try{
+    const raw=localStorage.getItem(LEVELS_CACHE_KEY);
+    if(raw){
+      const cached=JSON.parse(raw);
+      const age=Date.now()-Number(cached?.savedAt||0);
+      if(
+        Array.isArray(cached?.levels)
+        && cached.levels.length>0
+        && age>=0
+        && age<LEVELS_CACHE_TTL_MS
+      ){
+        levels=cached.levels;
+        return;
+      }
+    }
+  }catch(e){
+    console.warn("Cache livelli:",e);
+  }
+
+  const{data,error}=await supabase
+    .from("levels")
+    .select("level,xp_required")
+    .order("level");
+
+  if(error)throw error;
+
+  levels=data||[];
+
+  try{
+    localStorage.setItem(
+      LEVELS_CACHE_KEY,
+      JSON.stringify({
+        savedAt:Date.now(),
+        levels
+      })
+    );
+  }catch(e){
+    console.warn("Cache livelli:",e);
+  }
+}
 function updateXp(xp,lvl){xp=Number(xp||0);lvl=Number(lvl||1);$("#xpLevel").textContent=lvl;if(lvl>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmt(xp)} XP · MAX`;return}const c=levels.find(x=>Number(x.level)===lvl),n=levels.find(x=>Number(x.level)===lvl+1),cx=c?Number(c.xp_required):lvl===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${fmt(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.max(0,Math.min(100,into/need*100))}%`;$("#xpText").textContent=`${fmt(into)} / ${fmt(need)} XP`}
 async function loadProfile(){const uid=session.user.id;const[{data:p,error:pe},{data:x,error:xe}]=await Promise.all([supabase.from("profiles").select("username,chips").eq("user_id",uid).single(),supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle()]);if(pe)throw pe;if(xe)throw xe;$("#usernameValue").textContent=p.username||"—";$("#balanceValue").textContent=fmt(p.chips);updateXp(x?.xp||0,x?.level||1)}
+async function checkLevelUp(){try{const r=await CasinoLevelUp.check();if(r?.balance!=null){state.finalBalance=Number(r.balance);$("#balanceValue").textContent=fmt(r.balance)}return r}catch(e){console.error("Level-up:",e);return null}}
 async function loadConfig(){const{data,error}=await supabase.rpc("get_tombola_bot_config");if(error)throw error;config=data.game;paytable=data.paytable||[];$("#balanceValue").textContent=fmt(data.balance);const bets=(config.allowed_bets||[]).map(Number).filter(v=>v>0&&v<=Number(config.max_bet||Number.MAX_SAFE_INTEGER));$("#betSelect").innerHTML=bets.map(v=>`<option value="${v}">${fmt(v)} fiche</option>`).join("");const maxCards=Math.max(1,Number(config.max_cards||10));$("#cardCountSelect").innerHTML=Array.from({length:maxCards},(_,i)=>`<option value="${i+1}"${i===0?" selected":""}>${i+1}</option>`).join("");$("#maxBetValue").textContent=`${fmt(config.max_bet)} fiche`;$("#gameLimits").textContent=`Max ${maxCards} cartelle · Max ${fmt(config.max_bet)} fiche per cartella`;renderPaytable();updateControls()}
 async function hashHex(text){const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 async function revealFairness(){if(!state.seed)return;$("#seedReveal").textContent=state.seed;$("#revealWrap").classList.remove("hidden");const ok=(await hashHex(state.seed))===state.seedHash;$("#fairStatus").textContent=ok?"✓ Hash verificato":"⚠ Hash non corrispondente";$("#fairStatus").className=ok?"ok":"bad"}
@@ -105,10 +420,1174 @@ function restoreMarks(){for(const c of state.cards)c.marked=new Set();for(let i=
 function renderDrawnBoard(){renderBoard();for(let i=0;i<state.drawIndex;i++)$("#bn-"+state.draws[i])?.classList.add("drawn");if(state.drawIndex){const n=state.draws[state.drawIndex-1];$("#bn-"+n)?.classList.add("last");$("#currentBall").textContent=n}}
 function animateNext(){if(paused)return;if(state.drawIndex>=state.draws.length)return completeAnimation();document.querySelectorAll(".board-num.last").forEach(e=>e.classList.remove("last"));const n=Number(state.draws[state.drawIndex++]);applyDraw(n);$("#bn-"+n)?.classList.add("drawn","last");$("#currentBall").textContent=n;$("#drawCount").textContent=`${state.drawIndex}/${state.draws.length}`;$("#currentMult").textContent=state.drawIndex>=15?mult(multiplierAt(state.drawIndex)):"—";highlightPaytable(state.drawIndex);const unfinished=state.cards.filter(c=>c.marked.size<15).length;$("#phaseText").textContent=unfinished?`${unfinished} cartelle ancora aperte`:"Tutte completate";renderTabs();renderCard();persist();animationTimer=setTimeout(animateNext,Math.max(50,Number($("#speedSelect").value)||400))}
 async function finishRound(){const{data,error}=await supabase.rpc("finish_tombola_bot",{p_round_id:state.roundId});if(error)throw error;state.draws=(data.draws||[]).map(Number);const results=normalizeCards(data.cards);const old=state.cards;state.cards=results.map(r=>({...r,marked:old.find(x=>x.card_no===r.card_no)?.marked||new Set()}));state.result=data;state.seed=data.fairness?.server_seed||null;state.finalBalance=data.balance;persist()}
-function completeAnimation(){clearTimeout(animationTimer);animationTimer=null;$("#playBtn").disabled=false;$("#betSelect").disabled=false;$("#cardCountSelect").disabled=false;$("#pauseBtn").classList.add("hidden");$("#resumeBtn").classList.add("hidden");const d=state.result;const total=Number(d?.total_payout||0),stake=Number(d?.total_staked||0),net=Number(d?.net_result||0);const box=$("#resultBox");box.className="result "+(net>=0?"win":"loss");box.innerHTML=`<div class="result-main"><span>Risultato round</span><strong>${fmt(total)} fiche</strong></div><div style="font-size:11px;color:var(--muted)">Giocato ${fmt(stake)} · Netto ${net>=0?"+":""}${fmt(net)}</div><div class="cards-result">${state.cards.map(c=>`<div class="card-result-row"><b>#${c.card_no}</b><span>Tombola ${c.tombola_draw}ª</span><strong>${mult(c.multiplier)}</strong><span>${fmt(c.payout)}</span></div>`).join("")}</div>`;$("#balanceValue").textContent=fmt(state.finalBalance);status(`Round completato · ${state.cards.length} cartelle · ritorno ${fmt(total)} fiche`);revealFairness();localStorage.removeItem(STORAGE_KEY);try{const ch=new BroadcastChannel("slot-machine-sync");ch.postMessage({type:"balance-changed"});ch.close()}catch{}}
+async function completeAnimation(){clearTimeout(animationTimer);animationTimer=null;$("#playBtn").disabled=false;$("#betSelect").disabled=false;$("#cardCountSelect").disabled=false;$("#pauseBtn").classList.add("hidden");$("#resumeBtn").classList.add("hidden");const d=state.result;const total=Number(d?.total_payout||0),stake=Number(d?.total_staked||0),net=Number(d?.net_result||0);const box=$("#resultBox");box.className="result "+(net>=0?"win":"loss");box.innerHTML=`<div class="result-main"><span>Risultato round</span><strong>${fmt(total)} fiche</strong></div><div style="font-size:11px;color:var(--muted)">Giocato ${fmt(stake)} · Netto ${net>=0?"+":""}${fmt(net)}</div><div class="cards-result">${state.cards.map(c=>`<div class="card-result-row"><b>#${c.card_no}</b><span>Tombola ${c.tombola_draw}ª</span><strong>${mult(c.multiplier)}</strong><span>${fmt(c.payout)}</span></div>`).join("")}</div>`;$("#balanceValue").textContent=fmt(state.finalBalance);status(`Round completato · ${state.cards.length} cartelle · ritorno ${fmt(total)} fiche`);revealFairness();localStorage.removeItem(STORAGE_KEY);try{const ch=new BroadcastChannel("slot-machine-sync");ch.postMessage({type:"balance-changed"});ch.close()}catch{}await checkLevelUp();}
 async function play(){const bet=Number($("#betSelect").value),count=Number($("#cardCountSelect").value);if(!bet||!count)return;$("#playBtn").disabled=true;$("#betSelect").disabled=true;$("#cardCountSelect").disabled=true;showLoading("Creo le cartelle…");try{const requestId=crypto.randomUUID();const{data,error}=await supabase.rpc("start_tombola_bot",{p_card_price:bet,p_card_count:count,p_request_id:requestId});if(error)throw error;resetVisual();state.roundId=data.round_id;state.requestId=data.request_id||requestId;state.cards=normalizeCards(data.cards);state.seedHash=data.seed_hash;$("#seedHash").textContent=state.seedHash||"—";$("#balanceValue").textContent=fmt(data.balance);if(data.xp)updateXp(data.xp.total,data.xp.new_level);renderTabs();renderCard();persist();status("Round creato · risultato bloccato sul server");await finishRound();hideLoading();$("#pauseBtn").classList.remove("hidden");status("Estrazione in corso…");animateNext()}catch(e){$("#playBtn").disabled=false;$("#betSelect").disabled=false;$("#cardCountSelect").disabled=false;hideLoading();status(e?.message||String(e),true);console.error(e)}}
 async function restore(){let s=null;try{s=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")}catch{}if(!s?.roundId)return;state.roundId=s.roundId;state.requestId=s.requestId;state.cards=normalizeCards(s.cards||[]);state.draws=(s.draws||[]).map(Number);state.drawIndex=Number(s.drawIndex||0);state.activeCard=Math.min(Number(s.activeCard||0),Math.max(0,state.cards.length-1));state.result=s.result;state.seedHash=s.seedHash;state.seed=s.seed;state.finalBalance=s.finalBalance;if(s.bet&&[...$("#betSelect").options].some(o=>o.value===String(s.bet)))$("#betSelect").value=s.bet;if(s.count&&[...$("#cardCountSelect").options].some(o=>o.value===String(s.count)))$("#cardCountSelect").value=s.count;restoreMarks();renderDrawnBoard();renderTabs();renderCard();$("#seedHash").textContent=state.seedHash||"—";$("#drawCount").textContent=`${state.drawIndex}/${state.draws.length||90}`;updateControls();$("#playBtn").disabled=true;$("#betSelect").disabled=true;$("#cardCountSelect").disabled=true;if(!state.result){showLoading("Ripristino round…");await finishRound();hideLoading()}if(state.drawIndex>=state.draws.length)completeAnimation();else{$("#pauseBtn").classList.remove("hidden");status(`Partita ripristinata dalla ${state.drawIndex+1}ª estrazione`);animateNext()}}
-async function init(){if(SUPABASE_URL.includes("xxxxx")||SUPABASE_ANON_KEY.includes("INSERISCI"))throw new Error("Configura SUPABASE_URL e SUPABASE_ANON_KEY nel file.");const{data:{session:s}}=await supabase.auth.getSession();session=s;if(!session){location.href="../index.html";return}await Promise.all([loadLevels(),loadProfile(),loadConfig()]);resetVisual();updateControls();await restore();hideLoading()}
+
+
+// ============================================================
+// TOMBOLA ONLINE PVP
+// ============================================================
+
+const pvp = {
+  mode: localStorage.getItem(MODE_STORAGE_KEY) === "pvp" ? "pvp" : "bot",
+  rooms: [],
+  selectedRoomId: localStorage.getItem(PVP_ROOM_STORAGE_KEY) || null,
+  lobby: null,
+  joinableState: null,
+  liveState: null,
+  activeCard: 0,
+  activeCardId: null,
+  serverOffsetMs: 0,
+  lobbyTimer: null,
+  pollTimer: null,
+  clockTimer: null,
+  lobbyRunning: false,
+  pollRunning: false,
+  started: false,
+  heldState: null,
+  holdUntil: 0,
+  xpCheckedRounds: new Set(),
+  announcedCompletedRounds: new Set(),
+  prizeModalOpen: false,
+  watchedRoundId: null
+};
+
+function pvpNow(){
+  return Date.now() + Number(pvp.serverOffsetMs || 0);
+}
+
+function pvpSetServerNow(serverNow){
+  if(!serverNow)return;
+  const serverMs = Date.parse(serverNow);
+  if(Number.isFinite(serverMs)){
+    pvp.serverOffsetMs = serverMs - Date.now();
+  }
+}
+
+function pvpFmtTime(value){
+  if(!value)return "—";
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return "—";
+  return new Intl.DateTimeFormat("it-IT",{
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit",
+    timeZone:"Europe/Rome"
+  }).format(d);
+}
+
+function pvpFmtCountdown(ms){
+  if(!Number.isFinite(ms))return "—";
+  ms=Math.max(0,ms);
+  const totalSeconds=Math.ceil(ms/1000);
+  const minutes=Math.floor(totalSeconds/60);
+  const seconds=totalSeconds%60;
+  return `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+}
+
+function pvpStatus(text,bad=false){
+  const el=$("#pvpStatus");
+  el.textContent=text;
+  el.style.color=bad?"var(--bad)":"#ffd083";
+}
+
+function pvpNotifyBalanceChanged(){
+  try{
+    const ch=new BroadcastChannel("slot-machine-sync");
+    ch.postMessage({type:"balance-changed"});
+    ch.close();
+  }catch{}
+  try{
+    localStorage.setItem("slot-machine-balance-sync",String(Date.now()));
+  }catch{}
+}
+
+function pvpBuildBoard(){
+  const root=$("#pvpBoard");
+  root.innerHTML="";
+  for(let n=1;n<=90;n++){
+    const el=document.createElement("div");
+    el.className="board-num";
+    el.dataset.pvpNumber=String(n);
+    el.textContent=n;
+    root.appendChild(el);
+  }
+}
+
+function pvpNormalizeCards(cards){
+  return (cards||[])
+    .map(c=>({
+      id:c.id,
+      card_no:Number(c.card_no),
+      grid:normalizeGrid(c.card),
+      cinquina_win:c.cinquina_win===true,
+      tombola_win:c.tombola_win===true
+    }))
+    .sort((a,b)=>a.card_no-b.card_no);
+}
+
+function pvpDrawNumbers(roundState){
+  return (roundState?.draws||[])
+    .map(d=>Number(d.number))
+    .filter(Number.isFinite);
+}
+
+function pvpCardNumbers(card){
+  return (card?.grid||[])
+    .flat()
+    .filter(v=>v!=null)
+    .map(Number);
+}
+
+function pvpRowComplete(card,rowIndex,drawnSet){
+  const row=(card?.grid?.[rowIndex]||[]).filter(v=>v!=null);
+  return row.length===5 && row.every(n=>drawnSet.has(Number(n)));
+}
+
+function pvpRenderCards(roundState){
+  let cards=pvpNormalizeCards(roundState?.my_cards||[]);
+  const drawnNumbers=pvpDrawNumbers(roundState);
+  const drawnSet=new Set(drawnNumbers);
+
+  /*
+   * Ordine dinamico:
+   * 1) meno numeri mancanti alla Tombola
+   * 2) a parità, numero originale della cartella
+   */
+  cards=cards
+    .map(card=>{
+      const totalNumbers=pvpCardNumbers(card);
+      const markedCount=totalNumbers.filter(
+        n=>drawnSet.has(n)
+      ).length;
+
+      return {
+        ...card,
+        markedCount,
+        missingCount:Math.max(
+          0,
+          15-markedCount
+        )
+      };
+    })
+    .sort((a,b)=>
+      a.missingCount-b.missingCount
+      ||
+      a.card_no-b.card_no
+    );
+
+  /*
+   * Manteniamo selezionata la stessa cartella anche quando
+   * l'ordine cambia dopo una nuova estrazione.
+   */
+  let activeIndex=cards.findIndex(
+    c=>c.id===pvp.activeCardId
+  );
+
+  if(activeIndex<0){
+    activeIndex=0;
+    pvp.activeCardId=cards[0]?.id||null;
+  }
+
+  pvp.activeCard=activeIndex;
+
+  const tabs=$("#pvpCardTabs");
+  tabs.innerHTML="";
+
+  cards.forEach((card,index)=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className=
+      "card-tab"+
+      (index===pvp.activeCard?" active":"")+
+      (card.tombola_win?" done":"");
+
+    button.innerHTML=
+      `<b>Cartella ${card.card_no}</b>`+
+      `<span>${card.markedCount}/15 · mancano ${card.missingCount}`+
+      `${card.tombola_win?" · 🏆 TOMBOLA":card.cinquina_win?" · 🏆 CINQUINA":""}</span>`;
+
+    button.onclick=()=>{
+      pvp.activeCardId=card.id;
+      pvp.activeCard=index;
+      pvpRenderCards(roundState);
+    };
+
+    tabs.appendChild(button);
+  });
+
+  const root=$("#pvpCardGrid");
+  root.innerHTML="";
+
+  const card=cards[pvp.activeCard];
+
+  if(!card){
+    root.innerHTML=Array.from(
+      {length:27},
+      ()=>'<div class="card-cell empty"></div>'
+    ).join("");
+    $("#pvpActiveCardLabel").textContent="—";
+    $("#pvpMyCardsLabel").textContent=String(cards.length);
+    return;
+  }
+
+  $("#pvpActiveCardLabel").textContent=
+    `${card.card_no}/${cards.length}`;
+
+  $("#pvpMyCardsLabel").textContent=
+    String(cards.length);
+
+  card.grid.forEach((row,rowIndex)=>{
+    row.forEach(value=>{
+      const cell=document.createElement("div");
+      cell.className="card-cell"+(value==null?" empty":"");
+
+      if(value!=null){
+        const number=Number(value);
+        cell.textContent=number;
+
+        if(drawnSet.has(number)){
+          cell.classList.add("marked");
+        }
+
+        if(pvpRowComplete(card,rowIndex,drawnSet)){
+          cell.classList.add("rowdone");
+        }
+
+        if(
+          card.tombola_win &&
+          pvpCardNumbers(card).every(n=>drawnSet.has(n))
+        ){
+          cell.classList.add("tombola");
+        }
+
+        if(card.cinquina_win || card.tombola_win){
+          cell.classList.add("pvp-card-win");
+        }
+      }
+
+      root.appendChild(cell);
+    });
+  });
+}
+
+function pvpEscapeHtml(value){
+  return String(value??"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function pvpClosePrizeModal(){
+  $("#pvpPrizeModal").classList.add("hidden");
+  pvp.prizeModalOpen=false;
+}
+
+function pvpShowEndPrizeModal(roundState){
+  if(
+    !roundState
+    || String(roundState.status||"")!=="completed"
+    || !roundState.round_id
+  ){
+    return;
+  }
+
+  const roundId=roundState.round_id;
+
+  if(pvp.announcedCompletedRounds.has(roundId)){
+    return;
+  }
+
+  const winners=Array.isArray(roundState.winners)
+    ? roundState.winners
+    : [];
+
+  /*
+   * Segniamo il round come mostrato anche se, per qualche motivo,
+   * non ci fossero righe winner. Evita popup ripetuti al polling.
+   */
+  pvp.announcedCompletedRounds.add(roundId);
+
+  if(!winners.length){
+    return;
+  }
+
+  const cinquina=winners.filter(
+    w=>String(w.prize_type||"")==="cinquina"
+  );
+
+  const tombola=winners.filter(
+    w=>String(w.prize_type||"")==="tombola"
+  );
+
+  const sections=[];
+
+  if(cinquina.length){
+    sections.push(`
+      <div style="margin-bottom:10px">
+        <div style="margin-bottom:6px;color:var(--gold2);font-weight:1000">
+          🎉 CINQUINA · ${fmt(cinquina[0]?.draw_no||0)}ª estrazione
+        </div>
+        <div class="pvp-prize-users">
+          ${cinquina.map(w=>{
+            const cards=Number(w.cards_won||0);
+            return `
+              <div class="pvp-prize-user">
+                <b>
+                  ${pvpEscapeHtml(w.username||"Giocatore")}
+                  ${cards>1?` · ${cards} cartelle`:""}
+                </b>
+                <span>${fmt(w.amount)} fiche</span>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `);
+  }
+
+  if(tombola.length){
+    sections.push(`
+      <div>
+        <div style="margin-bottom:6px;color:var(--gold2);font-weight:1000">
+          🏆 TOMBOLA · ${fmt(tombola[0]?.draw_no||0)}ª estrazione
+        </div>
+        <div class="pvp-prize-users">
+          ${tombola.map(w=>{
+            const cards=Number(w.cards_won||0);
+            return `
+              <div class="pvp-prize-user">
+                <b>
+                  ${pvpEscapeHtml(w.username||"Giocatore")}
+                  ${cards>1?` · ${cards} cartelle`:""}
+                </b>
+                <span>${fmt(w.amount)} fiche</span>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `);
+  }
+
+  $("#pvpPrizeTitle").textContent="🏁 Partita conclusa";
+  $("#pvpPrizeSub").textContent="Utenti andati a premio";
+  $("#pvpPrizeUsers").innerHTML=sections.join("");
+
+  pvp.prizeModalOpen=true;
+  $("#pvpPrizeModal").classList.remove("hidden");
+}
+
+function pvpRenderWinners(roundState){
+  const root=$("#pvpWinners");
+  const winners=Array.isArray(roundState?.winners)
+    ? roundState.winners
+    : [];
+
+  if(!winners.length){
+    root.innerHTML=
+      `<div class="pvp-empty">Cinquina e Tombola non ancora assegnate.</div>`;
+    return;
+  }
+
+  root.innerHTML=winners.map(w=>{
+    const type=String(w.prize_type||"");
+    const label=type==="tombola"?"🏆 TOMBOLA":"🎉 CINQUINA";
+    const cards=Number(w.cards_won||0);
+    return `
+      <div class="pvp-winner ${type==="tombola"?"prize-tombola":""}">
+        <div class="pvp-winner-type">${label}</div>
+        <div class="pvp-winner-name">
+          ${String(w.username||"Giocatore")
+            .replaceAll("&","&amp;")
+            .replaceAll("<","&lt;")
+            .replaceAll(">","&gt;")}
+          ${cards>1?` · ${cards} cartelle`:""}
+        </div>
+        <div class="pvp-winner-amount">${fmt(w.amount)} fiche</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function pvpRenderBoard(roundState){
+  const numbers=pvpDrawNumbers(roundState);
+  const last=numbers.length?numbers[numbers.length-1]:null;
+
+  document
+    .querySelectorAll("#pvpBoard .board-num")
+    .forEach(el=>{
+      const n=Number(el.dataset.pvpNumber);
+      el.classList.toggle("drawn",numbers.includes(n));
+      el.classList.toggle("last",n===last);
+    });
+
+  $("#pvpCurrentBall").textContent=
+    last==null?"—":String(last);
+
+  const drawCount=Number(roundState?.draw_count||numbers.length||0);
+
+  $("#pvpDrawText").textContent=
+    `${drawCount} / 90`;
+
+  $("#pvpProgressFill").style.width=
+    `${Math.max(0,Math.min(100,drawCount/90*100))}%`;
+}
+
+function pvpRenderMain(roundState){
+  if(!roundState){
+    $("#pvpGameTitle").textContent="Tombola Online PvP";
+    $("#pvpRoundLabel").textContent="Seleziona una stanza";
+    $("#pvpPlayers").textContent="0";
+    $("#pvpTotalCards").textContent="0";
+    $("#pvpCinquinaPool").textContent="0";
+    $("#pvpTombolaPool").textContent="0";
+    $("#pvpPhaseText").textContent="In attesa";
+    $("#pvpDrawText").textContent="0 / 90";
+    $("#pvpCurrentBall").textContent="—";
+    $("#pvpProgressFill").style.width="0%";
+    pvpRenderCards(null);
+    pvpRenderWinners(null);
+    pvpBuildBoard();
+    return;
+  }
+
+  pvpSetServerNow(roundState.server_now);
+
+  const statusValue=String(roundState.status||"scheduled");
+  const roomName=roundState.room_name||"Tombola Online PvP";
+
+  $("#pvpGameTitle").textContent=roomName;
+  $("#pvpPlayers").textContent=fmt(roundState.total_players);
+  $("#pvpTotalCards").textContent=fmt(roundState.total_cards);
+  $("#pvpCinquinaPool").textContent=`${fmt(roundState.cinquina_pool)} fiche`;
+  $("#pvpTombolaPool").textContent=`${fmt(roundState.tombola_pool)} fiche`;
+
+  if(statusValue==="running"){
+    $("#pvpRoundLabel").textContent=
+      `Partita iniziata alle ${pvpFmtTime(roundState.scheduled_start_at)}`;
+    $("#pvpPhaseText").textContent="Estrazione in corso";
+  }else if(statusValue==="completed"){
+    $("#pvpRoundLabel").textContent=
+      `Partita conclusa · ${pvpFmtTime(roundState.scheduled_start_at)}`;
+    $("#pvpPhaseText").textContent="Partita conclusa";
+  }else if(statusValue==="cancelled"){
+    $("#pvpRoundLabel").textContent=
+      `Round annullato · ${pvpFmtTime(roundState.scheduled_start_at)}`;
+    $("#pvpPhaseText").textContent=
+      roundState.cancel_reason==="MIN_PLAYERS_NOT_REACHED"
+        ?"Annullata: minimo 2 giocatori"
+        :"Round annullato";
+  }else{
+    $("#pvpRoundLabel").textContent=
+      `Partenza ${pvpFmtTime(roundState.scheduled_start_at)}`;
+    $("#pvpPhaseText").textContent="In attesa della partenza";
+  }
+
+  $("#pvpCinquinaStatus").textContent=
+    roundState.cinquina_awarded
+      ? `Assegnata alla ${fmt(roundState.cinquina_draw_no)}ª`
+      : "Da assegnare";
+
+  $("#pvpTombolaStatus").textContent=
+    roundState.tombola_awarded
+      ? `Assegnata alla ${fmt(roundState.tombola_draw_no)}ª`
+      : "Da assegnare";
+
+  pvpRenderBoard(roundState);
+  pvpRenderCards(roundState);
+  pvpRenderWinners(roundState);
+
+  if(String(roundState.status||"")==="completed"){
+    pvpShowEndPrizeModal(roundState);
+  }
+
+  if(roundState.balance!=null){
+    $("#balanceValue").textContent=fmt(roundState.balance);
+  }
+}
+
+function pvpSelectedRoom(){
+  return pvp.rooms.find(r=>r.id===pvp.selectedRoomId)||null;
+}
+
+function pvpRenderRooms(){
+  const root=$("#pvpRoomStrip");
+  root.innerHTML="";
+
+  pvp.rooms.forEach(room=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className=
+      "pvp-room-btn"+
+      (room.id===pvp.selectedRoomId?" active":"");
+
+    const active=room.active_round;
+    const next=room.joinable_round;
+
+    button.innerHTML=`
+      <b>${String(room.name||room.id)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")}</b>
+      <span class="pvp-room-price">${fmt(room.card_price)} fiche</span>
+      <span class="pvp-room-meta">
+        ${active?`<span><span class="live-dot"></span>IN CORSO</span>`:""}
+        <span>${fmt(next?.players||0)} gioc.</span>
+        <span>${fmt(next?.cards||0)} cart.</span>
+      </span>
+    `;
+
+    button.onclick=async()=>{
+      pvp.selectedRoomId=room.id;
+      localStorage.setItem(PVP_ROOM_STORAGE_KEY,room.id);
+      pvp.activeCard=0;
+      pvp.activeCardId=null;
+      pvp.heldState=null;
+      pvp.holdUntil=0;
+      pvp.watchedRoundId=null;
+      pvpRenderRooms();
+      await pvpRefreshJoinableState();
+      await pvpAdvanceSelectedRoom();
+      pvpRenderPurchase();
+    };
+
+    root.appendChild(button);
+  });
+}
+
+function pvpUpdateQuantityOptions(){
+  const room=pvpSelectedRoom();
+  const select=$("#pvpQuantitySelect");
+
+  if(!room){
+    select.innerHTML="";
+    return;
+  }
+
+  const max=Number(room.max_cards_per_user||50);
+  const mine=Number(room.my_cards_next_round||0);
+  const remaining=Math.max(0,max-mine);
+  const previous=Number(select.value||1);
+
+  select.innerHTML=
+    Array.from(
+      {length:remaining},
+      (_,i)=>`<option value="${i+1}">${i+1}</option>`
+    ).join("");
+
+  if(remaining>0){
+    select.value=
+      String(
+        Math.min(
+          Math.max(1,previous),
+          remaining
+        )
+      );
+  }
+
+  pvpUpdatePurchaseTotal();
+}
+
+function pvpUpdatePurchaseTotal(){
+  const room=pvpSelectedRoom();
+  const qty=Number($("#pvpQuantitySelect").value||0);
+  const price=Number(room?.card_price||0);
+
+  $("#pvpPurchaseTotal").textContent=
+    `${fmt(price*qty)} fiche`;
+}
+
+function pvpRenderPurchase(){
+  const room=pvpSelectedRoom();
+
+  if(!room){
+    $("#pvpSelectedRoomName").textContent="—";
+    $("#pvpCardPrice").textContent="—";
+    $("#pvpNextStart").textContent="—";
+    $("#pvpPurchaseCountdown").textContent="—";
+    $("#pvpNextPlayersCards").textContent="0 / 0";
+    $("#pvpNextPools").textContent="0 / 0";
+    $("#pvpMyNextCards").textContent="0 / 50";
+    $("#pvpBuyBtn").disabled=true;
+    return;
+  }
+
+  const next=room.joinable_round||{};
+
+  $("#pvpSelectedRoomName").textContent=
+    room.name||room.id;
+
+  $("#pvpCardPrice").textContent=
+    `${fmt(room.card_price)} fiche`;
+
+  $("#pvpNextStart").textContent=
+    pvpFmtTime(next.scheduled_start_at);
+
+  $("#pvpNextPlayersCards").textContent=
+    `${fmt(next.players||0)} gioc. / ${fmt(next.cards||0)} cart.`;
+
+  $("#pvpNextPools").textContent=
+    `Cinquina ${fmt(next.cinquina_pool||0)} · Tombola ${fmt(next.tombola_pool||0)}`;
+
+  $("#pvpMyNextCards").textContent=
+    `${fmt(room.my_cards_next_round||0)} / ${fmt(room.max_cards_per_user||50)}`;
+
+  pvpUpdateQuantityOptions();
+  pvpTickClock();
+}
+
+function pvpTickClock(){
+  const room=pvpSelectedRoom();
+  if(!room)return;
+
+  const next=room.joinable_round||{};
+  const closeMs=Date.parse(next.purchase_close_at);
+  const startMs=Date.parse(next.scheduled_start_at);
+  const now=pvpNow();
+
+  const remainingToClose=
+    Number.isFinite(closeMs)
+      ? closeMs-now
+      : NaN;
+
+  const remainingToStart=
+    Number.isFinite(startMs)
+      ? startMs-now
+      : NaN;
+
+  const mine=Number(room.my_cards_next_round||0);
+  const max=Number(room.max_cards_per_user||50);
+  const canBuy=
+    Number.isFinite(remainingToClose)
+    && remainingToClose>0
+    && mine<max;
+
+  $("#pvpPurchaseCountdown").textContent=
+    canBuy
+      ? pvpFmtCountdown(remainingToClose)
+      : (
+          Number.isFinite(remainingToStart)
+          && remainingToStart>0
+            ? `CHIUSI · parte tra ${pvpFmtCountdown(remainingToStart)}`
+            : "CHIUSI"
+        );
+
+  $("#pvpBuyBtn").disabled=
+    !canBuy
+    || !Number($("#pvpQuantitySelect").value||0);
+
+  const live=pvp.liveState;
+
+  if(
+    live
+    && String(live.status)==="scheduled"
+    && live.scheduled_start_at
+  ){
+    const ms=Date.parse(live.scheduled_start_at)-now;
+    if(ms>0){
+      $("#pvpPhaseText").textContent=
+        `Partenza tra ${pvpFmtCountdown(ms)}`;
+    }
+  }
+}
+
+async function pvpRefreshJoinableState(){
+  const room=pvpSelectedRoom();
+  const roundId=room?.joinable_round?.round_id;
+
+  if(!roundId){
+    pvp.joinableState=null;
+    return;
+  }
+
+  const {data,error}=await supabase.rpc(
+    "get_tombola_pvp_round_state",
+    {p_round_id:roundId}
+  );
+
+  if(error)throw error;
+
+  pvpSetServerNow(data?.server_now);
+  pvp.joinableState=data;
+
+  if(
+    data?.round_id
+    && (
+      String(data.status||"")==="scheduled"
+      || String(data.status||"")==="running"
+    )
+  ){
+    pvp.watchedRoundId=data.round_id;
+  }
+
+  if(
+    (!room.active_round || !pvp.liveState)
+    && !(pvp.heldState && Date.now()<pvp.holdUntil)
+  ){
+    pvp.liveState=data;
+    pvpRenderMain(data);
+  }
+}
+
+async function pvpRefreshLobby(first=false){
+  if(pvp.lobbyRunning)return;
+
+  pvp.lobbyRunning=true;
+
+  try{
+    const {data,error}=await supabase.rpc("get_tombola_pvp_lobby");
+    if(error)throw error;
+
+    pvp.lobby=data;
+    pvpSetServerNow(data?.server_now);
+    pvp.rooms=Array.isArray(data?.rooms)?data.rooms:[];
+
+    if(
+      !pvp.selectedRoomId
+      || !pvp.rooms.some(r=>r.id===pvp.selectedRoomId)
+    ){
+      pvp.selectedRoomId=pvp.rooms[0]?.id||null;
+      if(pvp.selectedRoomId){
+        localStorage.setItem(PVP_ROOM_STORAGE_KEY,pvp.selectedRoomId);
+      }
+    }
+
+    pvpRenderRooms();
+    pvpRenderPurchase();
+
+    if(pvp.selectedRoomId){
+      await pvpRefreshJoinableState();
+    }
+
+    if(first && !pvp.rooms.length){
+      pvpStatus("Nessuna stanza PvP disponibile.",true);
+    }
+
+  }catch(error){
+    console.error("Lobby Tombola PvP:",error);
+    pvpStatus(error?.message||String(error),true);
+  }finally{
+    pvp.lobbyRunning=false;
+  }
+}
+
+async function pvpRefreshXpOnce(roundState){
+  if(!roundState?.round_id)return;
+
+  const statusValue=String(roundState.status||"");
+
+  if(
+    statusValue!=="running"
+    && statusValue!=="completed"
+  ){
+    return;
+  }
+
+  if(pvp.xpCheckedRounds.has(roundState.round_id)){
+    return;
+  }
+
+  pvp.xpCheckedRounds.add(roundState.round_id);
+
+  try{
+    await loadProfile();
+    await checkLevelUp();
+  }catch(error){
+    console.error("Aggiornamento XP Tombola PvP:",error);
+  }
+}
+
+async function pvpAdvanceSelectedRoom(){
+  if(
+    pvp.pollRunning
+    || !pvp.selectedRoomId
+    || pvp.mode!=="pvp"
+  ){
+    return;
+  }
+
+  pvp.pollRunning=true;
+
+  try{
+    /*
+     * Memorizziamo il round che questo browser stava seguendo.
+     *
+     * In PvP due browser possono chiamare advance quasi insieme:
+     * il primo può completare il round, mentre il secondo riceve
+     * già lo stato del prossimo slot/idle. Senza questo riferimento
+     * il secondo browser perderebbe il "completed" e quindi anche
+     * la modale finale.
+     */
+    const previousRoundId=
+      pvp.watchedRoundId
+      || pvp.liveState?.round_id
+      || null;
+
+    const {data,error}=await supabase.rpc(
+      "advance_tombola_pvp_room",
+      {p_room_id:pvp.selectedRoomId}
+    );
+
+    if(error)throw error;
+    if(!data)return;
+
+    pvpSetServerNow(data.server_now);
+
+    let effectiveData=data;
+    let statusValue=String(data.status||"");
+
+    /*
+     * Se il server ci ha già restituito il prossimo round/idle,
+     * controlliamo esplicitamente il round che stavamo guardando.
+     * È la correzione che rende affidabile il riepilogo su TUTTI
+     * i browser collegati, non solo su quello che ha effettuato
+     * materialmente l'ultima advance.
+     */
+    if(
+      previousRoundId
+      && data.round_id!==previousRoundId
+      && !["completed","cancelled"].includes(statusValue)
+    ){
+      const {
+        data:previousState,
+        error:previousError
+      }=await supabase.rpc(
+        "get_tombola_pvp_round_state",
+        {p_round_id:previousRoundId}
+      );
+
+      if(!previousError && previousState){
+        const previousStatus=
+          String(previousState.status||"");
+
+        if(
+          previousStatus==="running"
+          || previousStatus==="completed"
+          || previousStatus==="cancelled"
+        ){
+          effectiveData=previousState;
+          statusValue=previousStatus;
+          pvpSetServerNow(previousState.server_now);
+        }
+      }
+    }
+
+    /*
+     * Conserviamo l'ID del round reale finché non abbiamo visto
+     * il suo stato definitivo.
+     */
+    if(
+      effectiveData?.round_id
+      && (
+        statusValue==="scheduled"
+        || statusValue==="running"
+      )
+    ){
+      pvp.watchedRoundId=
+        effectiveData.round_id;
+    }
+
+    if(
+      statusValue==="completed"
+      || statusValue==="cancelled"
+    ){
+      pvp.heldState=effectiveData;
+      pvp.holdUntil=
+        Date.now()
+        +(statusValue==="completed"?8000:5000);
+
+      if(
+        pvp.watchedRoundId===
+        effectiveData.round_id
+      ){
+        /*
+         * La teniamo ancora visibile tramite heldState,
+         * ma non serve più inseguirla nei polling successivi.
+         */
+        pvp.watchedRoundId=null;
+      }
+    }
+
+    if(
+      pvp.heldState
+      && Date.now()<pvp.holdUntil
+      && (
+        effectiveData.round_id!==
+          pvp.heldState.round_id
+        || String(effectiveData.status||"")==="scheduled"
+        || String(effectiveData.status||"")==="idle"
+      )
+    ){
+      pvp.liveState=
+        pvp.heldState;
+    }else{
+      if(Date.now()>=pvp.holdUntil){
+        pvp.heldState=null;
+      }
+
+      pvp.liveState=
+        effectiveData;
+    }
+
+    pvpRenderMain(
+      pvp.liveState
+    );
+
+    /*
+     * Il saldo mostrato deve provenire dallo stato effettivamente
+     * visualizzato, così anche chi non ha eseguito l'ultima advance
+     * riceve il saldo post-premio corretto.
+     */
+    if(effectiveData.balance!=null){
+      $("#balanceValue").textContent=
+        fmt(effectiveData.balance);
+    }
+
+    pvpRefreshXpOnce(
+      effectiveData
+    );
+
+    if(
+      statusValue==="completed"
+      || statusValue==="cancelled"
+      || statusValue==="running"
+    ){
+      setTimeout(
+        ()=>pvpRefreshLobby(),
+        0
+      );
+    }
+
+  }catch(error){
+    console.error(
+      "Advance Tombola PvP:",
+      error
+    );
+
+    pvpStatus(
+      error?.details
+      || error?.message
+      || String(error),
+      true
+    );
+  }finally{
+    pvp.pollRunning=false;
+  }
+}
+
+async function pvpBuyCards(){
+  const room=pvpSelectedRoom();
+  if(!room)return;
+
+  const quantity=Number($("#pvpQuantitySelect").value||0);
+
+  if(!Number.isInteger(quantity)||quantity<1)return;
+
+  const button=$("#pvpBuyBtn");
+  button.disabled=true;
+
+  pvpStatus("Acquisto cartelle in corso…");
+
+  try{
+    const requestId=crypto.randomUUID();
+
+    const {data,error}=await supabase.rpc(
+      "buy_tombola_pvp_cards",
+      {
+        p_room_id:room.id,
+        p_quantity:quantity,
+        p_request_id:requestId
+      }
+    );
+
+    if(error)throw error;
+
+    if(data?.balance!=null){
+      $("#balanceValue").textContent=fmt(data.balance);
+    }
+
+    pvpNotifyBalanceChanged();
+
+    pvpStatus(
+      `${fmt(data?.quantity||quantity)} cartelle acquistate · `+
+      `${fmt(data?.total_price||0)} fiche. XP alla partenza del round.`
+    );
+
+    await pvpRefreshLobby();
+    await pvpAdvanceSelectedRoom();
+
+  }catch(error){
+    console.error("Acquisto Tombola PvP:",error);
+    pvpStatus(error?.details||error?.message||String(error),true);
+  }finally{
+    pvpRenderPurchase();
+  }
+}
+
+function stopPvp(){
+  clearInterval(pvp.pollTimer);
+  clearInterval(pvp.lobbyTimer);
+  clearInterval(pvp.clockTimer);
+  pvp.pollTimer=null;
+  pvp.lobbyTimer=null;
+  pvp.clockTimer=null;
+  pvp.started=false;
+}
+
+async function startPvp(){
+  if(pvp.started)return;
+  pvp.started=true;
+
+  pvpBuildBoard();
+  pvpRenderMain(null);
+
+  await pvpRefreshLobby(true);
+  await pvpAdvanceSelectedRoom();
+
+  pvp.pollTimer=setInterval(
+    pvpAdvanceSelectedRoom,
+    650
+  );
+
+  pvp.lobbyTimer=setInterval(
+    pvpRefreshLobby,
+    2500
+  );
+
+  pvp.clockTimer=setInterval(
+    pvpTickClock,
+    250
+  );
+}
+
+async function setTombolaMode(mode){
+  pvp.mode=mode==="pvp"?"pvp":"bot";
+  localStorage.setItem(MODE_STORAGE_KEY,pvp.mode);
+
+  const isPvp=pvp.mode==="pvp";
+
+  $("#botMode").classList.toggle("hidden",isPvp);
+  $("#pvpMode").classList.toggle("hidden",!isPvp);
+  $("#modeBotBtn").classList.toggle("active",!isPvp);
+  $("#modePvpBtn").classList.toggle("active",isPvp);
+
+  if(isPvp){
+    /*
+     * La modalità Bot è un'animazione locale: se era in corso,
+     * la fermiamo in pausa senza perdere il round salvato.
+     */
+    if(animationTimer){
+      paused=true;
+      clearTimeout(animationTimer);
+      animationTimer=null;
+    }
+
+    await startPvp();
+
+  }else{
+    stopPvp();
+
+    if(
+      state.roundId
+      && state.drawIndex<state.draws.length
+    ){
+      $("#pauseBtn").classList.add("hidden");
+      $("#resumeBtn").classList.remove("hidden");
+      status("Round vs Bot in pausa · premi Riprendi");
+    }
+  }
+}
+
+
+$("#pvpPrizeClose").addEventListener(
+  "click",
+  pvpClosePrizeModal
+);
+
+$("#pvpPrizeModal").addEventListener(
+  "click",
+  event=>{
+    if(event.target.id==="pvpPrizeModal"){
+      pvpClosePrizeModal();
+    }
+  }
+);
+
+document.addEventListener(
+  "keydown",
+  event=>{
+    if(
+      event.key==="Escape"
+      && pvp.prizeModalOpen
+    ){
+      pvpClosePrizeModal();
+    }
+  }
+);
+
+$("#pvpQuantitySelect").addEventListener(
+  "change",
+  pvpUpdatePurchaseTotal
+);
+
+$("#pvpBuyBtn").addEventListener(
+  "click",
+  pvpBuyCards
+);
+
+$("#modeBotBtn").addEventListener(
+  "click",
+  ()=>setTombolaMode("bot")
+);
+
+$("#modePvpBtn").addEventListener(
+  "click",
+  ()=>setTombolaMode("pvp")
+);
+
+async function init(){
+  if(SUPABASE_URL.includes("xxxxx")||SUPABASE_ANON_KEY.includes("INSERISCI")){
+    throw new Error("Configura SUPABASE_URL e SUPABASE_ANON_KEY nel file.");
+  }
+
+  const{data:{session:s}}=await supabase.auth.getSession();
+  session=s;
+
+  if(!session){
+    location.href="../index.html";
+    return;
+  }
+
+  await Promise.all([
+    loadLevels(),
+    loadProfile(),
+    loadConfig()
+  ]);
+
+  resetVisual();
+  updateControls();
+
+  /*
+   * Ripristiniamo sempre l'eventuale round Bot salvato.
+   * Se la modalità iniziale è PvP verrà poi messo in pausa
+   * da setTombolaMode(), senza perdere lo stato.
+   */
+  await restore();
+
+  pvpBuildBoard();
+
+  hideLoading();
+
+  if(!state.roundId){
+    await checkLevelUp();
+  }
+
+  await setTombolaMode(pvp.mode);
+}
 $("#betSelect").addEventListener("change",updateControls);$("#cardCountSelect").addEventListener("change",updateControls);$("#playBtn").onclick=play;$("#pauseBtn").onclick=()=>{paused=true;clearTimeout(animationTimer);$("#pauseBtn").classList.add("hidden");$("#resumeBtn").classList.remove("hidden");status("Estrazione in pausa")};$("#resumeBtn").onclick=()=>{paused=false;$("#resumeBtn").classList.add("hidden");$("#pauseBtn").classList.remove("hidden");status("Estrazione ripresa");animateNext()};$("#homeBtn").onclick=()=>location.href="../index.html";$("#fullscreenBtn").onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){status("Fullscreen non disponibile",true)}};window.addEventListener("beforeunload",persist);renderBoard();renderCard();init().catch(fail);
 </script>
 </body>
