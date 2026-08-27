@@ -643,6 +643,192 @@
       }
     }
 
+
+    /* ========================================================
+       RIEPILOGO ULTIMA ESTRAZIONE
+       ======================================================== */
+
+    .last-draw-summary {
+      display:none;
+      margin:0 0 14px;
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:17px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 85% 0%,rgba(255,214,90,.12),transparent 30%),
+        rgba(8,23,30,.95);
+      box-shadow:var(--shadow);
+    }
+
+    .last-draw-summary.show {
+      display:block;
+    }
+
+    .last-draw-head {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+
+    .last-draw-head h2 {
+      margin:0;
+      color:var(--gold2);
+      font-size:17px;
+    }
+
+    .last-draw-head p {
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .last-draw-body {
+      padding:14px 16px 16px;
+    }
+
+    .last-draw-balls {
+      display:flex;
+      gap:7px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .last-draw-ball {
+      width:34px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      border-radius:50%;
+      color:#241800;
+      font-size:12px;
+      font-weight:1000;
+      background:linear-gradient(180deg,#ffe276,#d8a822);
+      border:1px solid #fff0a7;
+      box-shadow:0 4px 10px rgba(0,0,0,.2);
+    }
+
+    .last-draw-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+    }
+
+    .last-draw-tier {
+      padding:11px;
+      border-radius:12px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .last-draw-tier small {
+      display:block;
+      color:var(--muted);
+      font-size:10px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .last-draw-tier strong {
+      display:block;
+      margin-top:4px;
+      color:var(--text);
+      font-size:15px;
+    }
+
+    .last-draw-tier span {
+      display:block;
+      margin-top:5px;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.35;
+    }
+
+    .mega-winner-banner {
+      display:none;
+      margin-top:12px;
+      padding:13px 14px;
+      border-radius:13px;
+      border:1px solid rgba(255,214,90,.55);
+      background:
+        radial-gradient(circle at 50% 0%,rgba(255,224,100,.22),transparent 60%),
+        linear-gradient(135deg,rgba(80,50,3,.82),rgba(14,31,39,.94));
+      color:#fff1b8;
+      line-height:1.45;
+      font-weight:800;
+      text-align:center;
+    }
+
+    .mega-winner-banner.show {
+      display:block;
+    }
+
+    .mega-winner-banner strong {
+      color:var(--gold);
+    }
+
+    .mega-winner-list {
+      display:grid;
+      gap:7px;
+      margin-top:10px;
+    }
+
+    .mega-winner-row {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 10px;
+      border-radius:9px;
+      background:rgba(0,0,0,.18);
+      font-size:12px;
+    }
+
+    .mega-winner-row span:last-child {
+      color:var(--gold2);
+      font-weight:1000;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .no-mega-winner {
+      margin-top:12px;
+      padding:11px 13px;
+      border-radius:11px;
+      color:var(--muted);
+      background:rgba(255,255,255,.025);
+      border:1px solid rgba(255,255,255,.055);
+      font-size:12px;
+      text-align:center;
+    }
+
+    @media (max-width:650px) {
+      .last-draw-grid {
+        grid-template-columns:1fr;
+      }
+
+      .last-draw-head {
+        flex-direction:column;
+      }
+    }
+
+
+    .no-last-draw-message {
+      padding:18px 14px;
+      border-radius:12px;
+      border:1px dashed rgba(255,214,90,.22);
+      background:rgba(255,214,90,.045);
+      color:var(--muted);
+      text-align:center;
+      line-height:1.55;
+      font-size:13px;
+    }
+
+    .no-last-draw-message strong {
+      color:var(--gold2);
+    }
+
   </style>
 </head>
 
@@ -681,6 +867,45 @@
       <span>Prossima estrazione</span>
       <strong id="drawAt">—</strong>
     </div>
+
+
+    <section class="last-draw-summary" id="lastDrawSummary">
+      <div class="last-draw-head">
+        <div>
+          <h2>Riepilogo ultima estrazione</h2>
+          <p id="lastDrawDate">—</p>
+        </div>
+      </div>
+
+      <div class="last-draw-body">
+        <div class="no-last-draw-message" id="noLastDrawMessage" hidden></div>
+
+        <div class="last-draw-balls" id="lastDrawBalls"></div>
+
+        <div class="last-draw-grid" id="lastDrawGrid">
+          <div class="last-draw-tier">
+            <small>4 estratti</small>
+            <strong id="lastDraw4Pool">0</strong>
+            <span id="lastDraw4Result">—</span>
+          </div>
+
+          <div class="last-draw-tier">
+            <small>5 estratti</small>
+            <strong id="lastDraw5Pool">0</strong>
+            <span id="lastDraw5Result">—</span>
+          </div>
+
+          <div class="last-draw-tier">
+            <small>MEGA JACKPOT · 6 estratti</small>
+            <strong id="lastDraw6Pool">0</strong>
+            <span id="lastDraw6Result">—</span>
+          </div>
+        </div>
+
+        <div class="mega-winner-banner" id="megaWinnerBanner"></div>
+        <div class="no-mega-winner" id="noMegaWinner" hidden></div>
+      </div>
+    </section>
 
     <div class="tabs" role="tablist" aria-label="Mega Jackpot">
       <button class="tab-btn active" id="tabPlayBtn" type="button" role="tab" aria-selected="true">
@@ -827,6 +1052,21 @@
     const clearBtn = $("#clearBtn");
     const messageEl = $("#message");
 
+    const lastDrawSummary = $("#lastDrawSummary");
+    const lastDrawDate = $("#lastDrawDate");
+    const lastDrawBalls = $("#lastDrawBalls");
+    const lastDrawGrid = $("#lastDrawGrid");
+    const noLastDrawMessage = $("#noLastDrawMessage");
+    const lastDraw4Pool = $("#lastDraw4Pool");
+    const lastDraw5Pool = $("#lastDraw5Pool");
+    const lastDraw6Pool = $("#lastDraw6Pool");
+    const lastDraw4Result = $("#lastDraw4Result");
+    const lastDraw5Result = $("#lastDraw5Result");
+    const lastDraw6Result = $("#lastDraw6Result");
+    const megaWinnerBanner = $("#megaWinnerBanner");
+    const noMegaWinner = $("#noMegaWinner");
+
+
     const tabPlayBtn = $("#tabPlayBtn");
     const tabTicketsBtn = $("#tabTicketsBtn");
     const playPanel = $("#playPanel");
@@ -937,6 +1177,204 @@
       ).format(new Date(value));
     }
 
+
+    function formatLastDrawDate(value) {
+      if (!value) return "—";
+
+      const date =
+        new Date(
+          `${value}T12:00:00`
+        );
+
+      return new Intl.DateTimeFormat(
+        "it-IT",
+        {
+          weekday:"long",
+          day:"2-digit",
+          month:"long",
+          year:"numeric",
+          timeZone:"Europe/Rome"
+        }
+      ).format(date);
+    }
+
+
+    function renderLastDraw(lastDraw, nextDraw) {
+      lastDrawSummary.classList.add("show");
+
+      /*
+       * Prima estrazione non ancora avvenuta:
+       * mostriamo comunque il pannello, così la pagina
+       * non sembra vuota o incompleta.
+       */
+      if (!lastDraw || !lastDraw.draw_id) {
+        lastDrawDate.textContent =
+          "Nessuna estrazione ancora effettuata.";
+
+        noLastDrawMessage.hidden = false;
+
+        const nextAt =
+          nextDraw?.draw_at
+            ? formatDrawAt(nextDraw.draw_at)
+            : "alle 21:00";
+
+        noLastDrawMessage.innerHTML =
+          `La prima estrazione sarà <strong>${escapeHtml(nextAt)}</strong>.`;
+
+        lastDrawBalls.hidden = true;
+        lastDrawGrid.hidden = true;
+
+        megaWinnerBanner.classList.remove("show");
+        megaWinnerBanner.innerHTML = "";
+
+        noMegaWinner.hidden = true;
+        noMegaWinner.textContent = "";
+
+        return;
+      }
+
+      noLastDrawMessage.hidden = true;
+      noLastDrawMessage.innerHTML = "";
+
+      lastDrawBalls.hidden = false;
+      lastDrawGrid.hidden = false;
+
+      lastDrawDate.textContent =
+        `Estrazione di ${formatLastDrawDate(lastDraw.draw_date)}`;
+
+      lastDrawBalls.innerHTML =
+        (lastDraw.drawn_numbers || [])
+          .map(
+            n =>
+              `<span class="last-draw-ball">${n}</span>`
+          )
+          .join("");
+
+      lastDraw4Pool.textContent =
+        `${fmt(lastDraw.pool_4_total)} fiche`;
+
+      lastDraw5Pool.textContent =
+        `${fmt(lastDraw.pool_5_total)} fiche`;
+
+      lastDraw6Pool.textContent =
+        `${fmt(lastDraw.pool_6_total)} fiche`;
+
+      const combos4 =
+        Number(
+          lastDraw.winning_combos_4
+          || 0
+        );
+
+      const combos5 =
+        Number(
+          lastDraw.winning_combos_5
+          || 0
+        );
+
+      const combos6 =
+        Number(
+          lastDraw.winning_combos_6
+          || 0
+        );
+
+      const paid4 =
+        Number(
+          lastDraw.paid_4
+          || 0
+        );
+
+      const paid5 =
+        Number(
+          lastDraw.paid_5
+          || 0
+        );
+
+      const paid6 =
+        Number(
+          lastDraw.paid_6
+          || 0
+        );
+
+      lastDraw4Result.textContent =
+        combos4 > 0
+          ? `${fmt(combos4)} combinazioni vincenti · ${fmt(paid4)} fiche pagate`
+          : `Nessun vincitore · ${fmt(lastDraw.rollover_4_after)} fiche in rollover`;
+
+      lastDraw5Result.textContent =
+        combos5 > 0
+          ? `${fmt(combos5)} combinazioni vincenti · ${fmt(paid5)} fiche pagate`
+          : `Nessun vincitore · ${fmt(lastDraw.rollover_5_after)} fiche in rollover`;
+
+      lastDraw6Result.textContent =
+        combos6 > 0
+          ? `${fmt(combos6)} combinazioni vincenti · ${fmt(paid6)} fiche pagate`
+          : `Nessun vincitore · jackpot in rollover`;
+
+      const winners =
+        Array.isArray(
+          lastDraw.mega_winners
+        )
+          ? lastDraw.mega_winners
+          : [];
+
+      if (winners.length === 1) {
+        const winner =
+          winners[0];
+
+        megaWinnerBanner.classList.add("show");
+        noMegaWinner.hidden = true;
+
+        megaWinnerBanner.innerHTML =
+          `🎉 Complimenti a <strong>${escapeHtml(winner.username)}</strong> ` +
+          `per aver vinto il MEGA JACKPOT!` +
+          `<div class="mega-winner-list">` +
+            `<div class="mega-winner-row">` +
+              `<span>${fmt(winner.winning_combinations)} combinazioni 6/6</span>` +
+              `<span>${fmt(winner.amount)} fiche</span>` +
+            `</div>` +
+          `</div>`;
+
+      } else if (winners.length > 1) {
+        megaWinnerBanner.classList.add("show");
+        noMegaWinner.hidden = true;
+
+        megaWinnerBanner.innerHTML =
+          `🎉 Complimenti ai <strong>${fmt(winners.length)} vincitori</strong> del MEGA JACKPOT!` +
+          `<div class="mega-winner-list">` +
+            winners
+              .map(
+                winner =>
+                  `<div class="mega-winner-row">` +
+                    `<span>${escapeHtml(winner.username)} · ${fmt(winner.winning_combinations)} combinazioni 6/6</span>` +
+                    `<span>${fmt(winner.amount)} fiche</span>` +
+                  `</div>`
+              )
+              .join("") +
+          `</div>`;
+
+      } else {
+        megaWinnerBanner.classList.remove("show");
+        megaWinnerBanner.innerHTML = "";
+
+        noMegaWinner.hidden = false;
+        noMegaWinner.textContent =
+          `Nessun 6/6 nell'ultima estrazione: il Mega Jackpot è passato all'estrazione successiva.`;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(
+        value
+        ?? ""
+      )
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+
     async function loadState() {
       const { data, error } = await supabase.rpc("get_mega_jackpot_state");
 
@@ -951,6 +1389,11 @@
       pool5El.textContent = fmt(draw.pool_5);
       pool6El.textContent = fmt(draw.jackpot_6);
       drawAtEl.textContent = formatDrawAt(draw.draw_at);
+
+      renderLastDraw(
+        data?.last_draw,
+        data?.next_draw
+      );
 
       updateSummary();
     }
