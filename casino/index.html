@@ -977,6 +977,107 @@
       font-size: 13px;
     }
 
+
+    /* ========================================================
+       MEGA JACKPOT - TICKER HOME
+       ======================================================== */
+
+    .jackpot-ticker {
+      width: 100%;
+      height: 42px;
+      margin-top: 14px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(255,221,143,.36);
+      border-radius: 13px;
+      background:
+        linear-gradient(90deg, rgba(87,55,9,.88), rgba(13,31,39,.96), rgba(87,55,9,.88));
+      box-shadow: inset 0 0 22px rgba(255,205,88,.08);
+    }
+
+    .jackpot-ticker::before,
+    .jackpot-ticker::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      bottom: 0;
+      width: 38px;
+      pointer-events: none;
+    }
+
+    .jackpot-ticker::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(13,31,39,1), rgba(13,31,39,0));
+    }
+
+    .jackpot-ticker::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(13,31,39,1), rgba(13,31,39,0));
+    }
+
+    .jackpot-ticker-track {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      min-width: max-content;
+      white-space: nowrap;
+      will-change: transform;
+      animation: jackpotTickerScroll 22s linear infinite;
+    }
+
+    .jackpot-ticker-item {
+      display: inline-block;
+      padding-right: 90px;
+      color: #fff2bd;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .025em;
+      text-shadow: 0 2px 8px rgba(0,0,0,.55);
+    }
+
+    .jackpot-ticker-item strong {
+      color: #ffd65a;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @keyframes jackpotTickerScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .jackpot-ticker-track {
+        animation: none;
+        transform: none;
+      }
+      .jackpot-ticker-item:nth-child(2) {
+        display: none;
+      }
+    }
+
+    .mega-jackpot-card {
+      background:
+        radial-gradient(circle at 50% 25%, rgba(255,211,72,.24), transparent 34%),
+        linear-gradient(145deg, #2b1a04 0%, #0b1c24 52%, #071218 100%);
+    }
+
+    .mega-jackpot-card::before {
+      content: "MEGA";
+      position: absolute;
+      z-index: 0;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,218,93,.12);
+      font-size: clamp(58px, 8vw, 94px);
+      font-weight: 1000;
+      letter-spacing: .08em;
+      pointer-events: none;
+    }
+
   </style>
 </head>
 
@@ -1007,6 +1108,18 @@
           <button id="refreshBtn" class="icon-btn" type="button" title="Aggiorna">↻</button>
           <button id="logoutBtn" class="icon-btn" type="button" title="Esci">↪</button>
         </div>
+
+        <div class="jackpot-ticker" id="jackpotTicker" aria-label="Montepremi Mega Jackpot">
+          <div class="jackpot-ticker-track" id="jackpotTickerTrack">
+            <span class="jackpot-ticker-item" id="jackpotTickerText">
+              Montepremi attuale: caricamento...
+            </span>
+            <span class="jackpot-ticker-item" id="jackpotTickerTextClone" aria-hidden="true">
+              Montepremi attuale: caricamento...
+            </span>
+          </div>
+        </div>
+
 		<div class="xp-panel" id="xpPanel">
 
     <div class="xp-header">
@@ -1044,7 +1157,8 @@
 <button class="category-nav-btn" type="button" data-category-target="category-roulette">🎡 Roulette</button>
 <button class="category-nav-btn" type="button" data-category-target="category-tombola">🎱 Tombola</button>
 <button class="category-nav-btn" type="button" data-category-target="category-blackjack">🂡 Blackjack</button>
-<button class="category-nav-btn" type="button" data-category-target="category-cards">🃏 Carte</button>         </div>
+<button class="category-nav-btn" type="button" data-category-target="category-cards">🃏 Carte</button>
+<button class="category-nav-btn" type="button" data-category-target="category-mega-jackpot">💰 Mega Jackpot</button>         </div>
 
           <div id="games" class="games"></div>
         </section>
@@ -1201,6 +1315,12 @@
 
     const refreshBtn =
       $("#refreshBtn");
+
+    const jackpotTickerText =
+      $("#jackpotTickerText");
+
+    const jackpotTickerTextClone =
+      $("#jackpotTickerTextClone");
 
     const dailyBonusBtn =
       $("#dailyBonusBtn");
@@ -1806,6 +1926,18 @@ function formatXp(value) {
           );
 
 
+        case "mega_jackpot":
+
+          /*
+           * La card ha già un background CSS dedicato.
+           * Se in futuro aggiungiamo una cover basta creare:
+           * mega-jackpot/assets/cover.webp
+           */
+          return (
+            `${folder}/assets/cover.webp?v=${version}`
+          );
+
+
         case "slot":
         default:
 
@@ -2201,6 +2333,13 @@ function formatXp(value) {
         icon: "🃏",
         title: "Carte",
         description: "Pacchetti, collezione e marketplace"
+      },
+      {
+        type: "mega_jackpot",
+        id: "category-mega-jackpot",
+        icon: "💰",
+        title: "Mega Jackpot",
+        description: "Scegli 6–10 numeri e acquista le tessere per le prossime estrazioni"
       }
     ];
 
@@ -2355,6 +2494,22 @@ function formatXp(value) {
                 || null
             })
           );
+
+
+      /*
+       * Mega Jackpot è una pagina del Casino Core e non dipende
+       * dalla presenza di una riga in casino_games.
+       */
+      games.push({
+        id: "mega-jackpot",
+        name: "Mega Jackpot",
+        game_type: "mega_jackpot",
+        active: true,
+        asset_folder: "mega-jackpot",
+        asset_version: 1,
+        page_path: "./mega-jackpot.html",
+        sort_order: 999
+      });
 
 
       renderGames(
@@ -2534,7 +2689,7 @@ function formatXp(value) {
 
 
       return `
-        <article class="game-card">
+        <article class="game-card ${game.game_type === "mega_jackpot" ? "mega-jackpot-card" : ""}">
 
           <img
             class="game-cover"
@@ -3021,6 +3176,121 @@ function formatXp(value) {
     );
 
 
+
+    // ========================================================
+    // MEGA JACKPOT - MONTEPREMI HOME
+    // ========================================================
+
+    function formatPrizePool(
+      value
+    ) {
+
+      const n =
+        Number(
+          value
+          || 0
+        );
+
+
+      return new Intl.NumberFormat(
+        "it-IT",
+        {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2
+        }
+      )
+        .format(
+          n
+        );
+    }
+
+
+    function setJackpotTickerText(
+      text
+    ) {
+
+      if (
+        jackpotTickerText
+      ) {
+        jackpotTickerText.innerHTML =
+          text;
+      }
+
+
+      if (
+        jackpotTickerTextClone
+      ) {
+        jackpotTickerTextClone.innerHTML =
+          text;
+      }
+    }
+
+
+    async function loadMegaJackpotTicker() {
+
+      if (
+        !currentSession
+      ) {
+        return;
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          "get_mega_jackpot_state"
+        );
+
+
+      if (
+        error
+      ) {
+
+        console.warn(
+          "Mega Jackpot ticker:",
+          error
+        );
+
+        setJackpotTickerText(
+          "💰 Montepremi Mega Jackpot momentaneamente non disponibile"
+        );
+
+        return;
+      }
+
+
+      const draw =
+        data?.next_draw
+        || {};
+
+
+      const pool4 =
+        formatPrizePool(
+          draw.pool_4
+        );
+
+      const pool5 =
+        formatPrizePool(
+          draw.pool_5
+        );
+
+      const pool6 =
+        formatPrizePool(
+          draw.jackpot_6
+        );
+
+
+      setJackpotTickerText(
+        `💰 Montepremi attuale: ` +
+        `4 estratti <strong>${pool4}</strong> · ` +
+        `5 estratti <strong>${pool5}</strong> · ` +
+        `MEGA JACKPOT <strong>${pool6}</strong>`
+      );
+    }
+
+
     // ========================================================
     // REFRESH HOME
     // ========================================================
@@ -3049,7 +3319,8 @@ function formatXp(value) {
             loadLeaderboard(),
             loadPreviousWinner(),
             loadDailyBonusState(),
-            loadUserProgression()
+            loadUserProgression(),
+            loadMegaJackpotTicker()
           ]
         );
 
@@ -3351,6 +3622,10 @@ async function loadUserProgression() {
         updateXpBar(
           0,
           1
+        );
+
+        setJackpotTickerText(
+          "💰 Montepremi attuale: accedi per visualizzare i premi"
         );
 
         gamesEl.innerHTML =
