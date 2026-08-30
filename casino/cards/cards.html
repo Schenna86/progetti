@@ -109,7 +109,8 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
   mix-blend-mode:screen;
   transition:opacity .15s ease
 }
-.collectible-render.animate-fx:hover .collectible-fx::after{opacity:.8}
+.collectible-render.animate-fx:hover .collectible-fx::after,
+.collectible-render.animate-fx.fx-active .collectible-fx::after{opacity:.8}
 
   72%,100%{transform:translateX(45%) rotate(5deg)}
 }
@@ -321,6 +322,11 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 }
 
 /* EPICA: solo Alternate Art */
+
+@media (hover:none) and (pointer:coarse){
+  #cardDetailCard .collectible-render.animate-fx{touch-action:none}
+  #openingGrid .collectible-render.animate-fx{touch-action:pan-y}
+}
 
 /* LEGGENDARIA: Starfoil */
 .collectible-render.animate-fx[data-rarity="legendary"] .collectible-fx::before{
@@ -719,6 +725,12 @@ function closeCardDetail(){
 function closeOpening(){$("#openingOverlay").classList.remove("visible");$("#openingGrid").innerHTML=""}
 async function buyPack(id,q){if(state.busy)return;const p=state.store.find(x=>x.id===id);if(!p)return;q=Math.max(1,Math.min(100,Number(q||1)));const total=Number(p.price_chips||0)*q;if(Number(state.profile?.chips||0)<total){$("#storeStatus").textContent="Saldo insufficiente.";return}state.busy=true;$("#storeStatus").textContent=`Acquisto ${p.name} ×${q}...`;try{const{data,error}=await supabase.rpc("buy_card_pack",{p_pack_id:id,p_quantity:q,p_request_id:crypto.randomUUID()});if(error)throw error;if(data?.balance!=null){state.profile.chips=Number(data.balance);$("#balanceValue").textContent=fmt(data.balance)}notifyBalance();$("#storeStatus").textContent=`Acquistato ${p.name} ×${q} per ${fmt(data?.total_price||total)} fiche.`;await Promise.all([loadPacks(),loadStore(),loadProgress()]);const up=await CasinoLevelUp.check();if(up?.balance!=null){state.profile.chips=Number(up.balance);$("#balanceValue").textContent=fmt(up.balance)}await Promise.all([loadProfile(),loadProgress(),loadPacks()])}catch(e){console.error(e);$("#storeStatus").textContent=e?.message||String(e)}finally{state.busy=false;renderStore()}}
 function tab(name){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+  $("#packsSection").classList.toggle("active",name==="packs");
+  $("#collectionSection").classList.toggle("active",name==="collection");
+  $("#storeSection").classList.toggle("active",name==="store")
+}
+
 function updateCardPointer(el,e){
   const r=el.getBoundingClientRect();
   const x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
@@ -728,18 +740,45 @@ function updateCardPointer(el,e){
   el.style.setProperty("--tilt-y",`${(x-.5)*7}deg`);
   el.style.setProperty("--tilt-x",`${(.5-y)*6}deg`)
 }
-document.addEventListener("pointermove",e=>{
-  const el=e.target.closest(".collectible-render.animate-fx");
-  if(el)updateCardPointer(el,e)
-});
-document.addEventListener("pointerout",e=>{
-  const el=e.target.closest(".collectible-render.animate-fx");
-  if(!el)return;
-  if(e.relatedTarget&&el.contains(e.relatedTarget))return;
+function resetCardPointer(el){
+  el.classList.remove("fx-active");
   el.style.setProperty("--mx","50%");
   el.style.setProperty("--my","50%");
   el.style.setProperty("--tilt-x","0deg");
   el.style.setProperty("--tilt-y","0deg")
+}
+
+// Desktop: hover/mouse. Mobile: touch/drag on the enlarged/opened card.
+document.addEventListener("pointerdown",e=>{
+  const el=e.target.closest(".collectible-render.animate-fx");
+  if(!el)return;
+  el.classList.add("fx-active");
+  updateCardPointer(el,e)
+});
+document.addEventListener("pointermove",e=>{
+  const el=e.target.closest(".collectible-render.animate-fx");
+  if(!el)return;
+  if(e.pointerType==="mouse"||el.classList.contains("fx-active"))updateCardPointer(el,e)
+});
+document.addEventListener("pointerup",e=>{
+  const el=e.target.closest(".collectible-render.animate-fx");
+  if(!el)return;
+  if(e.pointerType!=="mouse"){
+    el.classList.remove("fx-active");
+    el.style.setProperty("--tilt-x","0deg");
+    el.style.setProperty("--tilt-y","0deg")
+  }
+});
+document.addEventListener("pointercancel",e=>{
+  const el=e.target.closest(".collectible-render.animate-fx");
+  if(el)resetCardPointer(el)
+});
+document.addEventListener("pointerout",e=>{
+  if(e.pointerType!=="mouse")return;
+  const el=e.target.closest(".collectible-render.animate-fx");
+  if(!el)return;
+  if(e.relatedTarget&&el.contains(e.relatedTarget))return;
+  resetCardPointer(el)
 });
 
 document.addEventListener("click",e=>{
@@ -765,7 +804,6 @@ document.addEventListener("keydown",e=>{
     else if($("#openingOverlay").classList.contains("visible"))closeOpening()
   }
 });
-document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));$("#packsSection").classList.toggle("active",name==="packs");$("#collectionSection").classList.toggle("active",name==="collection");$("#storeSection").classList.toggle("active",name==="store")}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>tab(b.dataset.tab));$("#search").oninput=renderCollection;$("#rarityFilter").onchange=renderCollection;$("#setFilter").onchange=renderCollection;$("#openingClose").onclick=closeOpening;$("#openingContinue").onclick=closeOpening;$("#openingOverlay").onclick=e=>{if(e.target===$("#openingOverlay"))closeOpening()};$("#homeBtn").onclick=()=>location.href="../index.html";
 try{const{data,error}=await supabase.auth.getSession();if(error)throw error;if(!data.session){location.href="../index.html"}else{state.session=data.session;await loadLevels();await Promise.all([loadProfile(),loadProgress(),loadPacks(),loadStore(),loadCollection()]);const up=await CasinoLevelUp.check();if(up?.balance!=null){state.profile.chips=Number(up.balance);$("#balanceValue").textContent=fmt(up.balance)}await Promise.all([loadProfile(),loadProgress(),loadPacks()]);$("#loading").classList.add("hidden")}}catch(e){console.error(e);$("#loadingText").textContent=e?.message||String(e)}
 </script>
