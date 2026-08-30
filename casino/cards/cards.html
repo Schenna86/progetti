@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Marcellus&display=swap" rel="stylesheet">
 
-<style>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=uxwQp28vVg4d9B7HCM615dmXJkpke1kcl10JyZmM-yEW7F7p8XQ4bzXN7kk-kpp__UZTzYAuPH62ngAwWuNh-SyktFods7SAnHkqTerB5ambG86EyCgG9iLmyfWpeCLgLGJeh9zDWqCnRFpj_M5Tjr42QcJZgTlU-oondptpFoxfDhRNOpJJyya0Ga8obhtxv41trtydz_Ri6MbO7xLvrDeUJKHfhgGALdw-R0H8m6cwb8WyQRG55qVWnMZCdS3xEPP9DssLYztQRLWxeg_GrrRb2D5w2smlbvK1ZtITyF2FhMqpyu5nbTuD2ZXswfM-VGldqkEPfWisL6CSEGLQwQ" charset="UTF-8"></script><style>
 :root{--bg:#080b14;--panel:#111624;--panel2:#181f32;--gold:#f4c95d;--gold2:#ffe7a2;--text:#f7f8fb;--muted:#aab1c4;--good:#80e69a;--bad:#ff9696}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#26365d,#0d1220 40%,#060810);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}body{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}.page{width:min(1420px,100%);margin:auto}
 header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;align-items:center;margin-bottom:14px}.brand h1{margin:0;color:var(--gold2);font-size:clamp(26px,4vw,45px)}.brand p{margin:4px 0 0;color:var(--muted);font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill,.btn{min-height:38px;padding:7px 11px;border:1px solid #f4c95d88;border-radius:999px;background:#0005;color:white}.pill strong{color:var(--gold2)}.btn{font-weight:900}
@@ -36,9 +36,9 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
   --card-meta-top:16.2%;
   --card-meta-left:15%;
   --card-meta-right:14%;
-  --card-logo-left:42%;
-  --card-logo-top:85.7%;
-  --card-logo-width:16%;
+  --card-logo-left:43.1%;
+  --card-logo-top:85.8%;
+  --card-logo-width:14%;
 }
 .cardimg,.openedimg{aspect-ratio:2/3;padding:0;overflow:hidden}
 .collectible-render{
@@ -407,6 +407,66 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
   letter-spacing:var(--card-meta-spacing);
 }
 
+
+/* ============================================================
+   DOWNLOAD COLLEZIONI / CACHE LOCALE
+   ============================================================ */
+.offline-manager{
+  margin:12px 14px 4px;
+  padding:12px;
+  border:1px solid #f4c95d2f;
+  border-radius:14px;
+  background:linear-gradient(180deg,#171d2c,#0d121e)
+}
+.offline-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:10px;margin-bottom:10px
+}
+.offline-head strong{display:block;color:var(--gold2);font-size:13px}
+.offline-head span{display:block;margin-top:3px;color:var(--muted);font-size:10px;line-height:1.35}
+.offline-list{display:grid;gap:8px}
+.offline-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;align-items:center;
+  padding:10px;
+  border:1px solid #ffffff14;
+  border-radius:11px;
+  background:#080c15a8
+}
+.offline-collection{display:flex;align-items:center;gap:9px;min-width:0}
+.offline-logo{
+  flex:0 0 auto;width:34px;height:34px;
+  object-fit:contain;border-radius:50%;background:#0005
+}
+.offline-info{min-width:0}
+.offline-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:950}
+.offline-status{margin-top:2px;color:var(--muted);font-size:9px}
+.offline-progress{
+  width:min(360px,100%);height:7px;margin-top:6px;
+  display:block;overflow:hidden;border:0;border-radius:999px;background:#ffffff12
+}
+.offline-progress::-webkit-progress-bar{background:#ffffff12;border-radius:999px}
+.offline-progress::-webkit-progress-value{background:linear-gradient(90deg,#ad741e,#f4c95d);border-radius:999px}
+.offline-progress::-moz-progress-bar{background:linear-gradient(90deg,#ad741e,#f4c95d);border-radius:999px}
+.offline-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.offline-btn{
+  min-height:34px;padding:6px 9px;
+  border:1px solid #f4c95d66;border-radius:9px;
+  background:#9a631d2e;color:var(--gold2);
+  font-size:9px;font-weight:1000
+}
+.offline-btn.primary{background:linear-gradient(#d99b34,#81440f);border-color:#ffe09a;color:white}
+.offline-btn.remove{border-color:#ff85854c;background:#7b252526;color:#ffc1c1}
+.offline-btn:disabled{opacity:.45;cursor:default}
+.offline-warning{padding:9px;border:1px solid #ffba5740;border-radius:9px;background:#8e5c171e;color:#ffd894;font-size:10px}
+@media(max-width:620px){
+  .offline-manager{margin:9px 8px 2px;padding:9px}
+  .offline-row{grid-template-columns:1fr}
+  .offline-actions{justify-content:stretch}
+  .offline-btn{flex:1 1 auto}
+}
+
 </style>
 </head>
 <body>
@@ -437,6 +497,7 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
       <div class="stat">Completamento: <strong id="completionValue">0%</strong></div>
       <div class="stat">Copie totali: <strong id="copiesValue">0</strong></div>
     </div>
+    <div id="offlineManager" class="offline-manager"></div>
     <div id="cardGrid" class="cataloggroups"></div>
   </div>
   <div id="collectionStatus" class="status"></div>
@@ -476,9 +537,11 @@ const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
 const $=s=>document.querySelector(s),nf=new Intl.NumberFormat("it-IT"),cf=new Intl.NumberFormat("it-IT",{notation:"compact",maximumFractionDigits:1});
-const state={session:null,profile:null,levels:[],progress:{xp:0,level:1},packs:[],store:[],collection:[],lastOpened:[],summary:{owned_unique:0,catalog_total:0,total_copies:0,completion_percent:0},busy:false};
+const state={session:null,profile:null,levels:[],progress:{xp:0,level:1},packs:[],store:[],collection:[],lastOpened:[],summary:{owned_unique:0,catalog_total:0,total_copies:0,completion_percent:0},busy:false,offlineBusy:null,offlineStatus:{}};
 const LEVELS_CACHE_KEY="casino-levels:v1";
 const LEVELS_CACHE_TTL_MS=7*24*60*60*1000;
+const CARD_ASSET_CACHE="collectible-card-assets-v1";
+const OFFLINE_META_PREFIX="collectible-offline:";
 
 const fmt=v=>nf.format(Number(v||0));
 const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
@@ -523,6 +586,216 @@ function collectibleCardHTML(card,opts={}){
     <div class="collectible-code">${esc(code)}</div>
   </div>`
 }
+
+async function registerCardsServiceWorker(){
+  if(!("serviceWorker" in navigator)||!window.isSecureContext)return false;
+  try{
+    await navigator.serviceWorker.register("./cards-sw.js",{scope:"./"});
+    await navigator.serviceWorker.ready;
+    return true
+  }catch(e){
+    console.warn("Service Worker carte:",e);
+    return false
+  }
+}
+const cardsServiceWorkerReady=registerCardsServiceWorker();
+
+function collectionCatalogs(){
+  const map=new Map();
+  for(const c of state.collection){
+    const code=String(c.collection_code||"").trim();
+    if(!code)continue;
+    if(!map.has(code))map.set(code,{
+      code,
+      name:c.collection_name||code,
+      logo:collectionLogoPath(c),
+      cards:[]
+    });
+    map.get(code).cards.push(c)
+  }
+  return [...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name),"it"))
+}
+function cacheableAssetUrl(path){
+  if(!path)return"";
+  try{
+    const u=new URL(path,location.href);
+    return u.origin===location.origin?u.href:""
+  }catch{return""}
+}
+function collectionAssetUrls(code){
+  const urls=new Set();
+  const cards=state.collection.filter(c=>String(c.collection_code||"")===String(code));
+  for(const c of cards){
+    const artwork=c.artwork_path||c.image_path;
+    const full=cacheableAssetUrl(assetPath(artwork));
+    const thumb=cacheableAssetUrl(assetPath(thumbnailPath(artwork)));
+    const frame=cacheableAssetUrl(assetPath(c.frame_asset));
+    const logo=cacheableAssetUrl(collectionLogoPath(c));
+    if(full)urls.add(full);
+    if(thumb)urls.add(thumb);
+    if(frame)urls.add(frame);
+    if(logo)urls.add(logo)
+  }
+  return [...urls]
+}
+function offlineMetaKey(code){return`${OFFLINE_META_PREFIX}${code}`}
+function saveOfflineMeta(code,data){
+  try{localStorage.setItem(offlineMetaKey(code),JSON.stringify(data))}catch{}
+}
+function clearOfflineMeta(code){
+  try{localStorage.removeItem(offlineMetaKey(code))}catch{}
+}
+async function countCachedAssets(urls){
+  if(!("caches" in window)||!urls.length)return 0;
+  const cache=await caches.open(CARD_ASSET_CACHE);
+  let cached=0,index=0;
+  const workers=Array.from({length:Math.min(8,urls.length)},async()=>{
+    while(true){
+      const i=index++;
+      if(i>=urls.length)return;
+      if(await cache.match(urls[i]))cached++
+    }
+  });
+  await Promise.all(workers);
+  return cached
+}
+async function refreshOfflineStatus(code){
+  const urls=collectionAssetUrls(code);
+  const cached=await countCachedAssets(urls);
+  state.offlineStatus[code]={cached,total:urls.length};
+  renderOfflineManager();
+  return state.offlineStatus[code]
+}
+async function refreshAllOfflineStatus(){
+  if(!("caches" in window)){
+    renderOfflineManager();
+    return
+  }
+  const collections=collectionCatalogs();
+  await Promise.all(collections.map(c=>refreshOfflineStatus(c.code)))
+}
+function renderOfflineManager(){
+  const host=$("#offlineManager");
+  if(!host)return;
+  const supported=window.isSecureContext&&("caches" in window)&&("serviceWorker" in navigator);
+  const collections=collectionCatalogs();
+  if(!supported){
+    host.innerHTML=`<div class="offline-head"><div><strong>Carte sul dispositivo</strong><span>Scarica le immagini una volta e riusale dalla cache locale.</span></div></div><div class="offline-warning">Il download locale richiede HTTPS e un browser con Service Worker/Cache Storage.</div>`;
+    return
+  }
+  if(!collections.length){
+    host.innerHTML=`<div class="offline-head"><div><strong>Carte sul dispositivo</strong><span>Il download sarà disponibile quando il catalogo sarà caricato.</span></div></div>`;
+    return
+  }
+  host.innerHTML=`<div class="offline-head"><div><strong>Carte sul dispositivo</strong><span>Thumbnail e immagini grandi vengono salvate nella cache del browser. Non vengono riscaricate durante la navigazione normale.</span></div></div><div class="offline-list">${collections.map(col=>{
+    const st=state.offlineStatus[col.code]||{cached:0,total:collectionAssetUrls(col.code).length};
+    const complete=st.total>0&&st.cached>=st.total;
+    const partial=st.cached>0&&!complete;
+    const busy=state.offlineBusy===col.code;
+    const pct=st.total?Math.round(st.cached/st.total*100):0;
+    const text=busy?`Download ${pct}% · ${fmt(st.cached)} / ${fmt(st.total)} file`:complete?`Disponibile sul dispositivo · ${fmt(st.total)} file`:partial?`Download parziale · ${fmt(st.cached)} / ${fmt(st.total)} file`:`Non scaricata · ${fmt(st.total)} file`;
+    return `<div class="offline-row" data-offline-row="${esc(col.code)}">
+      <div class="offline-collection">
+        ${col.logo?`<img class="offline-logo" src="${esc(col.logo)}" alt="">`:""}
+        <div class="offline-info">
+          <div class="offline-name">${esc(col.name)}</div>
+          <div class="offline-status">${text}</div>
+          <progress class="offline-progress" max="${Math.max(1,st.total)}" value="${st.cached}"></progress>
+        </div>
+      </div>
+      <div class="offline-actions">
+        <button class="offline-btn primary" data-offline-download="${esc(col.code)}" ${state.offlineBusy?"disabled":""}>${complete?"AGGIORNA":"SCARICA"}</button>
+        ${st.cached>0?`<button class="offline-btn remove" data-offline-remove="${esc(col.code)}" ${state.offlineBusy?"disabled":""}>RIMUOVI</button>`:""}
+      </div>
+    </div>`
+  }).join("")}</div>`
+}
+async function persistCardStorage(){
+  try{
+    if(navigator.storage?.persist)await navigator.storage.persist()
+  }catch(e){console.warn("Persistenza storage:",e)}
+}
+async function downloadCollectionAssets(code,forceRefresh=false){
+  if(state.offlineBusy)return;
+  const urls=collectionAssetUrls(code);
+  if(!urls.length)return;
+  state.offlineBusy=code;
+  renderOfflineManager();
+  await cardsServiceWorkerReady;
+  await persistCardStorage();
+  const cache=await caches.open(CARD_ASSET_CACHE);
+  let done=0,index=0,failed=0;
+  state.offlineStatus[code]={cached:0,total:urls.length};
+  const updateProgress=()=>{
+    state.offlineStatus[code]={cached:done,total:urls.length};
+    const row=document.querySelector(`[data-offline-row="${CSS.escape(code)}"]`);
+    if(!row)return;
+    const progress=row.querySelector(".offline-progress");
+    const status=row.querySelector(".offline-status");
+    if(progress)progress.value=done;
+    if(status)status.textContent=`Download ${Math.round(done/urls.length*100)}% · ${fmt(done)} / ${fmt(urls.length)} file${failed?` · ${failed} errori`:""}`
+  };
+  const workers=Array.from({length:Math.min(4,urls.length)},async()=>{
+    while(true){
+      const i=index++;
+      if(i>=urls.length)return;
+      const url=urls[i];
+      try{
+        if(!forceRefresh&&await cache.match(url)){
+          done++;
+          updateProgress();
+          continue
+        }
+        const response=await fetch(url,{cache:forceRefresh?"reload":"default",credentials:"same-origin"});
+        if(!response.ok)throw new Error(`${response.status} ${response.statusText}`);
+        await cache.put(url,response.clone());
+        done++
+      }catch(e){
+        failed++;
+        console.warn("Download asset fallito:",url,e)
+      }
+      updateProgress()
+    }
+  });
+  try{
+    await Promise.all(workers);
+    const cached=await countCachedAssets(urls);
+    state.offlineStatus[code]={cached,total:urls.length};
+    if(cached===urls.length){
+      saveOfflineMeta(code,{downloadedAt:Date.now(),files:urls.length});
+    }else{
+      clearOfflineMeta(code)
+    }
+  }finally{
+    state.offlineBusy=null;
+    renderOfflineManager()
+  }
+}
+async function removeCollectionAssets(code){
+  if(state.offlineBusy)return;
+  const urls=collectionAssetUrls(code);
+  if(!urls.length)return;
+  state.offlineBusy=code;
+  renderOfflineManager();
+  try{
+    const cache=await caches.open(CARD_ASSET_CACHE);
+    const protectedUrls=new Set();
+    for(const col of collectionCatalogs()){
+      if(col.code===code)continue;
+      for(const url of collectionAssetUrls(col.code))protectedUrls.add(url)
+    }
+    for(const url of urls){
+      if(!protectedUrls.has(url))await cache.delete(url)
+    }
+    clearOfflineMeta(code);
+    const cached=await countCachedAssets(urls);
+    state.offlineStatus[code]={cached,total:urls.length}
+  }finally{
+    state.offlineBusy=null;
+    renderOfflineManager()
+  }
+}
+
 function notifyBalance(){try{const c=new BroadcastChannel("slot-machine-sync");c.postMessage({type:"balance-changed",source:"cards"});c.close()}catch{}try{localStorage.setItem("slot-machine-balance-sync",String(Date.now()))}catch{}}
 function updateXp(){const xp=Number(state.progress.xp||0),lv=Number(state.progress.level||1);$("#xpLevel").textContent=lv;if(lv>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${cf.format(xp)} XP · MAX`;return}const c=state.levels.find(x=>Number(x.level)===lv),n=state.levels.find(x=>Number(x.level)===lv+1),cx=c?Number(c.xp_required):lv===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${cf.format(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.min(100,into/need*100)}%`;$("#xpText").textContent=`${cf.format(into)} / ${cf.format(need)} XP`;$("#xpText").title=`${fmt(into)} / ${fmt(need)} XP`}
 async function loadProfile(){const{data,error}=await supabase.from("profiles").select("username,chips").eq("user_id",state.session.user.id).single();if(error)throw error;state.profile=data;$("#usernameValue").textContent=data.username||"—";$("#balanceValue").textContent=fmt(data.chips)}
@@ -530,7 +803,7 @@ async function loadLevels(){try{const raw=localStorage.getItem(LEVELS_CACHE_KEY)
 async function loadProgress(){const{data,error}=await supabase.from("user_progression").select("xp,level").eq("user_id",state.session.user.id).maybeSingle();if(error)throw error;state.progress={xp:Number(data?.xp||0),level:Number(data?.level||1)};updateXp()}
 async function loadPacks(){const{data,error}=await supabase.rpc("get_my_card_packs");if(error)throw error;state.packs=Array.isArray(data)?data:[];renderPacks()}
 async function loadStore(){const{data,error}=await supabase.from("card_packs").select("id,name,description,image_path,cards_per_pack,price_chips,purchasable,openable,active,sort_order").eq("active",true).order("sort_order").order("name");if(error)throw error;state.store=data||[];renderStore()}
-async function loadCollection(){const{data,error}=await supabase.rpc("get_my_card_collection");if(error){console.warn(error);state.collection=[];state.summary={owned_unique:0,catalog_total:0,total_copies:0,completion_percent:0};$("#collectionStatus").textContent="Esegui 005_cards_frontend_rpc_v2.sql per abilitare la nuova collezione.";renderCollection();return}state.collection=Array.isArray(data?.cards)?data.cards:[];state.summary=data?.summary||{};$("#collectionStatus").textContent="";renderCollection()}
+async function loadCollection(){const{data,error}=await supabase.rpc("get_my_card_collection");if(error){console.warn(error);state.collection=[];state.summary={owned_unique:0,catalog_total:0,total_copies:0,completion_percent:0};$("#collectionStatus").textContent="Esegui 005_cards_frontend_rpc_v2.sql per abilitare la nuova collezione.";renderCollection();renderOfflineManager();return}state.collection=Array.isArray(data?.cards)?data.cards:[];state.summary=data?.summary||{};$("#collectionStatus").textContent="";renderCollection();renderOfflineManager();refreshAllOfflineStatus().catch(e=>console.warn("Stato cache collezioni:",e))}
 function packCard(p,store=false){const owned=Number((state.packs.find(x=>x.id===p.id)?.quantity)??p.quantity??0),canOpen=!store&&p.openable===true&&p.configured===true&&owned>0;return`<article class="pack ${cls(p.id)}"><div class="visual">${imageHTML(p)}<div class="qty">${store?`Tu: ×${fmt(owned)}`:`×${fmt(owned)}`}</div></div><div class="body"><h3>${esc(p.name)}</h3><p>${esc(p.description||"Pacchetto della collezione.")}</p>${store?`<div class="price">🪙 ${fmt(p.price_chips)}</div>`:""}<div class="tags">${p.cards_per_pack?`<span class="tag">${fmt(p.cards_per_pack)} carte</span>`:`<span class="tag wait">Contenuto da configurare</span>`}${canOpen?`<span class="tag good">Apribile</span>`:""}</div>${store?`<div class="buyrow"><select data-q="${esc(p.id)}"><option>1</option><option>2</option><option>5</option><option>10</option></select><button class="action" data-buy="${esc(p.id)}">ACQUISTA</button></div>`:`<button class="action" data-open="${esc(p.id)}" ${canOpen?"":"disabled"}>${canOpen?"APRI PACCHETTO":p.openable?"CONFIGURAZIONE INCOMPLETA":"APERTURA NON DISPONIBILE"}</button>`}</div></article>`}
 function renderPacks(){const owned=state.packs.filter(p=>Number(p.quantity||0)>0),tot=owned.reduce((s,p)=>s+Number(p.quantity||0),0);$("#packBadge").textContent=`${fmt(tot)} ${tot===1?"pacchetto":"pacchetti"}`;$("#packGrid").innerHTML=owned.length?owned.map(p=>packCard(p)).join(""):`<div class="empty"><strong>Nessun pacchetto posseduto</strong>I pacchetti ottenuti dai livelli o acquistati appariranno qui.</div>`;document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openPack(b.dataset.open))}
 function renderStore(){const list=state.store.filter(p=>p.purchasable===true&&Number(p.price_chips||0)>0);$("#storeBadge").textContent=`${fmt(list.length)} disponibili`;$("#storeGrid").innerHTML=list.length?list.map(p=>packCard(p,true)).join(""):`<div class="empty"><strong>Nessun pacchetto in vendita</strong>I pacchetti ricompensa continuano comunque a funzionare.</div>`;document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const id=b.dataset.buy,q=Number(document.querySelector(`[data-q="${CSS.escape(id)}"]`)?.value||1);buyPack(id,q)})}
@@ -782,6 +1055,27 @@ document.addEventListener("pointerout",e=>{
 });
 
 document.addEventListener("click",e=>{
+  const download=e.target.closest("[data-offline-download]");
+  if(download){
+    const code=download.dataset.offlineDownload;
+    const col=collectionCatalogs().find(c=>c.code===code);
+    const st=state.offlineStatus[code]||{};
+    const refresh=Number(st.cached||0)>=Number(st.total||1);
+    const question=refresh
+      ?`Aggiornare la collezione ${col?.name||code}? Le immagini verranno riscaricate dalla rete.`
+      :`Scaricare la collezione ${col?.name||code} sul dispositivo? Il download comprende thumbnail e immagini grandi e può usare molti MB di traffico.`;
+    if(!confirm(question))return;
+    downloadCollectionAssets(code,refresh).catch(err=>{console.error(err);state.offlineBusy=null;renderOfflineManager()});
+    return
+  }
+  const remove=e.target.closest("[data-offline-remove]");
+  if(remove){
+    const code=remove.dataset.offlineRemove;
+    const col=collectionCatalogs().find(c=>c.code===code);
+    if(!confirm(`Rimuovere dal dispositivo le immagini scaricate di ${col?.name||code}?`))return;
+    removeCollectionAssets(code).catch(err=>{console.error(err);state.offlineBusy=null;renderOfflineManager()});
+    return
+  }
   const owned=e.target.closest("[data-view-card]");
   if(owned){
     const card=findCardForViewer(owned.dataset.viewCard);
