@@ -467,6 +467,195 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
   .offline-btn{flex:1 1 auto}
 }
 
+
+/* ============================================================
+   MARKETPLACE / BURN
+   ============================================================ */
+.market-toolbar{
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) 170px 170px 170px 150px;
+  gap:8px;
+  padding:10px 14px;
+  border-bottom:1px solid #ffffff0d
+}
+.market-toolbar input,.market-toolbar select,
+.tradeaction-body input,.tradeaction-body select{
+  min-height:40px;padding:7px 9px;
+  border:1px solid #ffffff1b;border-radius:9px;
+  background:#090d18;color:white
+}
+.market-stats{display:flex;gap:7px;flex-wrap:wrap;padding:11px 14px 0}
+.market-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+  gap:10px;padding:14px
+}
+.market-card{
+  content-visibility:auto;
+  contain-intrinsic-size:330px 250px;
+  display:grid;
+  grid-template-columns:126px minmax(0,1fr);
+  gap:11px;
+  overflow:hidden;
+  padding:10px;
+  border:1px solid #ffffff18;
+  border-radius:14px;
+  background:linear-gradient(145deg,#1a2234,#0b101a);
+  box-shadow:0 10px 28px #0003
+}
+.market-card.mine{border-color:#f4c95d55;background:linear-gradient(145deg,#272333,#0c1019)}
+.market-preview{
+  align-self:start;overflow:hidden;
+  border:1px solid #ffffff18;border-radius:9px;
+  cursor:zoom-in;background:#070a10
+}
+.market-info{min-width:0;display:flex;flex-direction:column}
+.market-rarity{
+  color:var(--gold2);font-size:8px;font-weight:1000;
+  letter-spacing:.08em;text-transform:uppercase
+}
+.market-info h3{
+  margin:3px 0 2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:15px
+}
+.market-code{color:var(--muted);font-size:9px}
+.market-seller{
+  margin-top:7px;padding-top:7px;border-top:1px solid #ffffff0e;
+  color:var(--muted);font-size:10px
+}
+.market-price{
+  margin-top:auto;padding-top:8px;
+  color:var(--gold2);font-size:20px;font-weight:1000
+}
+.market-qty{margin-top:2px;color:var(--muted);font-size:9px}
+.market-buttons{display:flex;gap:6px;margin-top:8px}
+.market-buttons input{
+  width:68px;min-height:38px;padding:6px 7px;
+  border:1px solid #ffffff1c;border-radius:8px;
+  background:#080c15;color:white;text-align:center
+}
+.market-btn{
+  flex:1;min-height:38px;padding:6px 9px;
+  border:1px solid #ffe09a;border-radius:8px;
+  background:linear-gradient(#d99b34,#81440f);
+  color:white;font-size:10px;font-weight:1000
+}
+.market-btn.secondary{
+  border-color:#ffffff25;background:#ffffff0a;color:#e7ebf3
+}
+.market-btn.danger{
+  border-color:#ff8f8f55;background:#7d25252f;color:#ffc3c3
+}
+.market-btn:disabled{opacity:.45;cursor:default}
+.market-own{
+  display:inline-flex;align-self:flex-start;
+  margin-top:6px;padding:4px 6px;border:1px solid #f4c95d55;
+  border-radius:999px;background:#c48a2430;color:var(--gold2);
+  font-size:8px;font-weight:1000
+}
+
+/* Azioni nella carta ingrandita */
+.carddetail-trade{
+  flex:1 0 100%;
+  display:grid;gap:8px;
+  padding-top:9px;border-top:1px solid #ffffff10
+}
+.carddetail-trade-stats{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px
+}
+.carddetail-trade-stat{
+  padding:7px 8px;border:1px solid #ffffff13;border-radius:9px;
+  background:#0003;color:var(--muted);font-size:9px
+}
+.carddetail-trade-stat strong{
+  display:block;margin-top:2px;color:white;font-size:12px
+}
+.carddetail-trade-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.carddetail-action{
+  min-height:40px;padding:7px 9px;border-radius:9px;
+  font-size:10px;font-weight:1000
+}
+.carddetail-action.burn{
+  border:1px solid #ffb05f66;background:#8f481d3b;color:#ffd2a0
+}
+.carddetail-action.list{
+  border:1px solid #f4c95d77;background:#9a6b2235;color:var(--gold2)
+}
+.carddetail-action:disabled{opacity:.4;cursor:default}
+.carddetail-market-note{
+  color:var(--muted);font-size:9px;line-height:1.35
+}
+
+/* Modale conferma burn/listing/acquisto */
+.tradeaction-overlay{
+  position:fixed;inset:0;z-index:1800;
+  display:none;place-items:center;padding:14px;
+  background:#02040aeb;backdrop-filter:blur(9px)
+}
+.tradeaction-overlay.visible{display:grid}
+.tradeaction-modal{
+  width:min(460px,96vw);overflow:hidden;
+  border:1px solid #f4c95d88;border-radius:17px;
+  background:linear-gradient(#171f32,#090d17);
+  box-shadow:0 30px 100px #000d
+}
+.tradeaction-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 14px;border-bottom:1px solid #ffffff12
+}
+.tradeaction-head h3{margin:0;color:var(--gold2);font-size:17px}
+.tradeaction-close{
+  width:35px;height:35px;border:1px solid #ffffff22;border-radius:50%;
+  background:#0005;color:white;font-size:18px
+}
+.tradeaction-body{padding:14px}
+.tradeaction-cardname{font-size:15px;font-weight:1000}
+.tradeaction-sub{margin-top:3px;color:var(--muted);font-size:10px}
+.tradeaction-field{display:grid;gap:4px;margin-top:12px}
+.tradeaction-field label{color:#c9cfdd;font-size:9px;font-weight:900}
+.tradeaction-summary{
+  margin-top:12px;padding:10px;border:1px solid #f4c95d2f;
+  border-radius:10px;background:#0004
+}
+.tradeaction-summary-row{
+  display:flex;justify-content:space-between;gap:10px;
+  padding:3px 0;color:var(--muted);font-size:10px
+}
+.tradeaction-summary-row strong{color:white}
+.tradeaction-warning{
+  margin-top:10px;padding:8px;border:1px solid #ff9a6150;
+  border-radius:8px;background:#6e2d1d2d;color:#ffc6a5;
+  font-size:9px;line-height:1.4
+}
+.tradeaction-submit{
+  width:100%;min-height:43px;margin-top:12px;
+  border:1px solid #ffe09a;border-radius:9px;
+  background:linear-gradient(#dfa23d,#884812);
+  color:white;font-weight:1000
+}
+.tradeaction-submit.danger{
+  border-color:#ffb169;background:linear-gradient(#b5662d,#6d2b17)
+}
+.tradeaction-submit:disabled{opacity:.45}
+.tradeaction-status{min-height:18px;margin-top:8px;color:#ffd894;font-size:10px}
+
+@media(max-width:1050px){
+  .market-toolbar{grid-template-columns:1fr 1fr 1fr}
+  .market-toolbar input{grid-column:1/-1}
+}
+@media(max-width:700px){
+  .market-toolbar{grid-template-columns:1fr 1fr;padding:8px}
+  .market-toolbar input{grid-column:1/-1}
+  .market-grid{grid-template-columns:1fr;padding:8px;gap:7px}
+  .market-card{grid-template-columns:108px minmax(0,1fr);padding:8px}
+}
+@media(max-width:420px){
+  .market-toolbar{grid-template-columns:1fr}
+  .market-card{grid-template-columns:96px minmax(0,1fr)}
+  .carddetail-trade-actions{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -480,6 +669,7 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 <nav class="tabs">
   <button class="tab active" data-tab="packs">🎁 I miei pacchetti</button>
   <button class="tab" data-tab="collection">🃏 Collezione</button>
+  <button class="tab" data-tab="market">🏪 Marketplace</button>
   <button class="tab" data-tab="store">🪙 Negozio</button>
 </nav>
 
@@ -503,6 +693,43 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
   <div id="collectionStatus" class="status"></div>
 </section>
 
+
+<section id="marketSection" class="section">
+  <div class="panel">
+    <div class="panelhead">
+      <div>
+        <h2>Marketplace carte</h2>
+        <p>Compra carte dagli altri giocatori. Il prezzo di vendita è deciso liberamente dal venditore.</p>
+      </div>
+      <div id="marketBadge" class="badge">0 annunci</div>
+    </div>
+
+    <div class="market-toolbar">
+      <input id="marketSearch" type="search" placeholder="Cerca carta, codice o venditore...">
+      <select id="marketRarityFilter"><option value="">Tutte le rarità</option></select>
+      <select id="marketSetFilter"><option value="">Tutte le collezioni</option></select>
+      <select id="marketSort">
+        <option value="price_asc">Prezzo crescente</option>
+        <option value="price_desc">Prezzo decrescente</option>
+        <option value="newest">Più recenti</option>
+      </select>
+      <select id="marketScope">
+        <option value="all">Tutti gli annunci</option>
+        <option value="mine">I miei annunci</option>
+      </select>
+    </div>
+
+    <div class="market-stats">
+      <div class="stat">Annunci attivi: <strong id="marketActiveValue">0</strong></div>
+      <div class="stat">I miei attivi: <strong id="marketMineValue">0</strong></div>
+      <div class="stat">Carte diverse: <strong id="marketCardsValue">0</strong></div>
+    </div>
+
+    <div id="marketGrid" class="market-grid"></div>
+  </div>
+  <div id="marketStatus" class="status"></div>
+</section>
+
 <section id="storeSection" class="section">
   <div class="panel"><div class="panelhead"><div><h2>Negozio pacchetti</h2><p>Gli acquisti spendono fiche e generano XP. L'apertura non genera XP.</p></div><div id="storeBadge" class="badge">0 disponibili</div></div><div id="storeGrid" class="grid"></div></div>
   <div id="storeStatus" class="status"></div>
@@ -523,7 +750,19 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
     <div class="carddetail-meta">
       <span id="cardDetailRarity" class="carddetail-rarity"></span>
       <span id="cardDetailCopies"></span>
+      <div id="cardDetailTrade" class="carddetail-trade"></div>
     </div>
+  </div>
+</div>
+
+
+<div id="tradeActionOverlay" class="tradeaction-overlay">
+  <div class="tradeaction-modal">
+    <div class="tradeaction-head">
+      <h3 id="tradeActionTitle">Operazione carta</h3>
+      <button id="tradeActionClose" class="tradeaction-close" aria-label="Chiudi">×</button>
+    </div>
+    <div id="tradeActionBody" class="tradeaction-body"></div>
   </div>
 </div>
 
@@ -537,7 +776,7 @@ const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
 const $=s=>document.querySelector(s),nf=new Intl.NumberFormat("it-IT"),cf=new Intl.NumberFormat("it-IT",{notation:"compact",maximumFractionDigits:1});
-const state={session:null,profile:null,levels:[],progress:{xp:0,level:1},packs:[],store:[],collection:[],lastOpened:[],summary:{owned_unique:0,catalog_total:0,total_copies:0,completion_percent:0},busy:false,offlineBusy:null,offlineStatus:{}};
+const state={session:null,profile:null,levels:[],progress:{xp:0,level:1},packs:[],store:[],collection:[],lastOpened:[],marketListings:[],myMarketListings:[],marketAction:null,summary:{owned_unique:0,catalog_total:0,total_copies:0,completion_percent:0},busy:false,offlineBusy:null,offlineStatus:{}};
 const LEVELS_CACHE_KEY="casino-levels:v1";
 const LEVELS_CACHE_TTL_MS=7*24*60*60*1000;
 const CARD_ASSET_CACHE="collectible-card-assets-v1";
@@ -804,6 +1043,394 @@ async function loadProgress(){const{data,error}=await supabase.from("user_progre
 async function loadPacks(){const{data,error}=await supabase.rpc("get_my_card_packs");if(error)throw error;state.packs=Array.isArray(data)?data:[];renderPacks()}
 async function loadStore(){const{data,error}=await supabase.from("card_packs").select("id,name,description,image_path,cards_per_pack,price_chips,purchasable,openable,active,sort_order").eq("active",true).order("sort_order").order("name");if(error)throw error;state.store=data||[];renderStore()}
 async function loadCollection(){const{data,error}=await supabase.rpc("get_my_card_collection");if(error){console.warn(error);state.collection=[];state.summary={owned_unique:0,catalog_total:0,total_copies:0,completion_percent:0};$("#collectionStatus").textContent="Esegui 005_cards_frontend_rpc_v2.sql per abilitare la nuova collezione.";renderCollection();renderOfflineManager();return}state.collection=Array.isArray(data?.cards)?data.cards:[];state.summary=data?.summary||{};$("#collectionStatus").textContent="";renderCollection();renderOfflineManager();refreshAllOfflineStatus().catch(e=>console.warn("Stato cache collezioni:",e))}
+
+async function loadMarketplace(){
+  const [marketRes,myRes]=await Promise.all([
+    supabase.rpc("get_collectible_marketplace",{
+      p_collection_code:null,
+      p_card_code:null,
+      p_limit:500,
+      p_offset:0
+    }),
+    supabase.rpc("get_my_collectible_market_listings")
+  ]);
+  if(marketRes.error)throw marketRes.error;
+  if(myRes.error)throw myRes.error;
+  state.marketListings=Array.isArray(marketRes.data?.listings)?marketRes.data.listings:[];
+  state.myMarketListings=Array.isArray(myRes.data?.listings)?myRes.data.listings:[];
+  $("#marketStatus").textContent="";
+  renderMarketplace()
+}
+function cardCode(card){return String(card?.card_code||card?.code||"")}
+function enrichedMarketCard(listing){
+  const owned=state.collection.find(c=>cardCode(c)===String(listing.card_code||""));
+  return {
+    ...(owned||{}),
+    ...listing,
+    code:listing.card_code,
+    card_code:listing.card_code,
+    collection_name:owned?.collection_name||listing.collection_code||"",
+    collection_logo_path:owned?.collection_logo_path||null,
+    typography_theme:owned?.typography_theme||"default"
+  }
+}
+function marketOwnActiveCount(){
+  return state.marketListings.filter(x=>x.is_mine===true).length
+}
+function lowestMarketPrice(code){
+  const prices=state.marketListings
+    .filter(x=>String(x.card_code)===String(code)&&Number(x.quantity_remaining||0)>0)
+    .map(x=>Number(x.unit_price||0))
+    .filter(x=>Number.isFinite(x)&&x>0);
+  return prices.length?Math.min(...prices):null
+}
+function populateMarketFilters(){
+  const raritySelect=$("#marketRarityFilter"),setSelect=$("#marketSetFilter");
+  if(!raritySelect||!setSelect)return;
+  const rv=raritySelect.value,sv=setSelect.value;
+  const rs=[...new Map(
+    state.collection
+      .filter(c=>c.rarity_code)
+      .sort((a,b)=>Number(a.rarity_id??999)-Number(b.rarity_id??999))
+      .map(c=>[c.rarity_code,c.rarity_name||c.rarity_code])
+  ).entries()];
+  const ss=[...new Map(
+    state.collection
+      .filter(c=>c.collection_code)
+      .sort((a,b)=>String(a.collection_name||a.collection_code).localeCompare(String(b.collection_name||b.collection_code),"it"))
+      .map(c=>[c.collection_code,c.collection_name||c.collection_code])
+  ).entries()];
+  raritySelect.innerHTML=`<option value="">Tutte le rarità</option>`+rs.map(([v,n])=>`<option value="${esc(v)}">${esc(n)}</option>`).join("");
+  setSelect.innerHTML=`<option value="">Tutte le collezioni</option>`+ss.map(([v,n])=>`<option value="${esc(v)}">${esc(n)}</option>`).join("");
+  if(rs.some(x=>x[0]===rv))raritySelect.value=rv;
+  if(ss.some(x=>x[0]===sv))setSelect.value=sv
+}
+function filteredMarketplace(){
+  const q=String($("#marketSearch")?.value||"").trim().toLocaleLowerCase("it-IT");
+  const rarity=$("#marketRarityFilter")?.value||"";
+  const collection=$("#marketSetFilter")?.value||"";
+  const scope=$("#marketScope")?.value||"all";
+  const sort=$("#marketSort")?.value||"price_asc";
+  const list=state.marketListings
+    .map(enrichedMarketCard)
+    .filter(x=>
+      (!rarity||x.rarity_code===rarity)&&
+      (!collection||x.collection_code===collection)&&
+      (scope!=="mine"||x.is_mine===true)&&
+      (!q||[
+        x.name,x.card_code,x.collection_name,x.rarity_name,x.seller_username
+      ].join(" ").toLocaleLowerCase("it-IT").includes(q))
+    );
+  list.sort((a,b)=>{
+    if(sort==="price_desc")return Number(b.unit_price||0)-Number(a.unit_price||0)||String(b.created_at||"").localeCompare(String(a.created_at||""));
+    if(sort==="newest")return String(b.created_at||"").localeCompare(String(a.created_at||""));
+    return Number(a.unit_price||0)-Number(b.unit_price||0)||String(a.created_at||"").localeCompare(String(b.created_at||""))
+  });
+  return list
+}
+function renderMarketplace(){
+  if(!$("#marketGrid"))return;
+  populateMarketFilters();
+  const list=filteredMarketplace();
+  const active=state.marketListings.length;
+  const mine=marketOwnActiveCount();
+  const unique=new Set(state.marketListings.map(x=>x.card_code)).size;
+  $("#marketBadge").textContent=`${fmt(active)} ${active===1?"annuncio":"annunci"}`;
+  $("#marketActiveValue").textContent=fmt(active);
+  $("#marketMineValue").textContent=fmt(mine);
+  $("#marketCardsValue").textContent=fmt(unique);
+  if(!list.length){
+    $("#marketGrid").innerHTML=`<div class="empty"><strong>Nessun annuncio trovato</strong>Non ci sono annunci che corrispondono ai filtri selezionati.</div>`;
+    return
+  }
+  $("#marketGrid").innerHTML=list.map(l=>{
+    const mine=l.is_mine===true;
+    const remaining=Math.max(0,Number(l.quantity_remaining||0));
+    const seller=l.seller_username||"Giocatore";
+    return `<article class="market-card${mine?" mine":""}">
+      <div class="market-preview" data-view-market-card="${esc(l.card_code)}">
+        ${collectibleCardHTML(l,{lazy:true,animate:false,thumbnail:true})}
+      </div>
+      <div class="market-info">
+        <div class="market-rarity" style="color:${rarityColor(l.rarity_code)}">${esc(l.rarity_name||l.rarity_code||"Carta")}</div>
+        <h3>${esc(l.name||l.card_code)}</h3>
+        <div class="market-code">${esc(l.card_code)} · ${esc(l.collection_name||l.collection_code||"")}</div>
+        ${mine?`<span class="market-own">TUO ANNUNCIO</span>`:`<div class="market-seller">Venditore: <strong>${esc(seller)}</strong></div>`}
+        <div class="market-price">🪙 ${fmt(l.unit_price)}</div>
+        <div class="market-qty">Disponibili nell'annuncio: ×${fmt(remaining)}</div>
+        <div class="market-buttons">
+          ${mine
+            ?`<button class="market-btn danger" data-market-cancel="${esc(l.listing_id)}">ANNULLA ANNUNCIO</button>`
+            :`<button class="market-btn" data-market-buy="${esc(l.listing_id)}">COMPRA</button>`
+          }
+        </div>
+      </div>
+    </article>`
+  }).join("")
+}
+function availableCardQuantity(card){
+  if(card?.available_quantity!=null)return Math.max(0,Number(card.available_quantity||0));
+  return Math.max(0,Number(card?.quantity||0)-Number(card?.reserved_quantity||0))
+}
+function renderCardDetailTrade(card){
+  const host=$("#cardDetailTrade");
+  if(!host)return;
+  const qty=Math.max(0,Number(card?.quantity||0));
+  const reserved=Math.max(0,Number(card?.reserved_quantity||0));
+  const available=availableCardQuantity(card);
+  const burn=Math.max(0,Number(card?.burn_price||0));
+  const low=lowestMarketPrice(cardCode(card));
+  const tradable=card?.is_tradable!==false;
+  if(qty<=0){
+    host.innerHTML=`<div class="carddetail-market-note">${low!=null?`Prezzo più basso sul marketplace: <strong>🪙 ${fmt(low)}</strong>`:"Nessun annuncio attivo per questa carta."}</div>`;
+    return
+  }
+  host.innerHTML=`
+    <div class="carddetail-trade-stats">
+      <div class="carddetail-trade-stat">Disponibili<strong>×${fmt(available)}</strong></div>
+      <div class="carddetail-trade-stat">In vendita / riservate<strong>×${fmt(reserved)}</strong></div>
+      <div class="carddetail-trade-stat">Burn garantito<strong>${burn>0?`🪙 ${fmt(burn)}`:"—"}</strong></div>
+      <div class="carddetail-trade-stat">Minimo marketplace<strong>${low!=null?`🪙 ${fmt(low)}`:"—"}</strong></div>
+    </div>
+    <div class="carddetail-trade-actions">
+      <button class="carddetail-action burn" data-card-burn="${esc(cardCode(card))}" ${available>0&&burn>0?"":"disabled"}>🔥 VENDI SUBITO</button>
+      <button class="carddetail-action list" data-card-list="${esc(cardCode(card))}" ${available>0&&tradable?"":"disabled"}>🏪 METTI IN VENDITA</button>
+    </div>
+    ${burn<=0?`<div class="carddetail-market-note">Prezzo di burn non disponibile nel catalogo frontend. Esegui la patch RPC marketplace.</div>`:""}
+  `
+}
+function showTradeAction(){
+  $("#tradeActionOverlay").classList.add("visible")
+}
+function closeTradeAction(){
+  if(state.busy)return;
+  state.marketAction=null;
+  $("#tradeActionOverlay").classList.remove("visible");
+  $("#tradeActionBody").innerHTML=""
+}
+function openBurnAction(code){
+  const card=findCardForViewer(code);
+  if(!card)return;
+  const available=availableCardQuantity(card);
+  const unit=Math.max(0,Number(card.burn_price||0));
+  if(available<1||unit<1)return;
+  state.marketAction={type:"burn",code,unit,max:available};
+  $("#tradeActionTitle").textContent="Vendita immediata";
+  $("#tradeActionBody").innerHTML=`
+    <div class="tradeaction-cardname">${esc(card.name)}</div>
+    <div class="tradeaction-sub">${esc(card.rarity_name||card.rarity_code||"")} · ${esc(code)}</div>
+    <div class="tradeaction-field">
+      <label>QUANTITÀ DA DISTRUGGERE</label>
+      <input id="tradeActionQuantity" type="number" min="1" max="${available}" step="1" value="1">
+    </div>
+    <div class="tradeaction-summary">
+      <div class="tradeaction-summary-row"><span>Valore unitario</span><strong>🪙 ${fmt(unit)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Riceverai</span><strong id="tradeActionTotal">🪙 ${fmt(unit)}</strong></div>
+    </div>
+    <div class="tradeaction-warning">Le copie vendute al sistema vengono distrutte definitivamente e non possono essere recuperate.</div>
+    <button class="tradeaction-submit danger" data-confirm-burn>CONFERMA VENDITA</button>
+    <div id="tradeActionStatus" class="tradeaction-status"></div>`;
+  showTradeAction();
+  $("#tradeActionQuantity").oninput=updateTradeActionTotal
+}
+function openListingAction(code){
+  const card=findCardForViewer(code);
+  if(!card)return;
+  const available=availableCardQuantity(card);
+  if(available<1||card.is_tradable===false)return;
+  const low=lowestMarketPrice(code);
+  state.marketAction={type:"list",code,max:available};
+  $("#tradeActionTitle").textContent="Metti in vendita";
+  $("#tradeActionBody").innerHTML=`
+    <div class="tradeaction-cardname">${esc(card.name)}</div>
+    <div class="tradeaction-sub">${esc(card.rarity_name||card.rarity_code||"")} · ${esc(code)}</div>
+    <div class="tradeaction-field">
+      <label>QUANTITÀ</label>
+      <input id="tradeActionQuantity" type="number" min="1" max="${available}" step="1" value="1">
+    </div>
+    <div class="tradeaction-field">
+      <label>PREZZO PER CARTA (FICHE)</label>
+      <input id="tradeActionPrice" type="number" min="1" max="${Number.MAX_SAFE_INTEGER}" step="1" value="${low||""}" placeholder="Inserisci il prezzo">
+    </div>
+    <div class="tradeaction-summary">
+      ${low!=null?`<div class="tradeaction-summary-row"><span>Minimo attuale marketplace</span><strong>🪙 ${fmt(low)}</strong></div>`:""}
+      <div class="tradeaction-summary-row"><span>Totale annuncio</span><strong id="tradeActionTotal">—</strong></div>
+    </div>
+    <button class="tradeaction-submit" data-confirm-list>METTI IN VENDITA</button>
+    <div id="tradeActionStatus" class="tradeaction-status"></div>`;
+  showTradeAction();
+  $("#tradeActionQuantity").oninput=updateTradeActionTotal;
+  $("#tradeActionPrice").oninput=updateTradeActionTotal;
+  updateTradeActionTotal()
+}
+function openBuyAction(listingId){
+  const raw=state.marketListings.find(x=>String(x.listing_id)===String(listingId));
+  if(!raw||raw.is_mine===true)return;
+  const card=enrichedMarketCard(raw);
+  const max=Math.max(1,Number(raw.quantity_remaining||1));
+  const unit=Number(raw.unit_price||0);
+  state.marketAction={type:"buy",listingId:String(listingId),code:raw.card_code,unit,max};
+  $("#tradeActionTitle").textContent="Compra carta";
+  $("#tradeActionBody").innerHTML=`
+    <div class="tradeaction-cardname">${esc(card.name||raw.card_code)}</div>
+    <div class="tradeaction-sub">${esc(card.rarity_name||card.rarity_code||"")} · venditore ${esc(raw.seller_username||"Giocatore")}</div>
+    <div class="tradeaction-field">
+      <label>QUANTITÀ</label>
+      <input id="tradeActionQuantity" type="number" min="1" max="${max}" step="1" value="1">
+    </div>
+    <div class="tradeaction-summary">
+      <div class="tradeaction-summary-row"><span>Prezzo unitario</span><strong>🪙 ${fmt(unit)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Totale</span><strong id="tradeActionTotal">🪙 ${fmt(unit)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Saldo attuale</span><strong>🪙 ${fmt(state.profile?.chips||0)}</strong></div>
+    </div>
+    <button class="tradeaction-submit" data-confirm-buy>COMPRA</button>
+    <div id="tradeActionStatus" class="tradeaction-status"></div>`;
+  showTradeAction();
+  $("#tradeActionQuantity").oninput=updateTradeActionTotal
+}
+function updateTradeActionTotal(){
+  const action=state.marketAction;
+  const target=$("#tradeActionTotal");
+  if(!action||!target)return;
+  const q=Math.max(1,Math.floor(Number($("#tradeActionQuantity")?.value||1)));
+  if(action.type==="burn"||action.type==="buy"){
+    target.textContent=`🪙 ${fmt(Number(action.unit||0)*q)}`
+  }else if(action.type==="list"){
+    const price=Number($("#tradeActionPrice")?.value||0);
+    target.textContent=Number.isFinite(price)&&price>0?`🪙 ${fmt(price*q)}`:"—"
+  }
+}
+function actionQuantity(){
+  const action=state.marketAction;
+  const q=Number($("#tradeActionQuantity")?.value||0);
+  if(!Number.isSafeInteger(q)||q<1||q>Number(action?.max||0))throw new Error("Quantità non valida.");
+  return q
+}
+function actionPrice(){
+  const p=Number($("#tradeActionPrice")?.value||0);
+  if(!Number.isSafeInteger(p)||p<1||p>Number.MAX_SAFE_INTEGER)throw new Error("Prezzo non valido.");
+  return p
+}
+async function refreshCardMarketState(code){
+  await Promise.all([loadProfile(),loadCollection()]);
+  await loadMarketplace();
+  const card=findCardForViewer(code);
+  if($("#cardDetailOverlay").classList.contains("visible")&&card)showCardDetail(card)
+}
+async function confirmBurnAction(){
+  if(state.busy||state.marketAction?.type!=="burn")return;
+  const action={...state.marketAction};
+  try{
+    const q=actionQuantity();
+    state.busy=true;
+    const btn=document.querySelector("[data-confirm-burn]");
+    if(btn)btn.disabled=true;
+    $("#tradeActionStatus").textContent="Vendita in corso...";
+    const{data,error}=await supabase.rpc("burn_collectible_card",{
+      p_card_code:action.code,
+      p_quantity:q,
+      p_request_id:crypto.randomUUID()
+    });
+    if(error)throw error;
+    if(data?.balance!=null){
+      state.profile.chips=Number(data.balance);
+      $("#balanceValue").textContent=fmt(data.balance)
+    }
+    notifyBalance();
+    state.busy=false;
+    closeTradeAction();
+    $("#marketStatus").textContent=`Vendute ${fmt(q)} copie per ${fmt(data?.total_price||0)} fiche.`;
+    await refreshCardMarketState(action.code)
+  }catch(e){
+    console.error(e);
+    state.busy=false;
+    const btn=document.querySelector("[data-confirm-burn]");
+    if(btn)btn.disabled=false;
+    if($("#tradeActionStatus"))$("#tradeActionStatus").textContent=e?.message||String(e)
+  }
+}
+async function confirmListingAction(){
+  if(state.busy||state.marketAction?.type!=="list")return;
+  const action={...state.marketAction};
+  try{
+    const q=actionQuantity(),price=actionPrice();
+    state.busy=true;
+    const btn=document.querySelector("[data-confirm-list]");
+    if(btn)btn.disabled=true;
+    $("#tradeActionStatus").textContent="Creazione annuncio...";
+    const{error}=await supabase.rpc("create_collectible_card_listing",{
+      p_card_code:action.code,
+      p_quantity:q,
+      p_unit_price:price,
+      p_request_id:crypto.randomUUID()
+    });
+    if(error)throw error;
+    state.busy=false;
+    closeTradeAction();
+    $("#marketStatus").textContent=`Annuncio creato: ${fmt(q)} × ${action.code} a ${fmt(price)} fiche ciascuna.`;
+    await refreshCardMarketState(action.code)
+  }catch(e){
+    console.error(e);
+    state.busy=false;
+    const btn=document.querySelector("[data-confirm-list]");
+    if(btn)btn.disabled=false;
+    if($("#tradeActionStatus"))$("#tradeActionStatus").textContent=e?.message||String(e)
+  }
+}
+async function confirmBuyAction(){
+  if(state.busy||state.marketAction?.type!=="buy")return;
+  const action={...state.marketAction};
+  try{
+    const q=actionQuantity();
+    const total=Number(action.unit||0)*q;
+    if(Number(state.profile?.chips||0)<total)throw new Error("Saldo insufficiente.");
+    state.busy=true;
+    const btn=document.querySelector("[data-confirm-buy]");
+    if(btn)btn.disabled=true;
+    $("#tradeActionStatus").textContent="Acquisto in corso...";
+    const{data,error}=await supabase.rpc("buy_collectible_card_listing",{
+      p_listing_id:action.listingId,
+      p_quantity:q,
+      p_request_id:crypto.randomUUID()
+    });
+    if(error)throw error;
+    if(data?.buyer_balance!=null){
+      state.profile.chips=Number(data.buyer_balance);
+      $("#balanceValue").textContent=fmt(data.buyer_balance)
+    }
+    notifyBalance();
+    state.busy=false;
+    closeTradeAction();
+    $("#marketStatus").textContent=`Acquistate ${fmt(q)} copie di ${action.code} per ${fmt(data?.total_price||total)} fiche.`;
+    await refreshCardMarketState(action.code)
+  }catch(e){
+    console.error(e);
+    state.busy=false;
+    const btn=document.querySelector("[data-confirm-buy]");
+    if(btn)btn.disabled=false;
+    if($("#tradeActionStatus"))$("#tradeActionStatus").textContent=e?.message||String(e)
+  }
+}
+async function cancelMarketListing(listingId){
+  if(state.busy)return;
+  const listing=state.marketListings.find(x=>String(x.listing_id)===String(listingId));
+  if(!listing||listing.is_mine!==true)return;
+  if(!confirm(`Annullare l'annuncio di ${listing.card_code}? Le copie ancora invendute torneranno disponibili.`))return;
+  state.busy=true;
+  $("#marketStatus").textContent="Annullamento annuncio...";
+  try{
+    const{error}=await supabase.rpc("cancel_collectible_card_listing",{p_listing_id:listingId});
+    if(error)throw error;
+    await Promise.all([loadCollection(),loadMarketplace()]);
+    $("#marketStatus").textContent="Annuncio annullato."
+  }catch(e){
+    console.error(e);
+    $("#marketStatus").textContent=e?.message||String(e)
+  }finally{
+    state.busy=false
+  }
+}
+
 function packCard(p,store=false){const owned=Number((state.packs.find(x=>x.id===p.id)?.quantity)??p.quantity??0),canOpen=!store&&p.openable===true&&p.configured===true&&owned>0;return`<article class="pack ${cls(p.id)}"><div class="visual">${imageHTML(p)}<div class="qty">${store?`Tu: ×${fmt(owned)}`:`×${fmt(owned)}`}</div></div><div class="body"><h3>${esc(p.name)}</h3><p>${esc(p.description||"Pacchetto della collezione.")}</p>${store?`<div class="price">🪙 ${fmt(p.price_chips)}</div>`:""}<div class="tags">${p.cards_per_pack?`<span class="tag">${fmt(p.cards_per_pack)} carte</span>`:`<span class="tag wait">Contenuto da configurare</span>`}${canOpen?`<span class="tag good">Apribile</span>`:""}</div>${store?`<div class="buyrow"><select data-q="${esc(p.id)}"><option>1</option><option>2</option><option>5</option><option>10</option></select><button class="action" data-buy="${esc(p.id)}">ACQUISTA</button></div>`:`<button class="action" data-open="${esc(p.id)}" ${canOpen?"":"disabled"}>${canOpen?"APRI PACCHETTO":p.openable?"CONFIGURAZIONE INCOMPLETA":"APERTURA NON DISPONIBILE"}</button>`}</div></article>`}
 function renderPacks(){const owned=state.packs.filter(p=>Number(p.quantity||0)>0),tot=owned.reduce((s,p)=>s+Number(p.quantity||0),0);$("#packBadge").textContent=`${fmt(tot)} ${tot===1?"pacchetto":"pacchetti"}`;$("#packGrid").innerHTML=owned.length?owned.map(p=>packCard(p)).join(""):`<div class="empty"><strong>Nessun pacchetto posseduto</strong>I pacchetti ottenuti dai livelli o acquistati appariranno qui.</div>`;document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openPack(b.dataset.open))}
 function renderStore(){const list=state.store.filter(p=>p.purchasable===true&&Number(p.price_chips||0)>0);$("#storeBadge").textContent=`${fmt(list.length)} disponibili`;$("#storeGrid").innerHTML=list.length?list.map(p=>packCard(p,true)).join(""):`<div class="empty"><strong>Nessun pacchetto in vendita</strong>I pacchetti ricompensa continuano comunque a funzionare.</div>`;document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const id=b.dataset.buy,q=Number(document.querySelector(`[data-q="${CSS.escape(id)}"]`)?.value||1);buyPack(id,q)})}
@@ -989,6 +1616,7 @@ function showCardDetail(card){
   $("#cardDetailCopies").innerHTML=qty>0
     ?`Copie possedute: <strong>×${fmt(qty)}</strong>`
     :`<strong>NON POSSEDUTA</strong>`;
+  renderCardDetailTrade(card);
   $("#cardDetailOverlay").classList.add("visible")
 }
 function closeCardDetail(){
@@ -1001,7 +1629,9 @@ function tab(name){
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
   $("#packsSection").classList.toggle("active",name==="packs");
   $("#collectionSection").classList.toggle("active",name==="collection");
-  $("#storeSection").classList.toggle("active",name==="store")
+  $("#marketSection").classList.toggle("active",name==="market");
+  $("#storeSection").classList.toggle("active",name==="store");
+  if(name==="market")renderMarketplace()
 }
 
 function updateCardPointer(el,e){
@@ -1076,6 +1706,48 @@ document.addEventListener("click",e=>{
     removeCollectionAssets(code).catch(err=>{console.error(err);state.offlineBusy=null;renderOfflineManager()});
     return
   }
+  const burn=e.target.closest("[data-card-burn]");
+  if(burn){
+    openBurnAction(burn.dataset.cardBurn);
+    return
+  }
+  const listCard=e.target.closest("[data-card-list]");
+  if(listCard){
+    openListingAction(listCard.dataset.cardList);
+    return
+  }
+  const marketBuy=e.target.closest("[data-market-buy]");
+  if(marketBuy){
+    openBuyAction(marketBuy.dataset.marketBuy);
+    return
+  }
+  const marketCancel=e.target.closest("[data-market-cancel]");
+  if(marketCancel){
+    cancelMarketListing(marketCancel.dataset.marketCancel);
+    return
+  }
+  const confirmBurn=e.target.closest("[data-confirm-burn]");
+  if(confirmBurn){
+    confirmBurnAction();
+    return
+  }
+  const confirmList=e.target.closest("[data-confirm-list]");
+  if(confirmList){
+    confirmListingAction();
+    return
+  }
+  const confirmBuy=e.target.closest("[data-confirm-buy]");
+  if(confirmBuy){
+    confirmBuyAction();
+    return
+  }
+  const marketCard=e.target.closest("[data-view-market-card]");
+  if(marketCard){
+    const card=findCardForViewer(marketCard.dataset.viewMarketCard)||
+      enrichedMarketCard(state.marketListings.find(x=>String(x.card_code)===String(marketCard.dataset.viewMarketCard))||{});
+    if(card)showCardDetail(card);
+    return
+  }
   const owned=e.target.closest("[data-view-card]");
   if(owned){
     const card=findCardForViewer(owned.dataset.viewCard);
@@ -1092,14 +1764,24 @@ $("#cardDetailClose").onclick=closeCardDetail;
 $("#cardDetailOverlay").onclick=e=>{
   if(e.target===$("#cardDetailOverlay"))closeCardDetail()
 };
+$("#tradeActionClose").onclick=closeTradeAction;
+$("#tradeActionOverlay").onclick=e=>{
+  if(e.target===$("#tradeActionOverlay"))closeTradeAction()
+};
+$("#marketSearch").oninput=renderMarketplace;
+$("#marketRarityFilter").onchange=renderMarketplace;
+$("#marketSetFilter").onchange=renderMarketplace;
+$("#marketSort").onchange=renderMarketplace;
+$("#marketScope").onchange=renderMarketplace;
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){
-    if($("#cardDetailOverlay").classList.contains("visible"))closeCardDetail();
+    if($("#tradeActionOverlay").classList.contains("visible"))closeTradeAction();
+    else if($("#cardDetailOverlay").classList.contains("visible"))closeCardDetail();
     else if($("#openingOverlay").classList.contains("visible"))closeOpening()
   }
 });
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>tab(b.dataset.tab));$("#search").oninput=renderCollection;$("#rarityFilter").onchange=renderCollection;$("#setFilter").onchange=renderCollection;$("#openingClose").onclick=closeOpening;$("#openingContinue").onclick=closeOpening;$("#openingOverlay").onclick=e=>{if(e.target===$("#openingOverlay"))closeOpening()};$("#homeBtn").onclick=()=>location.href="../index.html";
-try{const{data,error}=await supabase.auth.getSession();if(error)throw error;if(!data.session){location.href="../index.html"}else{state.session=data.session;await loadLevels();await Promise.all([loadProfile(),loadProgress(),loadPacks(),loadStore(),loadCollection()]);const up=await CasinoLevelUp.check();if(up?.balance!=null){state.profile.chips=Number(up.balance);$("#balanceValue").textContent=fmt(up.balance)}await Promise.all([loadProfile(),loadProgress(),loadPacks()]);$("#loading").classList.add("hidden")}}catch(e){console.error(e);$("#loadingText").textContent=e?.message||String(e)}
+try{const{data,error}=await supabase.auth.getSession();if(error)throw error;if(!data.session){location.href="../index.html"}else{state.session=data.session;await loadLevels();await Promise.all([loadProfile(),loadProgress(),loadPacks(),loadStore(),loadCollection()]);await loadMarketplace();const up=await CasinoLevelUp.check();if(up?.balance!=null){state.profile.chips=Number(up.balance);$("#balanceValue").textContent=fmt(up.balance)}await Promise.all([loadProfile(),loadProgress(),loadPacks()]);$("#loading").classList.add("hidden")}}catch(e){console.error(e);$("#loadingText").textContent=e?.message||String(e)}
 </script>
 </body>
 </html>
