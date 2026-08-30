@@ -1177,10 +1177,11 @@ function renderCardDetailTrade(card){
   if(!host)return;
   const qty=Math.max(0,Number(card?.quantity||0));
   const reserved=Math.max(0,Number(card?.reserved_quantity||0));
-  const available=availableCardQuantity(card);
-  const burn=Math.max(0,Number(card?.burn_price||0));
-  const low=lowestMarketPrice(cardCode(card));
-  const tradable=card?.is_tradable!==false;
+const available=availableCardQuantity(card);
+const sellable=Math.max(0,available-1);
+const burn=Math.max(0,Number(card?.burn_price||0));
+const low=lowestMarketPrice(cardCode(card));
+const tradable=card?.is_tradable!==false;
   if(qty<=0){
     host.innerHTML=`<div class="carddetail-market-note">${low!=null?`Prezzo più basso sul marketplace: <strong>🪙 ${fmt(low)}</strong>`:"Nessun annuncio attivo per questa carta."}</div>`;
     return
@@ -1193,8 +1194,8 @@ function renderCardDetailTrade(card){
       <div class="carddetail-trade-stat">Minimo marketplace<strong>${low!=null?`🪙 ${fmt(low)}`:"—"}</strong></div>
     </div>
     <div class="carddetail-trade-actions">
-      <button class="carddetail-action burn" data-card-burn="${esc(cardCode(card))}" ${available>0&&burn>0?"":"disabled"}>🔥 VENDI SUBITO</button>
-      <button class="carddetail-action list" data-card-list="${esc(cardCode(card))}" ${available>0&&tradable?"":"disabled"}>🏪 METTI IN VENDITA</button>
+      <button class="carddetail-action burn" data-card-burn="${esc(cardCode(card))}" ${sellable>0&&burn>0?"":"disabled"}>🔥 VENDI SUBITO</button>
+      <button class="carddetail-action list" data-card-list="${esc(cardCode(card))}" ${sellable>0&&tradable?"":"disabled"}>🏪 METTI IN VENDITA</button>
     </div>
     ${burn<=0?`<div class="carddetail-market-note">Prezzo di burn non disponibile nel catalogo frontend. Esegui la patch RPC marketplace.</div>`:""}
   `
@@ -1211,17 +1212,17 @@ function closeTradeAction(){
 function openBurnAction(code){
   const card=findCardForViewer(code);
   if(!card)return;
-  const available=availableCardQuantity(card);
+  const sellable=Math.max(0,availableCardQuantity(card)-1);
   const unit=Math.max(0,Number(card.burn_price||0));
-  if(available<1||unit<1)return;
-  state.marketAction={type:"burn",code,unit,max:available};
+  if(sellable<1||unit<1)return;
+  state.marketAction={type:"burn",code,unit,max:sellable};
   $("#tradeActionTitle").textContent="Vendita immediata";
   $("#tradeActionBody").innerHTML=`
     <div class="tradeaction-cardname">${esc(card.name)}</div>
     <div class="tradeaction-sub">${esc(card.rarity_name||card.rarity_code||"")} · ${esc(code)}</div>
     <div class="tradeaction-field">
       <label>QUANTITÀ DA DISTRUGGERE</label>
-      <input id="tradeActionQuantity" type="number" min="1" max="${available}" step="1" value="1">
+      <input id="tradeActionQuantity" type="number" min="1" max="${sellable}" step="1" value="1">
     </div>
     <div class="tradeaction-summary">
       <div class="tradeaction-summary-row"><span>Valore unitario</span><strong>🪙 ${fmt(unit)}</strong></div>
@@ -1236,17 +1237,18 @@ function openBurnAction(code){
 function openListingAction(code){
   const card=findCardForViewer(code);
   if(!card)return;
-  const available=availableCardQuantity(card);
-  if(available<1||card.is_tradable===false)return;
+  const sellable=Math.max(0,availableCardQuantity(card)-1);
+  if(sellable<1||card.is_tradable===false)return;
+
   const low=lowestMarketPrice(code);
-  state.marketAction={type:"list",code,max:available};
+  state.marketAction={type:"list",code,max:sellable};
   $("#tradeActionTitle").textContent="Metti in vendita";
   $("#tradeActionBody").innerHTML=`
     <div class="tradeaction-cardname">${esc(card.name)}</div>
     <div class="tradeaction-sub">${esc(card.rarity_name||card.rarity_code||"")} · ${esc(code)}</div>
     <div class="tradeaction-field">
       <label>QUANTITÀ</label>
-      <input id="tradeActionQuantity" type="number" min="1" max="${available}" step="1" value="1">
+      <input id="tradeActionQuantity" type="number" min="1" max="${sellable}" step="1" value="1">
     </div>
     <div class="tradeaction-field">
       <label>PREZZO PER CARTA (FICHE)</label>
