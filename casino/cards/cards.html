@@ -232,7 +232,7 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 .rarity-progress strong{color:white}
 .rarity-cards{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(70px,1fr));
   gap:5px
 }
 .card{
@@ -279,7 +279,7 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 @media(max-width:620px){
   .cataloggroups{padding:7px}
   .rarity-group-head{top:50px}
-  .rarity-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .rarity-cards{grid-template-columns:repeat(6,1fr));gap:7px}
 }
 
 
@@ -466,7 +466,7 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 .market-stats{display:flex;gap:7px;flex-wrap:wrap;padding:11px 14px 0}
 .market-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
   gap:10px;padding:14px
 }
 .market-card{
@@ -1268,7 +1268,7 @@ const tradable=card?.is_tradable!==false;
     </div>
     <div class="carddetail-trade-actions">
       <button class="carddetail-action burn" data-card-burn="${esc(cardCode(card))}" ${sellable>0&&burn>0?"":"disabled"}>🔥 VENDI SUBITO</button>
-      <button class="carddetail-action list" data-card-list="${esc(cardCode(card))}" ${sellable>0&&tradable?"":"disabled"}}>🏪 METTI IN VENDITA</button>
+      <button class="carddetail-action list" data-card-list="${esc(cardCode(card))}" ${sellable>0&&tradable?"":"disabled"}>🏪 METTI IN VENDITA</button>
     </div>
     ${burn<=0?`<div class="carddetail-market-note">Prezzo di burn non disponibile nel catalogo frontend. Esegui la patch RPC marketplace.</div>`:""}
   `
