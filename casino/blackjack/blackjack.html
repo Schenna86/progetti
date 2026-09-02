@@ -2009,6 +2009,238 @@ header{
   .seat:nth-child(5) .hands-wrap{left:43%}
 }
 
+
+/* ============================================================
+   BLACKJACK V3.6 - ACTION GRID VERTICALE A FIANCO DEL TAVOLO
+   ============================================================ */
+@media (min-width:1001px){
+  .table-shell{
+    width:calc(100% - 118px);
+    margin-left:0;
+    margin-right:118px;
+  }
+
+  .action-dock{
+    position:absolute;
+    left:calc(100% + 12px);
+    top:50%;
+    z-index:60;
+    width:100px;
+    transform:translateY(-50%);
+    padding:8px;
+    border:1px solid #d7ad5555;
+    border-radius:14px;
+    background:#020a07e8;
+    backdrop-filter:blur(7px);
+    box-shadow:0 10px 28px #0008;
+  }
+
+  .action-dock h3{
+    margin:0 0 7px;
+    color:var(--gold2);
+    font-size:9px;
+    text-align:center;
+    letter-spacing:.08em;
+  }
+
+  .action-dock .action-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:7px;
+  }
+
+  .action-dock .game-action{
+    width:100%;
+    min-height:54px;
+    padding:6px 4px;
+    font-size:10px;
+  }
+
+  .control-dock{
+    width:min(560px,92vw);
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width:1000px){
+  .action-dock{
+    position:absolute;
+    left:50%;
+    top:calc(100% + 8px);
+    z-index:60;
+    width:min(420px,calc(100vw - 16px));
+    transform:translateX(-50%);
+    padding:7px;
+    border:1px solid #d7ad5555;
+    border-radius:10px;
+    background:#020a07e8;
+    backdrop-filter:blur(7px);
+    box-shadow:0 8px 22px #0008;
+  }
+
+  .action-dock h3{
+    margin:0 0 5px;
+    color:var(--gold2);
+    font-size:8px;
+    text-align:center;
+  }
+
+  .action-dock .action-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+  }
+
+  .action-dock .game-action{
+    min-height:38px;
+    padding:5px 2px;
+    font-size:9px;
+  }
+
+  .control-dock{
+    top:calc(100% + 72px);
+  }
+}
+
+@media (max-width:700px){
+  .action-dock{
+    width:calc(100vw - 10px);
+  }
+
+  .action-dock .game-action{
+    min-height:36px;
+    font-size:8px;
+  }
+
+  .control-dock{
+    top:calc(100% + 70px);
+  }
+}
+
+
+
+/* ============================================================
+   BLACKJACK V3.7 - AZIONI SEMPRE A DESTRA + MANO ATTIVA PIÙ VISIBILE
+   ============================================================ */
+
+/* Mano selezionata: carte più brillanti e glow più evidente */
+.hand.active .hand-cards{
+  animation:activeCardsGlow 1.05s ease-in-out infinite alternate;
+}
+
+.hand.active .playing-card{
+  box-shadow:
+    0 0 0 1px #ffe59a,
+    0 0 11px #ffd45f,
+    0 5px 10px #0009;
+}
+
+@keyframes activeCardsGlow{
+  from{
+    filter:
+      brightness(1.22)
+      saturate(1.08)
+      drop-shadow(0 0 7px #ffd95e)
+      drop-shadow(0 0 11px #ffbf3f80);
+  }
+  to{
+    filter:
+      brightness(1.48)
+      saturate(1.18)
+      drop-shadow(0 0 11px #ffe27d)
+      drop-shadow(0 0 22px #ffbd35c0);
+  }
+}
+
+/* Tablet: il tavolo si restringe e lascia SEMPRE la colonna azioni a destra */
+@media (max-width:1000px){
+  .table-shell{
+    width:calc(100% - 90px);
+    max-width:calc(100% - 90px);
+    margin-left:0;
+    margin-right:90px;
+  }
+
+  .action-dock{
+    position:absolute;
+    left:calc(100% + 8px);
+    top:50%;
+    z-index:60;
+    width:80px;
+    transform:translateY(-50%);
+    padding:6px;
+    border:1px solid #d7ad5555;
+    border-radius:11px;
+    background:#020a07e8;
+    backdrop-filter:blur(7px);
+    box-shadow:0 8px 24px #0009;
+  }
+
+  .action-dock h3{
+    margin:0 0 5px;
+    color:var(--gold2);
+    font-size:8px;
+    text-align:center;
+    letter-spacing:.06em;
+  }
+
+  .action-dock .action-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:5px;
+  }
+
+  .action-dock .game-action{
+    width:100%;
+    min-height:42px;
+    padding:5px 2px;
+    font-size:8px;
+  }
+
+  /* Il blocco puntate/riepilogo resta sotto il tavolo */
+  .control-dock{
+    top:calc(100% + 8px);
+  }
+}
+
+/* Telefono: colonna ancora più stretta, ma sempre a destra */
+@media (max-width:700px){
+  .table-shell{
+    width:calc(100% - 72px);
+    max-width:calc(100% - 72px);
+    margin:5px 72px 300px 0;
+  }
+
+  .action-dock{
+    left:calc(100% + 5px);
+    top:50%;
+    width:64px;
+    padding:5px;
+    border-radius:9px;
+  }
+
+  .action-dock h3{
+    margin-bottom:4px;
+    font-size:7px;
+  }
+
+  .action-dock .action-grid{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+
+  .action-dock .game-action{
+    min-height:34px;
+    padding:4px 1px;
+    font-size:7px;
+    border-radius:7px;
+  }
+
+  .control-dock{
+    top:calc(100% + 8px);
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2035,6 +2267,16 @@ header{
 
   <div id="seats" class="seats"></div>
 
+  <div class="action-dock">
+    <h3>AZIONI</h3>
+    <div class="action-grid">
+      <button id="hitBtn" class="game-action primary" type="button">CARTA</button>
+      <button id="standBtn" class="game-action" type="button">STAI</button>
+      <button id="doubleBtn" class="game-action double" type="button">DOUBLE</button>
+      <button id="splitBtn" class="game-action split" type="button">SPLIT</button>
+    </div>
+  </div>
+
   <div class="control-dock">
     <div class="control-panel">
       <h3>PUNTATE TAVOLO</h3>
@@ -2046,15 +2288,6 @@ header{
       <button id="dealBtn" class="main-action" type="button">DISTRIBUISCI</button>
     </div>
 
-    <div class="control-panel">
-      <h3>AZIONI MANO</h3>
-      <div class="action-grid">
-        <button id="hitBtn" class="game-action primary" type="button">CARTA</button>
-        <button id="standBtn" class="game-action" type="button">STAI</button>
-        <button id="doubleBtn" class="game-action double" type="button">DOUBLE</button>
-        <button id="splitBtn" class="game-action split" type="button">SPLIT</button>
-      </div>
-    </div>
 
     <div id="status" class="status">Caricamento Blackjack…</div>
 
