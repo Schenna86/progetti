@@ -1133,13 +1133,20 @@ let collectionLoadPromise=null,storeLoadPromise=null,marketLoadPromise=null;
 
 async function ensureCollectionLoaded(renderNow=true){
   if(!state.collectionLoaded){
-    if(!collectionLoadPromise)collectionLoadPromise=loadCollection(false).finally(()=>collectionLoadPromise=null);
+    if(!collectionLoadPromise)
+      collectionLoadPromise=loadCollection(false)
+        .finally(()=>collectionLoadPromise=null);
+
     await collectionLoadPromise
   }
+
   if(renderNow&&!state.collectionRendered){
     renderCollection();
     renderOfflineManager();
-    state.collectionRendered=true
+    state.collectionRendered=true;
+
+    refreshAllOfflineStatus()
+      .catch(e=>console.warn("Stato cache collezioni:",e));
   }
 }
 async function ensureStoreLoaded(){
