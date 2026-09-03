@@ -1,11 +1,24 @@
-const CARD_ASSET_CACHE = "collectible-card-assets-v1";
+const CARD_ASSET_CACHE = "collectible-card-assets-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+
+    await Promise.all(
+      keys
+        .filter(key =>
+          key.startsWith("collectible-card-assets-") &&
+          key !== CARD_ASSET_CACHE
+        )
+        .map(key => caches.delete(key))
+    );
+
+    await self.clients.claim();
+  })());
 });
 
 function isCollectibleAsset(request) {
