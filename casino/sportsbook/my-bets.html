@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07151d" />
+  <title>Le mie schedine</title>
+
+  <style>
+    :root {
+      --bg: #07151d;
+      --panel: rgba(10, 32, 43, .92);
+      --panel2: rgba(20, 47, 58, .92);
+      --gold: #e7b654;
+      --gold-light: #ffe19a;
+      --text: #f4f7f9;
+      --muted: #9eb0b8;
+      --danger: #ff7777;
+      --ok: #77e18a;
+      --blue: #62a8ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% 0%, #163b4d 0%, #091820 45%, #040b10 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body { min-height: 100vh; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; opacity: .5; }
+    .hidden { display: none !important; }
+
+    #app {
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    .shell {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: clamp(25px, 4vw, 42px);
+      letter-spacing: .025em;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .pill,
+    .header-btn {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(231,182,84,.62);
+      border-radius: 999px;
+      padding: 8px 13px;
+      background: rgba(4,16,23,.78);
+      color: white;
+      white-space: nowrap;
+    }
+
+    .pill strong {
+      color: var(--gold-light);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .header-btn { font-weight: 850; }
+    .header-btn:hover {
+      border-color: rgba(255,225,154,.88);
+      color: var(--gold-light);
+    }
+
+    .xp-panel {
+      flex: 1 0 100%;
+      width: 100%;
+      user-select: none;
+    }
+
+    .xp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 5px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 2px 3px rgba(0,0,0,.8);
+    }
+
+    .xp-level strong {
+      color: var(--gold-light);
+      font-size: 16px;
+    }
+
+    .xp-text {
+      color: #dfe8ec;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      opacity: .95;
+      text-align: right;
+    }
+
+    .xp-bar {
+      position: relative;
+      width: 100%;
+      height: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,.75);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(0,0,0,.75), rgba(30,30,30,.85));
+      box-shadow: 0 2px 6px rgba(0,0,0,.6), inset 0 1px 3px rgba(0,0,0,.8);
+    }
+
+    .xp-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 8px;
+      background: linear-gradient(90deg,#2769ff,#6f5cff,#c255ff);
+      box-shadow: inset 0 1px 4px rgba(255,255,255,.4), 0 0 8px rgba(111,92,255,.7);
+      transition: width .6s ease;
+    }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid rgba(231,182,84,.33);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(15,43,55,.95), rgba(6,22,30,.96));
+      box-shadow: 0 14px 35px rgba(0,0,0,.26), inset 0 0 20px rgba(255,211,118,.035);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: 18px;
+    }
+
+    .panel-head small { color: var(--muted); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px 14px 0;
+    }
+
+    .stat-card {
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid rgba(231,182,84,.18);
+      border-radius: 12px;
+      background: rgba(0,0,0,.17);
+    }
+
+    .stat-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .stat-card strong {
+      display: block;
+      overflow: hidden;
+      margin-top: 3px;
+      color: var(--gold-light);
+      font-size: 18px;
+      font-variant-numeric: tabular-nums;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .filters {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 12px 14px;
+      scrollbar-width: thin;
+    }
+
+    .filter-btn {
+      flex: 0 0 auto;
+      min-height: 35px;
+      border: 1px solid rgba(231,182,84,.34);
+      border-radius: 999px;
+      padding: 6px 11px;
+      background: rgba(0,0,0,.22);
+      color: #e8eef1;
+      font-weight: 800;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: rgba(255,225,154,.82);
+      background: rgba(122,78,18,.34);
+      color: var(--gold-light);
+    }
+
+    .tickets-host {
+      display: grid;
+      gap: 10px;
+      padding: 0 14px 14px;
+    }
+
+    .ticket-card {
+      overflow: hidden;
+      border: 1px solid rgba(231,182,84,.22);
+      border-radius: 14px;
+      background: rgba(0,0,0,.17);
+    }
+
+    .ticket-card.claimable {
+      border-color: rgba(119,225,138,.55);
+      box-shadow: inset 0 0 18px rgba(119,225,138,.045);
+    }
+
+    .ticket-summary {
+      display: grid;
+      grid-template-columns: minmax(190px,1fr) repeat(4, minmax(100px,.55fr)) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .ticket-title {
+      min-width: 0;
+    }
+
+    .ticket-title strong {
+      display: block;
+      color: #f5f8fa;
+      font-size: 14px;
+    }
+
+    .ticket-title small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .ticket-metric {
+      min-width: 0;
+    }
+
+    .ticket-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .ticket-metric strong {
+      display: block;
+      overflow: hidden;
+      margin-top: 3px;
+      color: #eef4f6;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ticket-metric.payout strong { color: var(--gold-light); }
+
+    .ticket-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: #d8e2e6;
+      background: rgba(255,255,255,.055);
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .status-pill.pending { border-color: rgba(98,168,255,.5); color: #9ccaff; }
+    .status-pill.won { border-color: rgba(119,225,138,.5); color: #8ce69d; }
+    .status-pill.lost { border-color: rgba(255,119,119,.5); color: #ff9a9a; }
+    .status-pill.void { border-color: rgba(231,182,84,.5); color: var(--gold-light); }
+    .status-pill.claimed { opacity: .72; }
+
+    .small-btn,
+    .claim-btn {
+      min-height: 34px;
+      border-radius: 9px;
+      padding: 6px 10px;
+      font-weight: 900;
+      font-size: 11px;
+    }
+
+    .small-btn {
+      border: 1px solid rgba(231,182,84,.30);
+      background: rgba(4,16,23,.76);
+      color: var(--gold-light);
+    }
+
+    .claim-btn {
+      border: 1px solid #9cefaa;
+      background: linear-gradient(#3e9a54, #1d6130);
+      color: white;
+    }
+
+    .claim-btn:not(:disabled):hover,
+    .small-btn:hover { filter: brightness(1.08); }
+
+    .ticket-details {
+      display: none;
+      padding: 0 12px 12px;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .ticket-card.expanded .ticket-details { display: block; }
+
+    .settlement-note {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin: 10px 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .settlement-note strong { color: #eef4f6; }
+
+    .legs-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .leg-row {
+      display: grid;
+      grid-template-columns: minmax(180px,1fr) minmax(150px,.8fr) 80px 85px;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+      border: 1px solid rgba(255,255,255,.065);
+      border-radius: 10px;
+      background: rgba(0,0,0,.14);
+      font-size: 11px;
+    }
+
+    .leg-match {
+      min-width: 0;
+    }
+
+    .leg-match strong {
+      display: block;
+      overflow: hidden;
+      color: #e8eff2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .leg-match small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+    }
+
+    .leg-selection {
+      min-width: 0;
+      color: #d6e0e4;
+    }
+
+    .leg-selection small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .leg-odd {
+      color: var(--gold-light);
+      font-weight: 950;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .leg-result {
+      justify-self: end;
+      min-width: 68px;
+      border-radius: 999px;
+      padding: 4px 7px;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .leg-result.pending { background: rgba(98,168,255,.12); color: #9ccaff; }
+    .leg-result.won { background: rgba(119,225,138,.12); color: #8ce69d; }
+    .leg-result.lost { background: rgba(255,119,119,.12); color: #ff9a9a; }
+    .leg-result.void { background: rgba(231,182,84,.12); color: var(--gold-light); }
+
+    .empty-state,
+    .error-state {
+      padding: 42px 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .error-state { color: #ffabab; }
+
+    .toast-host {
+      position: fixed;
+      z-index: 1500;
+      right: 16px;
+      bottom: 16px;
+      display: grid;
+      gap: 8px;
+      width: min(360px, calc(100vw - 32px));
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 11px 13px;
+      border: 1px solid rgba(231,182,84,.38);
+      border-radius: 12px;
+      background: rgba(4,16,23,.96);
+      color: #eef5f7;
+      box-shadow: 0 12px 30px rgba(0,0,0,.42);
+      font-size: 12px;
+    }
+
+    .toast.bad { border-color: rgba(255,119,119,.5); }
+
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(2,8,12,.95);
+    }
+
+    .loading-card {
+      width: min(420px,100%);
+      padding: 24px;
+      border: 1px solid rgba(231,182,84,.60);
+      border-radius: 18px;
+      background: #071a23;
+      text-align: center;
+    }
+
+    .loader {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 13px;
+      border: 6px solid rgba(255,255,255,.12);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-card strong { color: var(--gold-light); }
+
+    @media (max-width: 1050px) {
+      .ticket-summary {
+        grid-template-columns: minmax(200px,1fr) repeat(2,minmax(110px,.6fr)) auto;
+      }
+
+      .ticket-summary .desktop-extra { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      #app { padding: 9px; }
+      header { align-items: flex-start; flex-direction: column; }
+      .header-actions { width: 100%; }
+      .stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+
+      .ticket-summary {
+        grid-template-columns: 1fr auto;
+      }
+
+      .ticket-metric { display: none; }
+      .ticket-actions { flex-wrap: wrap; }
+
+      .leg-row {
+        grid-template-columns: minmax(0,1fr) auto;
+      }
+
+      .leg-selection { grid-column: 1; }
+      .leg-odd { grid-column: 2; grid-row: 1; }
+      .leg-result { grid-column: 2; grid-row: 2; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <h1>Le mie schedine</h1>
+        <p>Storico scommesse · risultati · pagamenti automatici</p>
+      </div>
+
+      <div class="header-actions">
+        <div class="pill">👤 <strong id="usernameValue">—</strong></div>
+        <div class="pill">🪙 <strong id="balanceValue">0</strong></div>
+        <button id="sportsbookBtn" class="header-btn" type="button">⚽ Palinsesto</button>
+        <button id="refreshBtn" class="header-btn" type="button">↻ Aggiorna</button>
+        <button id="homeBtn" class="header-btn" type="button">← HOME</button>
+      </div>
+
+      <div class="xp-panel">
+        <div class="xp-header">
+          <span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span>
+          <span class="xp-text" id="xpText">0 XP</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+      </div>
+    </header>
+
+    <main class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Storico schedine</h2>
+          <small id="ticketCount">Caricamento…</small>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <span>In corso</span>
+          <strong id="pendingCount">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Vinte</span>
+          <strong id="wonCount">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Perse</span>
+          <strong id="lostCount">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Totale schedine</span>
+          <strong id="totalCount">0</strong>
+        </div>
+      </div>
+
+      <div class="filters" id="filters">
+        <button class="filter-btn active" type="button" data-filter="all">Tutte</button>
+        <button class="filter-btn" type="button" data-filter="pending">In corso</button>
+        <button class="filter-btn" type="button" data-filter="won">Vinte</button>
+        <button class="filter-btn" type="button" data-filter="lost">Perse</button>
+        <button class="filter-btn" type="button" data-filter="void">Rimborsi</button>
+      </div>
+
+      <div id="ticketsHost" class="tickets-host"></div>
+    </main>
+  </div>
+</div>
+
+<div id="toastHost" class="toast-host"></div>
+
+<div id="loadingOverlay">
+  <div class="loading-card">
+    <div class="loader"></div>
+    <strong id="loadingText">Caricamento schedine…</strong>
+    <div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div>
+  </div>
+</div>
+
+<script src="../shared/level-up-modal.js"></script>
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  // Copia gli stessi valori usati in sportsbook.html / index.html.
+    const SUPABASE_URL =
+      "https://jhpppwqdaceratwjnbzi.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
+
+  const supabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+
+  CasinoLevelUp.init(supabase, {
+    balanceSelector: "#balanceValue",
+    levelSelector: "#xpLevel"
+  });
+
+  const $ = selector => document.querySelector(selector);
+  const nf = new Intl.NumberFormat("it-IT");
+  const compactXp = new Intl.NumberFormat("it-IT", {
+    notation: "compact",
+    maximumFractionDigits: 1
+  });
+  const oddFormatter = new Intl.NumberFormat("it-IT", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 3
+  });
+
+  const state = {
+    session: null,
+    profile: null,
+    progression: null,
+    levels: [],
+    tickets: [],
+    legsByTicket: new Map(),
+    eventsById: new Map(),
+    filter: "all",
+    expanded: new Set()
+  };
+
+  const balanceSyncChannel = "BroadcastChannel" in window
+    ? new BroadcastChannel("casino-balance-sync")
+    : null;
+
+  const fmt = value => nf.format(Number(value || 0));
+  const fmtOdd = value => oddFormatter.format(Number(value || 0));
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "—";
+    return new Intl.DateTimeFormat("it-IT", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Rome"
+    }).format(new Date(value));
+  }
+
+  function formatKickoff(value) {
+    if (!value) return "—";
+    return new Intl.DateTimeFormat("it-IT", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Rome"
+    }).format(new Date(value));
+  }
+
+  function toast(message, bad = false) {
+    const el = document.createElement("div");
+    el.className = `toast${bad ? " bad" : ""}`;
+    el.textContent = message;
+    $("#toastHost").appendChild(el);
+    setTimeout(() => el.remove(), 3200);
+  }
+
+  async function loadLevels() {
+    const { data, error } = await supabase
+      .from("levels")
+      .select("level,xp_required")
+      .order("level");
+
+    if (error) throw error;
+    state.levels = data || [];
+  }
+
+  function updateXp(xp, level) {
+    xp = Number(xp || 0);
+    level = Number(level || 1);
+    $("#xpLevel").textContent = String(level);
+
+    if (level >= 500) {
+      $("#xpFill").style.width = "100%";
+      $("#xpText").textContent = `${compactXp.format(xp)} XP · MAX`;
+      return;
+    }
+
+    const current = state.levels.find(row => Number(row.level) === level);
+    const next = state.levels.find(row => Number(row.level) === level + 1);
+    const currentXp = current ? Number(current.xp_required) : level === 1 ? 0 : null;
+    const nextXp = next ? Number(next.xp_required) : null;
+
+    if (currentXp == null || nextXp == null) {
+      $("#xpText").textContent = `${compactXp.format(xp)} XP`;
+      return;
+    }
+
+    const into = Math.max(0, xp - currentXp);
+    const need = Math.max(1, nextXp - currentXp);
+    const percent = Math.max(0, Math.min(100, into / need * 100));
+
+    $("#xpFill").style.width = `${percent}%`;
+    $("#xpText").textContent = `${compactXp.format(into)} / ${compactXp.format(need)} XP`;
+    $("#xpText").title = `${fmt(into)} / ${fmt(need)} XP`;
+  }
+
+  async function loadProfileAndProgression() {
+    const userId = state.session.user.id;
+
+    const [profileResult, progressionResult] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("username,chips")
+        .eq("user_id", userId)
+        .single(),
+      supabase
+        .from("user_progression")
+        .select("xp,level")
+        .eq("user_id", userId)
+        .maybeSingle()
+    ]);
+
+    if (profileResult.error) throw profileResult.error;
+    if (progressionResult.error) throw progressionResult.error;
+
+    state.profile = profileResult.data;
+    state.progression = progressionResult.data || { xp: 0, level: 1 };
+
+    $("#usernameValue").textContent = state.profile?.username || state.session.user.email || "—";
+    $("#balanceValue").textContent = fmt(state.profile?.chips || 0);
+    updateXp(state.progression.xp, state.progression.level);
+  }
+
+  async function loadTickets() {
+    const userId = state.session.user.id;
+
+    const { data: tickets, error: ticketError } = await supabase
+      .from("betting_tickets")
+      .select(`
+        id,
+        user_id,
+        ticket_type,
+        stake,
+        total_odd,
+        base_total_odd,
+        bonus_percent,
+        bonus_multiplier,
+        final_total_odd,
+        effective_leg_count,
+        potential_win,
+        status,
+        created_at,
+        settled_at,
+        settled_total_odd,
+        settled_bonus_percent,
+        settled_effective_leg_count,
+        payout_amount,
+        payout_wallet_transaction_id
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(250);
+
+    if (ticketError) throw ticketError;
+
+    state.tickets = tickets || [];
+    state.legsByTicket = new Map();
+    state.eventsById = new Map();
+
+    if (!state.tickets.length) {
+      renderTickets();
+      return;
+    }
+
+    const ticketIds = state.tickets.map(ticket => ticket.id);
+
+    const { data: legs, error: legsError } = await supabase
+      .from("betting_legs")
+      .select(`
+        id,
+        ticket_id,
+        event_id,
+        market_name,
+        selection_name,
+        odd,
+        result,
+        settled_at
+      `)
+      .in("ticket_id", ticketIds)
+      .order("id", { ascending: true });
+
+    if (legsError) throw legsError;
+
+    for (const leg of (legs || [])) {
+      if (!state.legsByTicket.has(leg.ticket_id)) {
+        state.legsByTicket.set(leg.ticket_id, []);
+      }
+      state.legsByTicket.get(leg.ticket_id).push(leg);
+    }
+
+    const eventIds = [...new Set((legs || []).map(leg => leg.event_id).filter(Boolean))];
+
+    if (eventIds.length) {
+      const { data: events, error: eventsError } = await supabase
+        .from("betting_events")
+        .select(`
+          id,
+          league_name,
+          match_date,
+          home_team,
+          away_team,
+          status,
+          home_score,
+          away_score,
+          halftime_home_score,
+          halftime_away_score
+        `)
+        .in("id", eventIds);
+
+      if (eventsError) throw eventsError;
+
+      for (const event of (events || [])) {
+        state.eventsById.set(event.id, event);
+      }
+    }
+
+    renderTickets();
+  }
+
+  function statusInfo(ticket) {
+    if (ticket.status === "pending") {
+      return { cls: "pending", label: "🟡 IN CORSO" };
+    }
+
+    if (ticket.status === "lost") {
+      return { cls: "lost", label: "🔴 PERSA" };
+    }
+
+    if (ticket.status === "won") {
+      return {
+        cls: "won",
+        label: `🟢 VINTA +${fmt(ticket.payout_amount)}`
+      };
+    }
+
+    if (ticket.status === "void") {
+      return {
+        cls: "void",
+        label: `⚪ ANNULLATA +${fmt(ticket.payout_amount)}`
+      };
+    }
+
+    return { cls: "", label: ticket.status || "—" };
+  }
+
+  function filteredTickets() {
+    if (state.filter === "all") return state.tickets;
+    return state.tickets.filter(ticket => ticket.status === state.filter);
+  }
+
+  function resultLabel(result) {
+    switch (result) {
+      case "won": return "Vinta";
+      case "lost": return "Persa";
+      case "void": return "Void";
+      default: return "In corso";
+    }
+  }
+
+  function eventScore(event) {
+    if (!event) return "—";
+    if (event.home_score != null && event.away_score != null) {
+      return `${event.home_score}-${event.away_score}`;
+    }
+    return event.status || "NS";
+  }
+
+  function renderLeg(leg) {
+    const event = state.eventsById.get(leg.event_id);
+    const match = event
+      ? `${event.home_team} - ${event.away_team}`
+      : `Evento #${leg.event_id}`;
+
+    return `
+      <div class="leg-row">
+        <div class="leg-match">
+          <strong>${escapeHtml(match)}</strong>
+          <small>${event ? `${formatKickoff(event.match_date)} · ${escapeHtml(eventScore(event))}` : ""}</small>
+        </div>
+
+        <div class="leg-selection">
+          ${escapeHtml(leg.selection_name)}
+          <small>${escapeHtml(leg.market_name)}</small>
+        </div>
+
+        <div class="leg-odd">x${fmtOdd(leg.odd)}</div>
+        <div class="leg-result ${escapeHtml(leg.result)}">${resultLabel(leg.result)}</div>
+      </div>
+    `;
+  }
+
+  function renderTicket(ticket) {
+    const legs = state.legsByTicket.get(ticket.id) || [];
+    const status = statusInfo(ticket);
+    const expanded = state.expanded.has(ticket.id);
+
+    const displayOdd = ticket.status === "pending"
+      ? Number(ticket.final_total_odd || ticket.total_odd || 0)
+      : Number(ticket.settled_total_odd || ticket.final_total_odd || ticket.total_odd || 0);
+
+    const payoutLabel = ticket.status === "pending"
+      ? `🪙 ${fmt(ticket.potential_win)}`
+      : `🪙 ${fmt(ticket.payout_amount)}`;
+
+    const effectiveLegs = ticket.status === "pending"
+      ? Number(ticket.effective_leg_count || legs.length)
+      : Number(ticket.settled_effective_leg_count ?? ticket.effective_leg_count ?? legs.length);
+
+    const settledBonus = ticket.status === "pending"
+      ? Number(ticket.bonus_percent || 0)
+      : Number(ticket.settled_bonus_percent ?? ticket.bonus_percent ?? 0);
+
+    return `
+      <article class="ticket-card${expanded ? " expanded" : ""}" data-ticket-card="${ticket.id}">
+        <div class="ticket-summary">
+          <div class="ticket-title">
+            <strong>Schedina #${ticket.id} · ${ticket.ticket_type === "single" ? "Singola" : `${legs.length} eventi`}</strong>
+            <small>${formatDateTime(ticket.created_at)}</small>
+          </div>
+
+          <div class="ticket-metric">
+            <span>Puntata</span>
+            <strong>🪙 ${fmt(ticket.stake)}</strong>
+          </div>
+
+          <div class="ticket-metric">
+            <span>Quota</span>
+            <strong>x${fmtOdd(displayOdd)}</strong>
+          </div>
+
+          <div class="ticket-metric desktop-extra">
+            <span>Bonus</span>
+            <strong>${settledBonus > 0 ? `+${String(settledBonus).replace(".", ",")}%` : "—"}</strong>
+          </div>
+
+          <div class="ticket-metric payout desktop-extra">
+            <span>${ticket.status === "pending" ? "Potenziale" : "Pagamento"}</span>
+            <strong>${payoutLabel}</strong>
+          </div>
+
+          <div class="ticket-actions">
+            <span class="status-pill ${status.cls}">${escapeHtml(status.label)}</span>
+            <button class="small-btn" type="button" data-toggle-ticket="${ticket.id}">${expanded ? "Chiudi" : "Dettagli"}</button>
+          </div>
+        </div>
+
+        <div class="ticket-details">
+          <div class="settlement-note">
+            <span>Eventi effettivi: <strong>${effectiveLegs}</strong></span>
+            <span>Quota base: <strong>x${fmtOdd(ticket.base_total_odd || 0)}</strong></span>
+            <span>Quota ${ticket.status === "pending" ? "totale" : "liquidata"}: <strong>x${fmtOdd(displayOdd)}</strong></span>
+            ${ticket.settled_at ? `<span>Liquidata: <strong>${formatDateTime(ticket.settled_at)}</strong></span>` : ""}
+          </div>
+
+          <div class="legs-list">
+            ${legs.length ? legs.map(renderLeg).join("") : `<div class="empty-state" style="padding:14px">Nessuna selezione trovata.</div>`}
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderTickets() {
+    const pending = state.tickets.filter(ticket => ticket.status === "pending").length;
+    const won = state.tickets.filter(ticket => ticket.status === "won").length;
+    const lost = state.tickets.filter(ticket => ticket.status === "lost").length;
+
+    $("#pendingCount").textContent = fmt(pending);
+    $("#wonCount").textContent = fmt(won);
+    $("#lostCount").textContent = fmt(lost);
+    $("#totalCount").textContent = fmt(state.tickets.length);
+
+    const tickets = filteredTickets();
+    $("#ticketCount").textContent = `${tickets.length} ${tickets.length === 1 ? "schedina" : "schedine"}`;
+
+    if (!tickets.length) {
+      $("#ticketsHost").innerHTML = `
+        <div class="empty-state">
+          Nessuna schedina in questa sezione.
+        </div>
+      `;
+      return;
+    }
+
+    $("#ticketsHost").innerHTML = tickets.map(renderTicket).join("");
+  }
+
+  async function refreshAll() {
+    $("#refreshBtn").disabled = true;
+    try {
+      await Promise.all([
+        loadProfileAndProgression(),
+        loadTickets()
+      ]);
+    } catch (error) {
+      console.error("refresh:", error);
+      toast(error?.message || "Errore durante l'aggiornamento.", true);
+    } finally {
+      $("#refreshBtn").disabled = false;
+    }
+  }
+
+  document.addEventListener("click", event => {
+    const filter = event.target.closest("[data-filter]");
+    if (filter) {
+      state.filter = filter.dataset.filter;
+      document.querySelectorAll("[data-filter]").forEach(button => {
+        button.classList.toggle("active", button === filter);
+      });
+      renderTickets();
+      return;
+    }
+
+    const toggle = event.target.closest("[data-toggle-ticket]");
+    if (toggle) {
+      const id = Number(toggle.dataset.toggleTicket);
+      if (state.expanded.has(id)) state.expanded.delete(id);
+      else state.expanded.add(id);
+      renderTickets();
+      return;
+    }
+
+  });
+
+  $("#sportsbookBtn").addEventListener("click", () => {
+    location.href = "./sportsbook.html";
+  });
+
+  $("#homeBtn").addEventListener("click", () => {
+    location.href = "../index.html";
+  });
+
+  $("#refreshBtn").addEventListener("click", refreshAll);
+
+  balanceSyncChannel?.addEventListener("message", event => {
+    if (event.data?.type === "balance-changed") {
+      loadProfileAndProgression().catch(console.error);
+    }
+  });
+
+  async function boot() {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+
+      if (!data.session) {
+        location.href = "../index.html";
+        return;
+      }
+
+      state.session = data.session;
+
+      await loadLevels();
+      await Promise.all([
+        loadProfileAndProgression(),
+        loadTickets()
+      ]);
+
+      $("#loadingOverlay").classList.add("hidden");
+
+    } catch (error) {
+      console.error("my-bets boot:", error);
+      $("#loadingText").textContent = "Errore";
+      $("#loadingError").textContent = error?.message || String(error);
+    }
+  }
+
+  boot();
+
+  // La liquidazione avviene lato server; questa pagina si aggiorna
+  // automaticamente per mostrare appena possibile VINTA / PERSA / ANNULLATA.
+  setInterval(() => {
+    if (!document.hidden && state.session) {
+      refreshAll();
+    }
+  }, 60_000);
+</script>
+</body>
+</html>

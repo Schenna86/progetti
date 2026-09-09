@@ -1186,10 +1186,11 @@
           </div>
 
           <div class="category-nav" id="categoryNav">
- <button class="category-nav-btn" type="button" data-category-target="category-slot">🎰 Slot</button>
+<button class="category-nav-btn" type="button" data-category-target="category-slot">🎰 Slot</button>
 <button class="category-nav-btn" type="button" data-category-target="category-roulette">🎡 Roulette</button>
 <button class="category-nav-btn" type="button" data-category-target="category-tombola">🎱 Tombola</button>
 <button class="category-nav-btn" type="button" data-category-target="category-blackjack">🂡 Blackjack</button>
+<button class="category-nav-btn" type="button" data-category-target="category-sportsbook">⚽ Sportsbook</button>
 <button class="category-nav-btn" type="button" data-category-target="category-cards">🃏 Carte</button>
 <button class="category-nav-btn" type="button" data-category-target="category-mega-jackpot">💰 Mega Jackpot</button>         </div>
 
@@ -2360,6 +2361,13 @@ function formatXp(value) {
         title: "Blackjack",
         description: "Tavoli blackjack"
       },
+	    {
+    type: "sportsbook",
+    id: "category-sportsbook",
+    icon: "⚽",
+    title: "Sportsbook",
+    description: "Scommesse sportive pre-match"
+  },
       {
         type: "cards",
         id: "category-cards",
@@ -2667,7 +2675,14 @@ function formatXp(value) {
           "Blackjack"
         );
       }
-
+		
+		if (
+  game.game_type === "sportsbook"
+) {
+  tags.push("Calcio");
+  tags.push("Pre-match");
+  tags.push("Multiple + bonus");
+}
 
       if (
         game.game_type === "cards"
