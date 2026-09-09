@@ -298,20 +298,58 @@
     }
 
     .day-group + .day-group {
-      margin-top: 18px;
+      margin-top: 10px;
     }
 
     .day-title {
+      width: 100%;
+      min-height: 48px;
       display: flex;
       justify-content: space-between;
       gap: 10px;
       align-items: center;
-      margin: 0 2px 8px;
+      border: 1px solid rgba(231,182,84,.28);
+      border-radius: 12px;
+      padding: 9px 11px;
+      background: linear-gradient(180deg, rgba(19,48,59,.92), rgba(7,25,33,.94));
       color: #d9e4e8;
+      text-align: left;
       font-weight: 900;
       font-size: 13px;
       text-transform: uppercase;
       letter-spacing: .055em;
+    }
+
+    .day-title:hover {
+      border-color: rgba(255,225,154,.56);
+      background: linear-gradient(180deg, rgba(26,58,70,.96), rgba(9,30,39,.96));
+    }
+
+    .day-title-main,
+    .day-title-meta {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .day-title-main span:not(.day-chevron) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .day-chevron {
+      width: 18px;
+      flex: 0 0 18px;
+      color: var(--gold-light);
+      font-size: 14px;
+      line-height: 1;
+      transition: transform .18s ease;
+    }
+
+    .day-group.open .day-chevron {
+      transform: rotate(90deg);
     }
 
     .day-title small {
@@ -319,6 +357,29 @@
       font-weight: 650;
       text-transform: none;
       letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .day-selected-count {
+      padding: 4px 7px;
+      border: 1px solid rgba(255,225,154,.35);
+      border-radius: 999px;
+      background: rgba(160,101,24,.24);
+      color: var(--gold-light);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: none;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .day-content {
+      display: none;
+      padding-top: 8px;
+    }
+
+    .day-group.open .day-content {
+      display: block;
     }
 
     .league-block {
@@ -758,6 +819,14 @@
     }
 
     /* ========================================================
+       RIEPILOGO SCHEDINA MOBILE
+       ======================================================== */
+
+    .mobile-slip-bar {
+      display: none;
+    }
+
+    /* ========================================================
        TOAST / LOADING
        ======================================================== */
 
@@ -859,6 +928,7 @@
         position: static;
         max-height: none;
         overflow: visible;
+        scroll-margin-top: 10px;
       }
 
       .betslip-body {
@@ -866,7 +936,98 @@
       }
 
       .selection-list {
-        max-height: 46vh;
+        max-height: none;
+        overflow: visible;
+      }
+
+      body.has-mobile-slip #app {
+        padding-bottom: 88px;
+      }
+
+      body.has-mobile-slip .toast-host {
+        bottom: 88px;
+      }
+
+      .mobile-slip-bar {
+        position: fixed;
+        z-index: 1200;
+        left: max(8px, env(safe-area-inset-left));
+        right: max(8px, env(safe-area-inset-right));
+        bottom: max(8px, env(safe-area-inset-bottom));
+        min-height: 66px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 10px;
+        border: 1px solid rgba(255,225,154,.68);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(13,42,53,.98), rgba(5,20,27,.99));
+        box-shadow: 0 14px 34px rgba(0,0,0,.58), inset 0 0 18px rgba(255,211,118,.035);
+        backdrop-filter: blur(12px);
+        opacity: 0;
+        transform: translateY(calc(100% + 22px));
+        pointer-events: none;
+        transition: opacity .18s ease, transform .18s ease;
+      }
+
+      .mobile-slip-bar.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      body.betslip-in-view .mobile-slip-bar.visible {
+        opacity: 0;
+        transform: translateY(calc(100% + 22px));
+        pointer-events: none;
+      }
+
+      .mobile-slip-info {
+        min-width: 0;
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        justify-content: start;
+        gap: 4px 10px;
+      }
+
+      .mobile-slip-count {
+        grid-column: 1 / -1;
+        overflow: hidden;
+        color: #f3f7f8;
+        font-size: 12px;
+        font-weight: 900;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .mobile-slip-metric {
+        color: var(--muted);
+        font-size: 10px;
+        white-space: nowrap;
+      }
+
+      .mobile-slip-metric strong {
+        margin-left: 3px;
+        color: var(--gold-light);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .mobile-slip-metric.bonus strong {
+        color: var(--ok);
+      }
+
+      .mobile-slip-jump {
+        min-height: 44px;
+        border: 1px solid #f4cd72;
+        border-radius: 10px;
+        padding: 7px 10px;
+        background: linear-gradient(#d99a32, #8c4614);
+        color: white;
+        font-size: 10px;
+        font-weight: 950;
+        white-space: nowrap;
       }
 
       .event-main {
@@ -937,6 +1098,48 @@
 
       .search-row {
         grid-template-columns: 1fr;
+      }
+
+      .day-title {
+        min-height: 44px;
+        padding: 8px 9px;
+        font-size: 11px;
+      }
+
+      .day-title-meta {
+        gap: 5px;
+      }
+
+      .day-title small {
+        font-size: 9px;
+      }
+
+      .day-selected-count {
+        padding: 3px 6px;
+        font-size: 8px;
+      }
+
+      .mobile-slip-bar {
+        min-height: 62px;
+        gap: 7px;
+        padding: 8px;
+      }
+
+      .mobile-slip-info {
+        gap: 3px 7px;
+      }
+
+      .mobile-slip-metric {
+        font-size: 9px;
+      }
+
+      .mobile-slip-metric strong {
+        font-size: 11px;
+      }
+
+      .mobile-slip-jump {
+        padding: 6px 8px;
+        font-size: 9px;
       }
     }
   </style>
@@ -1011,6 +1214,15 @@
 
     </div>
   </div>
+</div>
+
+<div id="mobileSlipBar" class="mobile-slip-bar" aria-live="polite">
+  <div class="mobile-slip-info">
+    <div id="mobileSlipCount" class="mobile-slip-count">🎫 0 selezioni</div>
+    <div class="mobile-slip-metric">Moltiplicatore <strong id="mobileSlipOdd">x1,00</strong></div>
+    <div class="mobile-slip-metric bonus">Bonus <strong id="mobileSlipBonus">—</strong></div>
+  </div>
+  <button class="mobile-slip-jump" type="button" data-mobile-slip-jump>VEDI SCHEDINA ↑</button>
 </div>
 
 <div id="toastHost" class="toast-host"></div>
@@ -1108,6 +1320,8 @@
     dateFilter: "all",
     leagueFilter: "all",
     search: "",
+    openDays: new Set(),
+    dayStateInitialized: false,
     busy: false
   };
 
@@ -1546,8 +1760,16 @@
       leagues.get(event.league_name).push(event);
     }
 
+    if (!state.dayStateInitialized) {
+      const today = todayRomeKey(0);
+      if (byDay.has(today)) state.openDays.add(today);
+      state.dayStateInitialized = true;
+    }
+
     const html = [...byDay.entries()].map(([day, leagues]) => {
       const dayCount = [...leagues.values()].reduce((sum, rows) => sum + rows.length, 0);
+      const selectedCount = state.selections.filter(selection => localDateKey(selection.matchDate) === day).length;
+      const isOpen = state.openDays.has(day);
 
       const leagueHtml = [...leagues.entries()].map(([league, rows]) => `
         <section class="league-block">
@@ -1560,12 +1782,25 @@
       `).join("");
 
       return `
-        <section class="day-group">
-          <div class="day-title">
-            <span>${escapeHtml(formatDayLabel(day))}</span>
-            <small>${dayCount} ${dayCount === 1 ? "evento" : "eventi"}</small>
+        <section class="day-group${isOpen ? " open" : ""}" data-day-group="${escapeHtml(day)}">
+          <button
+            class="day-title"
+            type="button"
+            data-toggle-day="${escapeHtml(day)}"
+            aria-expanded="${isOpen ? "true" : "false"}"
+          >
+            <span class="day-title-main">
+              <span class="day-chevron">▶</span>
+              <span>${escapeHtml(formatDayLabel(day))}</span>
+            </span>
+            <span class="day-title-meta">
+              ${selectedCount ? `<span class="day-selected-count">🎫 ${selectedCount}</span>` : ""}
+              <small>${dayCount} ${dayCount === 1 ? "evento" : "eventi"}</small>
+            </span>
+          </button>
+          <div class="day-content">
+            ${leagueHtml}
           </div>
-          ${leagueHtml}
         </section>
       `;
     }).join("");
@@ -1629,10 +1864,53 @@
     renderBetslip();
   }
 
+  function renderMobileSlipSummary() {
+    const bar = $("#mobileSlipBar");
+    if (!bar) return;
+
+    const count = state.selections.length;
+    const hasSelections = count > 0;
+
+    bar.classList.toggle("visible", hasSelections);
+    document.body.classList.toggle("has-mobile-slip", hasSelections);
+
+    if (!hasSelections) {
+      $("#mobileSlipCount").textContent = "🎫 0 selezioni";
+      $("#mobileSlipOdd").textContent = "x1,00";
+      $("#mobileSlipBonus").textContent = "—";
+      return;
+    }
+
+    const calc = calculateTicket();
+    $("#mobileSlipCount").textContent = `🎫 ${count} ${count === 1 ? "selezione" : "selezioni"}`;
+    $("#mobileSlipOdd").textContent = `x${fmtOdd(calc.finalOdd)}`;
+    $("#mobileSlipBonus").textContent = calc.bonusPercent > 0
+      ? `+${String(calc.bonusPercent).replace(".", ",")}%`
+      : "—";
+  }
+
+  let betslipObserver = null;
+
+  function initMobileBetslipObserver() {
+    const slip = document.querySelector(".betslip");
+    if (!slip || !("IntersectionObserver" in window)) return;
+
+    betslipObserver?.disconnect();
+    betslipObserver = new IntersectionObserver(entries => {
+      const visible = entries.some(entry => entry.isIntersecting);
+      document.body.classList.toggle("betslip-in-view", visible);
+    }, {
+      threshold: .06
+    });
+
+    betslipObserver.observe(slip);
+  }
+
   function renderBetslip() {
     const host = $("#betslipBody");
     const count = state.selections.length;
     $("#slipCount").textContent = `${count} ${count === 1 ? "selezione" : "selezioni"}`;
+    renderMobileSlipSummary();
 
     if (!count) {
       host.innerHTML = `
@@ -1838,6 +2116,24 @@
       return;
     }
 
+    const dayToggle = event.target.closest("[data-toggle-day]");
+    if (dayToggle) {
+      const day = dayToggle.dataset.toggleDay;
+      if (state.openDays.has(day)) state.openDays.delete(day);
+      else state.openDays.add(day);
+      renderEvents();
+      return;
+    }
+
+    const mobileSlipJump = event.target.closest("[data-mobile-slip-jump]");
+    if (mobileSlipJump) {
+      document.querySelector(".betslip")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+      return;
+    }
+
     const toggle = event.target.closest("[data-toggle-event]");
     if (toggle) {
       const card = document.querySelector(`[data-event-card="${toggle.dataset.toggleEvent}"]`);
@@ -1870,6 +2166,10 @@
     const dateFilter = event.target.closest("[data-date-filter]");
     if (dateFilter) {
       state.dateFilter = dateFilter.dataset.dateFilter;
+
+      if (state.dateFilter === "today") state.openDays.add(todayRomeKey(0));
+      if (state.dateFilter === "tomorrow") state.openDays.add(todayRomeKey(1));
+
       document.querySelectorAll("[data-date-filter]").forEach(button => {
         button.classList.toggle("active", button === dateFilter);
       });
@@ -1946,6 +2246,7 @@
       ]);
 
       renderBetslip();
+      initMobileBetslipObserver();
       $("#loadingOverlay").classList.add("hidden");
 
     } catch (error) {
