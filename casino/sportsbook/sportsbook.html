@@ -1347,11 +1347,11 @@
     },
     {
       title: "Over / Under 1.5",
-      marketId: "1012",
+      marketId: "108",
       columns: 2,
       options: [
-        ["Over 1.5", "1012", "odd_over_15"],
-        ["Under 1.5", "1013", "odd_under_15"]
+        ["Over 1.5", "108", "odd_over_15"],
+        ["Under 1.5", "109", "odd_under_15"]
       ]
     },
     {
@@ -1365,11 +1365,20 @@
     },
     {
       title: "Over / Under 3.5",
+      marketId: "1012",
+      columns: 2,
+      options: [
+        ["Over 3.5", "1012", "odd_over_35"],
+        ["Under 3.5", "1013", "odd_under_35"]
+      ]
+    },
+    {
+      title: "Over / Under 4.5",
       marketId: "1014",
       columns: 2,
       options: [
-        ["Over 3.5", "1014", "odd_over_35"],
-        ["Under 3.5", "1015", "odd_under_35"]
+        ["Over 4.5", "1014", "odd_over_45"],
+        ["Under 4.5", "1015", "odd_under_45"]
       ]
     },
     {
@@ -1382,13 +1391,30 @@
       ]
     },
     {
-      title: "1° Tempo 1X2",
-      marketId: "10208",
-      columns: 3,
+      title: "Draw No Bet",
+      marketId: "10214",
+      columns: 2,
       options: [
-        ["1", "10208", "odd_ht_1"],
-        ["X", "10209", "odd_ht_x"],
-        ["2", "10210", "odd_ht_2"]
+        ["1", "10214", "odd_dnb_1"],
+        ["2", "10215", "odd_dnb_2"]
+      ]
+    },
+    {
+      title: "Casa vince senza subire",
+      marketId: "10316",
+      columns: 2,
+      options: [
+        ["Sì", "10316", "odd_home_win_to_nil_yes"],
+        ["No", "10317", "odd_home_win_to_nil_no"]
+      ]
+    },
+    {
+      title: "Trasferta vince senza subire",
+      marketId: "10318",
+      columns: 2,
+      options: [
+        ["Sì", "10318", "odd_away_win_to_nil_yes"],
+        ["No", "10319", "odd_away_win_to_nil_no"]
       ]
     }
   ];
@@ -1588,11 +1614,16 @@
         odd_under_25,
         odd_over_35,
         odd_under_35,
+        odd_over_45,
+        odd_under_45,
         odd_even,
         odd_odd,
-        odd_ht_1,
-        odd_ht_x,
-        odd_ht_2,
+        odd_dnb_1,
+        odd_dnb_2,
+        odd_home_win_to_nil_yes,
+        odd_home_win_to_nil_no,
+        odd_away_win_to_nil_yes,
+        odd_away_win_to_nil_no,
         odds_updated_at
       `)
       .eq("status", "NS")
