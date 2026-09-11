@@ -3584,48 +3584,67 @@ async function loadUserProgression() {
 
     async function signup() {
 
-      authStatus.textContent =
-        "Registrazione...";
+  authStatus.textContent =
+    "Registrazione...";
 
 
-      const {
-        data,
-        error
-      } =
-        await supabase.auth
-          .signUp(
-            {
-              email:
-                emailInput.value
-                  .trim(),
-
-              password:
-                passwordInput.value
-            }
-          );
-
-
-      if (error) {
-
-        authStatus.textContent =
-          error.message;
-
-        return;
-      }
+  /*
+   * Redirect dopo la conferma email.
+   *
+   * Su GitHub Pages risolve automaticamente:
+   * https://schenna86.github.io/progetti/casino/
+   *
+   * invece della sola root:
+   * https://schenna86.github.io/
+   */
+  const emailRedirectTo =
+    new URL(
+      "./",
+      window.location.href
+    ).href;
 
 
-      if (!data.session) {
+  const {
+    data,
+    error
+  } =
+    await supabase.auth
+      .signUp(
+        {
+          email:
+            emailInput.value
+              .trim(),
 
-        authStatus.textContent =
-          "Registrazione completata. Controlla l'email se la conferma è attiva.";
+          password:
+            passwordInput.value,
 
-      } else {
+          options: {
+            emailRedirectTo
+          }
+        }
+      );
 
-        authStatus.textContent =
-          "";
-      }
-    }
 
+  if (error) {
+
+    authStatus.textContent =
+      error.message;
+
+    return;
+  }
+
+
+  if (!data.session) {
+
+    authStatus.textContent =
+      "Registrazione completata. Controlla l'email per confermare il tuo account.";
+
+  } else {
+
+    authStatus.textContent =
+      "";
+  }
+}
 
     loginBtn.addEventListener(
       "click",
