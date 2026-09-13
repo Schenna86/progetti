@@ -1017,6 +1017,8 @@
 
   </div>
 
+  <script src="./shared/casino-format.js"></script>
+
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
@@ -1102,6 +1104,12 @@
       ).format(Number(value || 0));
     }
 
+    function formatChips(value) {
+      return window.CasinoFormat?.formatChips
+        ? window.CasinoFormat.formatChips(value)
+        : fmt(value);
+    }
+
     function showMessage(text, type = "ok") {
       messageEl.textContent = text;
       messageEl.className = `message show ${type}`;
@@ -1155,8 +1163,8 @@
       selectedCountEl.textContent = size;
       systemSizeEl.textContent = size;
       combinationCountEl.textContent = fmt(combinations);
-      costPerDrawEl.textContent = fmt(perDraw);
-      totalCostEl.textContent = fmt(total);
+      costPerDrawEl.textContent = formatChips(perDraw);
+      totalCostEl.textContent = formatChips(total);
 
       buyBtn.disabled = buying || size < 6 || size > 10;
     }
@@ -1251,13 +1259,13 @@
           .join("");
 
       lastDraw4Pool.textContent =
-        `${fmt(lastDraw.pool_4_total)} fiche`;
+        `${formatChips(lastDraw.pool_4_total)} fiche`;
 
       lastDraw5Pool.textContent =
-        `${fmt(lastDraw.pool_5_total)} fiche`;
+        `${formatChips(lastDraw.pool_5_total)} fiche`;
 
       lastDraw6Pool.textContent =
-        `${fmt(lastDraw.pool_6_total)} fiche`;
+        `${formatChips(lastDraw.pool_6_total)} fiche`;
 
       const combos4 =
         Number(
@@ -1297,17 +1305,17 @@
 
       lastDraw4Result.textContent =
         combos4 > 0
-          ? `${fmt(combos4)} combinazioni vincenti · ${fmt(paid4)} fiche pagate`
-          : `Nessun vincitore · ${fmt(lastDraw.rollover_4_after)} fiche in rollover`;
+          ? `${fmt(combos4)} combinazioni vincenti · ${formatChips(paid4)} fiche pagate`
+          : `Nessun vincitore · ${formatChips(lastDraw.rollover_4_after)} fiche in rollover`;
 
       lastDraw5Result.textContent =
         combos5 > 0
-          ? `${fmt(combos5)} combinazioni vincenti · ${fmt(paid5)} fiche pagate`
-          : `Nessun vincitore · ${fmt(lastDraw.rollover_5_after)} fiche in rollover`;
+          ? `${fmt(combos5)} combinazioni vincenti · ${formatChips(paid5)} fiche pagate`
+          : `Nessun vincitore · ${formatChips(lastDraw.rollover_5_after)} fiche in rollover`;
 
       lastDraw6Result.textContent =
         combos6 > 0
-          ? `${fmt(combos6)} combinazioni vincenti · ${fmt(paid6)} fiche pagate`
+          ? `${fmt(combos6)} combinazioni vincenti · ${formatChips(paid6)} fiche pagate`
           : `Nessun vincitore · jackpot in rollover`;
 
       const winners =
@@ -1330,7 +1338,7 @@
           `<div class="mega-winner-list">` +
             `<div class="mega-winner-row">` +
               `<span>${fmt(winner.winning_combinations)} combinazioni 6/6</span>` +
-              `<span>${fmt(winner.amount)} fiche</span>` +
+              `<span>${formatChips(winner.amount)} fiche</span>` +
             `</div>` +
           `</div>`;
 
@@ -1346,7 +1354,7 @@
                 winner =>
                   `<div class="mega-winner-row">` +
                     `<span>${escapeHtml(winner.username)} · ${fmt(winner.winning_combinations)} combinazioni 6/6</span>` +
-                    `<span>${fmt(winner.amount)} fiche</span>` +
+                    `<span>${formatChips(winner.amount)} fiche</span>` +
                   `</div>`
               )
               .join("") +
@@ -1381,13 +1389,13 @@
       if (error) throw error;
 
       ticketPrice = Number(data?.ticket_price || 1000);
-      balanceEl.textContent = fmt(data?.balance);
+      balanceEl.textContent = formatChips(data?.balance);
 
       const draw = data?.next_draw || {};
 
-      pool4El.textContent = fmt(draw.pool_4);
-      pool5El.textContent = fmt(draw.pool_5);
-      pool6El.textContent = fmt(draw.jackpot_6);
+      pool4El.textContent = formatChips(draw.pool_4);
+      pool5El.textContent = formatChips(draw.pool_5);
+      pool6El.textContent = formatChips(draw.jackpot_6);
       drawAtEl.textContent = formatDrawAt(draw.draw_at);
 
       renderLastDraw(
@@ -1424,7 +1432,7 @@
         );
 
         if (data?.balance != null) {
-          balanceEl.textContent = fmt(data.balance);
+          balanceEl.textContent = formatChips(data.balance);
         }
 
         selected.clear();
@@ -1675,19 +1683,19 @@
                     <div class="ticket-grid">
                       <div class="ticket-stat">
                         <span>Vincita 4/6</span>
-                        <strong>${fmt(entry.win_4 || 0)}</strong>
+                        <strong>${formatChips(entry.win_4 || 0)}</strong>
                       </div>
                       <div class="ticket-stat">
                         <span>Vincita 5/6</span>
-                        <strong>${fmt(entry.win_5 || 0)}</strong>
+                        <strong>${formatChips(entry.win_5 || 0)}</strong>
                       </div>
                       <div class="ticket-stat">
                         <span>Vincita 6/6</span>
-                        <strong>${fmt(entry.win_6 || 0)}</strong>
+                        <strong>${formatChips(entry.win_6 || 0)}</strong>
                       </div>
                       <div class="ticket-stat">
                         <span>Totale vinto</span>
-                        <strong>${fmt(totalWin)}</strong>
+                        <strong>${formatChips(totalWin)}</strong>
                       </div>
                     </div>
                   `

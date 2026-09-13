@@ -1,4 +1,4 @@
-const CACHE_NAME = "pirate-treasure-shell-v1";
+const CACHE_NAME = "pirate-treasure-shell-v2";
 
 const APP_SHELL = [
   "./",

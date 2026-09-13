@@ -767,6 +767,7 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 
 <div id="loading"><div class="loadbox"><div class="loader"></div><strong id="loadingText">Caricamento carte...</strong></div></div>
 
+<script src="../shared/casino-format.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -783,6 +784,12 @@ const CARD_ASSET_CACHE="collectible-card-assets-v2";
 const OFFLINE_META_PREFIX="collectible-offline:";
 
 const fmt=v=>nf.format(Number(v||0));
+const fmtChips=v=>window.CasinoFormat?.formatChips
+  ? window.CasinoFormat.formatChips(v)
+  : nf.format(Number(v||0));
+const fmtCompact=v=>window.CasinoFormat?.formatCompact
+  ? window.CasinoFormat.formatCompact(v)
+  : cf.format(Number(v||0));
 const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 const cls=v=>String(v||"").replace(/[^a-zA-Z0-9_-]/g,"");
 function imgPath(path,folder=""){path=String(path||"").trim();if(!path)return"";if(/^https?:\/\//i.test(path)||path.startsWith("data:")||path.startsWith("/")||path.startsWith("./")||path.startsWith("../"))return path;folder=String(folder||"").replace(/^\/+|\/+$/g,"");if(folder)return folder.startsWith("cards/")?`../${folder}/${path}`:`./${folder}/${path}`;return`./assets/${path}`}
@@ -1075,14 +1082,14 @@ async function removeCollectionAssets(code){
 }
 
 function notifyBalance(){try{const c=new BroadcastChannel("slot-machine-sync");c.postMessage({type:"balance-changed",source:"cards"});c.close()}catch{}try{localStorage.setItem("slot-machine-balance-sync",String(Date.now()))}catch{}}
-function updateXp(){const xp=Number(state.progress.xp||0),lv=Number(state.progress.level||1);$("#xpLevel").textContent=lv;if(lv>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${cf.format(xp)} XP · MAX`;return}const c=state.levels.find(x=>Number(x.level)===lv),n=state.levels.find(x=>Number(x.level)===lv+1),cx=c?Number(c.xp_required):lv===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${cf.format(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.min(100,into/need*100)}%`;$("#xpText").textContent=`${cf.format(into)} / ${cf.format(need)} XP`;$("#xpText").title=`${fmt(into)} / ${fmt(need)} XP`}
+function updateXp(){const xp=Number(state.progress.xp||0),lv=Number(state.progress.level||1);$("#xpLevel").textContent=lv;if(lv>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmtCompact(xp)} XP · MAX`;return}const c=state.levels.find(x=>Number(x.level)===lv),n=state.levels.find(x=>Number(x.level)===lv+1),cx=c?Number(c.xp_required):lv===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${fmtCompact(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.min(100,into/need*100)}%`;$("#xpText").textContent=`${fmtCompact(into)} / ${fmtCompact(need)} XP`;$("#xpText").title=`${fmt(into)} / ${fmt(need)} XP`}
 async function loadProfile(){
   const t=performance.now();
   const{data,error}=await supabase.from("profiles").select("username,chips").eq("user_id",state.session.user.id).single();
   if(error)throw error;
   state.profile=data;
   $("#usernameValue").textContent=data.username||"—";
-  $("#balanceValue").textContent=fmt(data.chips);
+  $("#balanceValue").textContent=fmtChips(data.chips);
   console.debug(`[cards] profile ${(performance.now()-t).toFixed(0)} ms`)
 }
 async function loadLevels(){try{const raw=localStorage.getItem(LEVELS_CACHE_KEY);if(raw){const cached=JSON.parse(raw),age=Date.now()-Number(cached?.savedAt||0);if(Array.isArray(cached?.levels)&&cached.levels.length>0&&age>=0&&age<LEVELS_CACHE_TTL_MS){state.levels=cached.levels;return}}}catch(e){console.warn("Cache livelli:",e)}const{data,error}=await supabase.from("levels").select("level,xp_required").order("level");if(error)throw error;state.levels=data||[];try{localStorage.setItem(LEVELS_CACHE_KEY,JSON.stringify({savedAt:Date.now(),levels:state.levels}))}catch(e){console.warn("Cache livelli:",e)}}
@@ -1273,7 +1280,7 @@ function renderMarketplace(){
         <h3>${esc(l.name||l.card_code)}</h3>
         <div class="market-code">${esc(l.card_code)} · ${esc(l.collection_name||l.collection_code||"")}</div>
         ${mine?`<span class="market-own">TUO ANNUNCIO</span>`:`<div class="market-seller">Venditore: <strong>${esc(seller)}</strong></div>`}
-        <div class="market-price">🪙 ${fmt(l.unit_price)}</div>
+        <div class="market-price">🪙 ${fmtChips(l.unit_price)}</div>
         <div class="market-qty">Disponibili nell'annuncio: ×${fmt(remaining)}</div>
         <div class="market-buttons">
           ${mine
@@ -1300,15 +1307,15 @@ const burn=Math.max(0,Number(card?.burn_price||0));
 const low=lowestMarketPrice(cardCode(card));
 const tradable=card?.is_tradable!==false;
   if(qty<=0){
-    host.innerHTML=`<div class="carddetail-market-note">${low!=null?`Prezzo più basso sul marketplace: <strong>🪙 ${fmt(low)}</strong>`:"Nessun annuncio attivo per questa carta."}</div>`;
+    host.innerHTML=`<div class="carddetail-market-note">${low!=null?`Prezzo più basso sul marketplace: <strong>🪙 ${fmtChips(low)}</strong>`:"Nessun annuncio attivo per questa carta."}</div>`;
     return
   }
   host.innerHTML=`
     <div class="carddetail-trade-stats">
       <div class="carddetail-trade-stat">Vendibili<strong>×${fmt(sellable)}</strong></div>
       <div class="carddetail-trade-stat">In vendita / riservate<strong>×${fmt(reserved)}</strong></div>
-      <div class="carddetail-trade-stat">Burn garantito<strong>${burn>0?`🪙 ${fmt(burn)}`:"—"}</strong></div>
-      <div class="carddetail-trade-stat">Minimo marketplace<strong>${low!=null?`🪙 ${fmt(low)}`:"—"}</strong></div>
+      <div class="carddetail-trade-stat">Burn garantito<strong>${burn>0?`🪙 ${fmtChips(burn)}`:"—"}</strong></div>
+      <div class="carddetail-trade-stat">Minimo marketplace<strong>${low!=null?`🪙 ${fmtChips(low)}`:"—"}</strong></div>
     </div>
     <div class="carddetail-trade-actions">
       <button class="carddetail-action burn" data-card-burn="${esc(cardCode(card))}" ${sellable>0&&burn>0?"":"disabled"}>🔥 VENDI SUBITO</button>
@@ -1343,8 +1350,8 @@ state.marketAction={type:"burn",code,unit,max:sellable};
       <input id="tradeActionQuantity" type="number" min="1" max="${sellable}" step="1" value="1">
     </div>
     <div class="tradeaction-summary">
-      <div class="tradeaction-summary-row"><span>Valore unitario</span><strong>🪙 ${fmt(unit)}</strong></div>
-      <div class="tradeaction-summary-row"><span>Riceverai</span><strong id="tradeActionTotal">🪙 ${fmt(unit)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Valore unitario</span><strong>🪙 ${fmtChips(unit)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Riceverai</span><strong id="tradeActionTotal">🪙 ${fmtChips(unit)}</strong></div>
     </div>
     <div class="tradeaction-warning">Le copie vendute al sistema vengono distrutte definitivamente e non possono essere recuperate.</div>
     <button class="tradeaction-submit danger" data-confirm-burn>CONFERMA VENDITA</button>
@@ -1372,7 +1379,7 @@ state.marketAction={type:"list",code,max:sellable};
       <input id="tradeActionPrice" type="number" min="1" max="${Number.MAX_SAFE_INTEGER}" step="1" value="${low||""}" placeholder="Inserisci il prezzo">
     </div>
     <div class="tradeaction-summary">
-      ${low!=null?`<div class="tradeaction-summary-row"><span>Minimo attuale marketplace</span><strong>🪙 ${fmt(low)}</strong></div>`:""}
+      ${low!=null?`<div class="tradeaction-summary-row"><span>Minimo attuale marketplace</span><strong>🪙 ${fmtChips(low)}</strong></div>`:""}
       <div class="tradeaction-summary-row"><span>Totale annuncio</span><strong id="tradeActionTotal">—</strong></div>
     </div>
     <button class="tradeaction-submit" data-confirm-list>METTI IN VENDITA</button>
@@ -1398,9 +1405,9 @@ function openBuyAction(listingId){
       <input id="tradeActionQuantity" type="number" min="1" max="${max}" step="1" value="1">
     </div>
     <div class="tradeaction-summary">
-      <div class="tradeaction-summary-row"><span>Prezzo unitario</span><strong>🪙 ${fmt(unit)}</strong></div>
-      <div class="tradeaction-summary-row"><span>Totale</span><strong id="tradeActionTotal">🪙 ${fmt(unit)}</strong></div>
-      <div class="tradeaction-summary-row"><span>Saldo attuale</span><strong>🪙 ${fmt(state.profile?.chips||0)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Prezzo unitario</span><strong>🪙 ${fmtChips(unit)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Totale</span><strong id="tradeActionTotal">🪙 ${fmtChips(unit)}</strong></div>
+      <div class="tradeaction-summary-row"><span>Saldo attuale</span><strong>🪙 ${fmtChips(state.profile?.chips||0)}</strong></div>
     </div>
     <button class="tradeaction-submit" data-confirm-buy>COMPRA</button>
     <div id="tradeActionStatus" class="tradeaction-status"></div>`;
@@ -1413,10 +1420,10 @@ function updateTradeActionTotal(){
   if(!action||!target)return;
   const q=Math.max(1,Math.floor(Number($("#tradeActionQuantity")?.value||1)));
   if(action.type==="burn"||action.type==="buy"){
-    target.textContent=`🪙 ${fmt(Number(action.unit||0)*q)}`
+    target.textContent=`🪙 ${fmtChips(Number(action.unit||0)*q)}`
   }else if(action.type==="list"){
     const price=Number($("#tradeActionPrice")?.value||0);
-    target.textContent=Number.isFinite(price)&&price>0?`🪙 ${fmt(price*q)}`:"—"
+    target.textContent=Number.isFinite(price)&&price>0?`🪙 ${fmtChips(price*q)}`:"—"
   }
 }
 function actionQuantity(){
@@ -1453,12 +1460,12 @@ async function confirmBurnAction(){
     if(error)throw error;
     if(data?.balance!=null){
       state.profile.chips=Number(data.balance);
-      $("#balanceValue").textContent=fmt(data.balance)
+      $("#balanceValue").textContent=fmtChips(data.balance)
     }
     notifyBalance();
     state.busy=false;
     closeTradeAction();
-    $("#marketStatus").textContent=`Vendute ${fmt(q)} copie per ${fmt(data?.total_price||0)} fiche.`;
+    $("#marketStatus").textContent=`Vendute ${fmt(q)} copie per ${fmtChips(data?.total_price||0)} fiche.`;
     await refreshCardMarketState(action.code)
   }catch(e){
     console.error(e);
@@ -1486,7 +1493,7 @@ async function confirmListingAction(){
     if(error)throw error;
     state.busy=false;
     closeTradeAction();
-    $("#marketStatus").textContent=`Annuncio creato: ${fmt(q)} × ${action.code} a ${fmt(price)} fiche ciascuna.`;
+    $("#marketStatus").textContent=`Annuncio creato: ${fmt(q)} × ${action.code} a ${fmtChips(price)} fiche ciascuna.`;
     await refreshCardMarketState(action.code)
   }catch(e){
     console.error(e);
@@ -1515,12 +1522,12 @@ async function confirmBuyAction(){
     if(error)throw error;
     if(data?.buyer_balance!=null){
       state.profile.chips=Number(data.buyer_balance);
-      $("#balanceValue").textContent=fmt(data.buyer_balance)
+      $("#balanceValue").textContent=fmtChips(data.buyer_balance)
     }
     notifyBalance();
     state.busy=false;
     closeTradeAction();
-    $("#marketStatus").textContent=`Acquistate ${fmt(q)} copie di ${action.code} per ${fmt(data?.total_price||total)} fiche.`;
+    $("#marketStatus").textContent=`Acquistate ${fmt(q)} copie di ${action.code} per ${fmtChips(data?.total_price||total)} fiche.`;
     await refreshCardMarketState(action.code)
   }catch(e){
     console.error(e);
@@ -1550,7 +1557,7 @@ async function cancelMarketListing(listingId){
   }
 }
 
-function packCard(p,store=false){const owned=Number((state.packs.find(x=>x.id===p.id)?.quantity)??p.quantity??0),canOpen=!store&&p.openable===true&&p.configured===true&&owned>0;return`<article class="pack ${cls(p.id)}"><div class="visual">${packImageHTML(p)}<div class="qty">${store?`Tu: ×${fmt(owned)}`:`×${fmt(owned)}`}</div></div><div class="body"><h3>${esc(p.name)}</h3><p>${esc(p.description||"Pacchetto della collezione.")}</p>${store?`<div class="price">🪙 ${fmt(p.price_chips)}</div>`:""}<div class="tags">${p.cards_per_pack?`<span class="tag">${fmt(p.cards_per_pack)} carte</span>`:`<span class="tag wait">Contenuto da configurare</span>`}${canOpen?`<span class="tag good">Apribile</span>`:""}</div>${store?`<div class="buyrow"><select data-q="${esc(p.id)}"><option>1</option><option>2</option><option>5</option><option>10</option></select><button class="action" data-buy="${esc(p.id)}">ACQUISTA</button></div>`:`<button class="action" data-open="${esc(p.id)}" ${canOpen?"":"disabled"}>${canOpen?"APRI PACCHETTO":p.openable?"CONFIGURAZIONE INCOMPLETA":"APERTURA NON DISPONIBILE"}</button>`}</div></article>`}
+function packCard(p,store=false){const owned=Number((state.packs.find(x=>x.id===p.id)?.quantity)??p.quantity??0),canOpen=!store&&p.openable===true&&p.configured===true&&owned>0;return`<article class="pack ${cls(p.id)}"><div class="visual">${packImageHTML(p)}<div class="qty">${store?`Tu: ×${fmt(owned)}`:`×${fmt(owned)}`}</div></div><div class="body"><h3>${esc(p.name)}</h3><p>${esc(p.description||"Pacchetto della collezione.")}</p>${store?`<div class="price">🪙 ${fmtChips(p.price_chips)}</div>`:""}<div class="tags">${p.cards_per_pack?`<span class="tag">${fmt(p.cards_per_pack)} carte</span>`:`<span class="tag wait">Contenuto da configurare</span>`}${canOpen?`<span class="tag good">Apribile</span>`:""}</div>${store?`<div class="buyrow"><select data-q="${esc(p.id)}"><option>1</option><option>2</option><option>5</option><option>10</option></select><button class="action" data-buy="${esc(p.id)}">ACQUISTA</button></div>`:`<button class="action" data-open="${esc(p.id)}" ${canOpen?"":"disabled"}>${canOpen?"APRI PACCHETTO":p.openable?"CONFIGURAZIONE INCOMPLETA":"APERTURA NON DISPONIBILE"}</button>`}</div></article>`}
 function renderPacks(){const owned=state.packs.filter(p=>Number(p.quantity||0)>0),tot=owned.reduce((s,p)=>s+Number(p.quantity||0),0);$("#packBadge").textContent=`${fmt(tot)} ${tot===1?"pacchetto":"pacchetti"}`;$("#packGrid").innerHTML=owned.length?owned.map(p=>packCard(p)).join(""):`<div class="empty"><strong>Nessun pacchetto posseduto</strong>I pacchetti ottenuti dai livelli o acquistati appariranno qui.</div>`;document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openPack(b.dataset.open))}
 function renderStore(){const list=state.store.filter(p=>p.purchasable===true&&Number(p.price_chips||0)>0);$("#storeBadge").textContent=`${fmt(list.length)} disponibili`;$("#storeGrid").innerHTML=list.length?list.map(p=>packCard(p,true)).join(""):`<div class="empty"><strong>Nessun pacchetto in vendita</strong>I pacchetti ricompensa continuano comunque a funzionare.</div>`;document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const id=b.dataset.buy,q=Number(document.querySelector(`[data-q="${CSS.escape(id)}"]`)?.value||1);buyPack(id,q)})}
 function filters(){
@@ -1758,7 +1765,7 @@ function closeCardDetail(){
   $("#cardDetailCard").innerHTML=""
 }
 function closeOpening(){$("#openingOverlay").classList.remove("visible");$("#openingGrid").innerHTML=""}
-async function buyPack(id,q){if(state.busy)return;const p=state.store.find(x=>x.id===id);if(!p)return;q=Math.max(1,Math.min(100,Number(q||1)));const total=Number(p.price_chips||0)*q;if(Number(state.profile?.chips||0)<total){$("#storeStatus").textContent="Saldo insufficiente.";return}state.busy=true;$("#storeStatus").textContent=`Acquisto ${p.name} ×${q}...`;try{const{data,error}=await supabase.rpc("buy_card_pack",{p_pack_id:id,p_quantity:q,p_request_id:crypto.randomUUID()});if(error)throw error;if(data?.balance!=null){state.profile.chips=Number(data.balance);$("#balanceValue").textContent=fmt(data.balance)}notifyBalance();$("#storeStatus").textContent=`Acquistato ${p.name} ×${q} per ${fmt(data?.total_price||total)} fiche.`;await Promise.all([loadPacks(),loadStore(),loadProgress()]);const up=await CasinoLevelUp.check();if(up?.balance!=null){state.profile.chips=Number(up.balance);$("#balanceValue").textContent=fmt(up.balance)}await Promise.all([loadProfile(),loadProgress(),loadPacks()])}catch(e){console.error(e);$("#storeStatus").textContent=e?.message||String(e)}finally{state.busy=false;renderStore()}}
+async function buyPack(id,q){if(state.busy)return;const p=state.store.find(x=>x.id===id);if(!p)return;q=Math.max(1,Math.min(100,Number(q||1)));const total=Number(p.price_chips||0)*q;if(Number(state.profile?.chips||0)<total){$("#storeStatus").textContent="Saldo insufficiente.";return}state.busy=true;$("#storeStatus").textContent=`Acquisto ${p.name} ×${q}...`;try{const{data,error}=await supabase.rpc("buy_card_pack",{p_pack_id:id,p_quantity:q,p_request_id:crypto.randomUUID()});if(error)throw error;if(data?.balance!=null){state.profile.chips=Number(data.balance);$("#balanceValue").textContent=fmtChips(data.balance)}notifyBalance();$("#storeStatus").textContent=`Acquistato ${p.name} ×${q} per ${fmtChips(data?.total_price||total)} fiche.`;await Promise.all([loadPacks(),loadStore(),loadProgress()]);const up=await CasinoLevelUp.check();if(up?.balance!=null){state.profile.chips=Number(up.balance);$("#balanceValue").textContent=fmtChips(up.balance)}await Promise.all([loadProfile(),loadProgress(),loadPacks()])}catch(e){console.error(e);$("#storeStatus").textContent=e?.message||String(e)}finally{state.busy=false;renderStore()}}
 async function tab(name){
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
   $("#packsSection").classList.toggle("active",name==="packs");
@@ -1973,7 +1980,7 @@ try{
         if(up?.balance!=null){
           state.profile=state.profile||{};
           state.profile.chips=Number(up.balance);
-          $("#balanceValue").textContent=fmt(up.balance)
+          $("#balanceValue").textContent=fmtChips(up.balance)
         }
       }catch(e){
         console.warn("Controllo level-up:",e)

@@ -2320,6 +2320,7 @@ header{
 
 <div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento Blackjack…</strong><div id="loadingError" style="margin-top:10px;color:#ff9292;white-space:pre-wrap"></div></div></div>
 
+<script src="../shared/casino-format.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -2335,6 +2336,7 @@ const STORAGE_KEY="casino-blackjack-bets-v1";
 let session=null;
 let config=null;
 let levels=[];
+let profileBalance=0;
 const LEVELS_CACHE_KEY="casino-levels:v1";
 const LEVELS_CACHE_TTL_MS=7*24*60*60*1000;
 
@@ -2349,22 +2351,18 @@ let state={
 };
 
 function fmt(value){return nf.format(Number(value||0))}
-
-function compactAmount(value){
-  const n=Number(value||0);
-
-  if(n>=1000000){
-    const v=n/1000000;
-    return `${Number.isInteger(v)?v:v.toFixed(1)}M`;
-  }
-
-  if(n>=1000){
-    const v=n/1000;
-    return `${Number.isInteger(v)?v:v.toFixed(1)}K`;
-  }
-
-  return String(n);
+function fmtChips(value){
+  return window.CasinoFormat?.formatChips
+    ?window.CasinoFormat.formatChips(value)
+    :nf.format(Number(value||0));
 }
+function fmtCompact(value){
+  return window.CasinoFormat?.formatCompact
+    ?window.CasinoFormat.formatCompact(value)
+    :nf.format(Number(value||0));
+}
+
+function compactAmount(value){return fmtChips(value)}
 
 function sleep(ms){
   return new Promise(resolve=>setTimeout(resolve,ms));
@@ -2599,13 +2597,13 @@ async function loadLevels(){
 
 function updateXp(xp,level){
   xp=Number(xp||0);level=Number(level||1);$("#xpLevel").textContent=level;
-  if(level>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmt(xp)} XP · MAX`;return}
+  if(level>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmtCompact(xp)} XP · MAX`;return}
   const current=levels.find(x=>Number(x.level)===level),next=levels.find(x=>Number(x.level)===level+1);
   const currentXp=current?Number(current.xp_required):(level===1?0:null),nextXp=next?Number(next.xp_required):null;
-  if(currentXp==null||nextXp==null){$("#xpText").textContent=`${fmt(xp)} XP`;return}
+  if(currentXp==null||nextXp==null){$("#xpText").textContent=`${fmtCompact(xp)} XP`;return}
   const into=Math.max(0,xp-currentXp),needed=Math.max(1,nextXp-currentXp);
   $("#xpFill").style.width=`${Math.max(0,Math.min(100,into/needed*100))}%`;
-  $("#xpText").textContent=`${fmt(into)} / ${fmt(needed)} XP`;
+  $("#xpText").textContent=`${fmtCompact(into)} / ${fmtCompact(needed)} XP`;
 }
 
 async function loadProfile(){
@@ -2617,7 +2615,8 @@ async function loadProfile(){
   if(profileError)throw profileError;
   if(progressionError)throw progressionError;
   $("#usernameValue").textContent=profile.username||"—";
-  $("#balanceValue").textContent=fmt(profile.chips);
+  profileBalance=Number(profile.chips||0);
+  $("#balanceValue").textContent=fmtChips(profileBalance);
   updateXp(progression?.xp||0,progression?.level||1);
 }
 
@@ -2625,7 +2624,7 @@ async function refreshProfileAndLevelUp(){
   try{
     if(window.CasinoLevelUp?.check){
       const result=await window.CasinoLevelUp.check();
-      if(result?.balance!=null)$("#balanceValue").textContent=fmt(result.balance);
+      if(result?.balance!=null){profileBalance=Number(result.balance);$("#balanceValue").textContent=fmtChips(profileBalance);}
     }
     await loadProfile();
   }catch(error){console.error("Aggiornamento XP/Level:",error)}
@@ -2884,7 +2883,7 @@ function handHtml(hand,spot){
       </div>
 
       <div class="hand-bet-total">
-        Puntata <strong>${fmt(hand.bet)}</strong>
+        Puntata <strong>${fmtChips(hand.bet)}</strong>
       </div>
     </div>
   `;
@@ -2902,7 +2901,7 @@ function renderSeats(){
     const seat=document.createElement("section");
     seat.className="seat"+(enabled?" enabled":"")+(activeSeat?" active-turn":"")+(state.round?.status==="COMPLETED"&&spot?" completed":"");
 
-    const betOptions=(config?.allowed_bets||[]).map(value=>`<option value="${value}" ${Number(state.selectedBets[seatNo])===Number(value)?"selected":""}>${fmt(value)}</option>`).join("");
+    const betOptions=(config?.allowed_bets||[]).map(value=>`<option value="${value}" ${Number(state.selectedBets[seatNo])===Number(value)?"selected":""}>${fmtChips(value)}</option>`).join("");
     const emptyMessage=enabled?"Le carte verranno distribuite qui.":"Attiva questa postazione per giocare.";
 
     const displayedBet=
@@ -2941,9 +2940,9 @@ function renderSeats(){
       </div>
       <div class="seat-stake">${
         roundOpen && spot
-          ?`Puntata attuale ${fmt(spot.initial_bet)}`
+          ?`Puntata attuale ${fmtChips(spot.initial_bet)}`
           :enabled
-            ?`Prossima puntata ${fmt(state.selectedBets[seatNo]||0)}`
+            ?`Prossima puntata ${fmtChips(state.selectedBets[seatNo]||0)}`
             :"Esclusa dalla prossima mano"
       }</div>
       ${
@@ -2999,15 +2998,15 @@ function renderSummary(){
   const roundLive=state.round&&state.round.status!=="COMPLETED";
   const enabledCount=roundLive?state.round.spots.length:Object.values(state.enabled).filter(Boolean).length;
   $("#enabledSeats").textContent=enabledCount;
-  $("#initialBet").textContent=fmt(roundLive?state.round.initial_staked:currentInitialBet());
-  $("#totalStaked").textContent=fmt(roundLive?state.round.total_staked:currentInitialBet());
+  $("#initialBet").textContent=fmtChips(roundLive?state.round.initial_staked:currentInitialBet());
+  $("#totalStaked").textContent=fmtChips(roundLive?state.round.total_staked:currentInitialBet());
 
   if(state.round?.status==="COMPLETED"){
     $("#resultStrip").classList.remove("hidden");
-    $("#resultStake").textContent=fmt(state.round.total_staked);
-    $("#resultReturn").textContent=fmt(state.round.total_return);
+    $("#resultStake").textContent=fmtChips(state.round.total_staked);
+    $("#resultReturn").textContent=fmtChips(state.round.total_return);
     const net=Number(state.round.net_result||0);
-    $("#resultNet").textContent=`${net>=0?"+":""}${fmt(net)}`;
+    $("#resultNet").textContent=`${net>=0?"+":""}${fmtChips(net)}`;
     $("#resultNet").style.color=net>0?"var(--good)":net<0?"var(--bad)":"var(--blue)";
     $("#resultDealer").textContent=state.round.dealer?.blackjack?"BLACKJACK":state.round.dealer?.total>21?"SBALLATO":String(state.round.dealer?.total??"—");
   }else{
@@ -3059,7 +3058,7 @@ function renderAll(){
   renderSummary();
   renderRoundBadge();
   renderControls();
-  if(state.round?.balance!=null)$("#balanceValue").textContent=fmt(state.round.balance);
+  if(state.round?.balance!=null){profileBalance=Number(state.round.balance);$("#balanceValue").textContent=fmtChips(profileBalance);}
 }
 
 function betsPayload(){
@@ -3092,7 +3091,7 @@ async function loadConfig(){
   if(error)throw error;
   config=normalizeConfig(data);
   initializeBetSelections();
-  if(data.balance!=null)$("#balanceValue").textContent=fmt(data.balance);
+  if(data.balance!=null){profileBalance=Number(data.balance);$("#balanceValue").textContent=fmtChips(profileBalance);}
   return data.open_round_id||null;
 }
 
@@ -3111,8 +3110,7 @@ async function startRound(){
   if(!bets.length){status("Attiva almeno una postazione.",true);return}
 
   const total=bets.reduce((sum,item)=>sum+item.bet,0);
-  const visibleBalance=Number(String($("#balanceValue").textContent).replace(/\./g,"").replace(/,/g,"."))||0;
-  if(visibleBalance<total){status(`Fiche insufficienti: servono ${fmt(total)}.`,true);return}
+  if(profileBalance<total){status(`Fiche insufficienti: servono ${fmtChips(total)}.`,true);return}
 
   const requestId=crypto.randomUUID();
   setBusy(true,"Distribuzione in corso…");
@@ -3123,8 +3121,9 @@ async function startRound(){
 
     state.round=normalizeRound(data);
 
+    profileBalance=Number(state.round.balance||0);
     $("#balanceValue").textContent=
-      fmt(state.round.balance);
+      fmtChips(profileBalance);
 
     /*
      * Il risultato è già deciso dal server, ma il browser
@@ -3213,8 +3212,9 @@ async function doAction(action){
     state.round=
       normalizeRound(data);
 
+    profileBalance=Number(state.round.balance||0);
     $("#balanceValue").textContent=
-      fmt(state.round.balance);
+      fmtChips(profileBalance);
 
     state.animation=
       buildActionAnimation(
@@ -3293,11 +3293,11 @@ function maybeShowResult(){
   if(!round||round.status!=="COMPLETED"||state.resultShownFor===round.round_id)return;
 
   state.resultShownFor=round.round_id;
-  $("#modalStake").textContent=fmt(round.total_staked);
-  $("#modalReturn").textContent=fmt(round.total_return);
+  $("#modalStake").textContent=fmtChips(round.total_staked);
+  $("#modalReturn").textContent=fmtChips(round.total_return);
 
   const net=Number(round.net_result||0);
-  $("#modalNet").textContent=`${net>=0?"+":""}${fmt(net)}`;
+  $("#modalNet").textContent=`${net>=0?"+":""}${fmtChips(net)}`;
   $("#modalNet").style.color=net>0?"var(--good)":net<0?"var(--bad)":"var(--blue)";
 
   $("#modalDealer").textContent=`Dealer: ${round.dealer?.total??"—"}${round.dealer?.blackjack?" · BLACKJACK":round.dealer?.total>21?" · SBALLATO":""}`;
@@ -3306,7 +3306,7 @@ function maybeShowResult(){
   for(const spot of round.spots||[]){
     for(const hand of spot.hands||[]){
       const klass=resultClass(hand);
-      rows.push(`<div class="modal-row ${klass}"><strong>Posto ${spot.seat_no} · Mano ${hand.hand_order}</strong><span class="result-word">${resultLabel(hand)} · ${hand.total}</span><span>${fmt(hand.bet)} → <strong>${fmt(hand.payout||0)}</strong></span></div>`);
+      rows.push(`<div class="modal-row ${klass}"><strong>Posto ${spot.seat_no} · Mano ${hand.hand_order}</strong><span class="result-word">${resultLabel(hand)} · ${hand.total}</span><span>${fmtChips(hand.bet)} → <strong>${fmtChips(hand.payout||0)}</strong></span></div>`);
     }
   }
   $("#modalHands").innerHTML=rows.join("");

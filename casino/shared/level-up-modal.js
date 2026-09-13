@@ -75,6 +75,16 @@
   }
 
 
+  function formatChips(
+    value
+  ) {
+
+    return window.CasinoFormat
+      ?.formatChips(value)
+      ?? formatNumber(value);
+  }
+
+
   function formatMultiplier(
     value
   ) {
@@ -624,7 +634,7 @@
       if (balanceEl) {
 
         balanceEl.textContent =
-          formatNumber(
+          formatChips(
             data.balance
           );
       }
@@ -747,7 +757,7 @@
               </div>
 
               <div class="clu-reward-value">
-                <strong>+${formatNumber(
+                <strong>+${formatChips(
                   data.chips_reward
                 )}</strong>
               </div>
@@ -843,7 +853,7 @@
           ) {
 
             rewards.push(
-              `+${formatNumber(
+              `+${formatChips(
                 level.chips_reward
               )} fiche`
             );

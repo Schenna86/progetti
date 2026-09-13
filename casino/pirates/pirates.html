@@ -1595,6 +1595,7 @@ height: 100vh;
     </main>
   </div>
 
+  <script src="../shared/casino-format.js"></script>
   <script src="../shared/level-up-modal.js"></script>
 
   <script type="module">
@@ -1928,9 +1929,11 @@ height: 100vh;
 
     function formatChips(value) {
 
-      return nf.format(
-        Number(value || 0)
-      );
+      return window.CasinoFormat
+        ?.formatChips(value)
+        ?? nf.format(
+          Number(value || 0)
+        );
     }
 
 

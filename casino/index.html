@@ -1274,6 +1274,8 @@
   </div>
 
 
+  <script src="./shared/casino-format.js"></script>
+
   <script type="module">
 
     import {
@@ -1293,13 +1295,11 @@
 
 
     /*
-     * Cartella locale contenente gli asset delle slot.
-     *
-     * Esempio:
-     * ./assets/pirates/background.webp
+     * Asset comuni del Casino Core:
+     * cover dei giochi, fiche e altri asset riutilizzati.
      */
-    const ASSETS_ROOT =
-      "./assets";
+    const SHARED_ASSETS_ROOT =
+      "./shared/assets";
 
 
     const supabase =
@@ -1466,6 +1466,16 @@
       return nf.format(
         Number(value || 0)
       );
+    }
+
+
+    function formatChips(
+      value
+    ) {
+
+      return window.CasinoFormat?.formatChips
+        ? window.CasinoFormat.formatChips(value)
+        : formatNumber(value);
     }
 
 
@@ -1902,95 +1912,29 @@ function updateXpBar(totalXp, level) {
 }
 function formatXp(value) {
 
-    return Number(value || 0)
-        .toLocaleString("it-IT");
+    return window.CasinoFormat?.formatCompact
+        ? window.CasinoFormat.formatCompact(value)
+        : Number(value || 0).toLocaleString("it-IT");
 }
     function gameCoverUrl(
       game
     ) {
 
-      const folder =
-        encodeURIComponent(
-          game.asset_folder
-          || game.id
-        );
-
-
       const version =
         encodeURIComponent(
-          game.asset_version
-          || 1
+          game.asset_version || 1
         );
 
+      const gameId =
+        encodeURIComponent(
+          game.id
+        );
 
-      /*
-       * Ogni macro-gioco può avere una cover diversa.
-       *
-       * Slot:
-       *   /pirates/assets/logo.webp
-       *
-       * Roulette:
-       *   /roulette/assets/wheel.webp
-       *
-       * Blackjack / Carte:
-       *   quando arriveranno useremo cover.webp.
-       */
-      switch (
-        game.game_type
-      ) {
-
-        case "roulette":
-
-          return (
-            `${folder}/assets/cover.webp?v=${version}`
-          );
-
-
-        case "blackjack":
-
-          return (
-            `${folder}/assets/cover.webp?v=${version}`
-          );
-
-        case "tombola":
-
-          return (
-            `${folder}/assets/cover.webp?v=${version}`
-          );
-
-        case "cards":
-
-          return (
-            `${folder}/assets/cover.webp?v=${version}`
-          );
-
-        case "sportsbook":
-
-          return (
-            `${folder}/assets/cover.webp?v=${version}`
-          );
-
-        case "mega_jackpot":
-
-          /*
-           * La card ha già un background CSS dedicato.
-           * Se in futuro aggiungiamo una cover basta creare:
-           * mega-jackpot/assets/cover.webp
-           */
-          return (
-            `${folder}/assets/cover.webp?v=${version}`
-          );
-
-
-        case "slot":
-        default:
-
-          return (
-            `${folder}/assets/logo.webp?v=${version}`
-          );
-      }
+      return (
+        `${SHARED_ASSETS_ROOT}/covers/${gameId}.webp`
+        + `?v=${version}`
+      );
     }
-
 
     function paylineTableUrl(game) {
       const fileName =
@@ -2102,7 +2046,7 @@ function formatXp(value) {
 
 
         balanceValue.textContent =
-          formatNumber(
+          formatChips(
             data.chips
           );
 
@@ -2281,7 +2225,7 @@ function formatXp(value) {
 
 
       balanceValue.textContent =
-        formatNumber(
+        formatChips(
           data.chips
         );
 
@@ -2641,40 +2585,30 @@ function formatXp(value) {
       }
 
 
-      if (
-        game.game_type === "roulette"
-      ) {
+if (game.game_type === "roulette") {
 
-        const cfg =
-          game.roulette_config;
+  const cfg = game.roulette_config;
 
+  if (cfg?.variant === "european") {
+    tags.push("0–36");
+  }
 
-        tags.push(
-          "0–36"
-        );
+  if (cfg?.variant === "american") {
+    tags.push("0–00");
+  }
 
+  if (cfg?.variant === "triple_zero") {
+    tags.push("0–00–000");
+  }
 
-        if (
-          cfg?.variant === "european"
-        ) {
-
-          tags.push(
-            "Europea"
-          );
-        }
-
-
-        if (
-          cfg?.target_rtp != null
-        ) {
-
-          tags.push(
-            `RTP ${Number(cfg.target_rtp)
-              .toFixed(2)
-              .replace(".", ",")}%`
-          );
-        }
-      }
+  if (cfg?.target_rtp != null) {
+    tags.push(
+      `RTP ${Number(cfg.target_rtp)
+        .toFixed(2)
+        .replace(".", ",")}%`
+    );
+  }
+}
 
 
       if (
@@ -3023,7 +2957,7 @@ function formatXp(value) {
               <div class="previous-podium-row place-${index + 1}">
                 <div class="previous-podium-medal">${medals[index]}</div>
                 <div class="previous-podium-name">${escapeHtml(row.username)}</div>
-                <div class="previous-podium-score">${formatNumber(row.score)}</div>
+                <div class="previous-podium-score">${formatChips(row.score)}</div>
               </div>
             `
           )
@@ -3117,7 +3051,7 @@ function formatXp(value) {
                   <div class="leader-row ${isMe ? "me" : ""}">
                     <div class="pos">#${Number(row.position)}</div>
                     <div class="leader-name">${escapeHtml(row.username)}</div>
-                    <div class="leader-score">${formatNumber(row.score)}</div>
+                    <div class="leader-score">${formatChips(row.score)}</div>
                   </div>
                 `;
               }
@@ -3137,7 +3071,7 @@ function formatXp(value) {
         myRankingEl.innerHTML = `
           Tu: <strong>#${formatNumber(me.position)}</strong>
           · ${escapeHtml(me.username)}
-          · <strong>${formatNumber(me.score)}</strong>
+          · <strong>${formatChips(me.score)}</strong>
         `;
 
       } else {
@@ -3243,23 +3177,7 @@ function formatXp(value) {
       value
     ) {
 
-      const n =
-        Number(
-          value
-          || 0
-        );
-
-
-      return new Intl.NumberFormat(
-        "it-IT",
-        {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2
-        }
-      )
-        .format(
-          n
-        );
+      return formatChips(value);
     }
 
 

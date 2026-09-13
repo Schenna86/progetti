@@ -1235,6 +1235,7 @@
   </div>
 </div>
 
+<script src="../shared/casino-format.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -1269,10 +1270,6 @@
 
   const $ = selector => document.querySelector(selector);
   const nf = new Intl.NumberFormat("it-IT");
-  const compactXp = new Intl.NumberFormat("it-IT", {
-    notation: "compact",
-    maximumFractionDigits: 1
-  });
 
   const oddsFormatter = new Intl.NumberFormat("it-IT", {
     minimumFractionDigits: 2,
@@ -1423,9 +1420,17 @@
     ? new BroadcastChannel("slot-machine-sync")
     : null;
 
-  function fmt(value) {
-    return nf.format(Number(value || 0));
-  }
+  const fmtNumber = value => nf.format(Number(value || 0));
+
+  const formatCompact = value =>
+    window.CasinoFormat?.formatCompact
+      ? window.CasinoFormat.formatCompact(value)
+      : fmtNumber(value);
+
+  const formatChips = value =>
+    window.CasinoFormat?.formatChips
+      ? window.CasinoFormat.formatChips(value)
+      : fmtNumber(value);
 
   function fmtOdd(value) {
     return oddsFormatter.format(Number(value || 0));
@@ -1534,7 +1539,7 @@
 
     if (level >= 500) {
       $("#xpFill").style.width = "100%";
-      $("#xpText").textContent = `${compactXp.format(xp)} XP · MAX`;
+      $("#xpText").textContent = `${formatCompact(xp)} XP · MAX`;
       return;
     }
 
@@ -1545,7 +1550,7 @@
     const nextXp = next ? Number(next.xp_required) : null;
 
     if (currentXp == null || nextXp == null) {
-      $("#xpText").textContent = `${compactXp.format(xp)} XP`;
+      $("#xpText").textContent = `${formatCompact(xp)} XP`;
       return;
     }
 
@@ -1554,8 +1559,8 @@
     const percent = Math.max(0, Math.min(100, into / need * 100));
 
     $("#xpFill").style.width = `${percent}%`;
-    $("#xpText").textContent = `${compactXp.format(into)} / ${compactXp.format(need)} XP`;
-    $("#xpText").title = `${fmt(into)} / ${fmt(need)} XP`;
+    $("#xpText").textContent = `${formatCompact(into)} / ${formatCompact(need)} XP`;
+    $("#xpText").title = `${fmtNumber(into)} / ${fmtNumber(need)} XP`;
   }
 
   async function loadProfileAndProgression() {
@@ -1582,7 +1587,7 @@
     state.progression = progressionResult.data || { xp: 0, level: 1 };
 
     $("#usernameValue").textContent = state.profile?.username || state.session.user.email || "—";
-    $("#balanceValue").textContent = fmt(state.profile?.chips || 0);
+    $("#balanceValue").textContent = formatChips(state.profile?.chips || 0);
     updateXp(state.progression.xp, state.progression.level);
   }
 
@@ -2012,7 +2017,7 @@
 
       <div class="potential-box">
         <span>Vincita potenziale</span>
-        <strong id="potentialWinValue">🪙 ${fmt(potentialWin)}</strong>
+        <strong id="potentialWinValue">🪙 ${formatChips(potentialWin)}</strong>
       </div>
 
       <button id="placeBetBtn" class="place-btn" type="button" ${state.busy ? "disabled" : ""}>
@@ -2031,7 +2036,7 @@
 
     const stake = Math.max(0, Math.floor(Number(input.value || 0)));
     const calc = calculateTicket();
-    output.textContent = `🪙 ${fmt(stake > 0 ? Math.floor(stake * calc.finalOdd) : 0)}`;
+    output.textContent = `🪙 ${formatChips(stake > 0 ? Math.floor(stake * calc.finalOdd) : 0)}`;
   }
 
   function readableRpcError(error) {
@@ -2095,13 +2100,13 @@
 
       if (data?.balance != null) {
         state.profile.chips = Number(data.balance);
-        $("#balanceValue").textContent = fmt(data.balance);
+        $("#balanceValue").textContent = formatChips(data.balance);
       }
 
       balanceSyncChannel?.postMessage({ type: "balance-changed" });
 
       toast(
-        `Schedina #${data.ticket_id} piazzata · quota x${fmtOdd(data.final_total_odd)} · vincita potenziale ${fmt(data.potential_win)} fiche.`
+        `Schedina #${data.ticket_id} piazzata · quota x${fmtOdd(data.final_total_odd)} · vincita potenziale ${formatChips(data.potential_win)} fiche.`
       );
 
       state.selections = [];
@@ -2113,7 +2118,7 @@
       const levelUp = await CasinoLevelUp.check();
       if (levelUp?.balance != null) {
         state.profile.chips = Number(levelUp.balance);
-        $("#balanceValue").textContent = fmt(levelUp.balance);
+        $("#balanceValue").textContent = formatChips(levelUp.balance);
       }
 
     } catch (error) {

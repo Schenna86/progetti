@@ -13,7 +13,7 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="stylesheet" href="../shared/designer.css" />
 
-  <style>
+  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=655Jp2mFktwCEziVy9QO_UfxU9Q-6SoA2BVxB5rta6j9j1nyPW_UCCYvgnIO3xtsSxv-LESUqHrOcJwWpOZDco9VQLUzjzaQTq6bUw1qDA7HaQZnE8U_ehUc5VVts2uxDvNcYW8DUL7tsgUDyJTRPwPN3cqVOUHvvdrXMJas-kStRjj2-T6-81DiaAuop_bjR4F-IwkYVDk6KgNN_nxmlzmdkDYxBfQbxOwYisMTsRIDGpUlFiA6CEieiafVhVmvIzriv6hucmLOEDeRx6hyY9SFK8oDYCZ-TDWOQjX-hZnegb8V2UbNWgCDzuao9NFr" charset="UTF-8"></script><style>
     :root {
       --stage-w: 2560;
       --stage-h: 1440;
@@ -1598,6 +1598,7 @@
     </main>
   </div>
 
+  <script src="../shared/casino-format.js"></script>
   <script src="../shared/level-up-modal.js"></script>
 
   <script type="module">
@@ -1936,9 +1937,11 @@
 
     function formatChips(value) {
 
-      return nf.format(
-        Number(value || 0)
-      );
+      return window.CasinoFormat
+        ?.formatChips(value)
+        ?? nf.format(
+          Number(value || 0)
+        );
     }
 
 

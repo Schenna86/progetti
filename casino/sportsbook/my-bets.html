@@ -627,6 +627,7 @@
   </div>
 </div>
 
+<script src="../shared/casino-format.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -657,10 +658,6 @@
 
   const $ = selector => document.querySelector(selector);
   const nf = new Intl.NumberFormat("it-IT");
-  const compactXp = new Intl.NumberFormat("it-IT", {
-    notation: "compact",
-    maximumFractionDigits: 1
-  });
   const oddFormatter = new Intl.NumberFormat("it-IT", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 3
@@ -682,7 +679,17 @@
     ? new BroadcastChannel("casino-balance-sync")
     : null;
 
-  const fmt = value => nf.format(Number(value || 0));
+  const fmtNumber = value => nf.format(Number(value || 0));
+
+  const formatCompact = value =>
+    window.CasinoFormat?.formatCompact
+      ? window.CasinoFormat.formatCompact(value)
+      : fmtNumber(value);
+
+  const formatChips = value =>
+    window.CasinoFormat?.formatChips
+      ? window.CasinoFormat.formatChips(value)
+      : fmtNumber(value);
   const fmtOdd = value => oddFormatter.format(Number(value || 0));
 
   function escapeHtml(value) {
@@ -742,7 +749,7 @@
 
     if (level >= 500) {
       $("#xpFill").style.width = "100%";
-      $("#xpText").textContent = `${compactXp.format(xp)} XP · MAX`;
+      $("#xpText").textContent = `${formatCompact(xp)} XP · MAX`;
       return;
     }
 
@@ -752,7 +759,7 @@
     const nextXp = next ? Number(next.xp_required) : null;
 
     if (currentXp == null || nextXp == null) {
-      $("#xpText").textContent = `${compactXp.format(xp)} XP`;
+      $("#xpText").textContent = `${formatCompact(xp)} XP`;
       return;
     }
 
@@ -761,8 +768,8 @@
     const percent = Math.max(0, Math.min(100, into / need * 100));
 
     $("#xpFill").style.width = `${percent}%`;
-    $("#xpText").textContent = `${compactXp.format(into)} / ${compactXp.format(need)} XP`;
-    $("#xpText").title = `${fmt(into)} / ${fmt(need)} XP`;
+    $("#xpText").textContent = `${formatCompact(into)} / ${formatCompact(need)} XP`;
+    $("#xpText").title = `${fmtNumber(into)} / ${fmtNumber(need)} XP`;
   }
 
   async function loadProfileAndProgression() {
@@ -788,7 +795,7 @@
     state.progression = progressionResult.data || { xp: 0, level: 1 };
 
     $("#usernameValue").textContent = state.profile?.username || state.session.user.email || "—";
-    $("#balanceValue").textContent = fmt(state.profile?.chips || 0);
+    $("#balanceValue").textContent = formatChips(state.profile?.chips || 0);
     updateXp(state.progression.xp, state.progression.level);
   }
 
@@ -900,14 +907,14 @@
     if (ticket.status === "won") {
       return {
         cls: "won",
-        label: `🟢 VINTA +${fmt(ticket.payout_amount)}`
+        label: `🟢 VINTA +${formatChips(ticket.payout_amount)}`
       };
     }
 
     if (ticket.status === "void") {
       return {
         cls: "void",
-        label: `⚪ ANNULLATA +${fmt(ticket.payout_amount)}`
+        label: `⚪ ANNULLATA +${formatChips(ticket.payout_amount)}`
       };
     }
 
@@ -970,8 +977,8 @@
       : Number(ticket.settled_total_odd || ticket.final_total_odd || ticket.total_odd || 0);
 
     const payoutLabel = ticket.status === "pending"
-      ? `🪙 ${fmt(ticket.potential_win)}`
-      : `🪙 ${fmt(ticket.payout_amount)}`;
+      ? `🪙 ${formatChips(ticket.potential_win)}`
+      : `🪙 ${formatChips(ticket.payout_amount)}`;
 
     const effectiveLegs = ticket.status === "pending"
       ? Number(ticket.effective_leg_count || legs.length)
@@ -991,7 +998,7 @@
 
           <div class="ticket-metric">
             <span>Puntata</span>
-            <strong>🪙 ${fmt(ticket.stake)}</strong>
+            <strong>🪙 ${formatChips(ticket.stake)}</strong>
           </div>
 
           <div class="ticket-metric">
@@ -1036,10 +1043,10 @@
     const won = state.tickets.filter(ticket => ticket.status === "won").length;
     const lost = state.tickets.filter(ticket => ticket.status === "lost").length;
 
-    $("#pendingCount").textContent = fmt(pending);
-    $("#wonCount").textContent = fmt(won);
-    $("#lostCount").textContent = fmt(lost);
-    $("#totalCount").textContent = fmt(state.tickets.length);
+    $("#pendingCount").textContent = fmtNumber(pending);
+    $("#wonCount").textContent = fmtNumber(won);
+    $("#lostCount").textContent = fmtNumber(lost);
+    $("#totalCount").textContent = fmtNumber(state.tickets.length);
 
     const tickets = filteredTickets();
     $("#ticketCount").textContent = `${tickets.length} ${tickets.length === 1 ? "schedina" : "schedine"}`;

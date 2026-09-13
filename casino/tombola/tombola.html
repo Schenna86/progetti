@@ -281,6 +281,7 @@ header{display:grid;grid-template-columns:auto minmax(280px,1fr) auto;gap:16px;a
 </div>
 
 <div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento Tombola…</strong><div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div></div></div>
+<script src="../shared/casino-format.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -306,14 +307,21 @@ const LEVELS_CACHE_TTL_MS=7*24*60*60*1000;
 
 let state={roundId:null,requestId:null,cards:[],draws:[],drawIndex:0,activeCard:0,result:null,seedHash:null,seed:null,finalBalance:null};
 
-function fmt(v){return nf.format(Number(v||0))}function mult(v){return v==null?"—":`x${fmt(v)}`}function status(t,bad=false){$("#status").textContent=t;$("#status").style.color=bad?"var(--bad)":"#ffd083"}function showLoading(t="Caricamento…"){$("#loadingText").textContent=t;$("#loadingError").textContent="";$("#loadingOverlay").classList.remove("hidden")}function hideLoading(){$("#loadingOverlay").classList.add("hidden")}function fail(e){console.error(e);$("#loadingText").textContent="Errore";$("#loadingError").textContent=e?.message||String(e);$("#loadingOverlay").classList.remove("hidden")}
+function fmt(v){return nf.format(Number(v||0))}
+function fmtChips(v){return window.CasinoFormat?.formatChips
+  ? window.CasinoFormat.formatChips(v)
+  : nf.format(Number(v||0))}
+function fmtCompact(v){return window.CasinoFormat?.formatCompact
+  ? window.CasinoFormat.formatCompact(v)
+  : nf.format(Number(v||0))}
+function mult(v){return v==null?"—":`x${fmt(v)}`}function status(t,bad=false){$("#status").textContent=t;$("#status").style.color=bad?"var(--bad)":"#ffd083"}function showLoading(t="Caricamento…"){$("#loadingText").textContent=t;$("#loadingError").textContent="";$("#loadingOverlay").classList.remove("hidden")}function hideLoading(){$("#loadingOverlay").classList.add("hidden")}function fail(e){console.error(e);$("#loadingText").textContent="Errore";$("#loadingError").textContent=e?.message||String(e);$("#loadingOverlay").classList.remove("hidden")}
 function normalizeGrid(g){return(Array.isArray(g)?g:[]).map(r=>(Array.isArray(r)?r:[]).map(v=>v==null?null:Number(v)))}
 function normalizeCards(cards){return(cards||[]).map(c=>({...c,card_no:Number(c.card_no),grid:normalizeGrid(c.grid),numbers:(c.numbers||[]).map(Number),cinquina_draw:c.cinquina_draw==null?null:Number(c.cinquina_draw),tombola_draw:c.tombola_draw==null?null:Number(c.tombola_draw),multiplier:c.multiplier==null?null:Number(c.multiplier),payout:c.payout==null?null:Number(c.payout),marked:new Set()})).sort((a,b)=>a.card_no-b.card_no)}
 function renderPaytable(){const root=$("#paytable");root.innerHTML=paytable.map(p=>`<div class="payrow" data-from="${p.draw_from}" data-to="${p.draw_to}"><span>${p.draw_from===p.draw_to?p.draw_from+"ª":p.draw_from+"–"+p.draw_to}</span><strong>${mult(p.multiplier)}</strong></div>`).join("")}
 function highlightPaytable(d){document.querySelectorAll(".payrow").forEach(e=>e.classList.toggle("active",d>=Number(e.dataset.from)&&d<=Number(e.dataset.to)))}
 function renderBoard(){const b=$("#board");b.innerHTML="";for(let n=1;n<=90;n++){const e=document.createElement("div");e.className="board-num";e.id=`bn-${n}`;e.textContent=n;b.appendChild(e)}}
 function rowComplete(card,r){const nums=card.grid[r].filter(v=>v!=null);return nums.length===5&&nums.every(n=>card.marked.has(n))}
-function renderCard(){const card=state.cards[state.activeCard];const root=$("#cardGrid");if(!card){root.innerHTML=Array.from({length:27},()=>'<div class="card-cell empty"></div>').join("");$("#activeCardLabel").textContent="—";return}$("#activeCardLabel").textContent=`${card.card_no}/${state.cards.length}`;root.innerHTML="";card.grid.forEach((row,r)=>row.forEach(v=>{const e=document.createElement("div");e.className="card-cell"+(v==null?" empty":"");if(v!=null){e.textContent=v;if(card.marked.has(v))e.classList.add("marked");if(rowComplete(card,r))e.classList.add("rowdone");if(card.marked.size===15)e.classList.add("tombola")}root.appendChild(e)}));$("#coveredCount").textContent=`${card.marked.size}/15`;$("#progressFill").style.width=`${card.marked.size/15*100}%`;$("#remainingText").textContent=card.marked.size<15?`Mancano ${15-card.marked.size}`:"TOMBOLA";$("#cinquinaInfo").textContent=card.cinquina_draw?`${card.cinquina_draw}ª`:(card.grid.some((_,r)=>rowComplete(card,r))?"Fatta":"—");$("#tombolaInfo").textContent=card.tombola_draw?`${card.tombola_draw}ª`:"—";$("#cardPrizeInfo").textContent=card.multiplier==null?"—":`${mult(card.multiplier)} · ${fmt(card.payout)} fiche`}
+function renderCard(){const card=state.cards[state.activeCard];const root=$("#cardGrid");if(!card){root.innerHTML=Array.from({length:27},()=>'<div class="card-cell empty"></div>').join("");$("#activeCardLabel").textContent="—";return}$("#activeCardLabel").textContent=`${card.card_no}/${state.cards.length}`;root.innerHTML="";card.grid.forEach((row,r)=>row.forEach(v=>{const e=document.createElement("div");e.className="card-cell"+(v==null?" empty":"");if(v!=null){e.textContent=v;if(card.marked.has(v))e.classList.add("marked");if(rowComplete(card,r))e.classList.add("rowdone");if(card.marked.size===15)e.classList.add("tombola")}root.appendChild(e)}));$("#coveredCount").textContent=`${card.marked.size}/15`;$("#progressFill").style.width=`${card.marked.size/15*100}%`;$("#remainingText").textContent=card.marked.size<15?`Mancano ${15-card.marked.size}`:"TOMBOLA";$("#cinquinaInfo").textContent=card.cinquina_draw?`${card.cinquina_draw}ª`:(card.grid.some((_,r)=>rowComplete(card,r))?"Fatta":"—");$("#tombolaInfo").textContent=card.tombola_draw?`${card.tombola_draw}ª`:"—";$("#cardPrizeInfo").textContent=card.multiplier==null?"—":`${mult(card.multiplier)} · ${fmtChips(card.payout)} fiche`}
 function renderTabs(){
   const root=$("#cardTabs");
   root.innerHTML="";
@@ -365,7 +373,7 @@ function renderTabs(){
     root.appendChild(b);
   });
 }
-function updateControls(){const bet=Number($("#betSelect").value||0),count=Number($("#cardCountSelect").value||1);$("#totalBetValue").textContent=`${fmt(bet*count)} fiche`}
+function updateControls(){const bet=Number($("#betSelect").value||0),count=Number($("#cardCountSelect").value||1);$("#totalBetValue").textContent=`${fmtChips(bet*count)} fiche`}
 async function loadLevels(){
   try{
     const raw=localStorage.getItem(LEVELS_CACHE_KEY);
@@ -407,10 +415,10 @@ async function loadLevels(){
     console.warn("Cache livelli:",e);
   }
 }
-function updateXp(xp,lvl){xp=Number(xp||0);lvl=Number(lvl||1);$("#xpLevel").textContent=lvl;if(lvl>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmt(xp)} XP · MAX`;return}const c=levels.find(x=>Number(x.level)===lvl),n=levels.find(x=>Number(x.level)===lvl+1),cx=c?Number(c.xp_required):lvl===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${fmt(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.max(0,Math.min(100,into/need*100))}%`;$("#xpText").textContent=`${fmt(into)} / ${fmt(need)} XP`}
-async function loadProfile(){const uid=session.user.id;const[{data:p,error:pe},{data:x,error:xe}]=await Promise.all([supabase.from("profiles").select("username,chips").eq("user_id",uid).single(),supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle()]);if(pe)throw pe;if(xe)throw xe;$("#usernameValue").textContent=p.username||"—";$("#balanceValue").textContent=fmt(p.chips);updateXp(x?.xp||0,x?.level||1)}
-async function checkLevelUp(){try{const r=await CasinoLevelUp.check();if(r?.balance!=null){state.finalBalance=Number(r.balance);$("#balanceValue").textContent=fmt(r.balance)}return r}catch(e){console.error("Level-up:",e);return null}}
-async function loadConfig(){const{data,error}=await supabase.rpc("get_tombola_bot_config");if(error)throw error;config=data.game;paytable=data.paytable||[];$("#balanceValue").textContent=fmt(data.balance);const bets=(config.allowed_bets||[]).map(Number).filter(v=>v>0&&v<=Number(config.max_bet||Number.MAX_SAFE_INTEGER));$("#betSelect").innerHTML=bets.map(v=>`<option value="${v}">${fmt(v)}</option>`).join("");const maxCards=Math.max(1,Number(config.max_cards||10));$("#cardCountSelect").innerHTML=Array.from({length:maxCards},(_,i)=>`<option value="${i+1}"${i===0?" selected":""}>${i+1}</option>`).join("");$("#gameLimits").textContent=`Max ${maxCards} cartelle · Max ${fmt(config.max_bet)} fiche per cartella`;renderPaytable();updateControls()}
+function updateXp(xp,lvl){xp=Number(xp||0);lvl=Number(lvl||1);$("#xpLevel").textContent=lvl;if(lvl>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmtCompact(xp)} XP · MAX`;return}const c=levels.find(x=>Number(x.level)===lvl),n=levels.find(x=>Number(x.level)===lvl+1),cx=c?Number(c.xp_required):lvl===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${fmtCompact(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.max(0,Math.min(100,into/need*100))}%`;$("#xpText").textContent=`${fmtCompact(into)} / ${fmtCompact(need)} XP`}
+async function loadProfile(){const uid=session.user.id;const[{data:p,error:pe},{data:x,error:xe}]=await Promise.all([supabase.from("profiles").select("username,chips").eq("user_id",uid).single(),supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle()]);if(pe)throw pe;if(xe)throw xe;$("#usernameValue").textContent=p.username||"—";$("#balanceValue").textContent=fmtChips(p.chips);updateXp(x?.xp||0,x?.level||1)}
+async function checkLevelUp(){try{const r=await CasinoLevelUp.check();if(r?.balance!=null){state.finalBalance=Number(r.balance);$("#balanceValue").textContent=fmtChips(r.balance)}return r}catch(e){console.error("Level-up:",e);return null}}
+async function loadConfig(){const{data,error}=await supabase.rpc("get_tombola_bot_config");if(error)throw error;config=data.game;paytable=data.paytable||[];$("#balanceValue").textContent=fmtChips(data.balance);const bets=(config.allowed_bets||[]).map(Number).filter(v=>v>0&&v<=Number(config.max_bet||Number.MAX_SAFE_INTEGER));$("#betSelect").innerHTML=bets.map(v=>`<option value="${v}">${fmtChips(v)}</option>`).join("");const maxCards=Math.max(1,Number(config.max_cards||10));$("#cardCountSelect").innerHTML=Array.from({length:maxCards},(_,i)=>`<option value="${i+1}"${i===0?" selected":""}>${i+1}</option>`).join("");$("#gameLimits").textContent=`Max ${maxCards} cartelle · Max ${fmtChips(config.max_bet)} fiche per cartella`;renderPaytable();updateControls()}
 async function hashHex(text){const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 async function revealFairness(){if(!state.seed)return;$("#seedReveal").textContent=state.seed;$("#revealWrap").classList.remove("hidden");const ok=(await hashHex(state.seed))===state.seedHash;$("#fairStatus").textContent=ok?"✓ Hash verificato":"⚠ Hash non corrispondente";$("#fairStatus").className=ok?"ok":"bad"}
 function resetVisual(){clearTimeout(animationTimer);paused=false;state={roundId:null,requestId:null,cards:[],draws:[],drawIndex:0,activeCard:0,result:null,seedHash:null,seed:null,finalBalance:null};renderBoard();renderCard();renderTabs();$("#currentBall").textContent="—";$("#drawCount").textContent="0";$("#phaseText").textContent="Pronto";$("#seedHash").textContent="—";$("#revealWrap").classList.add("hidden");$("#resultBox").classList.add("hidden");highlightPaytable(0)}
@@ -420,8 +428,8 @@ function restoreMarks(){for(const c of state.cards)c.marked=new Set();for(let i=
 function renderDrawnBoard(){renderBoard();for(let i=0;i<state.drawIndex;i++)$("#bn-"+state.draws[i])?.classList.add("drawn");if(state.drawIndex){const n=state.draws[state.drawIndex-1];$("#bn-"+n)?.classList.add("last");$("#currentBall").textContent=n}}
 function animateNext(){if(paused)return;if(state.drawIndex>=state.draws.length)return completeAnimation();document.querySelectorAll(".board-num.last").forEach(e=>e.classList.remove("last"));const n=Number(state.draws[state.drawIndex++]);applyDraw(n);$("#bn-"+n)?.classList.add("drawn","last");$("#currentBall").textContent=n;$("#drawCount").textContent=`${state.drawIndex}/${state.draws.length}`;highlightPaytable(state.drawIndex);const unfinished=state.cards.filter(c=>c.marked.size<15).length;$("#phaseText").textContent=unfinished?`${unfinished} cartelle ancora aperte`:"Tutte completate";renderTabs();renderCard();persist();animationTimer=setTimeout(animateNext,Math.max(50,Number($("#speedSelect").value)||400))}
 async function finishRound(){const{data,error}=await supabase.rpc("finish_tombola_bot",{p_round_id:state.roundId});if(error)throw error;state.draws=(data.draws||[]).map(Number);const results=normalizeCards(data.cards);const old=state.cards;state.cards=results.map(r=>({...r,marked:old.find(x=>x.card_no===r.card_no)?.marked||new Set()}));state.result=data;state.seed=data.fairness?.server_seed||null;state.finalBalance=data.balance;persist()}
-async function completeAnimation(){clearTimeout(animationTimer);animationTimer=null;$("#playBtn").disabled=false;$("#betSelect").disabled=false;$("#cardCountSelect").disabled=false;$("#pauseBtn").classList.add("hidden");$("#resumeBtn").classList.add("hidden");const d=state.result;const total=Number(d?.total_payout||0),stake=Number(d?.total_staked||0),net=Number(d?.net_result||0);const box=$("#resultBox");box.className="result "+(net>=0?"win":"loss");box.innerHTML=`<div class="result-main"><span>Risultato round</span><strong>${fmt(total)} fiche</strong></div><div style="font-size:11px;color:var(--muted)">Giocato ${fmt(stake)} · Netto ${net>=0?"+":""}${fmt(net)}</div><div class="cards-result">${state.cards.map(c=>`<div class="card-result-row"><b>#${c.card_no}</b><span>Tombola ${c.tombola_draw}ª</span><strong>${mult(c.multiplier)}</strong><span>${fmt(c.payout)}</span></div>`).join("")}</div>`;$("#balanceValue").textContent=fmt(state.finalBalance);status(`Round completato · ${state.cards.length} cartelle · ritorno ${fmt(total)} fiche`);revealFairness();localStorage.removeItem(STORAGE_KEY);try{const ch=new BroadcastChannel("slot-machine-sync");ch.postMessage({type:"balance-changed"});ch.close()}catch{}await checkLevelUp();}
-async function play(){const bet=Number($("#betSelect").value),count=Number($("#cardCountSelect").value);if(!bet||!count)return;$("#playBtn").disabled=true;$("#betSelect").disabled=true;$("#cardCountSelect").disabled=true;showLoading("Creo le cartelle…");try{const requestId=crypto.randomUUID();const{data,error}=await supabase.rpc("start_tombola_bot",{p_card_price:bet,p_card_count:count,p_request_id:requestId});if(error)throw error;resetVisual();state.roundId=data.round_id;state.requestId=data.request_id||requestId;state.cards=normalizeCards(data.cards);state.seedHash=data.seed_hash;$("#seedHash").textContent=state.seedHash||"—";$("#balanceValue").textContent=fmt(data.balance);if(data.xp)updateXp(data.xp.total,data.xp.new_level);renderTabs();renderCard();persist();status("Round creato · risultato bloccato sul server");await finishRound();hideLoading();$("#pauseBtn").classList.remove("hidden");status("Estrazione in corso…");animateNext()}catch(e){$("#playBtn").disabled=false;$("#betSelect").disabled=false;$("#cardCountSelect").disabled=false;hideLoading();status(e?.message||String(e),true);console.error(e)}}
+async function completeAnimation(){clearTimeout(animationTimer);animationTimer=null;$("#playBtn").disabled=false;$("#betSelect").disabled=false;$("#cardCountSelect").disabled=false;$("#pauseBtn").classList.add("hidden");$("#resumeBtn").classList.add("hidden");const d=state.result;const total=Number(d?.total_payout||0),stake=Number(d?.total_staked||0),net=Number(d?.net_result||0);const box=$("#resultBox");box.className="result "+(net>=0?"win":"loss");box.innerHTML=`<div class="result-main"><span>Risultato round</span><strong>${fmtChips(total)} fiche</strong></div><div style="font-size:11px;color:var(--muted)">Giocato ${fmtChips(stake)} · Netto ${net>=0?"+":""}${fmtChips(net)}</div><div class="cards-result">${state.cards.map(c=>`<div class="card-result-row"><b>#${c.card_no}</b><span>Tombola ${c.tombola_draw}ª</span><strong>${mult(c.multiplier)}</strong><span>${fmtChips(c.payout)}</span></div>`).join("")}</div>`;$("#balanceValue").textContent=fmtChips(state.finalBalance);status(`Round completato · ${state.cards.length} cartelle · ritorno ${fmtChips(total)} fiche`);revealFairness();localStorage.removeItem(STORAGE_KEY);try{const ch=new BroadcastChannel("slot-machine-sync");ch.postMessage({type:"balance-changed"});ch.close()}catch{}await checkLevelUp();}
+async function play(){const bet=Number($("#betSelect").value),count=Number($("#cardCountSelect").value);if(!bet||!count)return;$("#playBtn").disabled=true;$("#betSelect").disabled=true;$("#cardCountSelect").disabled=true;showLoading("Creo le cartelle…");try{const requestId=crypto.randomUUID();const{data,error}=await supabase.rpc("start_tombola_bot",{p_card_price:bet,p_card_count:count,p_request_id:requestId});if(error)throw error;resetVisual();state.roundId=data.round_id;state.requestId=data.request_id||requestId;state.cards=normalizeCards(data.cards);state.seedHash=data.seed_hash;$("#seedHash").textContent=state.seedHash||"—";$("#balanceValue").textContent=fmtChips(data.balance);if(data.xp)updateXp(data.xp.total,data.xp.new_level);renderTabs();renderCard();persist();status("Round creato · risultato bloccato sul server");await finishRound();hideLoading();$("#pauseBtn").classList.remove("hidden");status("Estrazione in corso…");animateNext()}catch(e){$("#playBtn").disabled=false;$("#betSelect").disabled=false;$("#cardCountSelect").disabled=false;hideLoading();status(e?.message||String(e),true);console.error(e)}}
 async function restore(){let s=null;try{s=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")}catch{}if(!s?.roundId)return;state.roundId=s.roundId;state.requestId=s.requestId;state.cards=normalizeCards(s.cards||[]);state.draws=(s.draws||[]).map(Number);state.drawIndex=Number(s.drawIndex||0);state.activeCard=Math.min(Number(s.activeCard||0),Math.max(0,state.cards.length-1));state.result=s.result;state.seedHash=s.seedHash;state.seed=s.seed;state.finalBalance=s.finalBalance;if(s.bet&&[...$("#betSelect").options].some(o=>o.value===String(s.bet)))$("#betSelect").value=s.bet;if(s.count&&[...$("#cardCountSelect").options].some(o=>o.value===String(s.count)))$("#cardCountSelect").value=s.count;restoreMarks();renderDrawnBoard();renderTabs();renderCard();$("#seedHash").textContent=state.seedHash||"—";$("#drawCount").textContent=`${state.drawIndex}/${state.draws.length||90}`;updateControls();$("#playBtn").disabled=true;$("#betSelect").disabled=true;$("#cardCountSelect").disabled=true;if(!state.result){showLoading("Ripristino round…");await finishRound();hideLoading()}if(state.drawIndex>=state.draws.length)completeAnimation();else{$("#pauseBtn").classList.remove("hidden");status(`Partita ripristinata dalla ${state.drawIndex+1}ª estrazione`);animateNext()}}
 
 
@@ -740,7 +748,7 @@ function pvpShowEndPrizeModal(roundState){
                   ${pvpEscapeHtml(w.username||"Giocatore")}
                   ${cards>1?` · ${cards} cartelle`:""}
                 </b>
-                <span>${fmt(w.amount)} fiche</span>
+                <span>${fmtChips(w.amount)} fiche</span>
               </div>
             `;
           }).join("")}
@@ -764,7 +772,7 @@ function pvpShowEndPrizeModal(roundState){
                   ${pvpEscapeHtml(w.username||"Giocatore")}
                   ${cards>1?` · ${cards} cartelle`:""}
                 </b>
-                <span>${fmt(w.amount)} fiche</span>
+                <span>${fmtChips(w.amount)} fiche</span>
               </div>
             `;
           }).join("")}
@@ -807,7 +815,7 @@ function pvpRenderWinners(roundState){
             .replaceAll(">","&gt;")}
           ${cards>1?` · ${cards} cartelle`:""}
         </div>
-        <div class="pvp-winner-amount">${fmt(w.amount)} fiche</div>
+        <div class="pvp-winner-amount">${fmtChips(w.amount)} fiche</div>
       </div>
     `;
   }).join("");
@@ -863,8 +871,8 @@ function pvpRenderMain(roundState){
   $("#pvpGameTitle").textContent=roomName;
   $("#pvpPlayers").textContent=fmt(roundState.total_players);
   $("#pvpTotalCards").textContent=fmt(roundState.total_cards);
-  $("#pvpCinquinaPool").textContent=`${fmt(roundState.cinquina_pool)} fiche`;
-  $("#pvpTombolaPool").textContent=`${fmt(roundState.tombola_pool)} fiche`;
+  $("#pvpCinquinaPool").textContent=`${fmtChips(roundState.cinquina_pool)} fiche`;
+  $("#pvpTombolaPool").textContent=`${fmtChips(roundState.tombola_pool)} fiche`;
 
   if(statusValue==="running"){
     $("#pvpRoundLabel").textContent=
@@ -906,7 +914,7 @@ function pvpRenderMain(roundState){
   }
 
   if(roundState.balance!=null){
-    $("#balanceValue").textContent=fmt(roundState.balance);
+    $("#balanceValue").textContent=fmtChips(roundState.balance);
   }
 }
 
@@ -933,7 +941,7 @@ function pvpRenderRooms(){
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")}</b>
-      <span class="pvp-room-price">${fmt(room.card_price)} fiche</span>
+      <span class="pvp-room-price">${fmtChips(room.card_price)} fiche</span>
       <span class="pvp-room-meta">
         ${active?`<span><span class="live-dot"></span>IN CORSO</span>`:""}
         <span>${fmt(next?.players||0)} gioc.</span>
@@ -998,7 +1006,7 @@ function pvpUpdatePurchaseTotal(){
   const price=Number(room?.card_price||0);
 
   $("#pvpPurchaseTotal").textContent=
-    `${fmt(price*qty)} fiche`;
+    `${fmtChips(price*qty)} fiche`;
 }
 
 function pvpRenderPurchase(){
@@ -1022,7 +1030,7 @@ function pvpRenderPurchase(){
     room.name||room.id;
 
   $("#pvpCardPrice").textContent=
-    `${fmt(room.card_price)} fiche`;
+    `${fmtChips(room.card_price)} fiche`;
 
   $("#pvpNextStart").textContent=
     pvpFmtTime(next.scheduled_start_at);
@@ -1031,7 +1039,7 @@ function pvpRenderPurchase(){
     `${fmt(next.players||0)} gioc. / ${fmt(next.cards||0)} cart.`;
 
   $("#pvpNextPools").textContent=
-    `Cinquina ${fmt(next.cinquina_pool||0)} · Tombola ${fmt(next.tombola_pool||0)}`;
+    `Cinquina ${fmtChips(next.cinquina_pool||0)} · Tombola ${fmtChips(next.tombola_pool||0)}`;
 
   $("#pvpMyNextCards").textContent=
     `${fmt(room.my_cards_next_round||0)} / ${fmt(room.max_cards_per_user||50)}`;
@@ -1344,7 +1352,7 @@ async function pvpAdvanceSelectedRoom(){
      */
     if(effectiveData.balance!=null){
       $("#balanceValue").textContent=
-        fmt(effectiveData.balance);
+        fmtChips(effectiveData.balance);
     }
 
     pvpRefreshXpOnce(
@@ -1407,14 +1415,14 @@ async function pvpBuyCards(){
     if(error)throw error;
 
     if(data?.balance!=null){
-      $("#balanceValue").textContent=fmt(data.balance);
+      $("#balanceValue").textContent=fmtChips(data.balance);
     }
 
     pvpNotifyBalanceChanged();
 
     pvpStatus(
       `${fmt(data?.quantity||quantity)} cartelle acquistate · `+
-      `${fmt(data?.total_price||0)} fiche. XP alla partenza del round.`
+      `${fmtChips(data?.total_price||0)} fiche. XP alla partenza del round.`
     );
 
     await pvpRefreshLobby();

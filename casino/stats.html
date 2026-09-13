@@ -297,6 +297,8 @@
   </div>
 
 
+  <script src="./shared/casino-format.js"></script>
+
   <script type="module">
 
     import {
@@ -366,6 +368,16 @@
           || 0
         )
       );
+    }
+
+
+    function formatChips(
+      value
+    ) {
+
+      return window.CasinoFormat?.formatChips
+        ? window.CasinoFormat.formatChips(value)
+        : formatNumber(value);
     }
 
 
@@ -525,7 +537,7 @@
 
         stat(
           "Totale giocato",
-          formatNumber(
+          formatChips(
             game.total_bet
           ),
           "gold"
@@ -533,21 +545,21 @@
 
         stat(
           "Vincite spin",
-          formatNumber(
+          formatChips(
             d.spin_win
           )
         ),
 
         stat(
           "Vincite bonus",
-          formatNumber(
+          formatChips(
             d.bonus_win
           )
         ),
 
         stat(
           "Totale vinto",
-          formatNumber(
+          formatChips(
             game.total_win
           ),
           "gold"
@@ -555,7 +567,7 @@
 
         stat(
           "Miglior vincita",
-          formatNumber(
+          formatChips(
             game.best_win
           ),
           "good"
@@ -637,7 +649,7 @@
 
         stat(
           "Totale giocato",
-          formatNumber(
+          formatChips(
             game.total_bet
           ),
           "gold"
@@ -645,7 +657,7 @@
 
         stat(
           "Totale restituito",
-          formatNumber(
+          formatChips(
             game.total_win
           ),
           "gold"
@@ -653,7 +665,7 @@
 
         stat(
           "Puntata media",
-          formatNumber(
+          formatChips(
             Math.round(
               Number(
                 d.average_bet
@@ -665,7 +677,7 @@
 
         stat(
           "Miglior ritorno",
-          formatNumber(
+          formatChips(
             game.best_win
           ),
           "good"
@@ -682,7 +694,7 @@
             : ""
           )
           +
-          formatNumber(
+          formatChips(
             game.net
           ),
           Number(game.net || 0) > 0
@@ -853,7 +865,7 @@
                             : ""
                           )
                           +
-                          formatNumber(
+                          formatChips(
                             net
                           ),
                           net > 0

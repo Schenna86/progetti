@@ -588,6 +588,8 @@
     </div>
   </div>
 
+  <script src="./shared/casino-format.js"></script>
+
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
@@ -688,7 +690,9 @@
     }
 
     function formatChips(value) {
-      return nf.format(Number(value || 0));
+      return window.CasinoFormat?.formatChips
+        ? window.CasinoFormat.formatChips(value)
+        : nf.format(Number(value || 0));
     }
 
     function formatWeeklyPrizeReward(data) {
