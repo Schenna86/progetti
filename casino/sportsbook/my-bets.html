@@ -610,6 +610,7 @@
         <button class="filter-btn" type="button" data-filter="won">Vinte</button>
         <button class="filter-btn" type="button" data-filter="lost">Perse</button>
         <button class="filter-btn" type="button" data-filter="void">Rimborsi</button>
+        <button class="filter-btn" type="button" data-filter="old" title="Perse e rimborsi oltre 2 giorni · vinte oltre 7 giorni">Vecchie</button>
       </div>
 
       <div id="ticketsHost" class="tickets-host"></div>
@@ -921,9 +922,47 @@
     return { cls: "", label: ticket.status || "—" };
   }
 
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  const OLD_TICKET_DAYS = {
+    lost: 2,
+    won: 7,
+    void: 2
+  };
+
+  function isOldTicket(ticket) {
+    // Le pending non diventano mai "vecchie".
+    if (ticket.status === "pending") return false;
+
+    const maxDays = OLD_TICKET_DAYS[ticket.status];
+    if (!maxDays) return false;
+
+    // La soglia parte dalla liquidazione della schedina.
+    // created_at è solo un fallback per eventuali record storici
+    // privi di settled_at.
+    const referenceDate = ticket.settled_at || ticket.created_at;
+    if (!referenceDate) return false;
+
+    const timestamp = new Date(referenceDate).getTime();
+    if (!Number.isFinite(timestamp)) return false;
+
+    return Date.now() - timestamp >= maxDays * DAY_MS;
+  }
+
   function filteredTickets() {
-    if (state.filter === "all") return state.tickets;
-    return state.tickets.filter(ticket => ticket.status === state.filter);
+    if (state.filter === "old") {
+      return state.tickets.filter(isOldTicket);
+    }
+
+    // Tutti gli altri filtri mostrano solamente le schedine
+    // ancora "recenti" secondo le soglie definite sopra.
+    const recentTickets = state.tickets.filter(ticket => !isOldTicket(ticket));
+
+    if (state.filter === "all") {
+      return recentTickets;
+    }
+
+    return recentTickets.filter(ticket => ticket.status === state.filter);
   }
 
   function resultLabel(result) {
