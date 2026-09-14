@@ -2420,10 +2420,12 @@ body.debug-grid .bet-hotspot.american-five-number{
 
 <div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento roulette…</strong><div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div></div></div>
 <script src="../shared/casino-format.js"></script>
+<script src="../shared/level-up-modal.js"></script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const SUPABASE_URL="https://jhpppwqdaceratwjnbzi.supabase.co",SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),GAME_ID="roulette-american",nf=new Intl.NumberFormat("it-IT");
+CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
 const RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]),WHEEL=[0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24,36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2];
 let session=null,game=null,options=[],byCode=new Map,byId=new Map,bets=new Map,actions=[],previous=[],selectedChip=1,allowedChips=[],levels=[],spinning=false,wheelTurns=0,recent=[],lastWinningNumber=null,lastWinningOptionIds=new Set();
 const LEVELS_CACHE_KEY="casino-levels:v1";
@@ -2957,7 +2959,7 @@ async function waitForTableImage(){
 
 async function init(){try{
   if(new URLSearchParams(location.search).get("debugGrid")==="1")document.body.classList.add("debug-grid");
-  const{data,error}=await supabase.auth.getSession();if(error)throw error;session=data.session;if(!session){location.href="../";return}buildWheel();buildNumbers();await waitForTableImage();await Promise.all([loadProfile(),loadLevels(),loadConfig(),loadOptions(),loadRecent()]);await loadProgress();requestAnimationFrame(()=>{renderHotspots();renderBets()});$("#loadingOverlay").classList.add("hidden")}catch(e){console.error(e);$("#loadingText").textContent="Errore";$("#loadingError").textContent=e?.message||String(e)}}
+  const{data,error}=await supabase.auth.getSession();if(error)throw error;session=data.session;if(!session){location.href="../";return}buildWheel();buildNumbers();await waitForTableImage();await Promise.all([loadProfile(),loadLevels(),loadConfig(),loadOptions(),loadRecent()]);await loadProgress();requestAnimationFrame(()=>{renderHotspots();renderBets()});$("#loadingOverlay").classList.add("hidden");try{const levelUp=await CasinoLevelUp.check();if(levelUp?.balance!=null)$("#balanceValue").textContent=fmtChips(levelUp.balance)}catch(levelError){console.warn("Level-up pendente roulette:",levelError)}}catch(e){console.error(e);$("#loadingText").textContent="Errore";$("#loadingError").textContent=e?.message||String(e)}}
 $("#homeBtn").onclick=()=>location.href="../";$("#undoBtn").onclick=undo;$("#clearBtn").onclick=clearBets;$("#repeatBtn").onclick=repeat;$("#spinBtn").onclick=play;let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(renderHotspots,100)});document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="visible"&&session&&!spinning){try{await Promise.all([loadProfile(),loadProgress()])}catch(e){console.warn(e)}}});await init();
 </script>
 </body>
