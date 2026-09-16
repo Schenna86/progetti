@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080b14">
 <title>Carte & Pacchetti</title>
+<link rel="stylesheet" href="../shared/game-header.css" />
 <style>
 :root{--bg:#080b14;--panel:#111624;--panel2:#181f32;--gold:#f4c95d;--gold2:#ffe7a2;--text:#f7f8fb;--muted:#aab1c4;--good:#80e69a;--bad:#ff9696}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#26365d,#0d1220 40%,#060810);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}body{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}.page{width:min(1420px,100%);margin:auto}
@@ -659,11 +660,12 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 </head>
 <body>
 <div class="page">
-<header>
-  <div class="brand"><h1>Carte & Pacchetti</h1><p>Apri pacchetti, completa la collezione e acquista nuovi pack.</p></div>
-  <div class="xpwrap"><div class="xphead"><span>LIVELLO <strong id="xpLevel">1</strong></span><span id="xpText">0 XP</span></div><div class="xpbar"><div id="xpFill" class="xpfill"></div></div></div>
-  <div class="actions"><div class="pill userpill">👤 <strong id="usernameValue">—</strong></div><div class="pill">🪙 <strong id="balanceValue">0</strong></div><button id="homeBtn" class="btn">← HOME</button></div>
-</header>
+<header
+  id="gameHeader"
+  data-title="CARTE"
+  data-subtitle="PACCHETTI · COLLEZIONE"
+  data-home-url="../index.html"
+></header>
 
 <nav class="tabs">
   <button class="tab active" data-tab="packs">🎁 I miei pacchetti</button>
@@ -768,12 +770,14 @@ header{display:grid;grid-template-columns:auto minmax(260px,1fr) auto;gap:14px;a
 <div id="loading"><div class="loadbox"><div class="loader"></div><strong id="loadingText">Caricamento carte...</strong></div></div>
 
 <script src="../shared/casino-format.js"></script>
+<script src="../shared/game-header.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const SUPABASE_URL="https://jhpppwqdaceratwjnbzi.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+CasinoGameHeader.init({title:"CARTE",subtitle:"PACCHETTI · COLLEZIONE",homeUrl:"../index.html"});
 CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
 console.debug(`[cards] module ready ${performance.now().toFixed(0)} ms`);
 const $=s=>document.querySelector(s),nf=new Intl.NumberFormat("it-IT"),cf=new Intl.NumberFormat("it-IT",{notation:"compact",maximumFractionDigits:1});
@@ -1085,10 +1089,9 @@ function notifyBalance(){try{const c=new BroadcastChannel("slot-machine-sync");c
 function updateXp(){const xp=Number(state.progress.xp||0),lv=Number(state.progress.level||1);$("#xpLevel").textContent=lv;if(lv>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmtCompact(xp)} XP · MAX`;return}const c=state.levels.find(x=>Number(x.level)===lv),n=state.levels.find(x=>Number(x.level)===lv+1),cx=c?Number(c.xp_required):lv===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${fmtCompact(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.min(100,into/need*100)}%`;$("#xpText").textContent=`${fmtCompact(into)} / ${fmtCompact(need)} XP`;$("#xpText").title=`${fmt(into)} / ${fmt(need)} XP`}
 async function loadProfile(){
   const t=performance.now();
-  const{data,error}=await supabase.from("profiles").select("username,chips").eq("user_id",state.session.user.id).single();
+  const{data,error}=await supabase.from("profiles").select("chips").eq("user_id",state.session.user.id).single();
   if(error)throw error;
   state.profile=data;
-  $("#usernameValue").textContent=data.username||"—";
   $("#balanceValue").textContent=fmtChips(data.chips);
   console.debug(`[cards] profile ${(performance.now()-t).toFixed(0)} ms`)
 }
@@ -1939,7 +1942,7 @@ document.addEventListener("keydown",e=>{
     else if($("#openingOverlay").classList.contains("visible"))closeOpening()
   }
 });
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>tab(b.dataset.tab));$("#search").oninput=()=>{if(state.collectionLoaded)renderCollection()};$("#rarityFilter").onchange=()=>{if(state.collectionLoaded)renderCollection()};$("#setFilter").onchange=()=>{if(state.collectionLoaded)renderCollection()};$("#openingClose").onclick=closeOpening;$("#openingContinue").onclick=closeOpening;$("#openingOverlay").onclick=e=>{if(e.target===$("#openingOverlay"))closeOpening()};$("#homeBtn").onclick=()=>location.href="../index.html";
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>tab(b.dataset.tab));$("#search").oninput=()=>{if(state.collectionLoaded)renderCollection()};$("#rarityFilter").onchange=()=>{if(state.collectionLoaded)renderCollection()};$("#setFilter").onchange=()=>{if(state.collectionLoaded)renderCollection()};$("#openingClose").onclick=closeOpening;$("#openingContinue").onclick=closeOpening;$("#openingOverlay").onclick=e=>{if(e.target===$("#openingOverlay"))closeOpening()};
 try{
   const startupT=performance.now();
   const sessionT=performance.now();

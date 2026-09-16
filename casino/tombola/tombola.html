@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#061017">
 <title>Tombola</title>
+<link rel="stylesheet" href="../shared/game-header.css" />
 <style>
 :root{--bg:#061017;--panel:#0a2530;--panel2:#102f3b;--gold:#e7b654;--gold2:#ffe19a;--text:#f6f8fa;--muted:#9eb0b8;--good:#80e69a;--bad:#ff9a9a;--blue:#62a8ff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#174154,#081820 45%,#03080c);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}button,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}#app{min-height:100vh;padding:14px}.shell{width:min(1500px,100%);margin:auto}
@@ -78,11 +79,12 @@ header{display:grid;grid-template-columns:auto minmax(280px,1fr) auto;gap:16px;a
 </head>
 <body>
 <div id="app"><div class="shell">
-<header>
-  <div class="brand"><h1>Tombola</h1><p>1–90 · vs Bot · Online PvP</p></div>
-  <div class="top-progress"><div class="xp-header"><span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span><span id="xpText">0 XP</span></div><div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div></div>
-  <div class="header-actions"><div class="pill">👤 <strong id="usernameValue">—</strong></div><div class="pill">🪙 <strong id="balanceValue">0</strong></div><button id="fullscreenBtn" class="header-btn">⛶</button><button id="homeBtn" class="header-btn">HOME</button></div>
-</header>
+<header
+  id="gameHeader"
+  data-title="TOMBOLA"
+  data-subtitle="BOT · ONLINE PVP"
+  data-home-url="../index.html"
+></header>
 
 <div class="mode-switch" aria-label="Modalità Tombola">
   <button id="modeBotBtn" class="mode-btn active" type="button">🤖 VS BOT</button>
@@ -282,6 +284,7 @@ header{display:grid;grid-template-columns:auto minmax(280px,1fr) auto;gap:16px;a
 
 <div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento Tombola…</strong><div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div></div></div>
 <script src="../shared/casino-format.js"></script>
+<script src="../shared/game-header.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -300,6 +303,7 @@ const PVP_ROOM_STORAGE_KEY="casino-tombola-pvp-room-v1";
 const nf=new Intl.NumberFormat("it-IT");
 const $=s=>document.querySelector(s);
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+CasinoGameHeader.init({title:"TOMBOLA",subtitle:"BOT · ONLINE PVP",homeUrl:"../index.html"});
 CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
 let session=null,config=null,paytable=[],levels=[],animationTimer=null,paused=false;
 const LEVELS_CACHE_KEY="casino-levels:v1";
@@ -416,7 +420,7 @@ async function loadLevels(){
   }
 }
 function updateXp(xp,lvl){xp=Number(xp||0);lvl=Number(lvl||1);$("#xpLevel").textContent=lvl;if(lvl>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmtCompact(xp)} XP · MAX`;return}const c=levels.find(x=>Number(x.level)===lvl),n=levels.find(x=>Number(x.level)===lvl+1),cx=c?Number(c.xp_required):lvl===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${fmtCompact(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.max(0,Math.min(100,into/need*100))}%`;$("#xpText").textContent=`${fmtCompact(into)} / ${fmtCompact(need)} XP`}
-async function loadProfile(){const uid=session.user.id;const[{data:p,error:pe},{data:x,error:xe}]=await Promise.all([supabase.from("profiles").select("username,chips").eq("user_id",uid).single(),supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle()]);if(pe)throw pe;if(xe)throw xe;$("#usernameValue").textContent=p.username||"—";$("#balanceValue").textContent=fmtChips(p.chips);updateXp(x?.xp||0,x?.level||1)}
+async function loadProfile(){const uid=session.user.id;const[{data:p,error:pe},{data:x,error:xe}]=await Promise.all([supabase.from("profiles").select("chips").eq("user_id",uid).single(),supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle()]);if(pe)throw pe;if(xe)throw xe;$("#balanceValue").textContent=fmtChips(p.chips);updateXp(x?.xp||0,x?.level||1)}
 async function checkLevelUp(){try{const r=await CasinoLevelUp.check();if(r?.balance!=null){state.finalBalance=Number(r.balance);$("#balanceValue").textContent=fmtChips(r.balance)}return r}catch(e){console.error("Level-up:",e);return null}}
 async function loadConfig(){const{data,error}=await supabase.rpc("get_tombola_bot_config");if(error)throw error;config=data.game;paytable=data.paytable||[];$("#balanceValue").textContent=fmtChips(data.balance);const bets=(config.allowed_bets||[]).map(Number).filter(v=>v>0&&v<=Number(config.max_bet||Number.MAX_SAFE_INTEGER));$("#betSelect").innerHTML=bets.map(v=>`<option value="${v}">${fmtChips(v)}</option>`).join("");const maxCards=Math.max(1,Number(config.max_cards||10));$("#cardCountSelect").innerHTML=Array.from({length:maxCards},(_,i)=>`<option value="${i+1}"${i===0?" selected":""}>${i+1}</option>`).join("");$("#gameLimits").textContent=`Max ${maxCards} cartelle · Max ${fmtChips(config.max_bet)} fiche per cartella`;renderPaytable();updateControls()}
 async function hashHex(text){const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));return[...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("")}
@@ -1596,7 +1600,7 @@ async function init(){
 
   await setTombolaMode(pvp.mode);
 }
-$("#betSelect").addEventListener("change",updateControls);$("#cardCountSelect").addEventListener("change",updateControls);$("#playBtn").onclick=play;$("#pauseBtn").onclick=()=>{paused=true;clearTimeout(animationTimer);$("#pauseBtn").classList.add("hidden");$("#resumeBtn").classList.remove("hidden");status("Estrazione in pausa")};$("#resumeBtn").onclick=()=>{paused=false;$("#resumeBtn").classList.add("hidden");$("#pauseBtn").classList.remove("hidden");status("Estrazione ripresa");animateNext()};$("#homeBtn").onclick=()=>location.href="../index.html";$("#fullscreenBtn").onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){status("Fullscreen non disponibile",true)}};window.addEventListener("beforeunload",persist);renderBoard();renderCard();init().catch(fail);
+$("#betSelect").addEventListener("change",updateControls);$("#cardCountSelect").addEventListener("change",updateControls);$("#playBtn").onclick=play;$("#pauseBtn").onclick=()=>{paused=true;clearTimeout(animationTimer);$("#pauseBtn").classList.add("hidden");$("#resumeBtn").classList.remove("hidden");status("Estrazione in pausa")};$("#resumeBtn").onclick=()=>{paused=false;$("#resumeBtn").classList.add("hidden");$("#pauseBtn").classList.remove("hidden");status("Estrazione ripresa");animateNext()};window.addEventListener("beforeunload",persist);renderBoard();renderCard();init().catch(fail);
 </script>
 </body>
 </html>

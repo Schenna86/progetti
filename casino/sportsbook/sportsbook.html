@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#07151d" />
   <title>Scommesse sportive</title>
+  <link rel="stylesheet" href="../shared/game-header.css" />
 
   <style>
     :root {
@@ -69,127 +70,6 @@
     }
 
     /* ========================================================
-       HEADER - stesso linguaggio grafico del Casino
-       ======================================================== */
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .brand h1 {
-      margin: 0;
-      color: var(--gold-light);
-      font-size: clamp(25px, 4vw, 42px);
-      letter-spacing: .025em;
-    }
-
-    .brand p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 9px;
-    }
-
-    .pill,
-    .header-btn {
-      min-height: 42px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(231,182,84,.62);
-      border-radius: 999px;
-      padding: 8px 13px;
-      background: rgba(4, 16, 23, .78);
-      color: white;
-      white-space: nowrap;
-    }
-
-    .pill strong {
-      color: var(--gold-light);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .header-btn {
-      font-weight: 850;
-    }
-
-    .header-btn:hover {
-      border-color: rgba(255,225,154,.88);
-      color: var(--gold-light);
-    }
-
-    .xp-panel {
-      flex: 1 0 100%;
-      width: 100%;
-      user-select: none;
-    }
-
-    .xp-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 5px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      text-shadow: 0 2px 3px rgba(0,0,0,.8);
-    }
-
-    .xp-level strong {
-      color: var(--gold-light);
-      font-size: 16px;
-    }
-
-    .xp-text {
-      color: #dfe8ec;
-      font-size: 12px;
-      font-variant-numeric: tabular-nums;
-      opacity: .95;
-      text-align: right;
-    }
-
-    .xp-bar {
-      position: relative;
-      width: 100%;
-      height: 18px;
-      overflow: hidden;
-      border: 2px solid rgba(255,255,255,.75);
-      border-radius: 10px;
-      background: linear-gradient(180deg, rgba(0,0,0,.75), rgba(30,30,30,.85));
-      box-shadow: 0 2px 6px rgba(0,0,0,.6), inset 0 1px 3px rgba(0,0,0,.8);
-    }
-
-    .xp-fill {
-      width: 0;
-      height: 100%;
-      border-radius: 8px;
-      background: linear-gradient(90deg,#2769ff,#6f5cff,#c255ff);
-      box-shadow: inset 0 1px 4px rgba(255,255,255,.4), 0 0 8px rgba(111,92,255,.7);
-      transition: width .6s ease;
-    }
-
-    .xp-fill::after {
-      content: "";
-      display: block;
-      width: 100%;
-      height: 45%;
-      border-radius: 8px;
-      background: rgba(255,255,255,.18);
-    }
-
-    /* ========================================================
        LAYOUT
        ======================================================== */
 
@@ -225,6 +105,31 @@
 
     .panel-head small {
       color: var(--muted);
+    }
+
+    .panel-head-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .panel-action-btn {
+      min-height: 34px;
+      border: 1px solid rgba(231,182,84,.34);
+      border-radius: 9px;
+      padding: 6px 10px;
+      background: rgba(4,16,23,.76);
+      color: var(--gold-light);
+      font-weight: 850;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .panel-action-btn:hover {
+      border-color: rgba(255,225,154,.82);
+      filter: brightness(1.08);
     }
 
     /* ========================================================
@@ -818,6 +723,110 @@
       color: #ff9d9d;
     }
 
+
+    .bet-mode-switch {
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+      margin-top: 8px;
+      padding: 3px;
+      border: 1px solid rgba(231,182,84,.24);
+      border-radius: 10px;
+      background: rgba(0,0,0,.18);
+    }
+
+    .bet-mode-btn {
+      min-height: 30px;
+      border: 0;
+      border-radius: 7px;
+      padding: 5px 9px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+
+    .bet-mode-btn.active {
+      background: rgba(160,101,24,.34);
+      color: var(--gold-light);
+      box-shadow: inset 0 0 0 1px rgba(255,225,154,.24);
+    }
+
+    .system-event-card {
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.085);
+      border-radius: 11px;
+      background: rgba(0,0,0,.18);
+    }
+
+    .system-event-card + .system-event-card {
+      margin-top: 8px;
+    }
+
+    .system-event-head {
+      margin-bottom: 7px;
+      color: #dce6ea;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .system-selection-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 4px;
+      border-top: 1px solid rgba(255,255,255,.055);
+    }
+
+    .system-selection-row:first-of-type {
+      border-top: 0;
+    }
+
+    .system-selection-text {
+      min-width: 0;
+    }
+
+    .system-selection-text strong {
+      display: block;
+      color: white;
+      font-size: 11px;
+    }
+
+    .system-selection-text small {
+      display: block;
+      overflow: hidden;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 9px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .system-selection-remove {
+      width: 24px;
+      height: 24px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.07);
+      color: #cbd6da;
+    }
+
+    .system-hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .system-hint.ready {
+      color: var(--ok);
+    }
+
     /* ========================================================
        RIEPILOGO SCHEDINA MOBILE
        ======================================================== */
@@ -909,15 +918,6 @@
     @media (max-width: 930px) {
       #app {
         padding: 10px;
-      }
-
-      header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .header-actions {
-        width: 100%;
       }
 
       .layout {
@@ -1050,25 +1050,6 @@
         padding: 7px;
       }
 
-      .brand h1 {
-        font-size: 25px;
-      }
-
-      .brand p {
-        font-size: 12px;
-      }
-
-      .header-actions {
-        gap: 6px;
-      }
-
-      .pill,
-      .header-btn {
-        min-height: 36px;
-        padding: 6px 9px;
-        font-size: 11px;
-      }
-
       .events-host {
         padding: 7px;
       }
@@ -1149,30 +1130,12 @@
 <div id="app">
   <div class="shell">
 
-    <header>
-      <div class="brand">
-        <h1>Scommesse Sportive</h1>
-        <p>Quote pre-match · Eurobet · bonus multiple fino a 30 eventi</p>
-      </div>
-
-      <div class="header-actions">
-        <div class="pill">👤 <strong id="usernameValue">—</strong></div>
-        <div class="pill">🪙 <strong id="balanceValue">0</strong></div>
-        <button id="myBetsBtn" class="header-btn" type="button">🎫 Le mie schedine</button>
-        <button id="refreshBtn" class="header-btn" type="button">↻ Aggiorna</button>
-        <button id="homeBtn" class="header-btn" type="button">← HOME</button>
-      </div>
-
-      <div class="xp-panel">
-        <div class="xp-header">
-          <span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span>
-          <span class="xp-text" id="xpText">0 XP</span>
-        </div>
-        <div class="xp-bar">
-          <div class="xp-fill" id="xpFill"></div>
-        </div>
-      </div>
-    </header>
+    <header
+      id="gameHeader"
+      data-title="SPORTSBOOK"
+      data-subtitle="CALCIO"
+      data-home-url="../index.html"
+    ></header>
 
     <div class="layout">
 
@@ -1181,6 +1144,10 @@
           <div>
             <h2>Palinsesto</h2>
             <small id="eventsCount">Caricamento…</small>
+          </div>
+          <div class="panel-head-actions">
+            <button id="myBetsBtn" class="panel-action-btn" type="button">🎫 Le mie schedine</button>
+            <button id="refreshBtn" class="panel-action-btn" type="button">↻ Aggiorna</button>
           </div>
         </div>
 
@@ -1207,6 +1174,10 @@
           <div>
             <h2>Schedina</h2>
             <small id="slipCount">0 selezioni</small>
+            <div class="bet-mode-switch" aria-label="Tipo schedina">
+              <button class="bet-mode-btn active" type="button" data-bet-mode="multiple">Multipla</button>
+              <button class="bet-mode-btn" type="button" data-bet-mode="system">Sistema</button>
+            </div>
           </div>
         </div>
         <div id="betslipBody" class="betslip-body"></div>
@@ -1219,8 +1190,8 @@
 <div id="mobileSlipBar" class="mobile-slip-bar" aria-live="polite">
   <div class="mobile-slip-info">
     <div id="mobileSlipCount" class="mobile-slip-count">🎫 0 selezioni</div>
-    <div class="mobile-slip-metric">Moltiplicatore <strong id="mobileSlipOdd">x1,00</strong></div>
-    <div class="mobile-slip-metric bonus">Bonus <strong id="mobileSlipBonus">—</strong></div>
+    <div class="mobile-slip-metric"><span id="mobileSlipMetric1Label">Moltiplicatore</span> <strong id="mobileSlipOdd">x1,00</strong></div>
+    <div class="mobile-slip-metric bonus"><span id="mobileSlipMetric2Label">Bonus</span> <strong id="mobileSlipBonus">—</strong></div>
   </div>
   <button class="mobile-slip-jump" type="button" data-mobile-slip-jump>VEDI SCHEDINA ↑</button>
 </div>
@@ -1236,6 +1207,7 @@
 </div>
 
 <script src="../shared/casino-format.js"></script>
+<script src="../shared/game-header.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -1262,6 +1234,12 @@
       }
     }
   );
+
+  CasinoGameHeader.init({
+    title: "SPORTSBOOK",
+    subtitle: "CALCIO",
+    homeUrl: "../index.html"
+  });
 
   CasinoLevelUp.init(supabase, {
     balanceSelector: "#balanceValue",
@@ -1317,6 +1295,7 @@
     dateFilter: "all",
     leagueFilter: "all",
     search: "",
+    betMode: "multiple",
     openDays: new Set(),
     dayStateInitialized: false,
     busy: false
@@ -1585,8 +1564,6 @@
 
     state.profile = profileResult.data;
     state.progression = progressionResult.data || { xp: 0, level: 1 };
-
-    $("#usernameValue").textContent = state.profile?.username || state.session.user.email || "—";
     $("#balanceValue").textContent = formatChips(state.profile?.chips || 0);
     updateXp(state.progression.xp, state.progression.level);
   }
@@ -1680,18 +1657,128 @@
     ].join("");
   }
 
-  function selectionFor(eventId) {
-    return state.selections.find(selection => Number(selection.eventId) === Number(eventId)) || null;
+  function selectionKey(selection) {
+    return `${Number(selection.eventId)}:${String(selection.marketId)}:${String(selection.outcomeId)}`;
+  }
+
+  function selectionIsSelected(eventId, marketId, outcomeId) {
+    return state.selections.some(selection =>
+      Number(selection.eventId) === Number(eventId)
+      && String(selection.marketId) === String(marketId)
+      && String(selection.outcomeId) === String(outcomeId)
+    );
+  }
+
+  function groupSelectionsByEvent(selections = state.selections) {
+    const groups = new Map();
+
+    for (const selection of selections) {
+      const eventId = Number(selection.eventId);
+      if (!groups.has(eventId)) groups.set(eventId, []);
+      groups.get(eventId).push(selection);
+    }
+
+    return [...groups.values()];
+  }
+
+  function generateSystemCombinations(selections = state.selections) {
+    const groups = groupSelectionsByEvent(selections);
+
+    if (!groups.length) return [];
+
+    let combinations = [[]];
+
+    for (const group of groups) {
+      const next = [];
+
+      for (const combination of combinations) {
+        for (const selection of group) {
+          next.push([...combination, selection]);
+
+          if (next.length > 500) {
+            return next;
+          }
+        }
+      }
+
+      combinations = next;
+    }
+
+    return combinations;
+  }
+
+  function calculateSystem(selections = state.selections, stakePerCombination = 0) {
+    const groups = groupSelectionsByEvent(selections);
+    const eventCount = groups.length;
+    const selectionCount = selections.length;
+
+    const combinationCount = groups.reduce(
+      (total, group) => total * Math.max(1, group.length),
+      groups.length ? 1 : 0
+    );
+
+    const valid =
+      eventCount >= 2
+      && selectionCount >= 3
+      && combinationCount >= 2
+      && combinationCount <= 500;
+
+    const bonusPercent = sportsBonusPercent(eventCount);
+    const bonusMultiplier = 1 + bonusPercent / 100;
+
+    let minFinalOdd = 0;
+    let maxFinalOdd = 0;
+    let totalPotentialWin = 0;
+    let hasOddOverLimit = false;
+
+    const combinations = combinationCount <= 500
+      ? generateSystemCombinations(selections)
+      : [];
+
+    combinations.forEach((combination, index) => {
+      const baseOdd = combination.reduce(
+        (total, selection) => total * Number(selection.odd || 0),
+        1
+      );
+
+      const finalOdd = baseOdd * bonusMultiplier;
+
+      if (index === 0 || finalOdd < minFinalOdd) minFinalOdd = finalOdd;
+      if (finalOdd > maxFinalOdd) maxFinalOdd = finalOdd;
+      if (finalOdd > MAX_TOTAL_ODD) hasOddOverLimit = true;
+
+      if (stakePerCombination > 0) {
+        totalPotentialWin += Math.floor(stakePerCombination * finalOdd);
+      }
+    });
+
+    return {
+      groups,
+      combinations,
+      eventCount,
+      selectionCount,
+      combinationCount,
+      valid,
+      bonusPercent,
+      bonusMultiplier,
+      minFinalOdd,
+      maxFinalOdd,
+      hasOddOverLimit,
+      stakePerCombination,
+      totalStake: Math.floor(stakePerCombination * combinationCount),
+      totalPotentialWin
+    };
   }
 
   function oddButton(event, marketId, outcomeId, label, odd, marketName) {
     const numericOdd = Number(odd);
     if (!Number.isFinite(numericOdd) || numericOdd < 1) return "";
 
-    const current = selectionFor(event.id);
-    const selected = current
-      && current.marketId === String(marketId)
-      && current.outcomeId === String(outcomeId);
+    const selected = selectionIsSelected(
+      event.id,
+      marketId,
+      outcomeId
+    );
 
     return `
       <button
@@ -1861,38 +1948,55 @@
       matchDate: event.match_date
     };
 
-    const existingIndex = state.selections.findIndex(
-      selection => Number(selection.eventId) === eventId
+    const exactIndex = state.selections.findIndex(
+      selection => selectionKey(selection) === selectionKey(nextSelection)
     );
 
-    if (
-      existingIndex >= 0
-      && state.selections[existingIndex].marketId === nextSelection.marketId
-      && state.selections[existingIndex].outcomeId === nextSelection.outcomeId
-    ) {
-      state.selections.splice(existingIndex, 1);
+    if (exactIndex >= 0) {
+      state.selections.splice(exactIndex, 1);
       renderEvents();
       renderBetslip();
       return;
     }
 
-    const candidate = [...state.selections];
-
-    if (existingIndex >= 0) {
-      candidate[existingIndex] = nextSelection;
-    } else {
-      if (candidate.length >= 30) {
-        toast("Massimo 30 selezioni per schedina.", true);
-        return;
-      }
-      candidate.push(nextSelection);
+    if (state.selections.length >= 30) {
+      toast("Massimo 30 selezioni per schedina.", true);
+      return;
     }
 
-    const calculation = calculateTicket(candidate);
+    let candidate = [...state.selections];
 
-    if (calculation.finalOdd > MAX_TOTAL_ODD) {
-      toast("La selezione porterebbe la quota oltre il limite x50.000.", true);
-      return;
+    if (state.betMode === "multiple") {
+      const existingEventIndex = candidate.findIndex(
+        selection => Number(selection.eventId) === eventId
+      );
+
+      if (existingEventIndex >= 0) {
+        candidate[existingEventIndex] = nextSelection;
+      } else {
+        candidate.push(nextSelection);
+      }
+
+      const calculation = calculateTicket(candidate);
+
+      if (calculation.finalOdd > MAX_TOTAL_ODD) {
+        toast("La selezione porterebbe la quota oltre il limite x50.000.", true);
+        return;
+      }
+    } else {
+      candidate.push(nextSelection);
+
+      const system = calculateSystem(candidate);
+
+      if (system.combinationCount > 500) {
+        toast("Il sistema supererebbe il limite di 500 combinazioni.", true);
+        return;
+      }
+
+      if (system.hasOddOverLimit) {
+        toast("Almeno una combinazione supererebbe il limite x50.000.", true);
+        return;
+      }
     }
 
     state.selections = candidate;
@@ -1912,17 +2016,44 @@
 
     if (!hasSelections) {
       $("#mobileSlipCount").textContent = "🎫 0 selezioni";
+      $("#mobileSlipMetric1Label").textContent = "Moltiplicatore";
+      $("#mobileSlipMetric2Label").textContent = "Bonus";
       $("#mobileSlipOdd").textContent = "x1,00";
       $("#mobileSlipBonus").textContent = "—";
       return;
     }
 
+    if (state.betMode === "system") {
+      const system = calculateSystem();
+      $("#mobileSlipCount").textContent =
+        `🎫 Sistema · ${count} selezioni`;
+
+      $("#mobileSlipMetric1Label").textContent = "Combinazioni";
+      $("#mobileSlipMetric2Label").textContent = "Bonus/combo";
+
+      $("#mobileSlipOdd").textContent =
+        fmtNumber(system.combinationCount);
+
+      $("#mobileSlipBonus").textContent =
+        system.bonusPercent > 0
+          ? `+${String(system.bonusPercent).replace(".", ",")}%`
+          : "—";
+
+      return;
+    }
+
     const calc = calculateTicket();
-    $("#mobileSlipCount").textContent = `🎫 ${count} ${count === 1 ? "selezione" : "selezioni"}`;
+    $("#mobileSlipCount").textContent =
+      `🎫 ${count} ${count === 1 ? "selezione" : "selezioni"}`;
+
+    $("#mobileSlipMetric1Label").textContent = "Moltiplicatore";
+    $("#mobileSlipMetric2Label").textContent = "Bonus";
+
     $("#mobileSlipOdd").textContent = `x${fmtOdd(calc.finalOdd)}`;
-    $("#mobileSlipBonus").textContent = calc.bonusPercent > 0
-      ? `+${String(calc.bonusPercent).replace(".", ",")}%`
-      : "—";
+    $("#mobileSlipBonus").textContent =
+      calc.bonusPercent > 0
+        ? `+${String(calc.bonusPercent).replace(".", ",")}%`
+        : "—";
   }
 
   let betslipObserver = null;
@@ -1945,30 +2076,208 @@
   function renderBetslip() {
     const host = $("#betslipBody");
     const count = state.selections.length;
-    $("#slipCount").textContent = `${count} ${count === 1 ? "selezione" : "selezioni"}`;
+
+    document.querySelectorAll("[data-bet-mode]").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.betMode === state.betMode
+      );
+    });
+
+    const modeLabel = state.betMode === "system" ? "Sistema" : "Multipla";
+    $("#slipCount").textContent =
+      `${modeLabel} · ${count} ${count === 1 ? "selezione" : "selezioni"}`;
+
     renderMobileSlipSummary();
 
     if (!count) {
       host.innerHTML = `
         <div class="betslip-empty">
-          Seleziona una quota dal palinsesto per creare la schedina.
+          ${state.betMode === "system"
+            ? "Seleziona più esiti anche sulla stessa partita per creare il sistema."
+            : "Seleziona una quota dal palinsesto per creare la schedina."}
         </div>
       `;
       return;
     }
 
+    const stake = Math.max(
+      0,
+      Math.floor(
+        Number($("#stakeInput")?.value || 0)
+      )
+    );
+
+    if (state.betMode === "system") {
+      const system = calculateSystem(state.selections, stake);
+
+      const selectionHtml = system.groups.map(group => {
+        const first = group[0];
+
+        return `
+          <div class="system-event-card">
+            <div class="system-event-head">
+              ${escapeHtml(first.homeTeam)} - ${escapeHtml(first.awayTeam)}
+            </div>
+
+            ${group.map(selection => `
+              <div class="system-selection-row">
+                <div class="system-selection-text">
+                  <strong>${escapeHtml(selection.selectionName)}</strong>
+                  <small>${escapeHtml(selection.marketName)}</small>
+                </div>
+
+                <span class="selection-odd">${fmtOdd(selection.odd)}</span>
+
+                <button
+                  class="system-selection-remove"
+                  type="button"
+                  data-remove-selection="1"
+                  data-event-id="${selection.eventId}"
+                  data-market-id="${escapeHtml(selection.marketId)}"
+                  data-outcome-id="${escapeHtml(selection.outcomeId)}"
+                  aria-label="Rimuovi selezione"
+                >×</button>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }).join("");
+
+      const limitPercent = Math.max(
+        0,
+        Math.min(
+          100,
+          system.maxFinalOdd / MAX_TOTAL_ODD * 100
+        )
+      );
+
+      const rangeLabel =
+        system.combinations.length
+          ? (
+              Math.abs(system.maxFinalOdd - system.minFinalOdd) < 0.000001
+                ? `x${fmtOdd(system.maxFinalOdd)}`
+                : `x${fmtOdd(system.minFinalOdd)} – x${fmtOdd(system.maxFinalOdd)}`
+            )
+          : "—";
+
+      host.innerHTML = `
+        <div id="selectionList" class="selection-list">
+          ${selectionHtml}
+        </div>
+
+        <div class="betslip-controls">
+          <div class="slip-summary">
+            <div class="summary-row">
+              <span>Eventi</span>
+              <strong>${fmtNumber(system.eventCount)}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Selezioni</span>
+              <strong>${fmtNumber(system.selectionCount)}</strong>
+            </div>
+
+            <div class="summary-row total">
+              <span>Combinazioni</span>
+              <strong>${fmtNumber(system.combinationCount)}</strong>
+            </div>
+
+            <div class="summary-row bonus">
+              <span>Bonus per combinazione</span>
+              <strong>${system.bonusPercent > 0
+                ? `+${String(system.bonusPercent).replace(".", ",")}%`
+                : "—"}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Quote combinazioni</span>
+              <strong>${rangeLabel}</strong>
+            </div>
+
+            <div class="limit-bar" title="Quota massima per combinazione x50.000">
+              <div class="limit-fill" style="width:${limitPercent}%"></div>
+            </div>
+
+            <div class="system-hint${system.valid ? " ready" : ""}">
+              ${system.valid
+                ? "Sistema pronto: ogni combinazione contiene una sola selezione per evento."
+                : "Per creare un sistema servono almeno 2 eventi e almeno una partita con più di una selezione."}
+            </div>
+          </div>
+
+          <div class="stake-wrap">
+            <label for="stakeInput">Puntata per combinazione</label>
+            <input
+              id="stakeInput"
+              class="stake-input"
+              type="number"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              placeholder="Inserisci fiche"
+              value="${stake || ""}"
+            />
+          </div>
+
+          <div class="slip-summary">
+            <div class="summary-row total">
+              <span>Puntata totale</span>
+              <strong id="systemTotalStake">🪙 ${formatChips(system.totalStake)}</strong>
+            </div>
+          </div>
+
+          <div class="potential-box">
+            <span>Potenziale complessivo</span>
+            <strong id="potentialWinValue">🪙 ${formatChips(system.totalPotentialWin)}</strong>
+          </div>
+
+          <button
+            id="placeBetBtn"
+            class="place-btn"
+            type="button"
+            ${state.busy || !system.valid || system.hasOddOverLimit ? "disabled" : ""}
+          >
+            ${state.busy ? "Piazzamento…" : "PIAZZA SISTEMA"}
+          </button>
+
+          <div id="slipStatus" class="slip-status"></div>
+        </div>
+      `;
+
+      return;
+    }
+
     const calc = calculateTicket();
-    const stake = Math.max(0, Math.floor(Number($("#stakeInput")?.value || 0)));
-    const potentialWin = stake > 0 ? Math.floor(stake * calc.finalOdd) : 0;
-    const limitPercent = Math.max(0, Math.min(100, calc.finalOdd / MAX_TOTAL_ODD * 100));
+    const potentialWin = stake > 0
+      ? Math.floor(stake * calc.finalOdd)
+      : 0;
+
+    const limitPercent = Math.max(
+      0,
+      Math.min(
+        100,
+        calc.finalOdd / MAX_TOTAL_ODD * 100
+      )
+    );
 
     const selectionHtml = state.selections.map(selection => `
       <div class="selection-card">
-        <button class="selection-remove" type="button" data-remove-event="${selection.eventId}">×</button>
+        <button
+          class="selection-remove"
+          type="button"
+          data-remove-selection="1"
+          data-event-id="${selection.eventId}"
+          data-market-id="${escapeHtml(selection.marketId)}"
+          data-outcome-id="${escapeHtml(selection.outcomeId)}"
+        >×</button>
+
         <div class="selection-match">
           ${escapeHtml(selection.homeTeam)} - ${escapeHtml(selection.awayTeam)}
         </div>
+
         <div class="selection-market">${escapeHtml(selection.marketName)}</div>
+
         <div class="selection-main">
           <strong>${escapeHtml(selection.selectionName)}</strong>
           <span class="selection-odd">${fmtOdd(selection.odd)}</span>
@@ -1980,51 +2289,58 @@
       <div id="selectionList" class="selection-list">${selectionHtml}</div>
 
       <div class="betslip-controls">
-      <div class="slip-summary">
-        <div class="summary-row">
-          <span>Quota base</span>
-          <strong>x${fmtOdd(calc.baseOdd)}</strong>
+        <div class="slip-summary">
+          <div class="summary-row">
+            <span>Quota base</span>
+            <strong>x${fmtOdd(calc.baseOdd)}</strong>
+          </div>
+
+          <div class="summary-row bonus">
+            <span>Bonus multipla</span>
+            <strong>${calc.bonusPercent > 0
+              ? `+${String(calc.bonusPercent).replace(".", ",")}%`
+              : "—"}</strong>
+          </div>
+
+          <div class="summary-row total">
+            <span>Quota totale</span>
+            <strong>x${fmtOdd(calc.finalOdd)}</strong>
+          </div>
+
+          <div class="limit-bar" title="Limite quota x50.000">
+            <div class="limit-fill" style="width:${limitPercent}%"></div>
+          </div>
         </div>
 
-        <div class="summary-row bonus">
-          <span>Bonus multipla</span>
-          <strong>${calc.bonusPercent > 0 ? `+${String(calc.bonusPercent).replace(".", ",")}%` : "—"}</strong>
+        <div class="stake-wrap">
+          <label for="stakeInput">Puntata</label>
+          <input
+            id="stakeInput"
+            class="stake-input"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            placeholder="Inserisci fiche"
+            value="${stake || ""}"
+          />
         </div>
 
-        <div class="summary-row total">
-          <span>Quota totale</span>
-          <strong>x${fmtOdd(calc.finalOdd)}</strong>
+        <div class="potential-box">
+          <span>Vincita potenziale</span>
+          <strong id="potentialWinValue">🪙 ${formatChips(potentialWin)}</strong>
         </div>
 
-        <div class="limit-bar" title="Limite quota x50.000">
-          <div class="limit-fill" style="width:${limitPercent}%"></div>
-        </div>
-      </div>
+        <button
+          id="placeBetBtn"
+          class="place-btn"
+          type="button"
+          ${state.busy ? "disabled" : ""}
+        >
+          ${state.busy ? "Piazzamento…" : "PIAZZA SCHEDINA"}
+        </button>
 
-      <div class="stake-wrap">
-        <label for="stakeInput">Puntata</label>
-        <input
-          id="stakeInput"
-          class="stake-input"
-          type="number"
-          min="1"
-          step="1"
-          inputmode="numeric"
-          placeholder="Inserisci fiche"
-          value="${stake || ""}"
-        />
-      </div>
-
-      <div class="potential-box">
-        <span>Vincita potenziale</span>
-        <strong id="potentialWinValue">🪙 ${formatChips(potentialWin)}</strong>
-      </div>
-
-      <button id="placeBetBtn" class="place-btn" type="button" ${state.busy ? "disabled" : ""}>
-        ${state.busy ? "Piazzamento…" : "PIAZZA SCHEDINA"}
-      </button>
-
-      <div id="slipStatus" class="slip-status"></div>
+        <div id="slipStatus" class="slip-status"></div>
       </div>
     `;
   }
@@ -2032,11 +2348,39 @@
   function updatePotentialOnly() {
     const input = $("#stakeInput");
     const output = $("#potentialWinValue");
+
     if (!input || !output) return;
 
-    const stake = Math.max(0, Math.floor(Number(input.value || 0)));
+    const stake = Math.max(
+      0,
+      Math.floor(
+        Number(input.value || 0)
+      )
+    );
+
+    if (state.betMode === "system") {
+      const system = calculateSystem(state.selections, stake);
+
+      output.textContent =
+        `🪙 ${formatChips(system.totalPotentialWin)}`;
+
+      const totalStake = $("#systemTotalStake");
+      if (totalStake) {
+        totalStake.textContent =
+          `🪙 ${formatChips(system.totalStake)}`;
+      }
+
+      return;
+    }
+
     const calc = calculateTicket();
-    output.textContent = `🪙 ${formatChips(stake > 0 ? Math.floor(stake * calc.finalOdd) : 0)}`;
+
+    output.textContent =
+      `🪙 ${formatChips(
+        stake > 0
+          ? Math.floor(stake * calc.finalOdd)
+          : 0
+      )}`;
   }
 
   function readableRpcError(error) {
@@ -2055,6 +2399,14 @@
         return "Una quota selezionata non è più disponibile.";
       case "DUPLICATE_EVENT":
         return "Puoi inserire una sola selezione per partita.";
+      case "DUPLICATE_SELECTION":
+        return "La stessa selezione è già presente.";
+      case "INVALID_SYSTEM":
+        return "Il sistema deve avere almeno 2 eventi e almeno una partita con più selezioni.";
+      case "TOO_MANY_SELECTIONS":
+        return "Massimo 30 selezioni complessive.";
+      case "TOO_MANY_COMBINATIONS":
+        return "Il sistema supera il limite di 500 combinazioni.";
       default:
         return error?.details || message;
     }
@@ -2067,7 +2419,90 @@
     const stake = Math.floor(Number(input?.value || 0));
 
     if (!Number.isInteger(stake) || stake <= 0) {
-      toast("Inserisci una puntata valida.", true);
+      toast(
+        state.betMode === "system"
+          ? "Inserisci una puntata valida per combinazione."
+          : "Inserisci una puntata valida.",
+        true
+      );
+      return;
+    }
+
+    if (state.betMode === "system") {
+      const system = calculateSystem(state.selections, stake);
+
+      if (!system.valid) {
+        toast(
+          "Per il sistema servono almeno 2 eventi e almeno una partita con più selezioni.",
+          true
+        );
+        return;
+      }
+
+      if (system.combinationCount > 500) {
+        toast("Il sistema supera il limite di 500 combinazioni.", true);
+        return;
+      }
+
+      if (system.hasOddOverLimit) {
+        toast("Almeno una combinazione supera il limite x50.000.", true);
+        return;
+      }
+
+      if (Number(state.profile?.chips || 0) < system.totalStake) {
+        toast("Fiche insufficienti per la puntata totale del sistema.", true);
+        return;
+      }
+
+      state.busy = true;
+      renderBetslip();
+
+      try {
+        const { data, error } = await supabase.rpc("place_system_bet", {
+          p_stake_per_combination: stake,
+          p_request_id: crypto.randomUUID(),
+          p_selections: state.selections.map(selection => ({
+            event_id: selection.eventId,
+            market_id: selection.marketId,
+            outcome_id: selection.outcomeId
+          }))
+        });
+
+        if (error) throw error;
+
+        if (data?.balance != null) {
+          state.profile.chips = Number(data.balance);
+          $("#balanceValue").textContent = formatChips(data.balance);
+        }
+
+        balanceSyncChannel?.postMessage({ type: "balance-changed" });
+
+        toast(
+          `Sistema #${data.system_id} piazzato · ${data.combination_count} combinazioni · puntata totale ${formatChips(data.total_stake)} · potenziale ${formatChips(data.max_potential_win)} fiche.`
+        );
+
+        state.selections = [];
+
+        await Promise.all([
+          loadProfileAndProgression(),
+          loadEvents()
+        ]);
+
+        const levelUp = await CasinoLevelUp.check();
+
+        if (levelUp?.balance != null) {
+          state.profile.chips = Number(levelUp.balance);
+          $("#balanceValue").textContent = formatChips(levelUp.balance);
+        }
+
+      } catch (error) {
+        console.error("place_system_bet:", error);
+        toast(readableRpcError(error), true);
+      } finally {
+        state.busy = false;
+        renderBetslip();
+      }
+
       return;
     }
 
@@ -2077,6 +2512,7 @@
     }
 
     const calculation = calculateTicket();
+
     if (calculation.finalOdd > MAX_TOTAL_ODD) {
       toast("Quota complessiva superiore al limite x50.000.", true);
       return;
@@ -2110,12 +2546,14 @@
       );
 
       state.selections = [];
+
       await Promise.all([
         loadProfileAndProgression(),
         loadEvents()
       ]);
 
       const levelUp = await CasinoLevelUp.check();
+
       if (levelUp?.balance != null) {
         state.profile.chips = Number(levelUp.balance);
         $("#balanceValue").textContent = formatChips(levelUp.balance);
@@ -2146,6 +2584,25 @@
   }
 
   document.addEventListener("click", event => {
+    const modeButton = event.target.closest("[data-bet-mode]");
+    if (modeButton) {
+      const nextMode = modeButton.dataset.betMode;
+
+      if (nextMode === "multiple" && state.betMode === "system") {
+        const hasAlternatives = groupSelectionsByEvent().some(group => group.length > 1);
+
+        if (hasAlternatives) {
+          toast("Rimuovi le selezioni alternative prima di tornare alla Multipla.", true);
+          return;
+        }
+      }
+
+      state.betMode = nextMode === "system" ? "system" : "multiple";
+      renderEvents();
+      renderBetslip();
+      return;
+    }
+
     const oddButtonEl = event.target.closest("[data-add-selection]");
     if (oddButtonEl) {
       addSelectionFromButton(oddButtonEl);
@@ -2180,10 +2637,20 @@
       return;
     }
 
-    const remove = event.target.closest("[data-remove-event]");
+    const remove = event.target.closest("[data-remove-selection]");
     if (remove) {
-      const eventId = Number(remove.dataset.removeEvent);
-      state.selections = state.selections.filter(selection => Number(selection.eventId) !== eventId);
+      const eventId = Number(remove.dataset.eventId);
+      const marketId = String(remove.dataset.marketId);
+      const outcomeId = String(remove.dataset.outcomeId);
+
+      state.selections = state.selections.filter(selection =>
+        !(
+          Number(selection.eventId) === eventId
+          && String(selection.marketId) === marketId
+          && String(selection.outcomeId) === outcomeId
+        )
+      );
+
       renderEvents();
       renderBetslip();
       return;
@@ -2249,10 +2716,6 @@
 
   $("#myBetsBtn").addEventListener("click", () => {
     location.href = "./my-bets.html";
-  });
-
-  $("#homeBtn").addEventListener("click", () => {
-    location.href = "../index.html";
   });
 
   $("#refreshBtn").addEventListener("click", refreshAll);

@@ -1,0 +1,193 @@
+/* ============================================================
+   CASINO - HEADER GIOCHI CONDIVISO
+   Layout: 15% titolo | 2.5% gap | 60% XP | 2.5% gap | 20% comandi
+   ============================================================ */
+
+header.game-header{
+  width:100%;
+  min-width:0;
+  height:52px;
+  margin:0 0 8px;
+  padding:5px 10px;
+  display:grid !important;
+  grid-template-columns:15% 60% 20% !important;
+  column-gap:2.5% !important;
+  align-items:center;
+  border:1px solid rgba(215,173,85,.28);
+  border-radius:12px;
+  background:rgba(2,7,5,.88);
+  backdrop-filter:blur(7px);
+  box-shadow:0 8px 24px rgba(0,0,0,.38);
+}
+
+.game-header__title,
+.game-header__xp,
+.game-header__actions{
+  min-width:0;
+}
+
+.game-header__title{
+  line-height:1;
+  overflow:hidden;
+}
+
+.game-header__title strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--gold2,#ffe5a0);
+  font-size:clamp(17px,1.7vw,25px);
+  font-weight:1000;
+  letter-spacing:.02em;
+}
+
+.game-header__title small{
+  display:block;
+  margin-top:3px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted,#9daea5);
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.15em;
+}
+
+.game-header__xp{
+  align-self:center;
+}
+
+.game-header__xp-info{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:3px;
+  color:#e9efeb;
+  font-size:9px;
+  font-weight:900;
+  line-height:1;
+}
+
+.game-header__xp-level{
+  flex:0 0 auto;
+  color:var(--gold2,#ffe5a0);
+  white-space:nowrap;
+}
+
+.game-header__xp-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:right;
+}
+
+.game-header__xp-bar{
+  width:100%;
+  height:12px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.33);
+  border-radius:999px;
+  background:rgba(0,0,0,.52);
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.45);
+}
+
+.game-header__xp-fill{
+  width:0;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#2769ff,#6f5cff,#c255ff);
+  transition:width .45s ease;
+}
+
+.game-header__actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+}
+
+.game-header__balance{
+  min-width:0;
+  max-width:calc(100% - 78px);
+  display:flex;
+  align-items:center;
+  gap:4px;
+  overflow:hidden;
+  white-space:nowrap;
+  color:#fff;
+  font-size:12px;
+  font-weight:850;
+}
+
+.game-header__balance-icon{
+  flex:0 0 auto;
+  font-size:13px;
+}
+
+.game-header__balance strong{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:var(--gold2,#ffe5a0);
+  font-size:13px;
+  font-weight:1000;
+}
+
+.game-header__button{
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(215,173,85,.42);
+  border-radius:8px;
+  background:#07120e;
+  color:#fff;
+  font:900 17px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+  cursor:pointer;
+}
+
+.game-header__button:hover,
+.game-header__button:focus-visible{
+  border-color:#ffe29a;
+  outline:none;
+  background:#10251c;
+}
+
+@media (max-width:760px){
+  header.game-header{
+    height:46px;
+    margin-bottom:5px;
+    padding:4px 6px;
+    border-radius:8px;
+  }
+
+  .game-header__title strong{font-size:15px}
+  .game-header__title small{margin-top:2px;font-size:6px}
+  .game-header__xp-info{gap:4px;margin-bottom:2px;font-size:7px}
+  .game-header__xp-bar{height:9px}
+  .game-header__actions{gap:3px}
+  .game-header__balance{max-width:calc(100% - 62px);gap:2px;font-size:9px}
+  .game-header__balance-icon{font-size:10px}
+  .game-header__balance strong{font-size:10px}
+  .game-header__button{flex-basis:28px;width:28px;height:28px;border-radius:6px;font-size:14px}
+}
+
+@media (max-height:500px) and (orientation:landscape){
+  header.game-header{
+    height:40px;
+    margin-bottom:4px;
+    padding:3px 6px;
+  }
+
+  .game-header__title strong{font-size:14px}
+  .game-header__title small{font-size:6px;letter-spacing:.11em}
+  .game-header__xp-info{font-size:6px;margin-bottom:2px}
+  .game-header__xp-bar{height:8px}
+  .game-header__balance strong{font-size:9px}
+  .game-header__button{flex-basis:26px;width:26px;height:26px;font-size:13px}
+}

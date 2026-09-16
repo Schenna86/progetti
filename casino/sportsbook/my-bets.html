@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#07151d" />
   <title>Le mie schedine</title>
+  <link rel="stylesheet" href="../shared/game-header.css" />
 
   <style>
     :root {
@@ -51,111 +52,6 @@
       margin: 0 auto;
     }
 
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .brand h1 {
-      margin: 0;
-      color: var(--gold-light);
-      font-size: clamp(25px, 4vw, 42px);
-      letter-spacing: .025em;
-    }
-
-    .brand p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 9px;
-    }
-
-    .pill,
-    .header-btn {
-      min-height: 42px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(231,182,84,.62);
-      border-radius: 999px;
-      padding: 8px 13px;
-      background: rgba(4,16,23,.78);
-      color: white;
-      white-space: nowrap;
-    }
-
-    .pill strong {
-      color: var(--gold-light);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .header-btn { font-weight: 850; }
-    .header-btn:hover {
-      border-color: rgba(255,225,154,.88);
-      color: var(--gold-light);
-    }
-
-    .xp-panel {
-      flex: 1 0 100%;
-      width: 100%;
-      user-select: none;
-    }
-
-    .xp-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 5px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      text-shadow: 0 2px 3px rgba(0,0,0,.8);
-    }
-
-    .xp-level strong {
-      color: var(--gold-light);
-      font-size: 16px;
-    }
-
-    .xp-text {
-      color: #dfe8ec;
-      font-size: 12px;
-      font-variant-numeric: tabular-nums;
-      opacity: .95;
-      text-align: right;
-    }
-
-    .xp-bar {
-      position: relative;
-      width: 100%;
-      height: 18px;
-      overflow: hidden;
-      border: 2px solid rgba(255,255,255,.75);
-      border-radius: 10px;
-      background: linear-gradient(180deg, rgba(0,0,0,.75), rgba(30,30,30,.85));
-      box-shadow: 0 2px 6px rgba(0,0,0,.6), inset 0 1px 3px rgba(0,0,0,.8);
-    }
-
-    .xp-fill {
-      width: 0;
-      height: 100%;
-      border-radius: 8px;
-      background: linear-gradient(90deg,#2769ff,#6f5cff,#c255ff);
-      box-shadow: inset 0 1px 4px rgba(255,255,255,.4), 0 0 8px rgba(111,92,255,.7);
-      transition: width .6s ease;
-    }
-
     .panel {
       overflow: hidden;
       border: 1px solid rgba(231,182,84,.33);
@@ -180,6 +76,30 @@
     }
 
     .panel-head small { color: var(--muted); }
+
+    .panel-head-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .panel-action-btn {
+      min-height: 34px;
+      border: 1px solid rgba(231,182,84,.34);
+      border-radius: 9px;
+      padding: 6px 10px;
+      background: rgba(4,16,23,.76);
+      color: var(--gold-light);
+      font-weight: 850;
+      font-size: 11px;
+    }
+
+    .panel-action-btn:hover {
+      border-color: rgba(255,225,154,.82);
+      filter: brightness(1.08);
+    }
 
     .stats {
       display: grid;
@@ -455,6 +375,92 @@
     .leg-result.lost { background: rgba(255,119,119,.12); color: #ff9a9a; }
     .leg-result.void { background: rgba(231,182,84,.12); color: var(--gold-light); }
 
+
+    .ticket-card.system {
+      border-color: rgba(98,168,255,.36);
+      box-shadow: inset 0 0 18px rgba(98,168,255,.035);
+    }
+
+    .system-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      margin-left: 6px;
+      border: 1px solid rgba(98,168,255,.38);
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: rgba(98,168,255,.09);
+      color: #a8ceff;
+      font-size: 9px;
+      font-weight: 900;
+      vertical-align: middle;
+    }
+
+    .system-combinations {
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .combination-card {
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 10px;
+      background: rgba(0,0,0,.13);
+    }
+
+    .combination-summary {
+      display: grid;
+      grid-template-columns: minmax(150px,1fr) 100px 120px auto;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+    }
+
+    .combination-title strong {
+      display: block;
+      color: #e9f0f3;
+      font-size: 11px;
+    }
+
+    .combination-title small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .combination-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .combination-metric strong {
+      display: block;
+      margin-top: 2px;
+      color: #eef4f6;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .combination-details {
+      display: none;
+      padding: 0 9px 9px;
+      border-top: 1px solid rgba(255,255,255,.055);
+    }
+
+    .combination-card.expanded .combination-details {
+      display: block;
+    }
+
+    .system-payout-note {
+      color: var(--gold-light);
+      font-weight: 900;
+    }
+
     .empty-state,
     .error-state {
       padding: 42px 18px;
@@ -529,8 +535,6 @@
 
     @media (max-width: 760px) {
       #app { padding: 9px; }
-      header { align-items: flex-start; flex-direction: column; }
-      .header-actions { width: 100%; }
       .stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
 
       .ticket-summary {
@@ -539,6 +543,14 @@
 
       .ticket-metric { display: none; }
       .ticket-actions { flex-wrap: wrap; }
+
+      .combination-summary {
+        grid-template-columns: 1fr auto;
+      }
+
+      .combination-metric {
+        display: none;
+      }
 
       .leg-row {
         grid-template-columns: minmax(0,1fr) auto;
@@ -554,34 +566,23 @@
 
 <div id="app">
   <div class="shell">
-    <header>
-      <div class="brand">
-        <h1>Le mie schedine</h1>
-        <p>Storico scommesse · risultati · pagamenti automatici</p>
-      </div>
 
-      <div class="header-actions">
-        <div class="pill">👤 <strong id="usernameValue">—</strong></div>
-        <div class="pill">🪙 <strong id="balanceValue">0</strong></div>
-        <button id="sportsbookBtn" class="header-btn" type="button">⚽ Palinsesto</button>
-        <button id="refreshBtn" class="header-btn" type="button">↻ Aggiorna</button>
-        <button id="homeBtn" class="header-btn" type="button">← HOME</button>
-      </div>
-
-      <div class="xp-panel">
-        <div class="xp-header">
-          <span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span>
-          <span class="xp-text" id="xpText">0 XP</span>
-        </div>
-        <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
-      </div>
-    </header>
+    <header
+      id="gameHeader"
+      data-title="SPORTSBOOK"
+      data-subtitle="LE MIE SCHEDINE"
+      data-home-url="../index.html"
+    ></header>
 
     <main class="panel">
       <div class="panel-head">
         <div>
           <h2>Storico schedine</h2>
           <small id="ticketCount">Caricamento…</small>
+        </div>
+        <div class="panel-head-actions">
+          <button id="sportsbookBtn" class="panel-action-btn" type="button">⚽ Palinsesto</button>
+          <button id="refreshBtn" class="panel-action-btn" type="button">↻ Aggiorna</button>
         </div>
       </div>
 
@@ -610,6 +611,7 @@
         <button class="filter-btn" type="button" data-filter="won">Vinte</button>
         <button class="filter-btn" type="button" data-filter="lost">Perse</button>
         <button class="filter-btn" type="button" data-filter="void">Rimborsi</button>
+        <button class="filter-btn" type="button" data-filter="old" title="Perse e rimborsi oltre 2 giorni · vinte oltre 7 giorni">Vecchie</button>
       </div>
 
       <div id="ticketsHost" class="tickets-host"></div>
@@ -628,6 +630,7 @@
 </div>
 
 <script src="../shared/casino-format.js"></script>
+<script src="../shared/game-header.js"></script>
 <script src="../shared/level-up-modal.js"></script>
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -651,6 +654,12 @@
     }
   );
 
+  CasinoGameHeader.init({
+    title: "SPORTSBOOK",
+    subtitle: "LE MIE SCHEDINE",
+    homeUrl: "../index.html"
+  });
+
   CasinoLevelUp.init(supabase, {
     balanceSelector: "#balanceValue",
     levelSelector: "#xpLevel"
@@ -669,10 +678,13 @@
     progression: null,
     levels: [],
     tickets: [],
+    systems: [],
+    systemTicketsBySystem: new Map(),
     legsByTicket: new Map(),
     eventsById: new Map(),
     filter: "all",
-    expanded: new Set()
+    expanded: new Set(),
+    expandedCombinations: new Set()
   };
 
   const balanceSyncChannel = "BroadcastChannel" in window
@@ -793,8 +805,6 @@
 
     state.profile = profileResult.data;
     state.progression = progressionResult.data || { xp: 0, level: 1 };
-
-    $("#usernameValue").textContent = state.profile?.username || state.session.user.email || "—";
     $("#balanceValue").textContent = formatChips(state.profile?.chips || 0);
     updateXp(state.progression.xp, state.progression.level);
   }
@@ -802,36 +812,131 @@
   async function loadTickets() {
     const userId = state.session.user.id;
 
-    const { data: tickets, error: ticketError } = await supabase
-      .from("betting_tickets")
-      .select(`
-        id,
-        user_id,
-        ticket_type,
-        stake,
-        total_odd,
-        base_total_odd,
-        bonus_percent,
-        bonus_multiplier,
-        final_total_odd,
-        effective_leg_count,
-        potential_win,
-        status,
-        created_at,
-        settled_at,
-        settled_total_odd,
-        settled_bonus_percent,
-        settled_effective_leg_count,
-        payout_amount,
-        payout_wallet_transaction_id
-      `)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(250);
+    const [systemsResult, regularTicketsResult] = await Promise.all([
+      supabase
+        .from("betting_systems")
+        .select(`
+          id,
+          user_id,
+          request_id,
+          stake_per_combination,
+          combination_count,
+          event_count,
+          selection_count,
+          total_stake,
+          max_potential_win,
+          created_at
+        `)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(250),
 
-    if (ticketError) throw ticketError;
+      supabase
+        .from("betting_tickets")
+        .select(`
+          id,
+          user_id,
+          ticket_type,
+          stake,
+          total_odd,
+          base_total_odd,
+          bonus_percent,
+          bonus_multiplier,
+          final_total_odd,
+          effective_leg_count,
+          potential_win,
+          status,
+          created_at,
+          settled_at,
+          settled_total_odd,
+          settled_bonus_percent,
+          settled_effective_leg_count,
+          payout_amount,
+          payout_wallet_transaction_id,
+          system_id,
+          system_combination_no
+        `)
+        .eq("user_id", userId)
+        .is("system_id", null)
+        .order("created_at", { ascending: false })
+        .limit(250)
+    ]);
 
-    state.tickets = tickets || [];
+    if (systemsResult.error) throw systemsResult.error;
+    if (regularTicketsResult.error) throw regularTicketsResult.error;
+
+    state.systems = systemsResult.data || [];
+
+    const systemIds = state.systems.map(system => system.id);
+    let systemTickets = [];
+
+    if (systemIds.length) {
+      const pageSize = 1000;
+      let from = 0;
+
+      while (true) {
+        const { data, error } = await supabase
+          .from("betting_tickets")
+          .select(`
+            id,
+            user_id,
+            ticket_type,
+            stake,
+            total_odd,
+            base_total_odd,
+            bonus_percent,
+            bonus_multiplier,
+            final_total_odd,
+            effective_leg_count,
+            potential_win,
+            status,
+            created_at,
+            settled_at,
+            settled_total_odd,
+            settled_bonus_percent,
+            settled_effective_leg_count,
+            payout_amount,
+            payout_wallet_transaction_id,
+            system_id,
+            system_combination_no
+          `)
+          .eq("user_id", userId)
+          .in("system_id", systemIds)
+          .order("system_id", { ascending: false })
+          .order("system_combination_no", { ascending: true })
+          .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+
+        const rows = data || [];
+        systemTickets.push(...rows);
+
+        if (rows.length < pageSize) break;
+
+        from += pageSize;
+
+        // Protezione da caricamenti patologici sul frontend.
+        if (from >= 10000) break;
+      }
+    }
+
+    state.tickets = [
+      ...(regularTicketsResult.data || []),
+      ...systemTickets
+    ];
+
+    state.systemTicketsBySystem = new Map();
+
+    for (const ticket of systemTickets) {
+      if (!state.systemTicketsBySystem.has(ticket.system_id)) {
+        state.systemTicketsBySystem.set(ticket.system_id, []);
+      }
+
+      state.systemTicketsBySystem
+        .get(ticket.system_id)
+        .push(ticket);
+    }
+
     state.legsByTicket = new Map();
     state.eventsById = new Map();
 
@@ -841,35 +946,50 @@
     }
 
     const ticketIds = state.tickets.map(ticket => ticket.id);
+    const legs = [];
 
-    const { data: legs, error: legsError } = await supabase
-      .from("betting_legs")
-      .select(`
-        id,
-        ticket_id,
-        event_id,
-        market_name,
-        selection_name,
-        odd,
-        result,
-        settled_at
-      `)
-      .in("ticket_id", ticketIds)
-      .order("id", { ascending: true });
+    for (let i = 0; i < ticketIds.length; i += 200) {
+      const chunk = ticketIds.slice(i, i + 200);
 
-    if (legsError) throw legsError;
+      const { data, error } = await supabase
+        .from("betting_legs")
+        .select(`
+          id,
+          ticket_id,
+          event_id,
+          market_name,
+          selection_name,
+          odd,
+          result,
+          settled_at
+        `)
+        .in("ticket_id", chunk)
+        .order("id", { ascending: true });
 
-    for (const leg of (legs || [])) {
+      if (error) throw error;
+      legs.push(...(data || []));
+    }
+
+    for (const leg of legs) {
       if (!state.legsByTicket.has(leg.ticket_id)) {
         state.legsByTicket.set(leg.ticket_id, []);
       }
+
       state.legsByTicket.get(leg.ticket_id).push(leg);
     }
 
-    const eventIds = [...new Set((legs || []).map(leg => leg.event_id).filter(Boolean))];
+    const eventIds = [
+      ...new Set(
+        legs
+          .map(leg => leg.event_id)
+          .filter(Boolean)
+      )
+    ];
 
-    if (eventIds.length) {
-      const { data: events, error: eventsError } = await supabase
+    for (let i = 0; i < eventIds.length; i += 200) {
+      const chunk = eventIds.slice(i, i + 200);
+
+      const { data, error } = await supabase
         .from("betting_events")
         .select(`
           id,
@@ -883,11 +1003,11 @@
           halftime_home_score,
           halftime_away_score
         `)
-        .in("id", eventIds);
+        .in("id", chunk);
 
-      if (eventsError) throw eventsError;
+      if (error) throw error;
 
-      for (const event of (events || [])) {
+      for (const event of (data || [])) {
         state.eventsById.set(event.id, event);
       }
     }
@@ -921,9 +1041,184 @@
     return { cls: "", label: ticket.status || "—" };
   }
 
-  function filteredTickets() {
-    if (state.filter === "all") return state.tickets;
-    return state.tickets.filter(ticket => ticket.status === state.filter);
+  function systemAggregate(system) {
+    const tickets =
+      state.systemTicketsBySystem.get(system.id)
+      || [];
+
+    const pending =
+      tickets.some(ticket => ticket.status === "pending");
+
+    const allVoid =
+      tickets.length > 0
+      && tickets.every(ticket => ticket.status === "void");
+
+    const anyWon =
+      tickets.some(ticket => ticket.status === "won");
+
+    const anyVoid =
+      tickets.some(ticket => ticket.status === "void");
+
+    const payoutAmount =
+      tickets.reduce(
+        (sum, ticket) =>
+          sum + Number(ticket.payout_amount || 0),
+        0
+      );
+
+    let status = "pending";
+
+    if (!pending) {
+      if (allVoid) {
+        status = "void";
+      } else if (anyWon) {
+        status = "won";
+      } else if (anyVoid && payoutAmount > 0) {
+        status = "void";
+      } else {
+        status = "lost";
+      }
+    }
+
+    const settledDates =
+      tickets
+        .map(ticket => ticket.settled_at)
+        .filter(Boolean)
+        .map(value => new Date(value).getTime())
+        .filter(Number.isFinite);
+
+    const settledAt =
+      !pending && settledDates.length
+        ? new Date(Math.max(...settledDates)).toISOString()
+        : null;
+
+    return {
+      system,
+      tickets,
+      status,
+      payoutAmount,
+      settledAt,
+      pendingCombinations:
+        tickets.filter(ticket => ticket.status === "pending").length,
+      wonCombinations:
+        tickets.filter(ticket => ticket.status === "won").length,
+      lostCombinations:
+        tickets.filter(ticket => ticket.status === "lost").length,
+      voidCombinations:
+        tickets.filter(ticket => ticket.status === "void").length
+    };
+  }
+
+  function displayEntries() {
+    const regularTickets =
+      state.tickets
+        .filter(ticket => ticket.system_id == null)
+        .map(ticket => ({
+          kind: "ticket",
+          id: `ticket:${ticket.id}`,
+          createdAt: ticket.created_at,
+          status: ticket.status,
+          settledAt: ticket.settled_at,
+          ticket
+        }));
+
+    const systems =
+      state.systems.map(system => {
+        const aggregate = systemAggregate(system);
+
+        return {
+          kind: "system",
+          id: `system:${system.id}`,
+          createdAt: system.created_at,
+          status: aggregate.status,
+          settledAt: aggregate.settledAt,
+          system,
+          aggregate
+        };
+      });
+
+    return [...regularTickets, ...systems]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime()
+          -
+          new Date(a.createdAt).getTime()
+      );
+  }
+
+  function statusInfoForSystem(aggregate) {
+    if (aggregate.status === "pending") {
+      return {
+        cls: "pending",
+        label: `🟡 IN CORSO · ${aggregate.pendingCombinations} combo`
+      };
+    }
+
+    if (aggregate.status === "won") {
+      return {
+        cls: "won",
+        label: `🟢 LIQUIDATO +${formatChips(aggregate.payoutAmount)}`
+      };
+    }
+
+    if (aggregate.status === "void") {
+      return {
+        cls: "void",
+        label: `⚪ RIMBORSO +${formatChips(aggregate.payoutAmount)}`
+      };
+    }
+
+    return {
+      cls: "lost",
+      label: "🔴 PERSO"
+    };
+  }
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  const OLD_TICKET_DAYS = {
+    lost: 2,
+    won: 7,
+    void: 2
+  };
+
+  function isOldEntry(entry) {
+    if (entry.status === "pending") return false;
+
+    const maxDays = OLD_TICKET_DAYS[entry.status];
+    if (!maxDays) return false;
+
+    const referenceDate =
+      entry.settledAt
+      || entry.createdAt;
+
+    if (!referenceDate) return false;
+
+    const timestamp =
+      new Date(referenceDate).getTime();
+
+    if (!Number.isFinite(timestamp)) return false;
+
+    return Date.now() - timestamp >= maxDays * DAY_MS;
+  }
+
+  function filteredEntries() {
+    const entries = displayEntries();
+
+    if (state.filter === "old") {
+      return entries.filter(isOldEntry);
+    }
+
+    const recentEntries =
+      entries.filter(entry => !isOldEntry(entry));
+
+    if (state.filter === "all") {
+      return recentEntries;
+    }
+
+    return recentEntries.filter(
+      entry => entry.status === state.filter
+    );
   }
 
   function resultLabel(result) {
@@ -964,6 +1259,172 @@
         <div class="leg-odd">x${fmtOdd(leg.odd)}</div>
         <div class="leg-result ${escapeHtml(leg.result)}">${resultLabel(leg.result)}</div>
       </div>
+    `;
+  }
+
+  function renderCombination(ticket) {
+    const legs =
+      state.legsByTicket.get(ticket.id)
+      || [];
+
+    const expanded =
+      state.expandedCombinations.has(ticket.id);
+
+    const status = statusInfo(ticket);
+
+    const displayOdd =
+      ticket.status === "pending"
+        ? Number(ticket.final_total_odd || ticket.total_odd || 0)
+        : Number(
+            ticket.settled_total_odd
+            || ticket.final_total_odd
+            || ticket.total_odd
+            || 0
+          );
+
+    const amountLabel =
+      ticket.status === "pending"
+        ? `🪙 ${formatChips(ticket.potential_win)}`
+        : `🪙 ${formatChips(ticket.payout_amount)}`;
+
+    return `
+      <div class="combination-card${expanded ? " expanded" : ""}">
+        <div class="combination-summary">
+          <div class="combination-title">
+            <strong>Combinazione ${ticket.system_combination_no}</strong>
+            <small>${legs.length} ${legs.length === 1 ? "evento" : "eventi"} · 🪙 ${formatChips(ticket.stake)}</small>
+          </div>
+
+          <div class="combination-metric">
+            <span>Quota</span>
+            <strong>x${fmtOdd(displayOdd)}</strong>
+          </div>
+
+          <div class="combination-metric">
+            <span>${ticket.status === "pending" ? "Potenziale" : "Pagamento"}</span>
+            <strong>${amountLabel}</strong>
+          </div>
+
+          <div class="ticket-actions">
+            <span class="status-pill ${status.cls}">${escapeHtml(status.label)}</span>
+            <button
+              class="small-btn"
+              type="button"
+              data-toggle-combination="${ticket.id}"
+            >${expanded ? "Chiudi" : "Dettagli"}</button>
+          </div>
+        </div>
+
+        <div class="combination-details">
+          <div class="legs-list">
+            ${legs.length
+              ? legs.map(renderLeg).join("")
+              : `<div class="empty-state" style="padding:14px">Nessuna selezione trovata.</div>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSystem(system) {
+    const aggregate = systemAggregate(system);
+    const status = statusInfoForSystem(aggregate);
+
+    const expanded =
+      state.expanded.has(`system:${system.id}`);
+
+    const payoutLabel =
+      aggregate.status === "pending"
+        ? `🪙 ${formatChips(system.max_potential_win)}`
+        : `🪙 ${formatChips(aggregate.payoutAmount)}`;
+
+    const tickets =
+      [...aggregate.tickets]
+        .sort(
+          (a, b) =>
+            Number(a.system_combination_no || 0)
+            -
+            Number(b.system_combination_no || 0)
+        );
+
+    return `
+      <article
+        class="ticket-card system${expanded ? " expanded" : ""}"
+        data-system-card="${system.id}"
+      >
+        <div class="ticket-summary">
+          <div class="ticket-title">
+            <strong>
+              Sistema #${system.id}
+              <span class="system-badge">${system.combination_count} combinazioni</span>
+            </strong>
+            <small>
+              ${formatDateTime(system.created_at)} ·
+              ${system.event_count} eventi ·
+              ${system.selection_count} selezioni
+            </small>
+          </div>
+
+          <div class="ticket-metric">
+            <span>Puntata totale</span>
+            <strong>🪙 ${formatChips(system.total_stake)}</strong>
+          </div>
+
+          <div class="ticket-metric">
+            <span>Per combinazione</span>
+            <strong>🪙 ${formatChips(system.stake_per_combination)}</strong>
+          </div>
+
+          <div class="ticket-metric desktop-extra">
+            <span>Combinazioni</span>
+            <strong>${fmtNumber(system.combination_count)}</strong>
+          </div>
+
+          <div class="ticket-metric payout desktop-extra">
+            <span>${aggregate.status === "pending" ? "Potenziale" : "Pagamento"}</span>
+            <strong>${payoutLabel}</strong>
+          </div>
+
+          <div class="ticket-actions">
+            <span class="status-pill ${status.cls}">
+              ${escapeHtml(status.label)}
+            </span>
+
+            <button
+              class="small-btn"
+              type="button"
+              data-toggle-system="${system.id}"
+            >${expanded ? "Chiudi" : "Dettagli"}</button>
+          </div>
+        </div>
+
+        <div class="ticket-details">
+          <div class="settlement-note">
+            <span>Eventi: <strong>${system.event_count}</strong></span>
+            <span>Selezioni: <strong>${system.selection_count}</strong></span>
+            <span>Combinazioni: <strong>${system.combination_count}</strong></span>
+            <span>Puntata/combo: <strong>🪙 ${formatChips(system.stake_per_combination)}</strong></span>
+            <span>Puntata totale: <strong>🪙 ${formatChips(system.total_stake)}</strong></span>
+            <span>Vinte: <strong>${aggregate.wonCombinations}</strong></span>
+            <span>Perse: <strong>${aggregate.lostCombinations}</strong></span>
+            ${aggregate.voidCombinations
+              ? `<span>Void: <strong>${aggregate.voidCombinations}</strong></span>`
+              : ""}
+            ${aggregate.settledAt
+              ? `<span>Liquidato: <strong>${formatDateTime(aggregate.settledAt)}</strong></span>`
+              : ""}
+            ${aggregate.status !== "pending"
+              ? `<span class="system-payout-note">Pagamento complessivo: <strong>🪙 ${formatChips(aggregate.payoutAmount)}</strong></span>`
+              : ""}
+          </div>
+
+          <div class="system-combinations">
+            ${tickets.length
+              ? tickets.map(renderCombination).join("")
+              : `<div class="empty-state" style="padding:14px">Nessuna combinazione trovata.</div>`}
+          </div>
+        </div>
+      </article>
     `;
   }
 
@@ -1039,19 +1500,28 @@
   }
 
   function renderTickets() {
-    const pending = state.tickets.filter(ticket => ticket.status === "pending").length;
-    const won = state.tickets.filter(ticket => ticket.status === "won").length;
-    const lost = state.tickets.filter(ticket => ticket.status === "lost").length;
+    const entries = displayEntries();
+
+    const pending =
+      entries.filter(entry => entry.status === "pending").length;
+
+    const won =
+      entries.filter(entry => entry.status === "won").length;
+
+    const lost =
+      entries.filter(entry => entry.status === "lost").length;
 
     $("#pendingCount").textContent = fmtNumber(pending);
     $("#wonCount").textContent = fmtNumber(won);
     $("#lostCount").textContent = fmtNumber(lost);
-    $("#totalCount").textContent = fmtNumber(state.tickets.length);
+    $("#totalCount").textContent = fmtNumber(entries.length);
 
-    const tickets = filteredTickets();
-    $("#ticketCount").textContent = `${tickets.length} ${tickets.length === 1 ? "schedina" : "schedine"}`;
+    const filtered = filteredEntries();
 
-    if (!tickets.length) {
+    $("#ticketCount").textContent =
+      `${filtered.length} ${filtered.length === 1 ? "schedina" : "schedine"}`;
+
+    if (!filtered.length) {
       $("#ticketsHost").innerHTML = `
         <div class="empty-state">
           Nessuna schedina in questa sezione.
@@ -1060,7 +1530,12 @@
       return;
     }
 
-    $("#ticketsHost").innerHTML = tickets.map(renderTicket).join("");
+    $("#ticketsHost").innerHTML =
+      filtered.map(entry =>
+        entry.kind === "system"
+          ? renderSystem(entry.system)
+          : renderTicket(entry.ticket)
+      ).join("");
   }
 
   async function refreshAll() {
@@ -1089,6 +1564,32 @@
       return;
     }
 
+    const systemToggle = event.target.closest("[data-toggle-system]");
+    if (systemToggle) {
+      const id = Number(systemToggle.dataset.toggleSystem);
+      const key = `system:${id}`;
+
+      if (state.expanded.has(key)) state.expanded.delete(key);
+      else state.expanded.add(key);
+
+      renderTickets();
+      return;
+    }
+
+    const combinationToggle = event.target.closest("[data-toggle-combination]");
+    if (combinationToggle) {
+      const id = Number(combinationToggle.dataset.toggleCombination);
+
+      if (state.expandedCombinations.has(id)) {
+        state.expandedCombinations.delete(id);
+      } else {
+        state.expandedCombinations.add(id);
+      }
+
+      renderTickets();
+      return;
+    }
+
     const toggle = event.target.closest("[data-toggle-ticket]");
     if (toggle) {
       const id = Number(toggle.dataset.toggleTicket);
@@ -1102,10 +1603,6 @@
 
   $("#sportsbookBtn").addEventListener("click", () => {
     location.href = "./sportsbook.html";
-  });
-
-  $("#homeBtn").addEventListener("click", () => {
-    location.href = "../index.html";
   });
 
   $("#refreshBtn").addEventListener("click", refreshAll);

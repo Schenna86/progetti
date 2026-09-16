@@ -2043,7 +2043,272 @@ body.debug-grid .bet-hotspot.american-five-number{
   background:rgba(255,190,0,.9) !important;
 }
 
+
+/* =========================================================
+   MOBILE LANDSCAPE FINAL FIX
+   - header su una sola riga
+   - after-table-strip su una sola riga
+   - bottom-console su una sola riga
+   ========================================================= */
+@media (orientation: landscape) and (max-width: 1000px) {
+
+  #app{
+    padding:
+      max(2px, env(safe-area-inset-top))
+      max(3px, env(safe-area-inset-right))
+      max(3px, env(safe-area-inset-bottom))
+      max(3px, env(safe-area-inset-left));
+  }
+
+  .shell{
+    width:100%;
+    max-width:none;
+  }
+
+  /* HEADER: titolo | XP | saldo/home, tutto sulla stessa riga */
+  header{
+    display:grid !important;
+    grid-template-columns:auto minmax(120px,1fr) auto !important;
+    grid-template-rows:1fr !important;
+    align-items:center !important;
+    gap:5px !important;
+    margin-bottom:3px !important;
+  }
+
+  .brand{
+    min-width:0;
+  }
+
+  .brand h1{
+    margin:0;
+    font-size:14px !important;
+    line-height:1 !important;
+    white-space:nowrap;
+  }
+
+  .brand p{
+    display:none !important;
+  }
+
+  .top-progress{
+    grid-column:auto !important;
+    grid-row:auto !important;
+    min-width:0;
+  }
+
+  .xp-header{
+    margin-bottom:1px !important;
+    gap:4px;
+    font-size:8px !important;
+    line-height:1;
+  }
+
+  .xp-level strong{
+    font-size:9px !important;
+  }
+
+  .xp-bar{
+    height:7px !important;
+  }
+
+  .header-actions{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    justify-content:flex-end !important;
+    gap:3px !important;
+    min-width:0;
+  }
+
+  /* Su telefono teniamo saldo + Home; username non serve qui. */
+  .header-actions .pill:first-child{
+    display:none !important;
+  }
+
+  .pill,
+  .header-btn{
+    min-height:27px !important;
+    padding:2px 6px !important;
+    font-size:9px !important;
+    white-space:nowrap;
+  }
+
+  /* STRISCIA SOTTO TAVOLO: storico + riepilogo affiancati */
+  .after-table-strip{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(270px,44%) !important;
+    align-items:stretch !important;
+    gap:4px !important;
+    padding:3px 4px !important;
+  }
+
+  .history-wrap{
+    min-width:0;
+    overflow:hidden;
+  }
+
+  .history{
+    min-width:0;
+    width:auto !important;
+    margin:0 !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+  }
+
+  .history-number{
+    min-width:23px !important;
+    height:23px !important;
+    font-size:8px !important;
+  }
+
+  .bet-summary{
+    width:auto !important;
+    min-width:0;
+    margin:0 !important;
+    padding:0 !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:3px !important;
+  }
+
+  .summary-row{
+    min-width:0;
+    padding:3px 4px !important;
+  }
+
+  .summary-row span{
+    font-size:7px !important;
+    line-height:1.05;
+    white-space:nowrap;
+  }
+
+  .summary-row strong{
+    font-size:9px !important;
+    white-space:nowrap;
+  }
+
+  /* CONSOLE: fiche a sinistra, 4 pulsanti a destra, mai a capo */
+  .bottom-console{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto !important;
+    align-items:center !important;
+    gap:5px !important;
+    padding:3px 4px 4px !important;
+  }
+
+  .chip-selector{
+    min-width:0;
+    overflow:hidden;
+  }
+
+  .chip-selector-label{
+    margin:0 0 1px 1px !important;
+    font-size:7px !important;
+  }
+
+  .chips{
+    width:100%;
+    min-width:0;
+    gap:3px !important;
+    padding:3px 2px !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+  }
+
+  .chip-btn{
+    flex:0 0 36px !important;
+    width:36px !important;
+    height:36px !important;
+  }
+
+  .controls{
+    min-width:0;
+    padding:0 !important;
+  }
+
+  .action-buttons{
+    display:flex !important;
+    width:auto !important;
+    flex-wrap:nowrap !important;
+    gap:3px !important;
+  }
+
+  .control-btn{
+    min-width:0 !important;
+    min-height:32px !important;
+    padding:3px 6px !important;
+    font-size:8px !important;
+    line-height:1 !important;
+    white-space:nowrap;
+  }
+
+  .spin-btn{
+    min-width:62px !important;
+    min-height:32px !important;
+    font-size:10px !important;
+  }
+}
+
+/* Telefoni landscape particolarmente stretti */
+@media (orientation: landscape) and (max-width: 740px) {
+
+  header{
+    grid-template-columns:auto minmax(90px,1fr) auto !important;
+    gap:3px !important;
+  }
+
+  .brand h1{
+    font-size:12px !important;
+  }
+
+  .xp-header{
+    font-size:7px !important;
+  }
+
+  .pill,
+  .header-btn{
+    padding:2px 4px !important;
+    font-size:8px !important;
+  }
+
+  .after-table-strip{
+    grid-template-columns:minmax(0,1fr) minmax(235px,46%) !important;
+  }
+
+  .history-label{
+    display:none;
+  }
+
+  .summary-row{
+    padding:2px 3px !important;
+  }
+
+  .summary-row span{
+    font-size:6.5px !important;
+  }
+
+  .summary-row strong{
+    font-size:8px !important;
+  }
+
+  .chip-btn{
+    flex-basis:32px !important;
+    width:32px !important;
+    height:32px !important;
+  }
+
+  .control-btn{
+    padding:3px 4px !important;
+    font-size:7px !important;
+  }
+
+  .spin-btn{
+    min-width:54px !important;
+    font-size:9px !important;
+  }
+}
+
 </style>
+  <link rel="stylesheet" href="../shared/game-header.css">
 </head>
 <body>
 <div id="portraitBlocker">
@@ -2055,21 +2320,8 @@ body.debug-grid .bet-hotspot.american-five-number{
 </div>
 
 <div id="app"><div class="shell">
-<header>
-  <div class="brand">
-    <h1>Roulette Americana</h1>
-    <p id="tableLimits">Caricamento limiti…</p>
-  </div>
-  <div class="top-progress">
-    <div class="xp-header"><span class="xp-level">LIVELLO <strong id="xpLevel">1</strong></span><span id="xpText">0 XP</span></div>
-    <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
-  </div>
-  <div class="header-actions">
-    <div class="pill">👤 <strong id="usernameValue">—</strong></div>
-    <div class="pill">🪙 <strong id="balanceValue">0</strong></div>
-    <button id="homeBtn" class="header-btn">← Home</button>
-  </div>
-</header>
+<header id="gameHeader" data-title="ROULETTE" data-subtitle="AMERICANA" data-home-url="../index.html"></header>
+<div id="tableLimits" class="hidden" aria-hidden="true"></div>
 
 <div class="layout">
 <section class="panel table-panel">
@@ -2156,10 +2408,20 @@ body.debug-grid .bet-hotspot.american-five-number{
 
 <div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento roulette…</strong><div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div></div></div>
 <script src="../shared/casino-format.js"></script>
+<script src="../shared/level-up-modal.js"></script>
+<script src="../shared/game-header.js"></script>
+<script>
+CasinoGameHeader.init({
+  title: "ROULETTE",
+  subtitle: "AMERICANA",
+  homeUrl: "../index.html"
+});
+</script>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const SUPABASE_URL="https://jhpppwqdaceratwjnbzi.supabase.co",SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocHBwd3FkYWNlcmF0d2puYnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzcwOTIsImV4cCI6MjA4MDk1MzA5Mn0.0SL_piY3zI04UTogAPJxl5nlzmm3AFD5pTGPFKaqEyE";
 const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),GAME_ID="roulette-american",nf=new Intl.NumberFormat("it-IT");
+CasinoLevelUp.init(supabase,{balanceSelector:"#balanceValue",levelSelector:"#xpLevel"});
 const RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]),WHEEL=[0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24,36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2];
 let session=null,game=null,options=[],byCode=new Map,byId=new Map,bets=new Map,actions=[],previous=[],selectedChip=1,allowedChips=[],levels=[],spinning=false,wheelTurns=0,recent=[],lastWinningNumber=null,lastWinningOptionIds=new Set();
 const LEVELS_CACHE_KEY="casino-levels:v1";
@@ -2265,7 +2527,7 @@ async function loadLevels(){
     console.warn("Cache livelli:",e);
   }
 }function updateXp(xp,lvl){xp=Number(xp||0);lvl=Number(lvl||1);$("#xpLevel").textContent=lvl;if(lvl>=500){$("#xpFill").style.width="100%";$("#xpText").textContent=`${fmtCompact(xp)} XP · MAX`;return}const c=levels.find(x=>Number(x.level)===lvl),n=levels.find(x=>Number(x.level)===lvl+1),cx=c?Number(c.xp_required):lvl===1?0:null,nx=n?Number(n.xp_required):null;if(cx==null||nx==null){$("#xpText").textContent=`${fmtCompact(xp)} XP`;return}const into=Math.max(0,xp-cx),need=Math.max(1,nx-cx);$("#xpFill").style.width=`${Math.max(0,Math.min(100,into/need*100))}%`;$("#xpText").textContent=`${fmtCompact(into)} / ${fmtCompact(need)} XP`}
-async function loadProfile(){const uid=session.user.id,{data,error}=await supabase.from("profiles").select("username,chips").eq("user_id",uid).single();if(error)throw error;$("#usernameValue").textContent=data.username||"—";$("#balanceValue").textContent=fmtChips(data.chips)}async function loadProgress(){const uid=session.user.id,{data,error}=await supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle();if(error)throw error;updateXp(data?.xp||0,data?.level||1)}
+async function loadProfile(){const uid=session.user.id,{data,error}=await supabase.from("profiles").select("chips").eq("user_id",uid).single();if(error)throw error;$("#balanceValue").textContent=fmtChips(data.chips)}async function loadProgress(){const uid=session.user.id,{data,error}=await supabase.from("user_progression").select("xp,level").eq("user_id",uid).maybeSingle();if(error)throw error;updateXp(data?.xp||0,data?.level||1)}
 async function loadConfig(){const{data,error}=await supabase.from("roulette_games").select("*").eq("game_id",GAME_ID).single();if(error)throw error;game=data;const giro=data.max_total_bet==null?"nessun limite":fmtChips(data.max_total_bet);$("#tableLimits").textContent=`Max posizione ${fmtChips(data.max_bet_per_position)} · Max giro ${giro}`;const arr=(data.allowed_chips||[]).map(Number);allowedChips=arr;selectedChip=arr[0]||1;renderChips(arr)}async function loadOptions(){const{data,error}=await supabase.from("roulette_bet_options").select("id,code,bet_type,label,numbers,payout_profit").eq("game_id",GAME_ID).order("id");if(error)throw error;options=data||[];byCode=new Map(options.map(o=>[o.code,o]));byId=new Map(options.map(o=>[Number(o.id),o]));wireStatic();renderHotspots()}async function loadRecent(){const{data,error}=await supabase.from("roulette_spins").select("result_number").eq("game_id",GAME_ID).order("created_at",{ascending:false}).limit(15);if(!error){recent=(data||[]).map(x=>Number(x.result_number));renderHistory()}}
 function chipAssetName(value){
   const v=Number(value);
@@ -2693,8 +2955,8 @@ async function waitForTableImage(){
 
 async function init(){try{
   if(new URLSearchParams(location.search).get("debugGrid")==="1")document.body.classList.add("debug-grid");
-  const{data,error}=await supabase.auth.getSession();if(error)throw error;session=data.session;if(!session){location.href="../";return}buildWheel();buildNumbers();await waitForTableImage();await Promise.all([loadProfile(),loadLevels(),loadConfig(),loadOptions(),loadRecent()]);await loadProgress();requestAnimationFrame(()=>{renderHotspots();renderBets()});$("#loadingOverlay").classList.add("hidden")}catch(e){console.error(e);$("#loadingText").textContent="Errore";$("#loadingError").textContent=e?.message||String(e)}}
-$("#homeBtn").onclick=()=>location.href="../";$("#undoBtn").onclick=undo;$("#clearBtn").onclick=clearBets;$("#repeatBtn").onclick=repeat;$("#spinBtn").onclick=play;let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(renderHotspots,100)});document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="visible"&&session&&!spinning){try{await Promise.all([loadProfile(),loadProgress()])}catch(e){console.warn(e)}}});await init();
+  const{data,error}=await supabase.auth.getSession();if(error)throw error;session=data.session;if(!session){location.href="../";return}buildWheel();buildNumbers();await waitForTableImage();await Promise.all([loadProfile(),loadLevels(),loadConfig(),loadOptions(),loadRecent()]);await loadProgress();requestAnimationFrame(()=>{renderHotspots();renderBets()});$("#loadingOverlay").classList.add("hidden");try{const levelUp=await CasinoLevelUp.check();if(levelUp?.balance!=null)$("#balanceValue").textContent=fmtChips(levelUp.balance)}catch(levelError){console.warn("Level-up pendente roulette:",levelError)}}catch(e){console.error(e);$("#loadingText").textContent="Errore";$("#loadingError").textContent=e?.message||String(e)}}
+$("#undoBtn").onclick=undo;$("#clearBtn").onclick=clearBets;$("#repeatBtn").onclick=repeat;$("#spinBtn").onclick=play;let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(renderHotspots,100)});document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="visible"&&session&&!spinning){try{await Promise.all([loadProfile(),loadProgress()])}catch(e){console.warn(e)}}});await init();
 </script>
 </body>
 </html>

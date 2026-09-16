@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#071218" />
   <title>Mega Jackpot</title>
+<link rel="stylesheet" href="./shared/game-header.css" />
 
   <style>
     :root {
@@ -834,17 +835,12 @@
 
 <body>
   <div class="shell">
-    <header>
-      <div class="brand">
-        <h1>💰 Mega Jackpot</h1>
-        <p>6 numeri per combinazione · estrazione di 10 numeri su 90</p>
-      </div>
-
-      <div class="header-actions">
-        <div class="pill">🪙 <strong id="balance">0</strong></div>
-        <button class="btn" id="homeBtn" type="button">← Home</button>
-      </div>
-    </header>
+    <header
+      id="gameHeader"
+      data-title="MEGA JACKPOT"
+      data-subtitle="6 SU 90"
+      data-home-url="./index.html"
+    ></header>
 
     <section class="prizes">
       <div class="prize">
@@ -1018,6 +1014,7 @@
   </div>
 
   <script src="./shared/casino-format.js"></script>
+<script src="./shared/game-header.js"></script>
 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -1037,9 +1034,15 @@
       }
     );
 
+    CasinoGameHeader.init({
+      title: "MEGA JACKPOT",
+      subtitle: "6 SU 90",
+      homeUrl: "./index.html"
+    });
+
     const $ = selector => document.querySelector(selector);
 
-    const balanceEl = $("#balance");
+    const balanceEl = $("#balanceValue");
     const pool4El = $("#pool4");
     const pool5El = $("#pool5");
     const pool6El = $("#pool6");
@@ -1108,6 +1111,82 @@
       return window.CasinoFormat?.formatChips
         ? window.CasinoFormat.formatChips(value)
         : fmt(value);
+    }
+
+    const LEVELS_CACHE_KEY = "casino-levels:v1";
+    const LEVELS_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+    let headerLevels = [];
+
+    function formatCompact(value) {
+      return window.CasinoFormat?.formatCompact
+        ? window.CasinoFormat.formatCompact(value)
+        : new Intl.NumberFormat("it-IT", { notation: "compact", maximumFractionDigits: 1 }).format(Number(value || 0));
+    }
+
+    async function loadHeaderLevels() {
+      try {
+        const raw = localStorage.getItem(LEVELS_CACHE_KEY);
+        if (raw) {
+          const cached = JSON.parse(raw);
+          const age = Date.now() - Number(cached?.savedAt || 0);
+          if (Array.isArray(cached?.levels) && cached.levels.length && age >= 0 && age < LEVELS_CACHE_TTL_MS) {
+            headerLevels = cached.levels;
+            return;
+          }
+        }
+      } catch {}
+
+      const { data, error } = await supabase
+        .from("levels")
+        .select("level,xp_required")
+        .order("level");
+
+      if (error) throw error;
+      headerLevels = data || [];
+
+      try {
+        localStorage.setItem(LEVELS_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), levels: headerLevels }));
+      } catch {}
+    }
+
+    function updateHeaderXp(xp, level) {
+      xp = Number(xp || 0);
+      level = Number(level || 1);
+      $("#xpLevel").textContent = String(level);
+
+      if (level >= 500) {
+        $("#xpFill").style.width = "100%";
+        $("#xpText").textContent = `${formatCompact(xp)} XP · MAX`;
+        return;
+      }
+
+      const current = headerLevels.find(row => Number(row.level) === level);
+      const next = headerLevels.find(row => Number(row.level) === level + 1);
+      const currentXp = current ? Number(current.xp_required) : (level === 1 ? 0 : null);
+      const nextXp = next ? Number(next.xp_required) : null;
+
+      if (currentXp == null || nextXp == null) {
+        $("#xpText").textContent = `${formatCompact(xp)} XP`;
+        return;
+      }
+
+      const into = Math.max(0, xp - currentXp);
+      const need = Math.max(1, nextXp - currentXp);
+      const percent = Math.max(0, Math.min(100, into / need * 100));
+
+      $("#xpFill").style.width = `${percent}%`;
+      $("#xpText").textContent = `${formatCompact(into)} / ${formatCompact(need)} XP`;
+      $("#xpText").title = `${fmt(into)} / ${fmt(need)} XP`;
+    }
+
+    async function loadHeaderProgression() {
+      await loadHeaderLevels();
+      const { data, error } = await supabase
+        .from("user_progression")
+        .select("xp,level")
+        .maybeSingle();
+      if (error) throw error;
+      updateHeaderXp(data?.xp || 0, data?.level || 1);
     }
 
     function showMessage(text, type = "ok") {
@@ -1440,7 +1519,10 @@
         updateSummary();
 
         ticketsLoaded = false;
-        await loadState();
+        await Promise.all([
+          loadState(),
+          loadHeaderProgression()
+        ]);
 
         /*
          * Se l'utente apre "Le mie tessere" dopo l'acquisto,
@@ -1830,10 +1912,6 @@
 
     buyBtn.addEventListener("click", buy);
 
-    $("#homeBtn").addEventListener("click", () => {
-      window.location.href = "./index.html";
-    });
-
     const sessionResult = await supabase.auth.getSession();
     const session = sessionResult.data.session;
 
@@ -1845,7 +1923,10 @@
       setActiveTab("play");
 
       try {
-        await loadState();
+        await Promise.all([
+          loadState(),
+          loadHeaderProgression()
+        ]);
       } catch (error) {
         console.error(error);
         showMessage(
