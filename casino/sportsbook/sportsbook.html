@@ -1728,7 +1728,8 @@
 
     let minFinalOdd = 0;
     let maxFinalOdd = 0;
-    let totalPotentialWin = 0;
+    let minPotentialWin = 0;
+    let maxPotentialWin = 0;
     let hasOddOverLimit = false;
 
     const combinations = combinationCount <= 500
@@ -1748,7 +1749,16 @@
       if (finalOdd > MAX_TOTAL_ODD) hasOddOverLimit = true;
 
       if (stakePerCombination > 0) {
-        totalPotentialWin += Math.floor(stakePerCombination * finalOdd);
+        const potentialWin =
+          Math.floor(stakePerCombination * finalOdd);
+
+        if (index === 0 || potentialWin < minPotentialWin) {
+          minPotentialWin = potentialWin;
+        }
+
+        if (potentialWin > maxPotentialWin) {
+          maxPotentialWin = potentialWin;
+        }
       }
     });
 
@@ -1766,7 +1776,8 @@
       hasOddOverLimit,
       stakePerCombination,
       totalStake: Math.floor(stakePerCombination * combinationCount),
-      totalPotentialWin
+      minPotentialWin,
+      maxPotentialWin
     };
   }
 
@@ -2228,8 +2239,10 @@
           </div>
 
           <div class="potential-box">
-            <span>Potenziale complessivo</span>
-            <strong id="potentialWinValue">🪙 ${formatChips(system.totalPotentialWin)}</strong>
+            <span>Potenziale min / max</span>
+            <strong id="potentialWinValue">
+              🪙 ${formatChips(system.minPotentialWin)} – 🪙 ${formatChips(system.maxPotentialWin)}
+            </strong>
           </div>
 
           <button
@@ -2362,7 +2375,7 @@
       const system = calculateSystem(state.selections, stake);
 
       output.textContent =
-        `🪙 ${formatChips(system.totalPotentialWin)}`;
+        `🪙 ${formatChips(system.minPotentialWin)} – 🪙 ${formatChips(system.maxPotentialWin)}`;
 
       const totalStake = $("#systemTotalStake");
       if (totalStake) {
@@ -2478,7 +2491,7 @@
         balanceSyncChannel?.postMessage({ type: "balance-changed" });
 
         toast(
-          `Sistema #${data.system_id} piazzato · ${data.combination_count} combinazioni · puntata totale ${formatChips(data.total_stake)} · potenziale ${formatChips(data.max_potential_win)} fiche.`
+          `Sistema #${data.system_id} piazzato · ${data.combination_count} combinazioni · puntata totale ${formatChips(data.total_stake)} · potenziale ${formatChips(system.minPotentialWin)}–${formatChips(system.maxPotentialWin)} fiche.`
         );
 
         state.selections = [];

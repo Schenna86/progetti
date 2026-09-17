@@ -1066,6 +1066,21 @@
         0
       );
 
+    const potentialWins =
+      tickets
+        .map(ticket => Number(ticket.potential_win || 0))
+        .filter(value => Number.isFinite(value) && value >= 0);
+
+    const minPotentialWin =
+      potentialWins.length
+        ? Math.min(...potentialWins)
+        : 0;
+
+    const maxPotentialWin =
+      potentialWins.length
+        ? Math.max(...potentialWins)
+        : 0;
+
     let status = "pending";
 
     if (!pending) {
@@ -1097,6 +1112,8 @@
       tickets,
       status,
       payoutAmount,
+      minPotentialWin,
+      maxPotentialWin,
       settledAt,
       pendingCombinations:
         tickets.filter(ticket => ticket.status === "pending").length,
@@ -1335,7 +1352,7 @@
 
     const payoutLabel =
       aggregate.status === "pending"
-        ? `🪙 ${formatChips(system.max_potential_win)}`
+        ? `🪙 ${formatChips(aggregate.minPotentialWin)} – 🪙 ${formatChips(aggregate.maxPotentialWin)}`
         : `🪙 ${formatChips(aggregate.payoutAmount)}`;
 
     const tickets =
@@ -1381,7 +1398,7 @@
           </div>
 
           <div class="ticket-metric payout desktop-extra">
-            <span>${aggregate.status === "pending" ? "Potenziale" : "Pagamento"}</span>
+            <span>${aggregate.status === "pending" ? "Potenziale min / max" : "Pagamento"}</span>
             <strong>${payoutLabel}</strong>
           </div>
 
@@ -1405,6 +1422,10 @@
             <span>Combinazioni: <strong>${system.combination_count}</strong></span>
             <span>Puntata/combo: <strong>🪙 ${formatChips(system.stake_per_combination)}</strong></span>
             <span>Puntata totale: <strong>🪙 ${formatChips(system.total_stake)}</strong></span>
+            ${aggregate.status === "pending"
+              ? `<span>Potenziale min: <strong>🪙 ${formatChips(aggregate.minPotentialWin)}</strong></span>
+                 <span>Potenziale max: <strong>🪙 ${formatChips(aggregate.maxPotentialWin)}</strong></span>`
+              : ""}
             <span>Vinte: <strong>${aggregate.wonCombinations}</strong></span>
             <span>Perse: <strong>${aggregate.lostCombinations}</strong></span>
             ${aggregate.voidCombinations
