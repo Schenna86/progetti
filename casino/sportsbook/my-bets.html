@@ -948,8 +948,15 @@
     const ticketIds = state.tickets.map(ticket => ticket.id);
     const legs = [];
 
-    for (let i = 0; i < ticketIds.length; i += 200) {
-      const chunk = ticketIds.slice(i, i + 200);
+    // Un ticket può contenere fino a 30 legs.
+    // Con chunk da 200 ticket la SELECT può superare facilmente
+    // il limite righe di Supabase/PostgREST e troncare le legs
+    // degli ultimi ticket del blocco.
+    // 20 ticket => massimo teorico 600 legs per richiesta.
+    const LEG_TICKET_CHUNK_SIZE = 20;
+
+    for (let i = 0; i < ticketIds.length; i += LEG_TICKET_CHUNK_SIZE) {
+      const chunk = ticketIds.slice(i, i + LEG_TICKET_CHUNK_SIZE);
 
       const { data, error } = await supabase
         .from("betting_legs")
