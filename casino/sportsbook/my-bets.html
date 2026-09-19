@@ -396,10 +396,129 @@
       vertical-align: middle;
     }
 
+    .system-full {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid rgba(98,168,255,.22);
+      border-radius: 11px;
+      background: rgba(98,168,255,.045);
+    }
+
+    .system-full-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .system-full-head strong {
+      color: #c9e0ff;
+      font-size: 12px;
+    }
+
+    .system-full-head small {
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .system-full-events {
+      display: grid;
+      gap: 7px;
+    }
+
+    .system-full-event {
+      display: grid;
+      grid-template-columns: minmax(190px, 1fr) minmax(240px, 1.5fr);
+      gap: 10px;
+      align-items: center;
+      padding: 8px 9px;
+      border: 1px solid rgba(255,255,255,.065);
+      border-radius: 9px;
+      background: rgba(0,0,0,.12);
+    }
+
+    .system-full-match {
+      min-width: 0;
+    }
+
+    .system-full-match strong {
+      display: block;
+      overflow: hidden;
+      color: #eef4f6;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .system-full-match small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .system-full-choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .system-choice {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 27px;
+      border: 1px solid rgba(231,182,84,.24);
+      border-radius: 999px;
+      padding: 4px 7px;
+      background: rgba(0,0,0,.16);
+      color: #e8eef1;
+      font-size: 9px;
+    }
+
+    .system-choice strong {
+      color: var(--gold-light);
+      font-size: 10px;
+    }
+
+    .system-choice .choice-market {
+      color: var(--muted);
+    }
+
+    .system-choice .choice-odd {
+      color: #cbd7dc;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .system-choice.won {
+      border-color: rgba(119,225,138,.38);
+      background: rgba(119,225,138,.07);
+    }
+
+    .system-choice.lost {
+      border-color: rgba(255,119,119,.34);
+      background: rgba(255,119,119,.055);
+    }
+
+    .system-choice.void {
+      border-color: rgba(231,182,84,.42);
+      background: rgba(231,182,84,.06);
+    }
+
+    .system-combinations-title {
+      margin: 11px 0 6px;
+      color: #d9e4e8;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
     .system-combinations {
       display: grid;
       gap: 7px;
-      margin-top: 8px;
+      margin-top: 0;
     }
 
     .combination-card {
@@ -550,6 +669,10 @@
 
       .combination-metric {
         display: none;
+      }
+
+      .system-full-event {
+        grid-template-columns: 1fr;
       }
 
       .leg-row {
@@ -1286,6 +1409,128 @@
     `;
   }
 
+  function systemFullEvents(aggregate) {
+    const byEvent = new Map();
+
+    for (const ticket of aggregate.tickets) {
+      const legs = state.legsByTicket.get(ticket.id) || [];
+
+      for (const leg of legs) {
+        const eventId = Number(leg.event_id);
+
+        if (!byEvent.has(eventId)) {
+          byEvent.set(eventId, {
+            eventId,
+            selections: new Map()
+          });
+        }
+
+        const selectionKey = [
+          leg.market_name || "",
+          leg.selection_name || "",
+          Number(leg.odd || 0)
+        ].join("|");
+
+        if (!byEvent.get(eventId).selections.has(selectionKey)) {
+          byEvent.get(eventId).selections.set(selectionKey, {
+            marketName: leg.market_name,
+            selectionName: leg.selection_name,
+            odd: Number(leg.odd || 0),
+            result: leg.result || "pending"
+          });
+        }
+      }
+    }
+
+    return [...byEvent.values()]
+      .map(group => {
+        const event = state.eventsById.get(group.eventId);
+
+        return {
+          ...group,
+          event,
+          selections: [...group.selections.values()]
+        };
+      })
+      .sort((a, b) => {
+        const aTime = a.event?.match_date
+          ? new Date(a.event.match_date).getTime()
+          : 0;
+
+        const bTime = b.event?.match_date
+          ? new Date(b.event.match_date).getTime()
+          : 0;
+
+        if (aTime !== bTime) return aTime - bTime;
+        return a.eventId - b.eventId;
+      });
+  }
+
+  function renderSystemFull(aggregate) {
+    const groups = systemFullEvents(aggregate);
+
+    if (!groups.length) {
+      return `
+        <div class="system-full">
+          <div class="system-full-head">
+            <strong>Sistema completo</strong>
+          </div>
+          <div class="empty-state" style="padding:10px">
+            Nessuna selezione trovata.
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="system-full">
+        <div class="system-full-head">
+          <strong>🎯 Sistema completo</strong>
+          <small>
+            ${groups.length} ${groups.length === 1 ? "evento" : "eventi"} ·
+            alternative raggruppate per partita
+          </small>
+        </div>
+
+        <div class="system-full-events">
+          ${groups.map(group => {
+            const event = group.event;
+
+            const match = event
+              ? `${event.home_team} - ${event.away_team}`
+              : `Evento #${group.eventId}`;
+
+            const eventMeta = event
+              ? `${formatKickoff(event.match_date)} · ${escapeHtml(eventScore(event))}`
+              : "";
+
+            return `
+              <div class="system-full-event">
+                <div class="system-full-match">
+                  <strong>${escapeHtml(match)}</strong>
+                  <small>${eventMeta}</small>
+                </div>
+
+                <div class="system-full-choices">
+                  ${group.selections.map(selection => `
+                    <span
+                      class="system-choice ${escapeHtml(selection.result)}"
+                      title="${escapeHtml(selection.marketName || "")}"
+                    >
+                      <strong>${escapeHtml(selection.selectionName || "—")}</strong>
+                      <span class="choice-market">${escapeHtml(selection.marketName || "")}</span>
+                      <span class="choice-odd">x${fmtOdd(selection.odd)}</span>
+                    </span>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  }
+
   function renderCombination(ticket) {
     const legs =
       state.legsByTicket.get(ticket.id)
@@ -1444,6 +1689,12 @@
             ${aggregate.status !== "pending"
               ? `<span class="system-payout-note">Pagamento complessivo: <strong>🪙 ${formatChips(aggregate.payoutAmount)}</strong></span>`
               : ""}
+          </div>
+
+          ${renderSystemFull(aggregate)}
+
+          <div class="system-combinations-title">
+            Combinazioni generate
           </div>
 
           <div class="system-combinations">
