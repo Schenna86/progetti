@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Roulette Casuale</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        background: #111827;
+        color: white;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 700px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 0;
+    }
+
+    textarea {
+        width: 100%;
+        height: 180px;
+        resize: vertical;
+
+        padding: 15px;
+
+        font-size: 18px;
+
+        border-radius: 10px;
+        border: 1px solid #374151;
+
+        background: #1f2937;
+        color: white;
+
+        outline: none;
+    }
+
+    textarea:focus {
+        border-color: #3b82f6;
+    }
+
+    button {
+        border: none;
+        border-radius: 10px;
+
+        padding: 14px 25px;
+        margin: 10px 5px;
+
+        font-size: 18px;
+        font-weight: bold;
+
+        cursor: pointer;
+    }
+
+    #createButton {
+        background: #3b82f6;
+        color: white;
+    }
+
+    #spinButton {
+        background: #22c55e;
+        color: white;
+        display: none;
+    }
+
+    #spinButton:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .wheel-wrapper {
+        position: relative;
+
+        width: min(90vw, 500px);
+        height: min(90vw, 500px);
+
+        margin: 30px auto;
+
+        display: none;
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+
+        transition: transform 5s cubic-bezier(.12,.65,.1,1);
+    }
+
+    .pointer {
+        position: absolute;
+
+        top: -8px;
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        width: 0;
+        height: 0;
+
+        border-left: 18px solid transparent;
+        border-right: 18px solid transparent;
+        border-top: 40px solid #ef4444;
+
+        z-index: 10;
+    }
+
+    #result {
+        min-height: 50px;
+
+        margin-top: 20px;
+
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .winner {
+        color: #facc15;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎡 Roulette Casuale</h1>
+
+    <div id="setup">
+
+        <p>Inserisci un'opzione per ogni riga:</p>
+
+        <textarea id="options" placeholder="Pizza
+Sushi
+Hamburger
+Messicano
+Cinese"></textarea>
+
+        <br>
+
+        <button id="createButton">
+            OK
+        </button>
+
+    </div>
+
+
+    <div class="wheel-wrapper" id="wheelWrapper">
+
+        <div class="pointer"></div>
+
+        <canvas
+            id="wheel"
+            width="1000"
+            height="1000">
+        </canvas>
+
+    </div>
+
+
+    <button id="spinButton">
+        🎲 GIRA
+    </button>
+
+
+    <div id="result"></div>
+
+</div>
+
+
+<script>
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+const createButton = document.getElementById("createButton");
+const spinButton = document.getElementById("spinButton");
+
+const wheelWrapper = document.getElementById("wheelWrapper");
+
+const result = document.getElementById("result");
+
+let options = [];
+
+let rotation = 0;
+let spinning = false;
+
+
+/* =========================
+   CREA LA ROULETTE
+========================= */
+
+createButton.addEventListener("click", () => {
+
+    const text =
+        document
+        .getElementById("options")
+        .value;
+
+    options =
+        text
+        .split("\n")
+        .map(x => x.trim())
+        .filter(x => x !== "");
+
+
+    if(options.length < 2) {
+
+        alert("Inserisci almeno 2 opzioni.");
+
+        return;
+    }
+
+
+    rotation = 0;
+
+    canvas.style.transition = "none";
+    canvas.style.transform = "rotate(0deg)";
+
+    drawWheel();
+
+    wheelWrapper.style.display = "block";
+    spinButton.style.display = "inline-block";
+
+    result.innerHTML = "";
+
+});
+
+
+/* =========================
+   DISEGNA RUOTA
+========================= */
+
+function drawWheel() {
+
+    const size = canvas.width;
+    const center = size / 2;
+    const radius = center - 10;
+
+    ctx.clearRect(0,0,size,size);
+
+
+    const slice =
+        (Math.PI * 2) /
+        options.length;
+
+
+    options.forEach((option,index) => {
+
+        const start =
+            -Math.PI / 2 +
+            index * slice;
+
+        const end =
+            start + slice;
+
+
+        /* colore */
+
+        const hue =
+            (index * 360) /
+            options.length;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(center,center);
+
+        ctx.arc(
+            center,
+            center,
+            radius,
+            start,
+            end
+        );
+
+        ctx.closePath();
+
+        ctx.fillStyle =
+            `hsl(${hue}, 70%, 45%)`;
+
+        ctx.fill();
+
+
+        /* bordo */
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+
+        ctx.stroke();
+
+
+        /* testo */
+
+        ctx.save();
+
+        ctx.translate(center,center);
+
+        ctx.rotate(
+            start +
+            slice / 2
+        );
+
+
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+
+        ctx.fillStyle = "white";
+
+        ctx.font =
+            options.length > 12
+            ? "bold 28px Arial"
+            : "bold 38px Arial";
+
+
+        ctx.fillText(
+            shorten(option),
+            radius - 45,
+            0
+        );
+
+
+        ctx.restore();
+
+    });
+
+
+    /* CENTRO */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        center,
+        center,
+        80,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle = "#111827";
+
+    ctx.fill();
+
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 8;
+
+    ctx.stroke();
+
+}
+
+
+/* =========================
+   GIRA
+========================= */
+
+spinButton.addEventListener("click", () => {
+
+    if(spinning)
+        return;
+
+
+    spinning = true;
+
+    spinButton.disabled = true;
+
+    result.innerHTML = "";
+
+
+    /* scelta casuale */
+
+    const selected =
+        randomInteger(options.length);
+
+
+    const segmentDegrees =
+        360 /
+        options.length;
+
+
+    /*
+        Posizione finale della ruota.
+
+        Il centro del segmento scelto
+        finirà esattamente sotto
+        la freccia.
+    */
+
+    let target =
+        -(selected + 0.5) *
+        segmentDegrees;
+
+
+    target =
+        ((target % 360) + 360)
+        % 360;
+
+
+    const current =
+        ((rotation % 360) + 360)
+        % 360;
+
+
+    let difference =
+        target -
+        current;
+
+
+    if(difference < 0)
+        difference += 360;
+
+
+    /*
+        numero di giri completi
+        casuali
+    */
+
+    const extraSpins =
+        6 +
+        randomInteger(5);
+
+
+    rotation +=
+        extraSpins * 360 +
+        difference;
+
+
+    canvas.style.transition =
+        "transform 5s cubic-bezier(.12,.65,.1,1)";
+
+
+    requestAnimationFrame(() => {
+
+        canvas.style.transform =
+            `rotate(${rotation}deg)`;
+
+    });
+
+
+    setTimeout(() => {
+
+        result.innerHTML =
+            `
+            🎉 Scelto:
+            <span class="winner">
+                ${escapeHTML(options[selected])}
+            </span>
+            `;
+
+        spinButton.disabled = false;
+
+        spinning = false;
+
+    },5000);
+
+});
+
+
+/* =========================
+   RANDOM
+========================= */
+
+function randomInteger(max) {
+
+    /*
+        crypto invece di Math.random
+        per una scelta più robusta
+    */
+
+    const array =
+        new Uint32Array(1);
+
+    crypto.getRandomValues(array);
+
+    return array[0] % max;
+
+}
+
+
+/* =========================
+   TESTI LUNGHI
+========================= */
+
+function shorten(text) {
+
+    if(text.length <= 18)
+        return text;
+
+    return text.substring(0,16) + "...";
+
+}
+
+
+/* =========================
+   SICUREZZA HTML
+========================= */
+
+function escapeHTML(text) {
+
+    return text
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+</script>
+
+</body>
+</html>
