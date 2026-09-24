@@ -1189,6 +1189,7 @@
 <button class="category-nav-btn" type="button" data-category-target="category-slot">🎰 Slot</button>
 <button class="category-nav-btn" type="button" data-category-target="category-roulette">🎡 Roulette</button>
 <button class="category-nav-btn" type="button" data-category-target="category-tombola">🎱 Tombola</button>
+<button class="category-nav-btn" type="button" data-category-target="category-bingo">🔵 Bingo</button>
 <button class="category-nav-btn" type="button" data-category-target="category-blackjack">🂡 Blackjack</button>
 <button class="category-nav-btn" type="button" data-category-target="category-sportsbook">⚽ Sportsbook</button>
 <button class="category-nav-btn" type="button" data-category-target="category-cards">🃏 Carte</button>
@@ -2309,6 +2310,13 @@ function formatXp(value) {
     description: "Tombola 1–90 contro il banco e multiplayer"
   },
       {
+        type: "bingo",
+        id: "category-bingo",
+        icon: "🔵",
+        title: "Bingo",
+        description: "American Bingo 1–75: Classic, Lines, Extreme e PvP"
+      },
+      {
         type: "blackjack",
         id: "category-blackjack",
         icon: "🂡",
@@ -2649,6 +2657,35 @@ if (game.game_type === "roulette") {
 		tags.push("Fino a 50 cartelle");
 		tags.push("RTP 97,42%");
 		}
+
+      if (game.game_type === "bingo") {
+        tags.push("1–75");
+        tags.push("Fino a 50 cartelle");
+
+        if (game.id === "bingo_classic") {
+          tags.push("45 palline");
+          tags.push("Prima linea");
+          tags.push("RTP 97,50%");
+        }
+
+        if (game.id === "bingo_lines") {
+          tags.push("45 palline");
+          tags.push("2–12 linee");
+          tags.push("RTP 97,50%");
+        }
+
+        if (game.id === "bingo_lines_extreme") {
+          tags.push("50 palline");
+          tags.push("4–12 linee");
+          tags.push("RTP 97,48%");
+        }
+
+        if (game.id === "bingo_pvp") {
+          tags.push("Online PvP");
+          tags.push("LINE · 3 LINES · BLACKOUT");
+          tags.push("RTP 97,50%");
+        }
+      }
 
       return tags
         .map(
