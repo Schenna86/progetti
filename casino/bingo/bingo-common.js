@@ -62,6 +62,7 @@ function lineProgress(card){
   const flat = flatGrid(card);
   let completed = 0;
   let minMissing = 5;
+  let incompleteLines = 0;
   const completedCells = new Set();
 
   for(const line of LINE_INDEXES){
@@ -74,13 +75,14 @@ function lineProgress(card){
       completed++;
       line.forEach(idx => completedCells.add(idx));
     }else{
+      incompleteLines++;
       minMissing = Math.min(minMissing, missing);
     }
   }
 
   return {
     completed,
-    minMissing: completed > 0 ? 0 : minMissing,
+    minMissing: incompleteLines ? minMissing : 0,
     completedCells
   };
 }
@@ -98,6 +100,9 @@ export async function initBingoBotPage(options){
   const subtitle = options.subtitle || "CLASSIC";
   const storageKey = options.storageKey || `casino-${variant}-active-v1`;
   const rtpLabel = options.rtpLabel || "RTP 97,50%";
+  const scoringMode = options.scoringMode || "classic";
+  const minWinningLines = Number(options.minWinningLines || (scoringMode === "lines" ? 2 : 1));
+  const paytableUnit = options.paytableUnit || (scoringMode === "lines" ? "lines" : "draw");
 
   const supabase = createClient(
     SUPABASE_URL,
@@ -215,21 +220,33 @@ export async function initBingoBotPage(options){
     }
   }
 
+  function paytableMultiplier(value){
+    value = Number(value);
+    const row = paytable.find(p => value >= Number(p.from) && value <= Number(p.to));
+    return row ? Number(row.multiplier || 0) : 0;
+  }
+
   function renderPaytable(){
     $("#rtpLabel").textContent = rtpLabel;
     $("#paytable").innerHTML = paytable.map(p => {
       const from = Number(p.from);
       const to = Number(p.to);
-      const label = from === to ? `${from}ª` : `${from}–${to}ª`;
+      let label;
+      if(paytableUnit === "lines"){
+        if(from === to) label = `${from} ${from === 1 ? "linea" : "linee"}`;
+        else label = `${from}–${to} linee`;
+      }else{
+        label = from === to ? `${from}ª` : `${from}–${to}ª`;
+      }
       return `<div class="payrow" data-from="${from}" data-to="${to}"><span>${label}</span><strong>${mult(p.multiplier)}</strong></div>`;
     }).join("");
   }
 
-  function highlightPaytable(drawNo){
+  function highlightPaytable(value){
     document.querySelectorAll(".payrow").forEach(el => {
       el.classList.toggle(
         "active",
-        drawNo >= Number(el.dataset.from) && drawNo <= Number(el.dataset.to)
+        value >= Number(el.dataset.from) && value <= Number(el.dataset.to)
       );
     });
   }
@@ -282,6 +299,7 @@ export async function initBingoBotPage(options){
       $("#linesInfo").textContent = "0/12";
       $("#nextLineInfo").textContent = "—";
       $("#cardPrizeInfo").textContent = "—";
+      highlightPaytable(0);
       return;
     }
 
@@ -301,25 +319,47 @@ export async function initBingoBotPage(options){
     });
 
     $("#coveredCount").textContent = `${card.marked.size}/24`;
-    $("#progressFill").style.width = `${Math.min(100,(card.marked.size/24)*100)}%`;
+    $("#progressFill").style.width = `${Math.min(100,(state.drawIndex/Math.max(1,state.draws.length || Number(config?.draw_limit || 45)))*100)}%`;
     $("#linesInfo").textContent = `${progress.completed}/12`;
 
-    if(progress.completed > 0){
-      const firstAt = card.first_line_draw && state.drawIndex >= card.first_line_draw
-        ? ` alla ${card.first_line_draw}ª`
-        : "";
-      $("#nextLineInfo").textContent = `BINGO${firstAt}`;
-    }else{
-      $("#nextLineInfo").textContent = `Manca ${progress.minMissing} alla linea`;
-    }
+    if(scoringMode === "classic"){
+      if(progress.completed > 0){
+        const firstAt = card.first_line_draw && state.drawIndex >= card.first_line_draw
+          ? ` alla ${card.first_line_draw}ª`
+          : "";
+        $("#nextLineInfo").textContent = `BINGO${firstAt}`;
+      }else{
+        $("#nextLineInfo").textContent = `Manca ${progress.minMissing} alla linea`;
+      }
 
-    const visibleMult = currentVisibleMultiplier(card,state.drawIndex,Number(config?.draw_limit || 45));
-    if(visibleMult != null){
-      $("#cardPrizeInfo").textContent = `${mult(visibleMult)} · ${fmtChips(card.payout)} fiche`;
-    }else if(state.drawIndex >= Number(config?.draw_limit || 45) && card.first_line_draw > Number(config?.draw_limit || 45)){
-      $("#cardPrizeInfo").textContent = "Nessun premio";
+      const visibleMult = currentVisibleMultiplier(card,state.drawIndex,Number(config?.draw_limit || 45));
+      if(visibleMult != null){
+        $("#cardPrizeInfo").textContent = `${mult(visibleMult)} · ${fmtChips(card.payout)} fiche`;
+      }else if(state.drawIndex >= Number(config?.draw_limit || 45) && card.first_line_draw > Number(config?.draw_limit || 45)){
+        $("#cardPrizeInfo").textContent = "Nessun premio";
+      }else{
+        $("#cardPrizeInfo").textContent = "—";
+      }
+      highlightPaytable(state.drawIndex);
     }else{
-      $("#cardPrizeInfo").textContent = "—";
+      if(progress.completed >= 12){
+        $("#nextLineInfo").textContent = "Tutte le 12 linee";
+      }else if(progress.completed === minWinningLines - 1){
+        $("#nextLineInfo").textContent = `🔥 ${progress.completed} ${progress.completed===1?"linea":"linee"} · una linea al premio`;
+      }else if(progress.completed > 0){
+        $("#nextLineInfo").textContent = `${progress.completed} ${progress.completed===1?"linea":"linee"} · manca ${progress.minMissing} alla prossima`;
+      }else{
+        $("#nextLineInfo").textContent = `Manca ${progress.minMissing} alla 1ª linea`;
+      }
+
+      const liveMult = paytableMultiplier(progress.completed);
+      if(liveMult > 0){
+        const livePayout = Math.floor(Number($("#betSelect").value || 0) * liveMult);
+        $("#cardPrizeInfo").textContent = `${mult(liveMult)} · premio attuale ${fmtChips(livePayout)}`;
+      }else{
+        $("#cardPrizeInfo").textContent = `Premio da ${minWinningLines} linee`;
+      }
+      highlightPaytable(progress.completed);
     }
   }
 
@@ -338,18 +378,33 @@ export async function initBingoBotPage(options){
 
     for(const {card,index,progress} of ordered){
       const btn = document.createElement("button");
-      const visibleWin = card.first_line_draw != null && card.first_line_draw <= state.drawIndex && card.first_line_draw <= drawLimit;
-      btn.className = "card-tab" + (index===state.activeCard?" active":"") + (visibleWin?" done":"");
+      let visibleWin = false;
+      let sub = "";
 
-      let sub;
-      if(visibleWin){
-        sub = `Bingo ${card.first_line_draw}ª · ${mult(card.multiplier)}`;
-      }else if(progress.completed > 0){
-        sub = progress.completed === 1 ? "1 linea" : `${progress.completed} linee`;
+      if(scoringMode === "classic"){
+        visibleWin = card.first_line_draw != null && card.first_line_draw <= state.drawIndex && card.first_line_draw <= drawLimit;
+        if(visibleWin){
+          sub = `Bingo ${card.first_line_draw}ª · ${mult(card.multiplier)}`;
+        }else if(progress.completed > 0){
+          sub = progress.completed === 1 ? "1 linea" : `${progress.completed} linee`;
+        }else{
+          sub = `${card.marked.size}/24 · manca ${progress.minMissing}`;
+        }
       }else{
-        sub = `${card.marked.size}/24 · manca ${progress.minMissing}`;
+        const liveMult = paytableMultiplier(progress.completed);
+        visibleWin = liveMult > 0;
+        if(visibleWin){
+          sub = `${progress.completed} linee · ${mult(liveMult)}`;
+        }else if(progress.completed === minWinningLines - 1){
+          sub = `🔥 ${progress.completed} ${progress.completed===1?"linea":"linee"} · una al premio`;
+        }else if(progress.completed > 0){
+          sub = `${progress.completed} ${progress.completed===1?"linea":"linee"} · manca ${progress.minMissing}`;
+        }else{
+          sub = `${card.marked.size}/24 · manca ${progress.minMissing}`;
+        }
       }
 
+      btn.className = "card-tab" + (index===state.activeCard?" active":"") + (visibleWin?" done":"");
       btn.innerHTML = `<b>Cartella ${card.card_no}</b><span>${esc(sub)}</span>`;
       btn.onclick = () => {
         state.activeCard = index;
@@ -459,10 +514,23 @@ export async function initBingoBotPage(options){
     $("#remainingText").textContent = `${state.draws.length-state.drawIndex} rimaste`;
     highlightPaytable(state.drawIndex);
 
-    const bingoCards = state.cards.filter(c => lineProgress(c).completed > 0).length;
-    $("#phaseText").textContent = bingoCards
-      ? `${bingoCards} cartell${bingoCards===1?"a":"e"} con Bingo`
-      : "Cerchiamo la prima linea";
+    if(scoringMode === "classic"){
+      const bingoCards = state.cards.filter(c => lineProgress(c).completed > 0).length;
+      $("#phaseText").textContent = bingoCards
+        ? `${bingoCards} cartell${bingoCards===1?"a":"e"} con Bingo`
+        : "Cerchiamo la prima linea";
+    }else{
+      const progresses = state.cards.map(c => lineProgress(c));
+      const prizeCards = progresses.filter(p => paytableMultiplier(p.completed) > 0).length;
+      const maxLines = progresses.reduce((m,p) => Math.max(m,p.completed),0);
+      if(prizeCards > 0){
+        $("#phaseText").textContent = `${prizeCards} cartell${prizeCards===1?"a":"e"} a premio · max ${maxLines} linee`;
+      }else if(maxLines === minWinningLines - 1){
+        $("#phaseText").textContent = `🔥 Una linea al premio`;
+      }else{
+        $("#phaseText").textContent = `Obiettivo: ${minWinningLines} linee`;
+      }
+    }
 
     renderTabs();
     renderCard();
@@ -500,7 +568,7 @@ export async function initBingoBotPage(options){
     const stake = Number(d?.total_staked || 0);
     const net = Number(d?.net_result || 0);
     const drawLimit = Number(d?.draw_limit || config?.draw_limit || 45);
-    const winning = state.cards.filter(c => c.first_line_draw != null && c.first_line_draw <= drawLimit && Number(c.multiplier || 0) > 0);
+    const winning = state.cards.filter(c => Number(c.multiplier || 0) > 0);
 
     const box = $("#resultBox");
     box.className = "result " + (net >= 0 ? "win" : "loss");
@@ -509,10 +577,13 @@ export async function initBingoBotPage(options){
       <div class="result-sub">Giocato ${fmtChips(stake)} · Netto ${net>=0?"+":""}${fmtChips(net)} · ${winning.length}/${state.cards.length} cartelle vincenti</div>
       <div class="cards-result">
         ${state.cards.map(c => {
-          const won = c.first_line_draw != null && c.first_line_draw <= drawLimit && Number(c.multiplier || 0) > 0;
+          const won = Number(c.multiplier || 0) > 0;
+          const resultText = scoringMode === "classic"
+            ? (won ? `Bingo ${c.first_line_draw}ª` : `Nessuna linea entro ${drawLimit}`)
+            : `${Number(c.lines_completed || 0)} ${Number(c.lines_completed || 0)===1?"linea":"linee"}`;
           return `<div class="card-result-row${won?" won":""}">
             <b>#${c.card_no}</b>
-            <span>${won?`Bingo ${c.first_line_draw}ª`:`Nessuna linea entro ${drawLimit}`}</span>
+            <span>${resultText}</span>
             <strong>${won?mult(c.multiplier):"×0"}</strong>
             <span>${fmtChips(c.payout || 0)}</span>
           </div>`;
