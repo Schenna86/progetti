@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061017">
+<title>Bingo PvP</title>
+<link rel="stylesheet" href="../shared/game-header.css">
+<style>
+:root{--bg:#061017;--panel:#0a2530;--panel2:#102f3b;--gold:#e7b654;--gold2:#ffe19a;--text:#f6f8fa;--muted:#9eb0b8;--good:#80e69a;--bad:#ff9a9a;--blue:#62a8ff;--b:#e54d4d;--i:#4d83e5;--n:#e3b13d;--g:#43a86b;--o:#a45ad6}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% -10%,#174154,#081820 45%,#03080c);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}button,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}#app{min-height:100vh;padding:14px}.shell{width:min(1540px,100%);margin:auto}
+.layout{display:grid;grid-template-columns:minmax(280px,.55fr) minmax(520px,1.2fr) minmax(320px,.65fr);gap:14px;align-items:start}.panel{border:1px solid rgba(231,182,84,.34);border-radius:18px;overflow:hidden;background:linear-gradient(#0f2b37f5,#06161efa);box-shadow:0 14px 35px #0005}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid #ffffff12}.panel-head h2{margin:0;color:var(--gold2);font-size:17px}.panel-head small{color:var(--muted)}.panel-body,.game-area,.side-body{padding:14px}
+.room-list{display:grid;gap:8px}.room-card{width:100%;padding:10px 11px;border:1px solid #ffffff1c;border-radius:12px;background:#0003;color:white;text-align:left}.room-card.active{border-color:var(--gold);background:#6c4b1738}.room-top,.room-mid,.room-bot{display:flex;justify-content:space-between;gap:8px;align-items:center}.room-top strong{color:var(--gold2)}.room-top span{font-weight:800}.room-mid,.room-bot,.room-foot{margin-top:5px;font-size:11px;color:var(--muted)}.room-bot span{white-space:nowrap}.room-foot{font-size:10px}
+.top-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.stat{padding:9px;border:1px solid #ffffff14;border-radius:12px;background:#0003;text-align:center}.stat small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em}.stat strong{display:block;margin-top:2px;color:var(--gold2);font-size:clamp(15px,2vw,22px)}
+.controls{display:grid;grid-template-columns:minmax(90px,.9fr) minmax(120px,1fr) minmax(130px,1fr) minmax(100px,.75fr);gap:8px;align-items:end;margin-bottom:13px}.field label{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase}.field select{width:100%;min-height:40px;padding:7px 9px;border:1px solid #ffffff22;border-radius:10px;background:#06171f;color:white}.total-box{min-height:40px;padding:5px 10px;border:1px solid #e7b65466;border-radius:10px;background:#6c4b172e}.total-box span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase}.total-box strong{color:var(--gold2)}.actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}.buy-btn,.control-btn{border:none;border-radius:12px;padding:11px 16px;font-weight:900}.buy-btn{flex:1;background:linear-gradient(180deg,#ffd87a,#d59c22);color:#281700;box-shadow:0 7px 18px #0006}.control-btn{background:#173847;color:white;border:1px solid #ffffff20}.control-btn:hover,.buy-btn:hover{filter:brightness(1.05)}
+.ball-row{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center;margin-bottom:13px}.ball{min-height:82px;display:grid;place-items:center;border-radius:18px;border:3px solid #ffedb3;background:radial-gradient(circle at 34% 25%,#fff6cf,#e7b654 42%,#925311);color:#251600;font-size:28px;font-weight:1000;box-shadow:0 7px 18px #0008;padding:6px;text-align:center}.phase{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px;font-size:12px;color:var(--muted)}.progress{height:13px;border:1px solid #ffffff55;border-radius:999px;overflow:hidden;background:#0008}.progress>div{height:100%;background:linear-gradient(90deg,#2769ff,#55d98e);width:0}
+.card-tabs{display:flex;gap:6px;overflow-x:auto;padding:3px 0 8px}.card-tab{flex:0 0 auto;min-width:118px;padding:7px 9px;border:1px solid #ffffff1d;border-radius:10px;background:#0003;color:white;text-align:left}.card-tab.active{border-color:var(--gold);background:#6c4b1738}.card-tab.done{border-color:#4aae75;background:#16482f66}.card-tab b{display:block;color:var(--gold2);font-size:12px}.card-tab span{font-size:10px;color:var(--muted)}
+.bingo-head{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:3px;padding:0 12px}.bingo-head div{display:grid;place-items:center;min-height:34px;border-radius:8px;color:white;font-weight:1000;font-size:22px;letter-spacing:.05em;text-shadow:0 2px 3px #0008}.bingo-head div:nth-child(1){background:var(--b)}.bingo-head div:nth-child(2){background:var(--i)}.bingo-head div:nth-child(3){background:var(--n);color:#271b00}.bingo-head div:nth-child(4){background:var(--g)}.bingo-head div:nth-child(5){background:var(--o)}
+.card-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:12px;border:2px solid rgba(231,182,84,.48);border-radius:15px;background:linear-gradient(180deg,#efe2b9,#cfbd83);box-shadow:inset 0 0 20px #6b501844,0 10px 24px #0005}.card-cell{aspect-ratio:1;min-width:0;display:grid;place-items:center;border-radius:8px;background:#e7d8ad;color:#32260f;font-size:clamp(18px,4vw,34px);font-weight:1000}.card-cell.marked{background:#0d6c49;color:white;box-shadow:inset 0 0 0 2px #a7f2cd}.card-cell.free{font-size:clamp(11px,2vw,18px);background:#a87920;color:#fff8d5}.card-cell.linedone{background:#6b4c0a;color:#fff8d5;box-shadow:inset 0 0 0 3px #fff0a8,0 0 12px #e7b654aa}
+.card-meta{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0}.mini-pill{padding:5px 8px;border:1px solid #ffffff17;border-radius:999px;background:#0003;color:var(--muted);font-size:11px}.mini-pill strong{color:var(--gold2)}
+.board{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:4px;margin-top:10px}.board-num{aspect-ratio:1;display:grid;place-items:center;border:1px solid #ffffff14;border-radius:6px;background:#0003;color:#78909b;font-size:10px;font-weight:900}.board-num small{display:block;font-size:8px;opacity:.85;line-height:1}.board-num span{display:block;line-height:1.1}.board-num.drawn{background:#224f72;color:white;border-color:#5aa6dc}.board-num.last{background:var(--gold);color:#251600;border-color:#fff0b7;transform:scale(1.08)}
+.status{padding:10px 11px;border:1px solid #ffffff17;border-radius:11px;background:#0003;color:#ffd083;font-size:12px;line-height:1.45}.pools{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.pool-box{padding:10px;border:1px solid #ffffff12;border-radius:11px;background:#0003}.pool-box small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}.pool-box strong{display:block;margin-top:3px;color:var(--gold2)}
+.winners{display:grid;gap:6px;margin-top:12px;max-height:320px;overflow:auto}.winner-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:8px 10px;border:1px solid #ffffff12;border-radius:9px;background:#0003}.winner-row b{display:block;color:var(--gold2)}.winner-row span{display:block;font-size:11px;color:var(--muted)}.winner-empty{padding:10px;border:1px dashed #ffffff24;border-radius:9px;color:var(--muted);font-size:11px;background:#0002}
+.rule-box{margin-top:12px;padding:11px;border:1px solid #ffffff14;border-radius:11px;background:#0003;color:var(--muted);font-size:11px;line-height:1.5}.rule-box strong{color:var(--gold2)}
+#loadingOverlay{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:20px;background:#02070ad9;backdrop-filter:blur(4px)}.loading-card{width:min(360px,100%);padding:22px;border:1px solid #e7b65466;border-radius:16px;background:#0b242f;text-align:center;box-shadow:0 20px 60px #000a}.loader{width:36px;height:36px;margin:0 auto 12px;border:4px solid #ffffff22;border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:1180px){.layout{grid-template-columns:1fr}.controls{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){#app{padding:8px}.panel{border-radius:14px}.top-stats{grid-template-columns:repeat(2,1fr);gap:5px}.stat{padding:7px 4px}.controls{gap:6px}.ball-row{grid-template-columns:84px 1fr}.ball{min-height:64px;font-size:22px}.bingo-head{padding:0 7px;gap:3px}.bingo-head div{min-height:28px;font-size:18px}.card-grid{padding:7px;gap:3px}.board{grid-template-columns:repeat(10,minmax(0,1fr));gap:3px}.board-num{font-size:9px}.pools{grid-template-columns:1fr 1fr}.card-tabs{margin-right:-10px;padding-right:10px}}
+</style>
+</head>
+<body>
+<div id="app"><div class="shell">
+<header id="gameHeader" data-title="AMERICAN BINGO" data-subtitle="PVP" data-home-url="../index.html"></header>
+
+<div class="layout">
+  <aside class="panel">
+    <div class="panel-head"><div><h2>Stanze PvP</h2><small>Scegli la room e acquista da 1 a 50 cartelle</small></div></div>
+    <div class="panel-body">
+      <div id="roomList" class="room-list"></div>
+      <div class="rule-box">
+        <strong>Premi PvP</strong><br>
+        LINE = <b>19,50%</b> della raccolta · 3 LINES = <b>29,25%</b> · BLACKOUT = <b>48,75%</b>.<br>
+        Il banco trattiene il <b>2,50%</b>.<br>
+        In caso di pari, il premio si divide <b>per cartella vincente</b>.
+      </div>
+    </div>
+  </aside>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div><h2>Bingo PvP</h2><small id="roomSummary">Caricamento lobby…</small></div>
+      <strong id="selectedRoomPrice" style="color:var(--gold2)">—</strong>
+    </div>
+    <div class="game-area">
+      <div class="top-stats">
+        <div class="stat"><small>Palline</small><strong id="drawCount">0/75</strong></div>
+        <div class="stat"><small>Giocatori</small><strong id="playersStat">0</strong></div>
+        <div class="stat"><small>Cartelle</small><strong id="cardsStat">0</strong></div>
+        <div class="stat"><small>Le mie</small><strong id="myCardsStat">0</strong></div>
+      </div>
+
+      <div class="controls">
+        <div class="field"><label>Stanza selezionata</label><div class="total-box"><span>Sala</span><strong id="selectedRoomName">—</strong></div></div>
+        <div class="field"><label for="cardCountSelect">Cartelle</label><select id="cardCountSelect"></select></div>
+        <div class="field"><label>Totale acquisto</label><div class="total-box"><span id="selectedRoomLimit">—</span><strong id="totalBetValue">0 fiche</strong></div></div>
+        <div class="field"><label>Speso nel round</label><div class="total-box"><span>Le mie fiches</span><strong id="mySpentStat">0</strong></div></div>
+        <div class="actions"><button id="buyBtn" class="buy-btn">COMPRA CARTELLE</button><button id="refreshBtn" class="control-btn">Aggiorna</button><button id="showCurrentRoomBtn" class="control-btn">Mostra round corrente</button></div>
+      </div>
+
+      <div class="ball-row">
+        <div id="currentBall" class="ball">—</div>
+        <div>
+          <div class="phase"><strong id="phaseText">Pronto</strong><span id="remainingText">—</span></div>
+          <div class="progress"><div id="progressFill"></div></div>
+        </div>
+      </div>
+
+      <div id="cardTabs" class="card-tabs"></div>
+      <div class="bingo-head"><div>B</div><div>I</div><div>N</div><div>G</div><div>O</div></div>
+      <div id="cardGrid" class="card-grid"></div>
+
+      <div class="card-meta">
+        <span class="mini-pill">Cartella: <strong id="activeCardLabel">—</strong></span>
+        <span class="mini-pill">Coperti: <strong id="coveredCount">0/24</strong></span>
+        <span class="mini-pill">Linee: <strong id="linesInfo">0/12</strong></span>
+        <span class="mini-pill">Prossimo step: <strong id="nextLineInfo">—</strong></span>
+        <span class="mini-pill">Esito: <strong id="cardPrizeInfo">—</strong></span>
+      </div>
+
+      <div id="board" class="board"></div>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="panel-head"><div><h2>Pool e vincitori</h2><small>Andamento del round e premi assegnati</small></div><strong id="lastBallCaption" style="color:var(--gold2)">—</strong></div>
+    <div class="side-body">
+      <div id="status" class="status">Caricamento Bingo PvP…</div>
+      <div class="pools">
+        <div class="pool-box"><small>LINE</small><strong id="linePool">0</strong></div>
+        <div class="pool-box"><small>3 LINES</small><strong id="threeLinesPool">0</strong></div>
+        <div class="pool-box"><small>BLACKOUT</small><strong id="blackoutPool">0</strong></div>
+        <div class="pool-box"><small>HOUSE</small><strong id="houseAmount">0</strong></div>
+      </div>
+      <div id="winnersList" class="winners"></div>
+      <div class="rule-box">
+        <strong>Regole round</strong><br>
+        Tutte le cartelle del round condividono la stessa sequenza di palline.<br>
+        I premi si assegnano in quest'ordine: <b>LINE</b>, <b>3 LINES</b>, <b>BLACKOUT</b>.<br>
+        Se compri durante un round già in corso, le cartelle vanno nel <b>round successivo</b> della stessa stanza.
+      </div>
+    </div>
+  </aside>
+</div>
+</div></div>
+
+<div id="loadingOverlay"><div class="loading-card"><div class="loader"></div><strong id="loadingText">Caricamento Bingo PvP…</strong><div id="loadingError" style="margin-top:10px;color:#ff9a9a;white-space:pre-wrap"></div></div></div>
+
+<script src="../shared/casino-format.js"></script>
+<script src="../shared/game-header.js"></script>
+<script src="../shared/level-up-modal.js"></script>
+<script type="module">
+import { initBingoPvpPage } from "./bingo-common.js";
+initBingoPvpPage({
+  title:"AMERICAN BINGO",
+  subtitle:"PVP · LINE / 3 LINES / BLACKOUT"
+});
+</script>
+</body>
+</html>
