@@ -403,6 +403,29 @@
           color: #90caf9;
           white-space: nowrap;
         }
+        .advisor-done {
+          grid-column: 2 / -1;
+          justify-self: start;
+          padding: 6px 9px;
+          font-size: .78rem;
+          background: #2e7d32;
+        }
+        .opponent-clue-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 7px;
+          margin-top: 8px;
+          flex-wrap: wrap;
+        }
+        .opponent-clue-count {
+          font-size: .76rem;
+          color: var(--muted);
+        }
+        .final-countdown-active {
+          color: #ffd54f;
+          font-weight: 800;
+        }
         .assistant-details {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
@@ -745,6 +768,7 @@
                 <div class="status-box">
                     <span class="subtle">Mazzo</span>
                     <span class="value" id="deck-count">0</span>
+                    <span class="subtle" id="final-countdown">Finale: —</span>
                 </div>
                 <div class="status-box">
                     <span class="subtle">Indizi</span>
@@ -875,7 +899,7 @@
 		
 		
 
-        <div class="version">Versione prova 2.5 · profili strategici standard 2P–5P</div>
+        <div class="version">Versione prova 2.6 · knowledge indizi + giro finale automatico</div>
     </main>
 
     <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
@@ -929,6 +953,30 @@
             <div class="physical-action-grid" id="physical-card-actions"></div>
             <div class="modal-footer">
                 <button onclick="closePhysicalCardMenu()">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="opponent-clue-overlay" class="modal-overlay" onclick="if(event.target===this) closeOpponentClueModal()">
+        <div class="modal">
+            <h3 id="opponent-clue-title">Registra indizio dato</h3>
+            <div class="subtle" id="opponent-clue-subtitle"></div>
+
+            <div class="modal-section">
+                <strong>Colore</strong>
+                <div class="choice-row" id="opponent-clue-colors" style="margin-top:8px"></div>
+            </div>
+
+            <div class="modal-section">
+                <strong>Numero</strong>
+                <div class="choice-row" id="opponent-clue-numbers" style="margin-top:8px"></div>
+            </div>
+
+            <div class="assistant" id="opponent-clue-preview">Scegli un colore o un numero.</div>
+
+            <div class="modal-footer">
+                <button onclick="closeOpponentClueModal()">Annulla</button>
+                <button class="primary" id="opponent-clue-confirm" onclick="confirmOpponentClue()" disabled>Conferma indizio</button>
             </div>
         </div>
     </div>
@@ -993,6 +1041,8 @@ let panelPreferences = {
           let probabilityCache = [];
           let quickIndex = null;
           let actionDraft = { type: null, handIndex: null, color: null, number: null };
+          let opponentClueDraft = { playerId: null, hintType: null, value: null };
+          let lastAdvisorRecommendations = [];
           let selectedPhysicalCard = { cardId: null, source: null, playerId: null };
           let toastTimer = null;
           let wakeLock = null;
@@ -1033,13 +1083,51 @@ let panelPreferences = {
             };
           }
         
+          function newOpponentKnowledge(cardId = null) {
+            return {
+              cardId,
+              possibleColors: [...COLORI],
+              possibleNumbers: NUMERI.map(Number),
+              playSignal: false,
+              saveSignal: false,
+              signalAge: 0,
+              playSignalDistance: 0,
+              multiPlaySignal: false,
+              deferredPlaySignal: false
+            };
+          }
+
+          function normalizeOpponentKnowledge(value, cardId = null) {
+            const k = value && typeof value === "object" ? value : {};
+            const colors = Array.isArray(k.possibleColors) && k.possibleColors.length
+              ? k.possibleColors.filter(color => COLORI.includes(color))
+              : [...COLORI];
+            const numbers = Array.isArray(k.possibleNumbers) && k.possibleNumbers.length
+              ? k.possibleNumbers.map(Number).filter(number => NUMERI.includes(String(number)))
+              : NUMERI.map(Number);
+
+            return {
+              cardId: cardId || k.cardId || null,
+              possibleColors: colors,
+              possibleNumbers: numbers,
+              playSignal: Boolean(k.playSignal),
+              saveSignal: Boolean(k.saveSignal),
+              signalAge: Number(k.signalAge || 0),
+              playSignalDistance: Number(k.playSignalDistance || 0),
+              multiPlaySignal: Boolean(k.multiPlaySignal),
+              deferredPlaySignal: Boolean(k.deferredPlaySignal)
+            };
+          }
+
           function createOpponents() {
             return Array.from({ length: Math.max(0, numGiocatori - 1) }, (_, index) => ({
               id: `player-${index + 2}`,
               name: `Giocatore ${index + 2}`,
               hand: [],
               setupSlotsRemaining: cartePerGiocatore,
-              drawSlotsPending: 0
+              drawSlotsPending: 0,
+              cluesReceived: 0,
+              turnCompletionPending: false
             }));
           }
         
@@ -1047,7 +1135,7 @@ let panelPreferences = {
             const deckSize = COLORI.length * 10;
             const initialDeal = numGiocatori * cartePerGiocatore;
             return {
-              version: 3,
+              version: 4,
               hand: Array.from({ length: cartePerGiocatore }, () => newHandCard(0)),
               opponents: createOpponents(),
               manualSeen: emptyManualSeen(),
@@ -1057,6 +1145,7 @@ let panelPreferences = {
               clues: 8,
               strikes: 0,
               deckRemaining: Math.max(0, deckSize - initialDeal),
+              finalTurnsRemaining: null,
               ownDrawCounter: 0,
               started: false
             };
@@ -1212,6 +1301,9 @@ function togglePanelPreference(panelName) {
             state.opponents ??= createOpponents();
             state.clues = Number.isFinite(state.clues) ? state.clues : 8;
             state.strikes = Number.isFinite(state.strikes) ? state.strikes : 0;
+            state.finalTurnsRemaining = Number.isFinite(state.finalTurnsRemaining)
+              ? Math.max(0, Number(state.finalTurnsRemaining))
+              : null;
             state.ownDrawCounter = Number.isFinite(state.ownDrawCounter) ? state.ownDrawCounter : 0;
             state.started = Boolean(state.started);
         
@@ -1222,7 +1314,9 @@ function togglePanelPreference(panelName) {
                 name: `Giocatore ${index + 2}`,
                 hand: [],
                 setupSlotsRemaining: cartePerGiocatore,
-                drawSlotsPending: 0
+                drawSlotsPending: 0,
+                cluesReceived: 0,
+                turnCompletionPending: false
               });
             }
             state.opponents = state.opponents.slice(0, Math.max(0, numGiocatori - 1));
@@ -1249,6 +1343,11 @@ function togglePanelPreference(panelName) {
               player.name ||= `Giocatore ${index + 2}`;
               player.hand = Array.isArray(player.hand) ? player.hand : [];
               player.drawSlotsPending = Number.isFinite(player.drawSlotsPending) ? player.drawSlotsPending : 0;
+              player.cluesReceived = Number.isFinite(player.cluesReceived) ? player.cluesReceived : 0;
+              player.turnCompletionPending = Boolean(player.turnCompletionPending);
+              player.hand.forEach(card => {
+                card.knowledge = normalizeOpponentKnowledge(card.knowledge, card.id);
+              });
               if (!Number.isFinite(player.setupSlotsRemaining)) {
                 player.setupSlotsRemaining = Math.max(0, cartePerGiocatore - player.hand.length);
               }
@@ -1261,7 +1360,7 @@ function togglePanelPreference(panelName) {
         
             assignMissingCardIds();
             migrateManualSeen();
-            state.version = 3;
+            state.version = 4;
           }
         
           function assignMissingCardIds() {
@@ -1310,7 +1409,7 @@ function togglePanelPreference(panelName) {
                     attempts++;
                   }
                   const player = state.opponents[playerIndex];
-                  player.hand.push({ ...card, dealSource: "initial" });
+                  player.hand.push({ ...card, dealSource: "initial", knowledge: newOpponentKnowledge(card.id) });
                   player.setupSlotsRemaining = Math.max(0, player.setupSlotsRemaining - 1);
                   used.add(card.id);
                   playerIndex = (playerIndex + 1) % state.opponents.length;
@@ -1321,6 +1420,38 @@ function togglePanelPreference(panelName) {
             });
           }
         
+          function ageOpponentSignals() {
+            state.opponents.forEach(player => {
+              player.hand.forEach(card => {
+                const k = card.knowledge;
+                if (!k) return;
+                if (k.playSignal || k.saveSignal || k.deferredPlaySignal) {
+                  k.signalAge = Number(k.signalAge || 0) + 1;
+                }
+              });
+            });
+          }
+
+          function completeRegisteredTurn({ lastDraw = false } = {}) {
+            ageOpponentSignals();
+
+            if (lastDraw) {
+              // Il turno che ha pescato l'ultima carta è appena terminato:
+              // restano esattamente N turni, uno per giocatore.
+              state.finalTurnsRemaining = numGiocatori;
+              return;
+            }
+
+            if (state.finalTurnsRemaining !== null) {
+              state.finalTurnsRemaining = Math.max(0, Number(state.finalTurnsRemaining) - 1);
+            }
+          }
+
+          function consumeClueAndCompleteTurn() {
+            state.clues = Math.max(0, Number(state.clues) - 1);
+            completeRegisteredTurn();
+          }
+
           function persistStateNow() {
             if (saveTimer) {
               clearTimeout(saveTimer);
@@ -1811,6 +1942,10 @@ function togglePanelPreference(panelName) {
                       ? player.hand.map(card => physicalCardHtml(card, "opponent", player.id)).join("")
                       : `<div class="empty-hand">Le carte assegnate a questo giocatore compariranno qui.</div>`}
                   </div>
+                  <div class="opponent-clue-row">
+                    <button class="small primary" onclick="openOpponentClueModal('${player.id}')" ${state.clues <= 0 || !player.hand.length ? "disabled" : ""}>✓ Registra indizio</button>
+                    <span class="opponent-clue-count">Indizi registrati: ${Number(player.cluesReceived || 0)}</span>
+                  </div>
                 </div>
               `;
             }).join("");
@@ -1881,6 +2016,20 @@ function togglePanelPreference(panelName) {
             document.getElementById("strike-count").textContent = `${state.strikes} / 3`;
             document.getElementById("score-count").textContent =
               Object.values(state.fireworks).reduce((sum, value) => sum + Number(value || 0), 0);
+
+            const finalLabel = document.getElementById("final-countdown");
+            if (finalLabel) {
+              if (state.finalTurnsRemaining === null) {
+                finalLabel.textContent = "Finale: —";
+                finalLabel.classList.remove("final-countdown-active");
+              } else if (state.finalTurnsRemaining > 0) {
+                finalLabel.textContent = `Finale: T${state.finalTurnsRemaining}`;
+                finalLabel.classList.add("final-countdown-active");
+              } else {
+                finalLabel.textContent = "Finale: terminato";
+                finalLabel.classList.add("final-countdown-active");
+              }
+            }
           }
         
           function bestVisibleClue() {
@@ -1944,17 +2093,18 @@ function togglePanelPreference(panelName) {
             };
           }
 
-          function neutralOpponentKnowledge(card, index, playerIndex) {
+          function trackedOpponentKnowledge(card, index, playerIndex) {
+            const k = normalizeOpponentKnowledge(card.knowledge, card.id || `p${playerIndex}-c${index}`);
             return {
-              cardId: card.id || `p${playerIndex}-c${index}`,
-              possibleColors: [...COLORI_BASE],
-              possibleNumbers: NUMERI.map(Number),
-              playSignal: false,
-              saveSignal: false,
-              signalAge: 0,
-              playSignalDistance: 0,
-              multiPlaySignal: false,
-              deferredPlaySignal: false
+              cardId: k.cardId,
+              possibleColors: k.possibleColors.filter(color => COLORI_BASE.includes(color)),
+              possibleNumbers: [...k.possibleNumbers],
+              playSignal: k.playSignal,
+              saveSignal: k.saveSignal,
+              signalAge: k.signalAge,
+              playSignalDistance: k.playSignalDistance,
+              multiPlaySignal: k.multiPlaySignal,
+              deferredPlaySignal: k.deferredPlaySignal
             };
           }
 
@@ -1973,9 +2123,7 @@ function togglePanelPreference(panelName) {
               return {
                 playerIndex,
                 hand,
-                // Il tracker attuale non registra gli indizi ricevuti dagli altri:
-                // per il motore strategico partono quindi da conoscenza neutra.
-                knowledge: hand.map((card, cardIndex) => neutralOpponentKnowledge(card, cardIndex, playerIndex)),
+                knowledge: player.hand.map((card, cardIndex) => trackedOpponentKnowledge(card, cardIndex, playerIndex)),
                 visibleOtherHands: state.opponents
                   .map((other, otherIndex) => ({
                     playerIndex: otherIndex + 1,
@@ -1998,9 +2146,7 @@ function togglePanelPreference(panelName) {
                 .filter(card => COLORI_BASE.includes(card.color))
                 .map(card => ({ id: card.id, color: card.color, number: Number(card.number) })),
               deckRemaining: state.deckRemaining,
-              // Il tracker non ha ancora un contatore affidabile del giro finale.
-              // Non inventiamo T5: l'Exact 5P rimane inattivo finché questo dato non verrà tracciato.
-              finalTurnsRemaining: null,
+              finalTurnsRemaining: state.finalTurnsRemaining,
               finalCountdownArmed: false,
               bonusMode: "original",
               ownHandSize: state.hand.length,
@@ -2030,8 +2176,9 @@ function togglePanelPreference(panelName) {
             try {
               const result = evaluateActions(buildStandardAdvisorView(), { limit: 5 });
               const profileLabel = standardProfileLabel(result.profile);
+              lastAdvisorRecommendations = result.recommendations;
 
-              const rows = result.recommendations.map(rec => `
+              const rows = result.recommendations.map((rec, recIndex) => `
                 <div class="advisor-row ${rec.selected ? "selected" : ""}">
                   <div class="advisor-rank">${rec.rank}</div>
                   <div>
@@ -2039,6 +2186,9 @@ function togglePanelPreference(panelName) {
                     <div class="advisor-reason">${escapeHtml(rec.reason || "")}</div>
                   </div>
                   <div class="advisor-utility">${rec.utility}</div>
+                  ${rec.action?.type === "HINT"
+                    ? `<button class="advisor-done" onclick="markAdvisorHintGiven(${recIndex})" ${state.clues <= 0 ? "disabled" : ""}>✓ Dato</button>`
+                    : ""}
                 </div>
               `).join("");
 
@@ -2061,6 +2211,190 @@ function togglePanelPreference(panelName) {
               console.error("Advisor standard non disponibile:", error);
               return false;
             }
+          }
+
+          function applyOpponentClueKnowledge(player, hintType, value, convention = null) {
+            const touchedIndexes = [];
+            const touchedColors = hintType === "color" ? colorsTouchedByClue(value) : [];
+            const numericValue = Number(value);
+
+            player.hand.forEach((card, index) => {
+              const k = normalizeOpponentKnowledge(card.knowledge, card.id);
+              const touched = hintType === "color"
+                ? touchedColors.includes(card.color)
+                : Number(card.number) === numericValue;
+
+              if (touched) touchedIndexes.push(index);
+
+              if (hintType === "color") {
+                if (touched) {
+                  k.possibleColors = k.possibleColors.filter(color => touchedColors.includes(color));
+                } else {
+                  k.possibleColors = k.possibleColors.filter(color => !touchedColors.includes(color));
+                }
+              } else {
+                if (touched) {
+                  k.possibleNumbers = k.possibleNumbers.filter(number => Number(number) === numericValue);
+                } else {
+                  k.possibleNumbers = k.possibleNumbers.filter(number => Number(number) !== numericValue);
+                }
+              }
+
+              card.knowledge = k;
+            });
+
+            if (convention && Number.isInteger(convention.focusIndex)) {
+              const focus = player.hand[convention.focusIndex];
+              if (focus) {
+                const k = normalizeOpponentKnowledge(focus.knowledge, focus.id);
+                if (convention.intent === "PLAY") {
+                  k.playSignal = true;
+                  k.playSignalDistance = Number(convention.playSignalDistance || 0);
+                  k.multiPlaySignal = Array.isArray(convention.multiPlayIndexes) && convention.multiPlayIndexes.length > 1;
+                  k.deferredPlaySignal = Boolean(convention.deferred);
+                } else if (convention.intent === "SAVE") {
+                  k.saveSignal = true;
+                }
+                k.signalAge = 0;
+                focus.knowledge = k;
+              }
+            }
+
+            return touchedIndexes;
+          }
+
+          function registerOpponentClue(playerId, hintType, value, convention = null) {
+            const player = findOpponent(playerId);
+            if (!player) return false;
+            if (state.clues <= 0) {
+              toast("Nessun indizio disponibile.");
+              return false;
+            }
+
+            const touched = hintType === "color"
+              ? player.hand.some(card => colorsTouchedByClue(value).includes(card.color))
+              : player.hand.some(card => Number(card.number) === Number(value));
+
+            if (!touched) {
+              toast("Indizio non valido: non toccherebbe nessuna carta di questo giocatore.");
+              return false;
+            }
+
+            pushHistory();
+            const touchedIndexes = applyOpponentClueKnowledge(player, hintType, value, convention);
+            player.cluesReceived = Number(player.cluesReceived || 0) + 1;
+            consumeClueAndCompleteTurn();
+            state.started = true;
+            saveState();
+            render();
+
+            const shownValue = hintType === "color" ? colorText(value) : value;
+            toast(`✓ Indizio ${hintType === "color" ? "colore" : "numero"} “${shownValue}” registrato per ${player.name} · carte toccate: ${touchedIndexes.map(i => i + 1).join(", ")}.`, 4200);
+            return true;
+          }
+
+          function markAdvisorHintGiven(index) {
+            const rec = lastAdvisorRecommendations[index];
+            const action = rec?.action;
+            if (!action || action.type !== "HINT") return;
+            const player = state.opponents[Number(action.targetIndex) - 1];
+            if (!player) {
+              toast("Giocatore dell'indizio non trovato.");
+              return;
+            }
+            registerOpponentClue(player.id, action.hintType, action.value, action.convention || null);
+          }
+
+          function openOpponentClueModal(playerId) {
+            const player = findOpponent(playerId);
+            if (!player) return;
+            if (state.clues <= 0) {
+              toast("Nessun indizio disponibile.");
+              return;
+            }
+            if (!player.hand.length) {
+              toast("Inserisci prima le carte del giocatore.");
+              return;
+            }
+
+            opponentClueDraft = { playerId, hintType: null, value: null };
+            document.getElementById("opponent-clue-title").textContent = `Registra indizio a ${player.name}`;
+            document.getElementById("opponent-clue-subtitle").textContent = "Il tracker aggiorna automaticamente cosa sa il giocatore e scala un indizio.";
+
+            document.getElementById("opponent-clue-colors").innerHTML = COLORI_BASE.map(color => `
+              <button
+                class="choice ${colorClass(color)}"
+                data-opponent-clue-color="${color}"
+                style="${backgroundStyle(color)} color:${textColorFor(color)}"
+                onclick="selectOpponentClue('color', '${color}')"
+              >${colorText(color)}</button>
+            `).join("");
+
+            document.getElementById("opponent-clue-numbers").innerHTML = NUMERI.map(number => `
+              <button
+                class="choice"
+                data-opponent-clue-number="${number}"
+                onclick="selectOpponentClue('number', '${number}')"
+              >${number}</button>
+            `).join("");
+
+            updateOpponentCluePreview();
+            document.getElementById("opponent-clue-overlay").classList.add("open");
+          }
+
+          function closeOpponentClueModal() {
+            document.getElementById("opponent-clue-overlay").classList.remove("open");
+            opponentClueDraft = { playerId: null, hintType: null, value: null };
+          }
+
+          function selectOpponentClue(hintType, value) {
+            opponentClueDraft.hintType = hintType;
+            opponentClueDraft.value = hintType === "number" ? String(value) : value;
+
+            document.querySelectorAll("[data-opponent-clue-color]").forEach(button => {
+              button.classList.toggle("active", hintType === "color" && button.dataset.opponentClueColor === value);
+            });
+            document.querySelectorAll("[data-opponent-clue-number]").forEach(button => {
+              button.classList.toggle("active", hintType === "number" && button.dataset.opponentClueNumber === String(value));
+            });
+            updateOpponentCluePreview();
+          }
+
+          function updateOpponentCluePreview() {
+            const preview = document.getElementById("opponent-clue-preview");
+            const confirm = document.getElementById("opponent-clue-confirm");
+            const player = findOpponent(opponentClueDraft.playerId);
+            if (!player || !opponentClueDraft.hintType) {
+              preview.textContent = "Scegli un colore o un numero.";
+              confirm.disabled = true;
+              return;
+            }
+
+            const matches = player.hand
+              .map((card, index) => ({ card, index }))
+              .filter(({ card }) => opponentClueDraft.hintType === "color"
+                ? colorsTouchedByClue(opponentClueDraft.value).includes(card.color)
+                : Number(card.number) === Number(opponentClueDraft.value));
+
+            const shownValue = opponentClueDraft.hintType === "color"
+              ? colorText(opponentClueDraft.value)
+              : opponentClueDraft.value;
+
+            if (!matches.length) {
+              preview.innerHTML = `<strong>Indizio non valido.</strong> “${escapeHtml(shownValue)}” non toccherebbe nessuna carta.`;
+              confirm.disabled = true;
+              return;
+            }
+
+            preview.innerHTML = `<strong>${opponentClueDraft.hintType === "color" ? "Colore" : "Numero"} “${escapeHtml(shownValue)}”</strong><br>Tocca le carte in posizione ${matches.map(x => x.index + 1).join(", ")}.`;
+            confirm.disabled = false;
+          }
+
+          function confirmOpponentClue() {
+            const { playerId, hintType, value } = opponentClueDraft;
+            if (!playerId || !hintType) return;
+            closeOpponentClueModal();
+            registerOpponentClue(playerId, hintType, value, null);
           }
 
           function assistantRecommendation() {
@@ -2440,7 +2774,13 @@ function togglePanelPreference(panelName) {
         }
         
           function registerOpponentDrawNeed(player) {
-            if (state.deckRemaining > 0) player.drawSlotsPending++;
+            if (state.deckRemaining > 0) {
+              player.drawSlotsPending++;
+              player.turnCompletionPending = true;
+            } else {
+              player.turnCompletionPending = false;
+              completeRegisteredTurn();
+            }
           }
         
           function movePhysicalCard(payload, target) {
@@ -2496,7 +2836,12 @@ function togglePanelPreference(panelName) {
               } else {
                 targetPlayer.setupSlotsRemaining--;
               }
-              targetPlayer.hand.push({ ...original, dealSource });
+              targetPlayer.hand.push({ ...original, dealSource, knowledge: newOpponentKnowledge(original.id) });
+              if (dealSource === "drawn") {
+                const lastDraw = state.deckRemaining === 0;
+                targetPlayer.turnCompletionPending = false;
+                completeRegisteredTurn({ lastDraw });
+              }
               state.started = true;
               saveState();
               render();
@@ -2611,6 +2956,10 @@ function togglePanelPreference(panelName) {
               toast("Seleziona prima le carte interessate dall'indizio.");
               return;
             }
+            if (state.clues <= 0) {
+              toast("Nessun indizio disponibile.");
+              return;
+            }
         
             pushHistory();
             const touchedColors = colorsTouchedByClue(color);
@@ -2641,8 +2990,9 @@ function togglePanelPreference(panelName) {
               card.selected = false;
             });
         
+            consumeClueAndCompleteTurn();
             state.started = true;
-            renderAnalysis();
+            render();
             notifyImpossibleClue();
             saveState();
           }
@@ -2650,6 +3000,10 @@ function togglePanelPreference(panelName) {
           function giveNumberClue(number) {
             if (!state.hand.some(card => card.selected)) {
               toast("Seleziona prima le carte interessate dall'indizio.");
+              return;
+            }
+            if (state.clues <= 0) {
+              toast("Nessun indizio disponibile.");
               return;
             }
         
@@ -2660,8 +3014,9 @@ function togglePanelPreference(panelName) {
               card.selected = false;
             });
         
+            consumeClueAndCompleteTurn();
             state.started = true;
-            renderAnalysis();
+            render();
             notifyImpossibleClue();
             saveState();
           }
@@ -2848,12 +3203,15 @@ function togglePanelPreference(panelName) {
               toast(`Scartata: ${colorText(color)} ${number}.`);
             }
         
+            const deckBeforeAction = state.deckRemaining;
             if (state.deckRemaining > 0) {
               state.deckRemaining--;
               if (handIndex !== null) replaceOwnCard(handIndex);
             } else if (handIndex !== null) {
               state.hand.splice(handIndex, 1);
             }
+
+            completeRegisteredTurn({ lastDraw: deckBeforeAction > 0 && state.deckRemaining === 0 });
         
             state.started = true;
             closeActionModal();
@@ -2970,6 +3328,11 @@ function togglePanelPreference(panelName) {
             closePhysicalCardMenu,
             executePhysicalCardAction,
             updatePlayerName,
+            openOpponentClueModal,
+            closeOpponentClueModal,
+            selectOpponentClue,
+            confirmOpponentClue,
+            markAdvisorHintGiven,
             giveColorClue,
             giveNumberClue,
             openQuickModal,
