@@ -1661,6 +1661,23 @@
 
           <div class="ticket-actions">
             <span class="status-pill ${status.cls}">${escapeHtml(status.label)}</span>
+
+            ${ticket.status === "won"
+              ? (
+                  state.savedTicketIds.has(Number(ticket.id))
+                    ? `<button class="save-winning-btn saved" type="button" disabled>⭐ Combinazione salvata</button>`
+                    : `<button
+                         class="save-winning-btn"
+                         type="button"
+                         data-save-winning-ticket="${ticket.id}"
+                         ${state.savingTicketIds.has(Number(ticket.id)) ? "disabled" : ""}
+                       >${state.savingTicketIds.has(Number(ticket.id))
+                           ? "Salvataggio…"
+                           : "⭐ Salva combinazione vincente"}</button>`
+                )
+              : ""
+            }
+
             <button
               class="small-btn"
               type="button"
