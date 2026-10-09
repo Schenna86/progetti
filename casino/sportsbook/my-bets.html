@@ -283,6 +283,30 @@
     .claim-btn:not(:disabled):hover,
     .small-btn:hover { filter: brightness(1.08); }
 
+    .save-winning-btn {
+      min-height: 34px;
+      border: 1px solid rgba(119,225,138,.62);
+      border-radius: 9px;
+      padding: 6px 10px;
+      background: rgba(33,104,55,.34);
+      color: #a8efb5;
+      font-weight: 900;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .save-winning-btn:not(:disabled):hover {
+      filter: brightness(1.10);
+      border-color: rgba(156,239,170,.92);
+    }
+
+    .save-winning-btn.saved {
+      border-color: rgba(231,182,84,.45);
+      background: rgba(122,78,18,.22);
+      color: var(--gold-light);
+      opacity: .95;
+    }
+
     .ticket-details {
       display: none;
       padding: 0 12px 12px;
@@ -805,6 +829,8 @@
     systemTicketsBySystem: new Map(),
     legsByTicket: new Map(),
     eventsById: new Map(),
+    savedTicketIds: new Set(),
+    savingTicketIds: new Set(),
     filter: "all",
     expanded: new Set(),
     expandedCombinations: new Set()
@@ -930,6 +956,65 @@
     state.progression = progressionResult.data || { xp: 0, level: 1 };
     $("#balanceValue").textContent = formatChips(state.profile?.chips || 0);
     updateXp(state.progression.xp, state.progression.level);
+  }
+
+  async function loadSavedTicketIds() {
+    const userId = state.session.user.id;
+
+    const { data, error } = await supabase
+      .from("saved_betting_tickets")
+      .select("original_ticket_id")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.warn("saved_betting_tickets:", error);
+      state.savedTicketIds = new Set();
+      return;
+    }
+
+    state.savedTicketIds = new Set(
+      (data || [])
+        .map(row => Number(row.original_ticket_id))
+        .filter(Number.isFinite)
+    );
+  }
+
+  async function saveWinningTicket(ticketId) {
+    ticketId = Number(ticketId);
+
+    if (!Number.isFinite(ticketId)) return;
+    if (state.savedTicketIds.has(ticketId)) return;
+    if (state.savingTicketIds.has(ticketId)) return;
+
+    state.savingTicketIds.add(ticketId);
+    renderTickets();
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "save_winning_bet",
+        { p_ticket_id: ticketId }
+      );
+
+      if (error) throw error;
+
+      state.savedTicketIds.add(ticketId);
+
+      toast(
+        data?.already_saved
+          ? "Schedina già salvata."
+          : "Schedina vincente salvata."
+      );
+
+    } catch (error) {
+      console.error("saveWinningTicket:", error);
+      toast(
+        error?.message || "Errore durante il salvataggio della schedina.",
+        true
+      );
+    } finally {
+      state.savingTicketIds.delete(ticketId);
+      renderTickets();
+    }
   }
 
   async function loadTickets() {
@@ -1758,6 +1843,23 @@
 
           <div class="ticket-actions">
             <span class="status-pill ${status.cls}">${escapeHtml(status.label)}</span>
+
+            ${ticket.status === "won"
+              ? (
+                  state.savedTicketIds.has(Number(ticket.id))
+                    ? `<button class="save-winning-btn saved" type="button" disabled>⭐ Schedina salvata</button>`
+                    : `<button
+                         class="save-winning-btn"
+                         type="button"
+                         data-save-winning-ticket="${ticket.id}"
+                         ${state.savingTicketIds.has(Number(ticket.id)) ? "disabled" : ""}
+                       >${state.savingTicketIds.has(Number(ticket.id))
+                           ? "Salvataggio…"
+                           : "⭐ Vuoi salvare la schedina vincente?"}</button>`
+                )
+              : ""
+            }
+
             <button class="small-btn" type="button" data-toggle-ticket="${ticket.id}">${expanded ? "Chiudi" : "Dettagli"}</button>
           </div>
         </div>
@@ -1822,8 +1924,11 @@
     try {
       await Promise.all([
         loadProfileAndProgression(),
+        loadSavedTicketIds(),
         loadTickets()
       ]);
+
+      renderTickets();
     } catch (error) {
       console.error("refresh:", error);
       toast(error?.message || "Errore durante l'aggiornamento.", true);
@@ -1840,6 +1945,13 @@
         button.classList.toggle("active", button === filter);
       });
       renderTickets();
+      return;
+    }
+
+    const saveWinning = event.target.closest("[data-save-winning-ticket]");
+    if (saveWinning) {
+      const id = Number(saveWinning.dataset.saveWinningTicket);
+      saveWinningTicket(id);
       return;
     }
 
@@ -1907,9 +2019,11 @@
       await loadLevels();
       await Promise.all([
         loadProfileAndProgression(),
+        loadSavedTicketIds(),
         loadTickets()
       ]);
 
+      renderTickets();
       $("#loadingOverlay").classList.add("hidden");
 
     } catch (error) {
