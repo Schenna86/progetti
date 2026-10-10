@@ -1061,23 +1061,7 @@
     const userId = state.session.user.id;
 
     const [systemsResult, regularTicketsResult] = await Promise.all([
-      supabase
-        .from("betting_systems")
-        .select(`
-          id,
-          user_id,
-          request_id,
-          stake_per_combination,
-          combination_count,
-          event_count,
-          selection_count,
-          total_stake,
-          max_potential_win,
-          created_at
-        `)
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(250),
+      supabase.rpc("get_my_betting_system_summaries"),
 
       supabase
         .from("betting_tickets")
@@ -1113,77 +1097,22 @@
     if (systemsResult.error) throw systemsResult.error;
     if (regularTicketsResult.error) throw regularTicketsResult.error;
 
-    state.systems = systemsResult.data || [];
+    /*
+     * La RPC restituisce UN SOLO record JSON per sistema.
+     * Non scarichiamo più le centinaia di betting_tickets figli.
+     */
+    state.systems = (systemsResult.data || []).map(row => {
+      const data = row?.summary ?? row;
+      return data || {};
+    });
 
-    const systemIds = state.systems.map(system => system.id);
-    let systemTickets = [];
-
-    if (systemIds.length) {
-      const pageSize = 1000;
-      let from = 0;
-
-      while (true) {
-        const { data, error } = await supabase
-          .from("betting_tickets")
-          .select(`
-            id,
-            user_id,
-            ticket_type,
-            stake,
-            total_odd,
-            base_total_odd,
-            bonus_percent,
-            bonus_multiplier,
-            final_total_odd,
-            effective_leg_count,
-            potential_win,
-            status,
-            created_at,
-            settled_at,
-            settled_total_odd,
-            settled_bonus_percent,
-            settled_effective_leg_count,
-            payout_amount,
-            payout_wallet_transaction_id,
-            system_id,
-            system_combination_no
-          `)
-          .eq("user_id", userId)
-          .in("system_id", systemIds)
-          .order("system_id", { ascending: false })
-          .order("system_combination_no", { ascending: true })
-          .range(from, from + pageSize - 1);
-
-        if (error) throw error;
-
-        const rows = data || [];
-        systemTickets.push(...rows);
-
-        if (rows.length < pageSize) break;
-
-        from += pageSize;
-
-        // Protezione da caricamenti patologici sul frontend.
-        if (from >= 10000) break;
-      }
-    }
-
-    state.tickets = [
-      ...(regularTicketsResult.data || []),
-      ...systemTickets
-    ];
-
+    /*
+     * state.tickets contiene SOLO le schedine normali.
+     * Di conseguenza anche legs/eventi vengono caricati solo
+     * per le normali, mai per le combinazioni dei sistemi.
+     */
+    state.tickets = regularTicketsResult.data || [];
     state.systemTicketsBySystem = new Map();
-
-    for (const ticket of systemTickets) {
-      if (!state.systemTicketsBySystem.has(ticket.system_id)) {
-        state.systemTicketsBySystem.set(ticket.system_id, []);
-      }
-
-      state.systemTicketsBySystem
-        .get(ticket.system_id)
-        .push(ticket);
-    }
 
     state.legsByTicket = new Map();
     state.eventsById = new Map();
@@ -1196,11 +1125,7 @@
     const ticketIds = state.tickets.map(ticket => ticket.id);
     const legs = [];
 
-    // Un ticket può contenere fino a 30 legs.
-    // Con chunk da 200 ticket la SELECT può superare facilmente
-    // il limite righe di Supabase/PostgREST e troncare le legs
-    // degli ultimi ticket del blocco.
-    // 20 ticket => massimo teorico 600 legs per richiesta.
+    // Solo schedine normali: massimo teorico 600 legs per richiesta.
     const LEG_TICKET_CHUNK_SIZE = 20;
 
     for (let i = 0; i < ticketIds.length; i += LEG_TICKET_CHUNK_SIZE) {
@@ -1297,87 +1222,21 @@
   }
 
   function systemAggregate(system) {
-    const tickets =
-      state.systemTicketsBySystem.get(system.id)
-      || [];
-
-    const pending =
-      tickets.some(ticket => ticket.status === "pending");
-
-    const allVoid =
-      tickets.length > 0
-      && tickets.every(ticket => ticket.status === "void");
-
-    const anyWon =
-      tickets.some(ticket => ticket.status === "won");
-
-    const anyVoid =
-      tickets.some(ticket => ticket.status === "void");
-
-    const payoutAmount =
-      tickets.reduce(
-        (sum, ticket) =>
-          sum + Number(ticket.payout_amount || 0),
-        0
-      );
-
-    const potentialWins =
-      tickets
-        .map(ticket => Number(ticket.potential_win || 0))
-        .filter(value => Number.isFinite(value) && value >= 0);
-
-    const minPotentialWin =
-      potentialWins.length
-        ? Math.min(...potentialWins)
-        : 0;
-
-    const maxPotentialWin =
-      potentialWins.length
-        ? Math.max(...potentialWins)
-        : 0;
-
-    let status = "pending";
-
-    if (!pending) {
-      if (allVoid) {
-        status = "void";
-      } else if (anyWon) {
-        status = "won";
-      } else if (anyVoid && payoutAmount > 0) {
-        status = "void";
-      } else {
-        status = "lost";
-      }
-    }
-
-    const settledDates =
-      tickets
-        .map(ticket => ticket.settled_at)
-        .filter(Boolean)
-        .map(value => new Date(value).getTime())
-        .filter(Number.isFinite);
-
-    const settledAt =
-      !pending && settledDates.length
-        ? new Date(Math.max(...settledDates)).toISOString()
-        : null;
-
     return {
       system,
-      tickets,
-      status,
-      payoutAmount,
-      minPotentialWin,
-      maxPotentialWin,
-      settledAt,
-      pendingCombinations:
-        tickets.filter(ticket => ticket.status === "pending").length,
-      wonCombinations:
-        tickets.filter(ticket => ticket.status === "won").length,
-      lostCombinations:
-        tickets.filter(ticket => ticket.status === "lost").length,
-      voidCombinations:
-        tickets.filter(ticket => ticket.status === "void").length
+      tickets: [],
+      status: system.status || "pending",
+      payoutAmount: Number(system.payout_amount || 0),
+      minPotentialWin: Number(system.min_potential_win || 0),
+      maxPotentialWin: Number(system.max_potential_win || 0),
+      settledAt: system.settled_at || null,
+      pendingCombinations: Number(system.pending_combinations || 0),
+      wonCombinations: Number(system.won_combinations || 0),
+      lostCombinations: Number(system.lost_combinations || 0),
+      voidCombinations: Number(system.void_combinations || 0),
+      winningCombinations: Array.isArray(system.winning_combinations)
+        ? system.winning_combinations
+        : []
     };
   }
 
@@ -1749,14 +1608,7 @@
         ? `🪙 ${formatChips(aggregate.minPotentialWin)} – 🪙 ${formatChips(aggregate.maxPotentialWin)}`
         : `🪙 ${formatChips(aggregate.payoutAmount)}`;
 
-    const tickets =
-      [...aggregate.tickets]
-        .sort(
-          (a, b) =>
-            Number(a.system_combination_no || 0)
-            -
-            Number(b.system_combination_no || 0)
-        );
+    const winners = aggregate.winningCombinations;
 
     return `
       <article
@@ -1805,7 +1657,7 @@
               class="small-btn"
               type="button"
               data-toggle-system="${system.id}"
-            >${expanded ? "Chiudi" : "Dettagli"}</button>
+            >${expanded ? "Chiudi" : "Riepilogo"}</button>
           </div>
         </div>
 
@@ -1816,34 +1668,91 @@
             <span>Combinazioni: <strong>${system.combination_count}</strong></span>
             <span>Puntata/combo: <strong>🪙 ${formatChips(system.stake_per_combination)}</strong></span>
             <span>Puntata totale: <strong>🪙 ${formatChips(system.total_stake)}</strong></span>
+
             ${aggregate.status === "pending"
               ? `<span>Potenziale min: <strong>🪙 ${formatChips(aggregate.minPotentialWin)}</strong></span>
                  <span>Potenziale max: <strong>🪙 ${formatChips(aggregate.maxPotentialWin)}</strong></span>`
               : ""}
+
+            <span>In corso: <strong>${aggregate.pendingCombinations}</strong></span>
             <span>Vinte: <strong>${aggregate.wonCombinations}</strong></span>
             <span>Perse: <strong>${aggregate.lostCombinations}</strong></span>
+
             ${aggregate.voidCombinations
               ? `<span>Void: <strong>${aggregate.voidCombinations}</strong></span>`
               : ""}
+
             ${aggregate.settledAt
               ? `<span>Liquidato: <strong>${formatDateTime(aggregate.settledAt)}</strong></span>`
               : ""}
+
             ${aggregate.status !== "pending"
               ? `<span class="system-payout-note">Pagamento complessivo: <strong>🪙 ${formatChips(aggregate.payoutAmount)}</strong></span>`
               : ""}
           </div>
 
-          ${renderSystemFull(aggregate)}
+          ${winners.length
+            ? `
+              <div class="system-combinations-title">
+                🟢 Combinazioni vincenti
+              </div>
 
-          <div class="system-combinations-title">
-            Combinazioni generate
-          </div>
+              <div class="system-combinations">
+                ${winners.map(winner => {
+                  const ticketId = Number(winner.id);
+                  const alreadySaved = state.savedTicketIds.has(ticketId);
+                  const saving = state.savingTicketIds.has(ticketId);
 
-          <div class="system-combinations">
-            ${tickets.length
-              ? tickets.map(renderCombination).join("")
-              : `<div class="empty-state" style="padding:14px">Nessuna combinazione trovata.</div>`}
-          </div>
+                  const displayOdd = Number(
+                    winner.settled_total_odd
+                    || winner.final_total_odd
+                    || 0
+                  );
+
+                  return `
+                    <div class="combination-card">
+                      <div class="combination-summary">
+                        <div class="combination-title">
+                          <strong>Combinazione ${winner.system_combination_no ?? "—"}</strong>
+                          <small>Ticket #${ticketId} · 🪙 ${formatChips(winner.stake)}</small>
+                        </div>
+
+                        <div class="combination-metric">
+                          <span>Quota</span>
+                          <strong>x${fmtOdd(displayOdd)}</strong>
+                        </div>
+
+                        <div class="combination-metric">
+                          <span>Pagamento</span>
+                          <strong>🪙 ${formatChips(winner.payout_amount)}</strong>
+                        </div>
+
+                        <div class="ticket-actions">
+                          <span class="status-pill won">🟢 VINTA</span>
+
+                          ${alreadySaved
+                            ? `<button class="save-winning-btn saved" type="button" disabled>⭐ Combinazione salvata</button>`
+                            : `<button
+                                 class="save-winning-btn"
+                                 type="button"
+                                 data-save-winning-ticket="${ticketId}"
+                                 ${saving ? "disabled" : ""}
+                               >${saving ? "Salvataggio…" : "⭐ Salva combinazione vincente"}</button>`
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            `
+            : `
+              <div class="empty-state" style="padding:14px">
+                ${aggregate.status === "pending"
+                  ? "Il sistema è ancora in corso. Le singole combinazioni non vengono caricate."
+                  : "Nessuna combinazione vincente."}
+              </div>
+            `}
         </div>
       </article>
     `;
@@ -2186,19 +2095,6 @@
       return;
     }
 
-    const combinationToggle = event.target.closest("[data-toggle-combination]");
-    if (combinationToggle) {
-      const id = Number(combinationToggle.dataset.toggleCombination);
-
-      if (state.expandedCombinations.has(id)) {
-        state.expandedCombinations.delete(id);
-      } else {
-        state.expandedCombinations.add(id);
-      }
-
-      renderTickets();
-      return;
-    }
 
     const savedToggle = event.target.closest("[data-toggle-saved]");
     if (savedToggle) {
