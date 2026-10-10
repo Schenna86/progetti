@@ -1236,6 +1236,9 @@
       voidCombinations: Number(system.void_combinations || 0),
       winningCombinations: Array.isArray(system.winning_combinations)
         ? system.winning_combinations
+        : [],
+      systemEvents: Array.isArray(system.system_events)
+        ? system.system_events
         : []
     };
   }
@@ -1596,6 +1599,80 @@
     `;
   }
 
+  function renderSystemSummary(aggregate) {
+    const groups = aggregate.systemEvents || [];
+
+    if (!groups.length) {
+      return `
+        <div class="system-full">
+          <div class="system-full-head">
+            <strong>🎯 Riepilogo sistema</strong>
+          </div>
+          <div class="empty-state" style="padding:10px">
+            Nessuna selezione trovata per il sistema.
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="system-full">
+        <div class="system-full-head">
+          <strong>🎯 Riepilogo sistema</strong>
+          <small>
+            ${groups.length} ${groups.length === 1 ? "evento" : "eventi"} ·
+            combinazioni non caricate
+          </small>
+        </div>
+
+        <div class="system-full-events">
+          ${groups.map(group => {
+            const event = group.event || {};
+            const selections = Array.isArray(group.selections)
+              ? group.selections
+              : [];
+
+            const match =
+              event.home_team && event.away_team
+                ? `${event.home_team} - ${event.away_team}`
+                : `Evento #${group.event_id ?? "—"}`;
+
+            const score =
+              event.home_score != null && event.away_score != null
+                ? `${event.home_score}-${event.away_score}`
+                : (event.status || "NS");
+
+            const eventMeta = event.match_date
+              ? `${formatKickoff(event.match_date)} · ${escapeHtml(score)}`
+              : "";
+
+            return `
+              <div class="system-full-event">
+                <div class="system-full-match">
+                  <strong>${escapeHtml(match)}</strong>
+                  <small>${eventMeta}</small>
+                </div>
+
+                <div class="system-full-choices">
+                  ${selections.map(selection => `
+                    <span
+                      class="system-choice ${escapeHtml(selection.result || "pending")}"
+                      title="${escapeHtml(selection.market_name || "")}"
+                    >
+                      <strong>${escapeHtml(selection.selection_name || "—")}</strong>
+                      <span class="choice-market">${escapeHtml(selection.market_name || "")}</span>
+                      <span class="choice-odd">x${fmtOdd(selection.odd || 0)}</span>
+                    </span>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+    `;
+  }
+
   function renderSystem(system) {
     const aggregate = systemAggregate(system);
     const status = statusInfoForSystem(aggregate);
@@ -1690,6 +1767,8 @@
               ? `<span class="system-payout-note">Pagamento complessivo: <strong>🪙 ${formatChips(aggregate.payoutAmount)}</strong></span>`
               : ""}
           </div>
+
+          ${renderSystemSummary(aggregate)}
 
           ${winners.length
             ? `
