@@ -1057,11 +1057,42 @@
     }
   }
 
+  // Solo per mostrare lo stato degli esiti. Il pagamento è calcolato esclusivamente dal server.
+  function compactSelectionResult(s, ev) {
+    const status = ev?.status;
+    if (["CANC", "ABD", "AWD", "WO"].includes(status)) return "void";
+    if (!["FT", "AET", "PEN"].includes(status)) return "pending";
+    const mid = String(s.market_id), out = String(s.outcome_id);
+    const ht = mid === "10208";
+    const h = Number(ht ? ev.halftime_home_score : ev.home_score);
+    const a = Number(ht ? ev.halftime_away_score : ev.away_score);
+    if ((ht ? ev.halftime_home_score : ev.home_score) == null ||
+        (ht ? ev.halftime_away_score : ev.away_score) == null) return "pending";
+    const total = h + a;
+    let win;
+    if (mid === "101") win = (h > a ? "101" : h === a ? "102" : "103") === out;
+    else if (mid === "104") win = (h > 0 && a > 0 ? "104" : "105") === out;
+    else if (["108","1010","1012","1014"].includes(mid)) {
+      const threshold = {"108":2,"1010":3,"1012":4,"1014":5}[mid];
+      const overId = mid;
+      const underId = {"108":"109","1010":"1011","1012":"1013","1014":"1015"}[mid];
+      win = (total >= threshold ? overId : underId) === out;
+    } else if (mid === "101902") win = out === "101902" ? h >= a : out === "101903" ? h !== a : a >= h;
+    else if (mid === "10222") win = (total % 2 ? "10222" : "10223") === out;
+    else if (mid === "10214") {
+      if (h === a) return "void";
+      win = (h > a ? "10214" : "10215") === out;
+    } else if (mid === "10316") win = ((h > a && a === 0) ? "10316" : "10317") === out;
+    else if (mid === "10318") win = ((a > h && h === 0) ? "10318" : "10319") === out;
+    else return "pending";
+    return win ? "won" : "lost";
+  }
+
   async function loadTickets() {
     const userId = state.session.user.id;
 
     const [systemsResult, regularTicketsResult] = await Promise.all([
-      supabase.rpc("get_my_betting_system_summaries"),
+      supabase.rpc("get_my_betting_system_summaries_v2"),
 
       supabase
         .from("betting_tickets")
@@ -1086,7 +1117,9 @@
           payout_amount,
           payout_wallet_transaction_id,
           system_id,
-          system_combination_no
+          system_combination_no,
+          ticket_format_version,
+          ticket_data
         `)
         .eq("user_id", userId)
         .is("system_id", null)
@@ -1105,6 +1138,37 @@
       const data = row?.summary ?? row;
       return data || {};
     });
+    // Costruiamo il riepilogo dalle sole selezioni del JSONB.
+    const v2EventIds = [...new Set(state.systems.flatMap(sys =>
+      (sys.ticket_data?.groups || []).map(group => Number(group.event_id))
+    ))].filter(Number.isFinite);
+    const v2Events = new Map();
+    for (let i = 0; i < v2EventIds.length; i += 150) {
+      const { data, error } = await supabase.from("betting_events")
+        .select("id,home_team,away_team,league_name,match_date,status,home_score,away_score,halftime_home_score,halftime_away_score")
+        .in("id", v2EventIds.slice(i, i + 150));
+      if (error) throw error;
+      for (const event of data || []) v2Events.set(Number(event.id), event);
+    }
+    for (const sys of state.systems) {
+      const groups = sys.ticket_data?.groups || [];
+      sys.system_events = groups.map(group => {
+        const ev = v2Events.get(Number(group.event_id)) || {id:group.event_id};
+        return {
+          event_id: Number(group.event_id), event: ev,
+          selections: (group.selections || []).map(selection => ({
+            ...selection, result: compactSelectionResult(selection, ev)
+          }))
+        };
+      });
+      const settlement = sys.ticket_data?.settlement || {};
+      sys.won_combinations = Number(settlement.won_combinations || 0);
+      sys.void_combinations = Number(settlement.void_combinations || 0);
+      sys.pending_combinations = sys.status === "pending" ? Number(sys.combination_count || 0) : 0;
+      sys.lost_combinations = sys.status === "pending" ? 0 : Math.max(0,
+        Number(sys.combination_count || 0) - Number(settlement.paying_combinations || 0));
+      sys.winning_combinations = [];
+    }
 
     /*
      * state.tickets contiene SOLO le schedine normali.
@@ -1730,6 +1794,11 @@
               ${escapeHtml(status.label)}
             </span>
 
+            ${aggregate.status === "won" && system.ticket_id
+              ? (state.savedTicketIds.has(Number(system.ticket_id))
+                ? `<button class="save-winning-btn saved" disabled>⭐ Sistema salvato</button>`
+                : `<button class="save-winning-btn" type="button" data-save-winning-ticket="${system.ticket_id}">⭐ Salva sistema vincente</button>`)
+              : ""}
             <button
               class="small-btn"
               type="button"
@@ -1929,6 +1998,7 @@
     const snapshot = saved?.snapshot || {};
     const ticket = snapshot.ticket || {};
     const savedLegs = Array.isArray(snapshot.legs) ? snapshot.legs : [];
+    const compactGroups = ticket.ticket_data?.groups || [];
     const system = snapshot.system || null;
 
     const isSystemCombination =
@@ -2003,7 +2073,12 @@
             </div>
           `;
         }).join("")
-      : `<div class="empty-state" style="padding:14px">Nessuna selezione nello snapshot.</div>`;
+      : compactGroups.length
+        ? compactGroups.map(group => (group.selections || []).map(sel => `
+          <div class="leg-row"><div class="leg-match"><strong>Evento #${escapeHtml(group.event_id)}</strong></div>
+          <div class="leg-selection">${escapeHtml(sel.selection_name || "—")}<small>${escapeHtml(sel.market_name || "")}</small></div>
+          <div class="leg-odd">x${fmtOdd(sel.odd)}</div></div>`).join("")).join("")
+        : `<div class="empty-state" style="padding:14px">Nessuna selezione nello snapshot.</div>`;
 
     return `
       <article class="ticket-card saved-ticket${expanded ? " expanded" : ""}">

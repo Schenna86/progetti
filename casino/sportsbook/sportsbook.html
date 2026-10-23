@@ -1254,7 +1254,11 @@
     maximumFractionDigits: 3
   });
 
-  const MAX_TOTAL_ODD = 50000;
+  const MAX_TOTAL_ODD = 1000000;
+  const MAX_SYSTEM_COMBINATIONS = 100000;
+  const MAX_SYSTEM_EVENTS = 30;
+  const MAX_SYSTEM_STAKE_PER_COMBINATION = 1000000;
+  const MAX_BIGINT_SAFE_STAKE = 9000000000000;
 
   const MULTIPLE_BONUSES = {
     5: 6,
@@ -1681,103 +1685,36 @@
     return [...groups.values()];
   }
 
-  function generateSystemCombinations(selections = state.selections) {
-    const groups = groupSelectionsByEvent(selections);
-
-    if (!groups.length) return [];
-
-    let combinations = [[]];
-
-    for (const group of groups) {
-      const next = [];
-
-      for (const combination of combinations) {
-        for (const selection of group) {
-          next.push([...combination, selection]);
-
-          if (next.length > 500) {
-            return next;
-          }
-        }
-      }
-
-      combinations = next;
-    }
-
-    return combinations;
-  }
-
+  // Calcolo O(n) sui gruppi: non genera mai 100.000 combinazioni nel browser.
   function calculateSystem(selections = state.selections, stakePerCombination = 0) {
     const groups = groupSelectionsByEvent(selections);
     const eventCount = groups.length;
     const selectionCount = selections.length;
-
-    const combinationCount = groups.reduce(
-      (total, group) => total * Math.max(1, group.length),
-      groups.length ? 1 : 0
-    );
-
-    const valid =
-      eventCount >= 2
-      && selectionCount >= 3
-      && combinationCount >= 2
-      && combinationCount <= 500;
-
+    const combinationCount = groups.reduce((total, group) => {
+      const next = total * group.length;
+      return next > MAX_SYSTEM_COMBINATIONS ? MAX_SYSTEM_COMBINATIONS + 1 : next;
+    }, eventCount ? 1 : 0);
+    const valid = eventCount >= 2 && eventCount <= MAX_SYSTEM_EVENTS
+      && selectionCount >= 3 && selectionCount <= 3000
+      && combinationCount >= 2 && combinationCount <= MAX_SYSTEM_COMBINATIONS;
     const bonusPercent = sportsBonusPercent(eventCount);
     const bonusMultiplier = 1 + bonusPercent / 100;
-
-    let minFinalOdd = 0;
-    let maxFinalOdd = 0;
-    let minPotentialWin = 0;
-    let maxPotentialWin = 0;
-    let hasOddOverLimit = false;
-
-    const combinations = combinationCount <= 500
-      ? generateSystemCombinations(selections)
-      : [];
-
-    combinations.forEach((combination, index) => {
-      const baseOdd = combination.reduce(
-        (total, selection) => total * Number(selection.odd || 0),
-        1
-      );
-
-      const finalOdd = baseOdd * bonusMultiplier;
-
-      if (index === 0 || finalOdd < minFinalOdd) minFinalOdd = finalOdd;
-      if (finalOdd > maxFinalOdd) maxFinalOdd = finalOdd;
-      if (finalOdd > MAX_TOTAL_ODD) hasOddOverLimit = true;
-
-      if (stakePerCombination > 0) {
-        const potentialWin =
-          Math.floor(stakePerCombination * finalOdd);
-
-        if (index === 0 || potentialWin < minPotentialWin) {
-          minPotentialWin = potentialWin;
-        }
-
-        if (potentialWin > maxPotentialWin) {
-          maxPotentialWin = potentialWin;
-        }
-      }
-    });
-
+    const minBaseOdd = groups.reduce((p, group) => p * Math.min(...group.map(x => Number(x.odd))), 1);
+    const maxBaseOdd = groups.reduce((p, group) => p * Math.max(...group.map(x => Number(x.odd))), 1);
+    const minFinalOdd = minBaseOdd * bonusMultiplier;
+    const maxUncappedOdd = maxBaseOdd * bonusMultiplier;
+    const maxFinalOdd = Math.min(maxUncappedOdd, MAX_TOTAL_ODD);
+    const totalStake = stakePerCombination * combinationCount;
+    const stakeValid = Number.isSafeInteger(stakePerCombination)
+      && stakePerCombination >= 1 && stakePerCombination <= MAX_SYSTEM_STAKE_PER_COMBINATION
+      && Number.isSafeInteger(totalStake) && totalStake <= MAX_BIGINT_SAFE_STAKE;
     return {
-      groups,
-      combinations,
-      eventCount,
-      selectionCount,
-      combinationCount,
-      valid,
-      bonusPercent,
-      bonusMultiplier,
-      minFinalOdd,
-      maxFinalOdd,
-      hasOddOverLimit,
-      stakePerCombination,
-      totalStake: Math.floor(stakePerCombination * combinationCount),
-      minPotentialWin,
-      maxPotentialWin
+      groups, combinations: [], eventCount, selectionCount, combinationCount, valid,
+      bonusPercent, bonusMultiplier, minFinalOdd: Math.min(minFinalOdd, MAX_TOTAL_ODD),
+      maxFinalOdd, hasOddOverLimit: false, stakePerCombination, totalStake,
+      minPotentialWin: stakePerCombination > 0 ? Math.floor(stakePerCombination * Math.min(minFinalOdd, MAX_TOTAL_ODD)) : 0,
+      maxPotentialWin: stakePerCombination > 0 ? Math.floor(stakePerCombination * maxFinalOdd) : 0,
+      stakeValid
     };
   }
 
@@ -1970,10 +1907,6 @@
       return;
     }
 
-    if (state.selections.length >= 30) {
-      toast("Massimo 30 selezioni per schedina.", true);
-      return;
-    }
 
     let candidate = [...state.selections];
 
@@ -1988,24 +1921,29 @@
         candidate.push(nextSelection);
       }
 
+      if (candidate.length > MAX_SYSTEM_EVENTS) {
+        toast("Massimo 30 eventi per multipla.", true);
+        return;
+      }
       const calculation = calculateTicket(candidate);
 
       if (calculation.finalOdd > MAX_TOTAL_ODD) {
-        toast("La selezione porterebbe la quota oltre il limite x50.000.", true);
+        toast("La selezione porterebbe la quota oltre il limite x1.000.000.", true);
         return;
       }
     } else {
       candidate.push(nextSelection);
-
       const system = calculateSystem(candidate);
-
-      if (system.combinationCount > 500) {
-        toast("Il sistema supererebbe il limite di 500 combinazioni.", true);
+      if (system.eventCount > MAX_SYSTEM_EVENTS) {
+        toast("Massimo 30 eventi distinti per sistema.", true);
         return;
       }
-
-      if (system.hasOddOverLimit) {
-        toast("Almeno una combinazione supererebbe il limite x50.000.", true);
+      if (system.selectionCount > 3000) {
+        toast("Massimo 3.000 esiti complessivi per sistema.", true);
+        return;
+      }
+      if (system.combinationCount > MAX_SYSTEM_COMBINATIONS) {
+        toast("Il sistema supererebbe il limite di 100.000 combinazioni.", true);
         return;
       }
     }
@@ -2037,7 +1975,7 @@
     if (state.betMode === "system") {
       const system = calculateSystem();
       $("#mobileSlipCount").textContent =
-        `🎫 Sistema · ${count} selezioni`;
+        `🎫 Sistema · ${system.eventCount} eventi · ${count} esiti`;
 
       $("#mobileSlipMetric1Label").textContent = "Combinazioni";
       $("#mobileSlipMetric2Label").textContent = "Bonus/combo";
@@ -2097,7 +2035,7 @@
 
     const modeLabel = state.betMode === "system" ? "Sistema" : "Multipla";
     $("#slipCount").textContent =
-      `${modeLabel} · ${count} ${count === 1 ? "selezione" : "selezioni"}`;
+      `${modeLabel} · ${state.betMode === "system" ? groupSelectionsByEvent().length + " eventi · " : ""}${count} ${count === 1 ? "selezione" : "selezioni"}`;
 
     renderMobileSlipSummary();
 
@@ -2163,14 +2101,9 @@
         )
       );
 
-      const rangeLabel =
-        system.combinations.length
-          ? (
-              Math.abs(system.maxFinalOdd - system.minFinalOdd) < 0.000001
-                ? `x${fmtOdd(system.maxFinalOdd)}`
-                : `x${fmtOdd(system.minFinalOdd)} – x${fmtOdd(system.maxFinalOdd)}`
-            )
-          : "—";
+      const rangeLabel = Math.abs(system.maxFinalOdd - system.minFinalOdd) < 0.000001
+        ? `x${fmtOdd(system.maxFinalOdd)}`
+        : `x${fmtOdd(system.minFinalOdd)} – x${fmtOdd(system.maxFinalOdd)}`;
 
       host.innerHTML = `
         <div id="selectionList" class="selection-list">
@@ -2206,7 +2139,7 @@
               <strong>${rangeLabel}</strong>
             </div>
 
-            <div class="limit-bar" title="Quota massima per combinazione x50.000">
+            <div class="limit-bar" title="Quota massima per combinazione x1.000.000">
               <div class="limit-fill" style="width:${limitPercent}%"></div>
             </div>
 
@@ -2320,7 +2253,7 @@
             <strong>x${fmtOdd(calc.finalOdd)}</strong>
           </div>
 
-          <div class="limit-bar" title="Limite quota x50.000">
+          <div class="limit-bar" title="Limite quota x1.000.000">
             <div class="limit-fill" style="width:${limitPercent}%"></div>
           </div>
         </div>
@@ -2401,7 +2334,11 @@
 
     switch (message) {
       case "MAX_ODD_EXCEEDED":
-        return "Quota complessiva superiore al limite x50.000.";
+        return "Quota complessiva superiore al limite x1.000.000.";
+      case "POTENTIAL_OVERFLOW":
+        return "Vincita potenziale oltre il limite numerico consentito.";
+      case "INVALID_STAKE":
+        return "Puntata non valida o superiore al limite.";
       case "INSUFFICIENT_CHIPS":
         return "Fiche insufficienti.";
       case "EVENT_STARTED":
@@ -2416,10 +2353,14 @@
         return "La stessa selezione è già presente.";
       case "INVALID_SYSTEM":
         return "Il sistema deve avere almeno 2 eventi e almeno una partita con più selezioni.";
+      case "INVALID_EVENT_COUNT":
+        return "Servono da 2 a 30 eventi distinti.";
+      case "INVALID_SELECTION_COUNT":
+        return "Da 3 a 3.000 esiti per sistema.";
       case "TOO_MANY_SELECTIONS":
-        return "Massimo 30 selezioni complessive.";
+        return "Massimo 30 eventi.";
       case "TOO_MANY_COMBINATIONS":
-        return "Il sistema supera il limite di 500 combinazioni.";
+        return "Il sistema supera il limite di 100.000 combinazioni.";
       default:
         return error?.details || message;
     }
@@ -2431,10 +2372,10 @@
     const input = $("#stakeInput");
     const stake = Math.floor(Number(input?.value || 0));
 
-    if (!Number.isInteger(stake) || stake <= 0) {
+    if (!Number.isSafeInteger(stake) || stake <= 0) {
       toast(
         state.betMode === "system"
-          ? "Inserisci una puntata valida per combinazione."
+          ? "Inserisci una puntata valida per combinazione (max 1.000.000)."
           : "Inserisci una puntata valida.",
         true
       );
@@ -2452,13 +2393,12 @@
         return;
       }
 
-      if (system.combinationCount > 500) {
-        toast("Il sistema supera il limite di 500 combinazioni.", true);
+      if (system.combinationCount > MAX_SYSTEM_COMBINATIONS) {
+        toast("Il sistema supera il limite di 100.000 combinazioni.", true);
         return;
       }
-
-      if (system.hasOddOverLimit) {
-        toast("Almeno una combinazione supera il limite x50.000.", true);
+      if (!system.stakeValid) {
+        toast("Puntata per combinazione: da 1 a 1.000.000 fiche.", true);
         return;
       }
 
@@ -2471,7 +2411,7 @@
       renderBetslip();
 
       try {
-        const { data, error } = await supabase.rpc("place_system_bet", {
+        const { data, error } = await supabase.rpc("place_system_bet_v2", {
           p_stake_per_combination: stake,
           p_request_id: crypto.randomUUID(),
           p_selections: state.selections.map(selection => ({
@@ -2491,7 +2431,7 @@
         balanceSyncChannel?.postMessage({ type: "balance-changed" });
 
         toast(
-          `Sistema #${data.system_id} piazzato · ${data.combination_count} combinazioni · puntata totale ${formatChips(data.total_stake)} · potenziale ${formatChips(system.minPotentialWin)}–${formatChips(system.maxPotentialWin)} fiche.`
+          `Sistema #${data.system_id} piazzato · ticket #${data.ticket_id} · ${data.combination_count} combinazioni · puntata ${formatChips(data.total_stake)} fiche.`
         );
 
         state.selections = [];
@@ -2509,7 +2449,7 @@
         }
 
       } catch (error) {
-        console.error("place_system_bet:", error);
+        console.error("place_system_bet_v2:", error);
         toast(readableRpcError(error), true);
       } finally {
         state.busy = false;
@@ -2527,7 +2467,7 @@
     const calculation = calculateTicket();
 
     if (calculation.finalOdd > MAX_TOTAL_ODD) {
-      toast("Quota complessiva superiore al limite x50.000.", true);
+      toast("Quota complessiva superiore al limite x1.000.000.", true);
       return;
     }
 
