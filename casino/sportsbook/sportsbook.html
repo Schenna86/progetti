@@ -1257,8 +1257,8 @@
   const MAX_TOTAL_ODD = 1000000;
   const MAX_SYSTEM_COMBINATIONS = 100000;
   const MAX_SYSTEM_EVENTS = 30;
-  const MAX_SYSTEM_STAKE_PER_COMBINATION = 1000000;
-  const MAX_BIGINT_SAFE_STAKE = 9000000000000;
+  const MAX_SYSTEM_STAKE_PER_COMBINATION = 1000000000;
+  const MAX_BIGINT_SAFE_STAKE = Number.MAX_SAFE_INTEGER;
 
   const MULTIPLE_BONUSES = {
     5: 6,
@@ -1932,6 +1932,17 @@
         return;
       }
     } else {
+      const existingOnEvent = candidate.filter(
+        selection => Number(selection.eventId) === eventId
+      );
+      if (existingOnEvent.some(selection => String(selection.marketId) !== nextSelection.marketId)) {
+        toast("Per la stessa partita il sistema ammette un solo mercato.", true);
+        return;
+      }
+      if (nextSelection.marketId === "101902" && existingOnEvent.length > 0) {
+        toast("Per la Doppia Chance è ammesso un solo esito per partita.", true);
+        return;
+      }
       candidate.push(nextSelection);
       const system = calculateSystem(candidate);
       if (system.eventCount > MAX_SYSTEM_EVENTS) {
@@ -2145,7 +2156,7 @@
 
             <div class="system-hint${system.valid ? " ready" : ""}">
               ${system.valid
-                ? "Sistema pronto: ogni combinazione contiene una sola selezione per evento."
+                ? "Sistema pronto: esiti dello stesso mercato per partita, una sola combinazione vincente."
                 : "Per creare un sistema servono almeno 2 eventi e almeno una partita con più di una selezione."}
             </div>
           </div>
@@ -2156,6 +2167,7 @@
               id="stakeInput"
               class="stake-input"
               type="number"
+              max="1000000000"
               min="1"
               step="1"
               inputmode="numeric"
@@ -2375,7 +2387,7 @@
     if (!Number.isSafeInteger(stake) || stake <= 0) {
       toast(
         state.betMode === "system"
-          ? "Inserisci una puntata valida per combinazione (max 1.000.000)."
+          ? "Inserisci una puntata valida per combinazione (max 1.000.000.000)."
           : "Inserisci una puntata valida.",
         true
       );
@@ -2398,7 +2410,7 @@
         return;
       }
       if (!system.stakeValid) {
-        toast("Puntata per combinazione: da 1 a 1.000.000 fiche.", true);
+        toast("Puntata per combinazione: da 1 a 1.000.000.000 fiche.", true);
         return;
       }
 
