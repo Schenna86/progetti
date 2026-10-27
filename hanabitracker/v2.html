@@ -899,7 +899,7 @@
 		
 		
 
-        <div class="version">Versione prova 2.6 · knowledge indizi + giro finale automatico</div>
+        <div class="version">Versione prova 2.7 · indizi Advisor unificati con Registra indizio</div>
     </main>
 
     <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
@@ -1041,7 +1041,7 @@ let panelPreferences = {
           let probabilityCache = [];
           let quickIndex = null;
           let actionDraft = { type: null, handIndex: null, color: null, number: null };
-          let opponentClueDraft = { playerId: null, hintType: null, value: null };
+          let opponentClueDraft = { playerId: null, hintType: null, value: null, convention: null };
           let lastAdvisorRecommendations = [];
           let selectedPhysicalCard = { cardId: null, source: null, playerId: null };
           let toastTimer = null;
@@ -2302,10 +2302,18 @@ function togglePanelPreference(panelName) {
               toast("Giocatore dell'indizio non trovato.");
               return;
             }
-            registerOpponentClue(player.id, action.hintType, action.value, action.convention || null);
+
+            // IMPORTANT: l'indizio suggerito dall'Advisor passa dallo stesso identico
+            // flusso di "Registra indizio". Il modal viene solo precompilato.
+            openOpponentClueModal(player.id, {
+              hintType: action.hintType,
+              value: action.value,
+              convention: action.convention || null,
+              fromAdvisor: true
+            });
           }
 
-          function openOpponentClueModal(playerId) {
+          function openOpponentClueModal(playerId, preset = null) {
             const player = findOpponent(playerId);
             if (!player) return;
             if (state.clues <= 0) {
@@ -2317,13 +2325,26 @@ function togglePanelPreference(panelName) {
               return;
             }
 
-            opponentClueDraft = { playerId, hintType: null, value: null };
+            const presetHintType = preset?.hintType || null;
+            const presetValue = presetHintType === "number"
+              ? String(preset?.value ?? "")
+              : (preset?.value ?? null);
+
+            opponentClueDraft = {
+              playerId,
+              hintType: presetHintType,
+              value: presetValue,
+              convention: preset?.convention || null
+            };
+
             document.getElementById("opponent-clue-title").textContent = `Registra indizio a ${player.name}`;
-            document.getElementById("opponent-clue-subtitle").textContent = "Il tracker aggiorna automaticamente cosa sa il giocatore e scala un indizio.";
+            document.getElementById("opponent-clue-subtitle").textContent = preset?.fromAdvisor
+              ? "Indizio suggerito dall'Advisor: confermalo qui. Verrà registrato esattamente come un indizio manuale, conservando anche l'eventuale convenzione PLAY/SAVE."
+              : "Il tracker aggiorna automaticamente cosa sa il giocatore e scala un indizio.";
 
             document.getElementById("opponent-clue-colors").innerHTML = COLORI_BASE.map(color => `
               <button
-                class="choice ${colorClass(color)}"
+                class="choice ${presetHintType === "color" && presetValue === color ? "active" : ""} ${colorClass(color)}"
                 data-opponent-clue-color="${color}"
                 style="${backgroundStyle(color)} color:${textColorFor(color)}"
                 onclick="selectOpponentClue('color', '${color}')"
@@ -2332,7 +2353,7 @@ function togglePanelPreference(panelName) {
 
             document.getElementById("opponent-clue-numbers").innerHTML = NUMERI.map(number => `
               <button
-                class="choice"
+                class="choice ${presetHintType === "number" && presetValue === String(number) ? "active" : ""}"
                 data-opponent-clue-number="${number}"
                 onclick="selectOpponentClue('number', '${number}')"
               >${number}</button>
@@ -2344,12 +2365,15 @@ function togglePanelPreference(panelName) {
 
           function closeOpponentClueModal() {
             document.getElementById("opponent-clue-overlay").classList.remove("open");
-            opponentClueDraft = { playerId: null, hintType: null, value: null };
+            opponentClueDraft = { playerId: null, hintType: null, value: null, convention: null };
           }
 
           function selectOpponentClue(hintType, value) {
             opponentClueDraft.hintType = hintType;
             opponentClueDraft.value = hintType === "number" ? String(value) : value;
+            // Se l'utente cambia manualmente l'indizio precompilato dall'Advisor,
+            // la convenzione originaria non è più valida per il nuovo indizio.
+            opponentClueDraft.convention = null;
 
             document.querySelectorAll("[data-opponent-clue-color]").forEach(button => {
               button.classList.toggle("active", hintType === "color" && button.dataset.opponentClueColor === value);
@@ -2391,10 +2415,10 @@ function togglePanelPreference(panelName) {
           }
 
           function confirmOpponentClue() {
-            const { playerId, hintType, value } = opponentClueDraft;
+            const { playerId, hintType, value, convention } = opponentClueDraft;
             if (!playerId || !hintType) return;
             closeOpponentClueModal();
-            registerOpponentClue(playerId, hintType, value, null);
+            registerOpponentClue(playerId, hintType, value, convention || null);
           }
 
           function assistantRecommendation() {
