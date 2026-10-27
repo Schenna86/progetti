@@ -899,7 +899,7 @@
 		
 		
 
-        <div class="version">Versione prova 2.7 · indizi Advisor unificati con Registra indizio</div>
+        <div class="version">Versione prova 2.8 · riconoscimento automatico indizi Advisor</div>
     </main>
 
     <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
@@ -2410,15 +2410,66 @@ function togglePanelPreference(panelName) {
               return;
             }
 
-            preview.innerHTML = `<strong>${opponentClueDraft.hintType === "color" ? "Colore" : "Numero"} “${escapeHtml(shownValue)}”</strong><br>Tocca le carte in posizione ${matches.map(x => x.index + 1).join(", ")}.`;
+            const matchedAdvisor = matchingAdvisorHintRecommendation(
+              opponentClueDraft.playerId,
+              opponentClueDraft.hintType,
+              opponentClueDraft.value
+            );
+            const matchedIntent = matchedAdvisor?.action?.convention?.intent || null;
+            const advisorMatchHtml = matchedAdvisor
+              ? `<br><span class="subtle">✓ Coincide con il suggerimento Advisor #${Number(matchedAdvisor.rank || 1)}${matchedIntent ? ` · convenzione ${escapeHtml(matchedIntent)}` : ""}</span>`
+              : "";
+
+            preview.innerHTML = `<strong>${opponentClueDraft.hintType === "color" ? "Colore" : "Numero"} “${escapeHtml(shownValue)}”</strong><br>Tocca le carte in posizione ${matches.map(x => x.index + 1).join(", ")}.${advisorMatchHtml}`;
             confirm.disabled = false;
+          }
+
+          function matchingAdvisorHintRecommendation(playerId, hintType, value) {
+            const opponentIndex = state.opponents.findIndex(player => player.id === playerId);
+            if (opponentIndex < 0) return null;
+
+            const targetIndex = opponentIndex + 1;
+            const normalizedValue = hintType === "number" ? String(value) : String(value);
+
+            const matches = lastAdvisorRecommendations
+              .filter(rec => {
+                const action = rec?.action;
+                if (!action || action.type !== "HINT") return false;
+                if (Number(action.targetIndex) !== targetIndex) return false;
+                if (action.hintType !== hintType) return false;
+                return String(action.value) === normalizedValue;
+              })
+              .sort((a, b) => {
+                if (Boolean(a.selected) !== Boolean(b.selected)) return a.selected ? -1 : 1;
+                return Number(a.rank || 999) - Number(b.rank || 999);
+              });
+
+            return matches[0] || null;
+          }
+
+          function resolveOpponentClueConvention(playerId, hintType, value, explicitConvention = null) {
+            if (explicitConvention) return explicitConvention;
+
+            const matchedRecommendation = matchingAdvisorHintRecommendation(playerId, hintType, value);
+            return matchedRecommendation?.action?.convention || null;
           }
 
           function confirmOpponentClue() {
             const { playerId, hintType, value, convention } = opponentClueDraft;
             if (!playerId || !hintType) return;
+
+            // Anche un indizio inserito dal pulsante manuale deve essere riconosciuto
+            // dall'Advisor. Se coincide con una raccomandazione attualmente visibile,
+            // recuperiamo automaticamente la stessa convenzione PLAY/SAVE.
+            const resolvedConvention = resolveOpponentClueConvention(
+              playerId,
+              hintType,
+              value,
+              convention || null
+            );
+
             closeOpponentClueModal();
-            registerOpponentClue(playerId, hintType, value, convention || null);
+            registerOpponentClue(playerId, hintType, value, resolvedConvention);
           }
 
           function assistantRecommendation() {
