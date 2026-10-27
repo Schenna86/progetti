@@ -711,6 +711,11 @@
     font-size: .76rem;
   }
 }
+        .bonus-items {display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+        .bonus-items button {text-align:left;white-space:normal}
+        .bonus-items button:disabled {opacity:.55}
+        .bonus-items .bonus-available {border:1px solid #66bb6a;background:#24502b}
+        .bonus-items .bonus-used {background:#424242;opacity:.55}
         .toast {
           position: fixed;
           left: 50%;
@@ -811,6 +816,12 @@
 
 
 
+<section class="panel" id="panel-bonuses" style="display:none">
+  <h2>Bonus Espansione</h2>
+  <div id="bonus-summary" class="subtle"></div>
+  <div id="bonus-items" class="bonus-items"></div>
+</section>
+
 <section class="panel" id="panel-assistant">
   <h2>Assistente</h2>
   <div class="assistant" id="assistant"></div>
@@ -899,9 +910,17 @@
 		
 		
 
-        <div class="version">Versione prova 2.8 · riconoscimento automatico indizi Advisor</div>
+        <div class="version">Versione prova 2.10 · Classico / Espansione</div>
     </main>
 
+    <div id="bonus-overlay" class="modal-overlay" onclick="if(event.target===this)closeBonusModal()">
+      <div class="modal">
+        <h3>Scala completata: registra la carta bonus</h3>
+        <div class="subtle">Pescate la carta bonus dal vivo e selezionate qui quella uscita. Nessuna estrazione automatica.</div>
+        <div id="bonus-choices" class="physical-action-grid"></div>
+        <div class="modal-footer"><button onclick="closeBonusModal()">Più tardi</button></div>
+      </div>
+    </div>
     <div id="quick-overlay" class="modal-overlay" onclick="if(event.target===this) closeQuickModal()">
         <div class="modal">
             <h3>Imposta rapidamente la carta</h3>
@@ -994,6 +1013,7 @@
           const cartePerGiocatore = numGiocatori <= 3 ? 5 : 4;
           const arcobalenoAttivo = ["on", "true", "1"].includes(params.get("arcobaleno"));
           const resetMode = params.get("reset") || "sinistra";
+          const expansionMode = params.get("modalita") === "espansione";
         
           const COLOR_META = {
             Gia: { name: "Giallo", css: "gold" },
@@ -1010,8 +1030,9 @@
           const COLORI = arcobalenoAttivo ? [...COLORI_BASE, "Arcobaleno"] : [...COLORI_BASE];
           const NUMERI = ["1", "2", "3", "4", "5"];
           const COPIE = { "1": 3, "2": 2, "3": 2, "4": 2, "5": 1 };
-          const STORAGE_KEY = `hanabiTrackerTableV3:${numGiocatori}:${arcobalenoAttivo}:${resetMode}`;
+          const STORAGE_KEY = `hanabiTrackerTableV3:${numGiocatori}:${arcobalenoAttivo}:${resetMode}:${expansionMode ? "espansione" : "classico"}`;
           const LEGACY_STORAGE_KEY = `hanabiTrackerV2:${numGiocatori}:${arcobalenoAttivo}:${resetMode}`;
+          const PREVIOUS_STORAGE_KEY = `hanabiTrackerTableV3:${numGiocatori}:${arcobalenoAttivo}:${resetMode}`;
         const PANEL_PREFS_KEY = "hanabiTrackerPanelPreferences";
 
 const PANEL_CONFIG = {
@@ -1146,6 +1167,10 @@ let panelPreferences = {
               strikes: 0,
               deckRemaining: Math.max(0, deckSize - initialDeal),
               finalTurnsRemaining: null,
+              bonusDrawn: [],
+              bonusAvailable: [],
+              pendingBonuses: 0,
+              freeClueType: null,
               ownDrawCounter: 0,
               started: false
             };
@@ -1298,6 +1323,10 @@ function togglePanelPreference(panelName) {
             state.played ??= [];
             state.discarded ??= [];
             state.fireworks ??= emptyFireworks();
+            state.bonusDrawn = Array.isArray(state.bonusDrawn) ? state.bonusDrawn : [];
+            state.bonusAvailable = Array.isArray(state.bonusAvailable) ? state.bonusAvailable : [];
+            state.pendingBonuses = Math.max(0, Number(state.pendingBonuses || 0));
+            state.freeClueType ??= null;
             state.opponents ??= createOpponents();
             state.clues = Number.isFinite(state.clues) ? state.clues : 8;
             state.strikes = Number.isFinite(state.strikes) ? state.strikes : 0;
@@ -1472,7 +1501,7 @@ function togglePanelPreference(panelName) {
         
           function loadState() {
             try {
-              const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+              const raw = localStorage.getItem(STORAGE_KEY) || (!expansionMode ? (localStorage.getItem(PREVIOUS_STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY)) : null);
               if (!raw) return false;
               const parsed = JSON.parse(raw);
               state = parsed.state || parsed;
@@ -2148,7 +2177,8 @@ function togglePanelPreference(panelName) {
               deckRemaining: state.deckRemaining,
               finalTurnsRemaining: state.finalTurnsRemaining,
               finalCountdownArmed: false,
-              bonusMode: "original",
+              bonusMode: "original", // Advisor standard: bonus fisici gestiti dal tracker, senza simulare pescate ignote.
+              bonusRemaining: [],
               ownHandSize: state.hand.length,
               knowledge: state.hand.map(trackerKnowledge),
               otherHands
@@ -2266,7 +2296,7 @@ function togglePanelPreference(panelName) {
           function registerOpponentClue(playerId, hintType, value, convention = null) {
             const player = findOpponent(playerId);
             if (!player) return false;
-            if (state.clues <= 0) {
+            if (!canGiveClue(hintType)) {
               toast("Nessun indizio disponibile.");
               return false;
             }
@@ -2283,7 +2313,7 @@ function togglePanelPreference(panelName) {
             pushHistory();
             const touchedIndexes = applyOpponentClueKnowledge(player, hintType, value, convention);
             player.cluesReceived = Number(player.cluesReceived || 0) + 1;
-            consumeClueAndCompleteTurn();
+            finishClue(hintType);
             state.started = true;
             saveState();
             render();
@@ -2316,7 +2346,7 @@ function togglePanelPreference(panelName) {
           function openOpponentClueModal(playerId, preset = null) {
             const player = findOpponent(playerId);
             if (!player) return;
-            if (state.clues <= 0) {
+            if (state.clues <= 0 && !canGiveClue("color") && !canGiveClue("number")) {
               toast("Nessun indizio disponibile.");
               return;
             }
@@ -2568,7 +2598,115 @@ function togglePanelPreference(panelName) {
             renderAssistant();
           }
         
+          // I sei bonus unici sono pescati fisicamente, non dall'app.
+          const BONUS_TYPES = [
+            "CLUE", "CLUE_AND_STRIKE_RECOVERY", "FREE_COLOR_HINT",
+            "FREE_NUMBER_HINT", "PLAY_FROM_DISCARD", "RETURN_DISCARD_TO_DECK"
+          ];
+          const BONUS_LABELS = {
+            CLUE: "+1 indizio",
+            CLUE_AND_STRIKE_RECOVERY: "+1 indizio e recupera 1 errore",
+            FREE_COLOR_HINT: "Indizio colore gratuito",
+            FREE_NUMBER_HINT: "Indizio numero gratuito",
+            PLAY_FROM_DISCARD: "Gioca una carta dagli scarti",
+            RETURN_DISCARD_TO_DECK: "Rimetti uno scarto nel mazzo"
+          };
+          function bonusAvailable(type) {return expansionMode && state.bonusAvailable.includes(type);}
+          // I bonus di recupero sono utilizzabili soltanto se esiste AL MOMENTO
+          // dell'estrazione una carta negli scarti che può essere giocata.
+          function playableDiscardCards() {
+            return state.discarded.filter(card => isPlayable(card.color, card.number));
+          }
+          function isDiscardBonus(type) {
+            return type === "PLAY_FROM_DISCARD" || type === "RETURN_DISCARD_TO_DECK";
+          }
+          function completedFireworkBonus() {
+            if (!expansionMode) {
+              state.clues = Math.min(8, state.clues + 1);
+            } else {
+              state.pendingBonuses++;
+              queueMicrotask(() => openBonusModal());
+            }
+          }
+          function renderBonuses() {
+            const panel = document.getElementById("panel-bonuses");
+            if (!panel) return;
+            panel.style.display = expansionMode ? "" : "none";
+            if (!expansionMode) return;
+            const unpicked = BONUS_TYPES.filter(type => !state.bonusDrawn.includes(type));
+            document.getElementById("bonus-summary").textContent =
+              `Da registrare: ${state.pendingBonuses} · Carte bonus non pescate: ${unpicked.length} · Disponibili: ${state.bonusAvailable.length}` + (state.freeClueType ? ` · Indizio gratuito ${state.freeClueType === "color" ? "colore" : "numero"} pronto` : "");
+            document.getElementById("bonus-items").innerHTML =
+              (state.pendingBonuses ? `<button class="primary" onclick="openBonusModal()">Registra bonus pescato (${state.pendingBonuses})</button>` : "") +
+              BONUS_TYPES.filter(type => state.bonusDrawn.includes(type)).map(type => {
+                const available = bonusAvailable(type);
+                return `<button class="${available ? "bonus-available" : "bonus-used"}" ${available ? "" : "disabled"}
+                  onclick="activateBonus('${type}')">${escapeHtml(BONUS_LABELS[type])} · ${available ? "Da usare" : "Usato"}</button>`;
+              }).join("");
+          }
+          function openBonusModal() {
+            if (!expansionMode || !state.pendingBonuses) return;
+            const available = BONUS_TYPES.filter(type => !state.bonusDrawn.includes(type));
+            document.getElementById("bonus-choices").innerHTML = available.length
+              ? available.map(type => `<button onclick="registerDrawnBonus('${type}')">${escapeHtml(BONUS_LABELS[type])}</button>`).join("")
+              : `<span class="subtle">Sono già state registrate tutte e sei le carte bonus.</span>`;
+            document.getElementById("bonus-overlay").classList.add("open");
+          }
+          function closeBonusModal() {document.getElementById("bonus-overlay").classList.remove("open");}
+          function registerDrawnBonus(type) {
+            if (!expansionMode || !state.pendingBonuses || !BONUS_TYPES.includes(type) || state.bonusDrawn.includes(type)) return;
+            pushHistory();
+            state.pendingBonuses--;
+            state.bonusDrawn.push(type);
+            const lost = isDiscardBonus(type) && playableDiscardCards().length === 0;
+            if (!lost) state.bonusAvailable.push(type);
+            closeBonusModal();
+            state.started = true;
+            saveState(); render();
+            toast(lost
+              ? `Bonus perso: non ci sono carte giocabili negli scarti (${BONUS_LABELS[type]}).`
+              : `Bonus registrato: ${BONUS_LABELS[type]}.`);
+            if (state.pendingBonuses) queueMicrotask(openBonusModal);
+          }
+          function spendBonus(type) {
+            if (!bonusAvailable(type)) return false;
+            state.bonusAvailable.splice(state.bonusAvailable.indexOf(type),1);
+            return true;
+          }
+          function activateBonus(type) {
+            if (!bonusAvailable(type)) return;
+            if (type === "CLUE" || type === "CLUE_AND_STRIKE_RECOVERY") {
+              pushHistory(); spendBonus(type);
+              state.clues = Math.min(8, state.clues + 1);
+              if (type === "CLUE_AND_STRIKE_RECOVERY") state.strikes = Math.max(0, state.strikes - 1);
+              saveState(); render();
+            } else if (type === "FREE_COLOR_HINT" || type === "FREE_NUMBER_HINT") {
+              const selected = type === "FREE_COLOR_HINT" ? "color" : "number";
+              state.freeClueType = state.freeClueType === selected ? null : selected;
+              toast(`Bonus pronto: registra ora un indizio ${state.freeClueType === "color" ? "colore" : "numero"} senza spendere segnalini.`);
+              renderBonuses();
+            } else {
+              toast("Tocca una carta negli scarti e scegli l'azione del bonus.");
+              document.getElementById("discard-zone")?.scrollIntoView({behavior:"smooth",block:"center"});
+            }
+          }
+          function useFreeClue(hintType) {
+            const type = hintType === "color" ? "FREE_COLOR_HINT" : "FREE_NUMBER_HINT";
+            if (state.freeClueType === hintType && bonusAvailable(type)) {
+              spendBonus(type); state.freeClueType = null; return true;
+            }
+            return false;
+          }
+          function canGiveClue(hintType) {
+            return state.clues > 0 || (state.freeClueType === hintType && bonusAvailable(hintType === "color" ? "FREE_COLOR_HINT" : "FREE_NUMBER_HINT"));
+          }
+          function finishClue(hintType) {
+            if (!useFreeClue(hintType)) state.clues = Math.max(0, state.clues - 1);
+            completeRegisteredTurn();
+          }
+
           function render() {
+            renderBonuses();
             renderStatus();
             renderFireworks();
             renderCards();
@@ -2683,13 +2821,16 @@ function togglePanelPreference(panelName) {
               `;
 
             } else if (source === "discard") {
-              description.textContent = "Usa il bonus dell’espansione.";
+              const playable = isPlayable(card.color, card.number);
+              description.textContent = expansionMode
+                ? "I bonus dagli scarti sono utilizzabili solo su carte attualmente giocabili."
+                : "Carta negli scarti.";
               actions.innerHTML = `
-                <button class="success" onclick="executePhysicalCardAction('played')">
-                  Gioca dagli scarti
+                <button class="success" onclick="executePhysicalCardAction('played')" ${playable && bonusAvailable("PLAY_FROM_DISCARD") ? "" : "disabled"}>
+                  Gioca dagli scarti ${bonusAvailable("PLAY_FROM_DISCARD") ? "(bonus disponibile)" : "(bonus non disponibile)"}
                 </button>
-                <button class="primary" onclick="executePhysicalCardAction('residue')">
-                  Rimetti nel mazzo
+                <button class="primary" onclick="executePhysicalCardAction('${state.deckRemaining === 0 ? "returnPlay" : "residue"}')" ${playable && bonusAvailable("RETURN_DISCARD_TO_DECK") ? "" : "disabled"}>
+                  ${state.deckRemaining === 0 ? "Gioca la carta recuperata" : "Rimetti nel mazzo"} ${bonusAvailable("RETURN_DISCARD_TO_DECK") ? "(bonus disponibile)" : "(bonus non disponibile)"}
                 </button>
               `;
             } else {
@@ -2870,9 +3011,21 @@ function togglePanelPreference(panelName) {
               toast("Carta non trovata. Riprova.");
               return;
             }
-        	if (
+         if (source === "discard" && ["residue", "returnPlay"].includes(target.type) && !bonusAvailable("RETURN_DISCARD_TO_DECK")) {
+          toast("Serve il bonus 'Rimetti uno scarto nel mazzo'."); return;
+        }
+        if (source === "discard" && target.type === "returnPlay" && state.deckRemaining !== 0) {
+          toast("La giocata diretta del bonus è prevista solo a mazzo esaurito."); return;
+        }
+        if (source === "discard" && target.type === "residue" && state.deckRemaining === 0) {
+          toast("Il mazzo è finito: la carta recuperata va giocata, non reinserita nel mazzo."); return;
+        }
+        if (source === "discard" && ["firework","played"].includes(target.type) && !bonusAvailable("PLAY_FROM_DISCARD")) {
+          toast("Serve il bonus 'Gioca una carta dagli scarti'."); return;
+        }
+        if (
           source === "discard" &&
-          !["residue", "firework", "played"].includes(target.type)
+          !["residue", "returnPlay", "firework", "played"].includes(target.type)
         ) {
           toast("Dagli scarti puoi giocare la carta oppure rimetterla nel mazzo.");
           return;
@@ -2923,11 +3076,17 @@ function togglePanelPreference(panelName) {
               return;
             }
         
+            if (source === "discard" && ["residue", "returnPlay", "played", "firework"].includes(target.type)
+                && !isPlayable(original.color, original.number)) {
+              toast("Questa carta non è attualmente giocabile. Se nessuna carta negli scarti è giocabile, il bonus va perso.");
+              return;
+            }
             if (target.type === "residue") {
         	if (source === "discard") {
           pushHistory();
         
           const returnedCard = removeFromDiscard(cardId);
+          if (returnedCard) spendBonus("RETURN_DISCARD_TO_DECK");
         
           if (!returnedCard) {
             historyStack.pop();
@@ -2936,6 +3095,7 @@ function togglePanelPreference(panelName) {
           }
         
           state.deckRemaining++;
+          state.finalTurnsRemaining = null;
           state.started = true;
         
           toast(
@@ -2960,13 +3120,13 @@ function togglePanelPreference(panelName) {
               return;
             }
         
-            if (!["discard", "firework", "played"].includes(target.type)) return;
+            if (!["discard", "firework", "played", "returnPlay"].includes(target.type)) return;
             if (target.type === "firework" && target.color !== original.color) {
               toast(`Questa carta è ${colorText(original.color)}: trascinala sul fuoco corretto.`);
               return;
             }
         
-            const isPlayTarget = target.type === "firework" || target.type === "played";
+            const isPlayTarget = target.type === "firework" || target.type === "played" || target.type === "returnPlay";
             const validPlay = isPlayTarget && isPlayable(original.color, original.number);
         	if (source === "discard" && isPlayTarget && !validPlay) {
           const nextNumber =
@@ -2991,6 +3151,7 @@ function togglePanelPreference(panelName) {
         
         } else if (source === "discard") {
           movedCard = removeFromDiscard(cardId) || movedCard;
+          if (isPlayTarget) spendBonus(target.type === "returnPlay" ? "RETURN_DISCARD_TO_DECK" : "PLAY_FROM_DISCARD");
           delete movedCard.failed;
         
         } else if (source === "residue" && state.deckRemaining > 0) {
@@ -3004,7 +3165,7 @@ function togglePanelPreference(panelName) {
             } else if (validPlay) {
               state.played.push({ ...movedCard, source: "drag", at: Date.now() });
               state.fireworks[movedCard.color] = Number(movedCard.number);
-              if (movedCard.number === "5") state.clues = Math.min(8, state.clues + 1);
+              if (movedCard.number === "5") completedFireworkBonus();
               toast(`Giocata corretta: ${colorText(movedCard.color)} ${movedCard.number}.`);
             } else {
               state.discarded.push({ ...movedCard, source: "drag", failed: true, at: Date.now() });
@@ -3031,7 +3192,7 @@ function togglePanelPreference(panelName) {
               toast("Seleziona prima le carte interessate dall'indizio.");
               return;
             }
-            if (state.clues <= 0) {
+            if (!canGiveClue("color")) {
               toast("Nessun indizio disponibile.");
               return;
             }
@@ -3065,7 +3226,7 @@ function togglePanelPreference(panelName) {
               card.selected = false;
             });
         
-            consumeClueAndCompleteTurn();
+            finishClue("color");
             state.started = true;
             render();
             notifyImpossibleClue();
@@ -3077,7 +3238,7 @@ function togglePanelPreference(panelName) {
               toast("Seleziona prima le carte interessate dall'indizio.");
               return;
             }
-            if (state.clues <= 0) {
+            if (!canGiveClue("number")) {
               toast("Nessun indizio disponibile.");
               return;
             }
@@ -3089,7 +3250,7 @@ function togglePanelPreference(panelName) {
               card.selected = false;
             });
         
-            consumeClueAndCompleteTurn();
+            finishClue("number");
             state.started = true;
             render();
             notifyImpossibleClue();
@@ -3265,7 +3426,7 @@ function togglePanelPreference(panelName) {
               if (isPlayable(color, number)) {
                 state.played.push(cardEntry);
                 state.fireworks[color] = Number(number);
-                if (number === "5") state.clues = Math.min(8, state.clues + 1);
+                if (number === "5") completedFireworkBonus();
                 toast(`Giocata corretta: ${colorText(color)} ${number}.`);
               } else {
                 state.discarded.push({ ...cardEntry, failed: true });
@@ -3390,6 +3551,7 @@ function togglePanelPreference(panelName) {
         
           Object.assign(window, {
             undo,
+            openBonusModal, closeBonusModal, registerDrawnBonus, activateBonus,
             tornaAllaHome,
             resetPartita,
             adjustClues,
