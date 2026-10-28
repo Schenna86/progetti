@@ -1167,6 +1167,7 @@ let panelPreferences = {
               strikes: 0,
               deckRemaining: Math.max(0, deckSize - initialDeal),
               finalTurnsRemaining: null,
+              registeredAdvisorHints: [],
               bonusDrawn: [],
               bonusAvailable: [],
               pendingBonuses: 0,
@@ -1323,6 +1324,7 @@ function togglePanelPreference(panelName) {
             state.played ??= [];
             state.discarded ??= [];
             state.fireworks ??= emptyFireworks();
+            state.registeredAdvisorHints = Array.isArray(state.registeredAdvisorHints) ? state.registeredAdvisorHints : [];
             state.bonusDrawn = Array.isArray(state.bonusDrawn) ? state.bonusDrawn : [];
             state.bonusAvailable = Array.isArray(state.bonusAvailable) ? state.bonusAvailable : [];
             state.pendingBonuses = Math.max(0, Number(state.pendingBonuses || 0));
@@ -2199,12 +2201,28 @@ function togglePanelPreference(panelName) {
             return action.type || "Azione";
           }
 
+          // Evita di riproporre indizi già dati alla stessa mano fisica.
+          // Un indizio torna proponibile quando la mano destinataria cambia.
+          function advisorHintAlreadyRegistered(action) {
+            if (action?.type !== "HINT") return false;
+            const player = state.opponents[Number(action.targetIndex) - 1];
+            if (!player) return false;
+            const handSignature = player.hand.map(card => card.id).join("|");
+            return (state.registeredAdvisorHints || []).some(entry =>
+              entry.playerId === player.id && entry.hintType === action.hintType &&
+              String(entry.value) === String(action.value) && entry.handSignature === handSignature
+            );
+          }
+
           function renderFrozenStandardAdvisor() {
             const assistant = document.getElementById("assistant");
             const opponentsReady = state.opponents.every(player => player.hand.length > 0);
 
             try {
-              const result = evaluateActions(buildStandardAdvisorView(), { limit: 5 });
+              const result = evaluateActions(buildStandardAdvisorView(), {
+                limit: 5,
+                excludeAction: advisorHintAlreadyRegistered
+              });
               const profileLabel = standardProfileLabel(result.profile);
               lastAdvisorRecommendations = result.recommendations;
 
@@ -2233,7 +2251,7 @@ function togglePanelPreference(panelName) {
                 ${!opponentsReady ? `<div class="subtle" style="margin-bottom:8px">Completa le mani visibili per rendere affidabili soprattutto gli indizi suggeriti.</div>` : ""}
                 <div class="advisor-list">${rows}</div>
                 <div class="subtle" style="margin-top:9px">
-                  La mossa n. 1 è quella scelta dal profilo frozen; le altre sono alternative tattiche ordinate per utility relativa.
+                  La mossa n. 1 segue il profilo frozen, escludendo indizi già dati alla stessa mano; se esclusa, mostra la migliore alternativa disponibile.
                 </div>
               `;
               return true;
@@ -2312,6 +2330,11 @@ function togglePanelPreference(panelName) {
 
             pushHistory();
             const touchedIndexes = applyOpponentClueKnowledge(player, hintType, value, convention);
+            state.registeredAdvisorHints.push({
+              playerId, hintType, value: String(value),
+              handSignature: player.hand.map(card => card.id).join("|")
+            });
+            if (state.registeredAdvisorHints.length > 100) state.registeredAdvisorHints.shift();
             player.cluesReceived = Number(player.cluesReceived || 0) + 1;
             finishClue(hintType);
             state.started = true;
@@ -2658,13 +2681,15 @@ function togglePanelPreference(panelName) {
             pushHistory();
             state.pendingBonuses--;
             state.bonusDrawn.push(type);
-            const lost = isDiscardBonus(type) && playableDiscardCards().length === 0;
+            const lost = (type === "PLAY_FROM_DISCARD" && playableDiscardCards().length === 0) ||
+              (type === "RETURN_DISCARD_TO_DECK" && (state.deckRemaining === 0
+                ? playableDiscardCards().length === 0 : state.discarded.length === 0));
             if (!lost) state.bonusAvailable.push(type);
             closeBonusModal();
             state.started = true;
             saveState(); render();
             toast(lost
-              ? `Bonus perso: non ci sono carte giocabili negli scarti (${BONUS_LABELS[type]}).`
+              ? `Bonus perso: nessuna carta utilizzabile negli scarti (${BONUS_LABELS[type]}).`
               : `Bonus registrato: ${BONUS_LABELS[type]}.`);
             if (state.pendingBonuses) queueMicrotask(openBonusModal);
           }
@@ -2823,13 +2848,15 @@ function togglePanelPreference(panelName) {
             } else if (source === "discard") {
               const playable = isPlayable(card.color, card.number);
               description.textContent = expansionMode
-                ? "I bonus dagli scarti sono utilizzabili solo su carte attualmente giocabili."
+                ? (state.deckRemaining > 0
+                  ? "Gioca dagli scarti richiede una carta giocabile. Rimetti nel mazzo permette qualsiasi scarto."
+                  : "Mazzo esaurito: entrambi i bonus richiedono una carta giocabile.")
                 : "Carta negli scarti.";
               actions.innerHTML = `
                 <button class="success" onclick="executePhysicalCardAction('played')" ${playable && bonusAvailable("PLAY_FROM_DISCARD") ? "" : "disabled"}>
                   Gioca dagli scarti ${bonusAvailable("PLAY_FROM_DISCARD") ? "(bonus disponibile)" : "(bonus non disponibile)"}
                 </button>
-                <button class="primary" onclick="executePhysicalCardAction('${state.deckRemaining === 0 ? "returnPlay" : "residue"}')" ${playable && bonusAvailable("RETURN_DISCARD_TO_DECK") ? "" : "disabled"}>
+                <button class="primary" onclick="executePhysicalCardAction('${state.deckRemaining === 0 ? "returnPlay" : "residue"}')" ${(state.deckRemaining > 0 || playable) && bonusAvailable("RETURN_DISCARD_TO_DECK") ? "" : "disabled"}>
                   ${state.deckRemaining === 0 ? "Gioca la carta recuperata" : "Rimetti nel mazzo"} ${bonusAvailable("RETURN_DISCARD_TO_DECK") ? "(bonus disponibile)" : "(bonus non disponibile)"}
                 </button>
               `;
@@ -3076,7 +3103,7 @@ function togglePanelPreference(panelName) {
               return;
             }
         
-            if (source === "discard" && ["residue", "returnPlay", "played", "firework"].includes(target.type)
+            if (source === "discard" && ["returnPlay", "played", "firework"].includes(target.type)
                 && !isPlayable(original.color, original.number)) {
               toast("Questa carta non è attualmente giocabile. Se nessuna carta negli scarti è giocabile, il bonus va perso.");
               return;

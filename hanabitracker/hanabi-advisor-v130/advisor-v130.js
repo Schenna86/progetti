@@ -261,7 +261,7 @@ function actionReason(row, selected) {
   return "Azione alternativa.";
 }
 
-export function evaluateActions(inputView, { limit = 5 } = {}) {
+export function evaluateActions(inputView, { limit = 5, excludeAction = null } = {}) {
   const view = normalizeTrackerView(inputView);
   const profile = profileConfigForPlayers(view.playerCount);
   const strategy = createFrozenProfileStrategy(view.playerCount);
@@ -278,24 +278,30 @@ export function evaluateActions(inputView, { limit = 5 } = {}) {
   for (const row of ownCandidates(view)) add(row);
   for (const row of hintCandidates(view, strategy)) add(row);
 
-  const existing = merged.get(selectedKey);
-  add({
-    ...(existing || {}),
-    action: selectedAction,
-    policyScore: 10000,
-    category: `SELECTED_${selectedAction.type}`,
-    metrics: { ...(existing?.metrics || {}), selectedByProfile: true }
-  });
+  const selectedExcluded = Boolean(excludeAction?.(selectedAction));
+  if (!selectedExcluded) {
+    const existing = merged.get(selectedKey);
+    add({
+      ...(existing || {}),
+      action: selectedAction,
+      policyScore: 10000,
+      category: `SELECTED_${selectedAction.type}`,
+      metrics: { ...(existing?.metrics || {}), selectedByProfile: true }
+    });
+  }
 
-  const rows = [...merged.values()].sort((a, b) => b.policyScore - a.policyScore);
-  const alternatives = rows.filter(r => actionKey(r.action) !== selectedKey);
+  const rows = [...merged.values()]
+    .filter(row => !excludeAction?.(row.action))
+    .sort((a, b) => b.policyScore - a.policyScore);
+  const effectiveSelectedKey = selectedExcluded ? (rows[0] ? actionKey(rows[0].action) : null) : selectedKey;
+  const alternatives = rows.filter(r => actionKey(r.action) !== effectiveSelectedKey);
   const altScores = alternatives.map(r => r.policyScore);
   const maxAlt = altScores.length ? Math.max(...altScores) : 1;
   const minAlt = altScores.length ? Math.min(...altScores) : 0;
   const span = Math.max(1e-9, maxAlt - minAlt);
 
   const recommendations = rows.slice(0, Math.max(1, Number(limit || 5))).map((row, index) => {
-    const selected = actionKey(row.action) === selectedKey;
+    const selected = actionKey(row.action) === effectiveSelectedKey;
     const utility = selected
       ? 100
       : Math.round((55 + 40 * ((row.policyScore - minAlt) / span)) * 10) / 10;
@@ -305,7 +311,7 @@ export function evaluateActions(inputView, { limit = 5 } = {}) {
       selected,
       category: row.category,
       action: row.action,
-      reason: actionReason(row, selected),
+      reason: selectedExcluded && selected ? "Alternativa migliore disponibile: l’indizio preferito è già stato registrato alla stessa mano." : actionReason(row, selected),
       metrics: row.metrics || {}
     };
   });
