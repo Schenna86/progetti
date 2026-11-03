@@ -751,52 +751,164 @@
           .inline-adjust {gap: 3px;}
           .inline-adjust button {padding: 4px 7px;}
         }
+
+        /* Header compatto: unico elemento sticky, sempre visibile. */
+        .tracker-header {
+          position: sticky;
+          top: 0;
+          z-index: 900;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: -4px 0 12px;
+          padding: 7px;
+          background: rgba(39, 39, 39, .97);
+          border: 1px solid #696969;
+          border-radius: 12px;
+          box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+        }
+        .tracker-header .status-grid {
+          flex: 1 1 auto;
+          min-width: 0;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 5px;
+        }
+        .tracker-header .status-box {
+          min-width: 0;
+          padding: 4px 3px;
+          border: 1px solid #565656;
+          border-radius: 8px;
+          background: #353535;
+        }
+        .tracker-header .status-box > .subtle {
+          display: block;
+          font-size: .70rem;
+          line-height: 1.1;
+        }
+        .tracker-header .status-box > .value,
+        .tracker-header .status-value-row .value {
+          display: block;
+          font-size: 1.08rem;
+          font-weight: 800;
+          line-height: 1.35;
+          white-space: nowrap;
+        }
+        .tracker-header #final-countdown {
+          font-size: .65rem;
+          white-space: nowrap;
+          margin-top: 1px;
+        }
+        .tracker-header .status-value-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 3px;
+        }
+        .tracker-header .status-value-row button {
+          display: grid;
+          place-items: center;
+          flex: 0 0 24px;
+          width: 24px;
+          height: 24px;
+          min-width: 0;
+          padding: 0;
+          border-radius: 6px;
+          font-size: 1rem;
+          line-height: 1;
+        }
+        .tracker-header-actions {
+          display: flex;
+          flex: 0 0 auto;
+          gap: 5px;
+        }
+        .tracker-header-actions button {
+          padding: 7px 9px;
+          border-radius: 7px;
+          font-size: .80rem;
+          font-weight: 650;
+          white-space: nowrap;
+        }
+        @media (max-width: 760px) {
+          .tracker-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 5px;
+            padding: 5px;
+            margin-bottom: 9px;
+            border-radius: 10px;
+          }
+          .tracker-header .status-grid { width: 100%; gap: 4px; }
+          .tracker-header .status-box { padding: 3px 1px; }
+          .tracker-header .status-box > .subtle { font-size: .62rem; }
+          .tracker-header .status-box > .value,
+          .tracker-header .status-value-row .value { font-size: .95rem; }
+          .tracker-header .status-value-row { gap: 2px; }
+          .tracker-header .status-value-row button {
+            flex-basis: 22px;
+            width: 22px;
+            height: 22px;
+          }
+          .tracker-header #final-countdown { font-size: .57rem; }
+          .tracker-header-actions { width: 100%; }
+          .tracker-header-actions button {
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 5px 5px;
+            font-size: .75rem;
+          }
+          .panel-toggle-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 360px) {
+          .tracker-header .status-value-row button {
+            flex-basis: 19px;
+            width: 19px;
+            height: 21px;
+          }
+          .tracker-header .status-value-row .value { font-size: .88rem; }
+        }
     </style>
 </head>
 
 <body>
     <main class="app">
-        <div class="topbar">
-            <div>
-                <h1>Hanabi Tracker Tavolo</h1>
-                <div class="subtle">Tutte le mani, carte fisiche e assistente probabilistico</div>
+        <!-- Barra unica, compatta e sempre visibile durante lo scorrimento. -->
+        <header class="tracker-header" id="panel-status" aria-label="Stato e comandi partita">
+          <div class="status-grid">
+            <div class="status-box status-deck">
+              <span class="subtle">Mazzo</span>
+              <span class="value" id="deck-count">0</span>
+              <span class="subtle" id="final-countdown">Finale: —</span>
             </div>
-            <div class="top-actions">
-                <button class="ghost" onclick="tornaAllaHome()">Home</button>
-                <button onclick="undo()">Undo</button>
-                <button class="danger" onclick="resetPartita()">Nuova partita</button>
+            <div class="status-box">
+              <span class="subtle">Indizi</span>
+              <div class="status-value-row">
+                <button class="small" aria-label="Riduci indizi" title="Riduci indizi" onclick="adjustClues(-1)">−</button>
+                <span class="value" id="clue-count">8</span>
+                <button class="small" aria-label="Aumenta indizi" title="Aumenta indizi" onclick="adjustClues(1)">+</button>
+              </div>
             </div>
-        </div>
-
-		<section class="panel" id="panel-status">
-			<div class="status-grid">
-                <div class="status-box">
-                    <span class="subtle">Mazzo</span>
-                    <span class="value" id="deck-count">0</span>
-                    <span class="subtle" id="final-countdown">Finale: —</span>
-                </div>
-                <div class="status-box">
-                    <span class="subtle">Indizi</span>
-                    <span class="value" id="clue-count">8</span>
-                    <div class="inline-adjust">
-                        <button class="small" onclick="adjustClues(-1)">−</button>
-                        <button class="small" onclick="adjustClues(1)">+</button>
-                    </div>
-                </div>
-                <div class="status-box">
-                    <span class="subtle">Errori</span>
-                    <span class="value" id="strike-count">0 / 3</span>
-                    <div class="inline-adjust">
-                        <button class="small" onclick="adjustStrikes(-1)">−</button>
-                        <button class="small" onclick="adjustStrikes(1)">+</button>
-                    </div>
-                </div>
-                <div class="status-box">
-                    <span class="subtle">Punteggio</span>
-                    <span class="value" id="score-count">0</span>
-                </div>
+            <div class="status-box">
+              <span class="subtle">Errori</span>
+              <div class="status-value-row">
+                <button class="small" aria-label="Riduci errori" title="Riduci errori" onclick="adjustStrikes(-1)">−</button>
+                <span class="value" id="strike-count">0 / 3</span>
+                <button class="small" aria-label="Aumenta errori" title="Aumenta errori" onclick="adjustStrikes(1)">+</button>
+              </div>
             </div>
-        </section>
+            <div class="status-box">
+              <span class="subtle">Punteggio</span>
+              <span class="value" id="score-count">0</span>
+            </div>
+          </div>
+          <nav class="tracker-header-actions" aria-label="Comandi partita">
+            <button class="ghost" onclick="tornaAllaHome()" title="Torna alla Home">Home</button>
+            <button onclick="undo()" title="Annulla l'ultima modifica">Undo</button>
+            <button class="danger" onclick="resetPartita()" title="Inizia nuova partita">Nuova partita</button>
+          </nav>
+        </header>
 
 <section class="panel" id="panel-fireworks">
   <h2>Fuochi d'artificio</h2>
@@ -874,14 +986,6 @@
     <strong>Pannelli visibili</strong>
 
     <div class="panel-toggle-row">
-      <button
-        type="button"
-        id="toggle-panel-status"
-        class="panel-toggle"
-        onclick="togglePanelPreference('status')"
-      >
-        Stato: ON
-      </button>
 
       <button
         type="button"
@@ -1036,12 +1140,7 @@
         const PANEL_PREFS_KEY = "hanabiTrackerPanelPreferences";
 
 const PANEL_CONFIG = {
-  status: {
-    panelId: "panel-status",
-    buttonId: "toggle-panel-status",
-    label: "Stato"
-  },
-  fireworks: {
+fireworks: {
     panelId: "panel-fireworks",
     buttonId: "toggle-panel-fireworks",
     label: "Fuochi"
@@ -1054,7 +1153,6 @@ const PANEL_CONFIG = {
 };
 
 let panelPreferences = {
-  status: true,
   fireworks: true,
   assistant: true
 };
@@ -1974,7 +2072,7 @@ function togglePanelPreference(panelName) {
                       : `<div class="empty-hand">Le carte assegnate a questo giocatore compariranno qui.</div>`}
                   </div>
                   <div class="opponent-clue-row">
-                    <button class="small primary" onclick="openOpponentClueModal('${player.id}')" ${state.clues <= 0 || !player.hand.length ? "disabled" : ""}>✓ Registra indizio</button>
+                    <button class="small primary" onclick="openOpponentClueModal('${player.id}')" ${(!canGiveClue("color") && !canGiveClue("number")) || !player.hand.length ? "disabled" : ""}>✓ Registra indizio</button>
                     <span class="opponent-clue-count">Indizi registrati: ${Number(player.cluesReceived || 0)}</span>
                   </div>
                 </div>
@@ -2235,7 +2333,7 @@ function togglePanelPreference(panelName) {
                   </div>
                   <div class="advisor-utility">${rec.utility}</div>
                   ${rec.action?.type === "HINT"
-                    ? `<button class="advisor-done" onclick="markAdvisorHintGiven(${recIndex})" ${state.clues <= 0 ? "disabled" : ""}>✓ Dato</button>`
+                    ? `<button class="advisor-done" onclick="markAdvisorHintGiven(${recIndex})" ${!canGiveClue(rec.action.hintType) ? "disabled" : ""}>✓ Dato</button>`
                     : ""}
                 </div>
               `).join("");
@@ -2447,6 +2545,13 @@ function togglePanelPreference(panelName) {
               return;
             }
 
+            // A zero segnalini soltanto il tipo del bonus attivo è consentito.
+            if (!canGiveClue(opponentClueDraft.hintType)) {
+              preview.textContent = "Nessun segnalino disponibile per questo tipo di indizio. Attiva il bonus gratuito corrispondente.";
+              confirm.disabled = true;
+              return;
+            }
+
             const matches = player.hand
               .map((card, index) => ({ card, index }))
               .filter(({ card }) => opponentClueDraft.hintType === "color"
@@ -2473,7 +2578,12 @@ function togglePanelPreference(panelName) {
               ? `<br><span class="subtle">✓ Coincide con il suggerimento Advisor #${Number(matchedAdvisor.rank || 1)}${matchedIntent ? ` · convenzione ${escapeHtml(matchedIntent)}` : ""}</span>`
               : "";
 
-            preview.innerHTML = `<strong>${opponentClueDraft.hintType === "color" ? "Colore" : "Numero"} “${escapeHtml(shownValue)}”</strong><br>Tocca le carte in posizione ${matches.map(x => x.index + 1).join(", ")}.${advisorMatchHtml}`;
+            const usingFreeBonus = state.freeClueType === opponentClueDraft.hintType &&
+              bonusAvailable(opponentClueDraft.hintType === "color" ? "FREE_COLOR_HINT" : "FREE_NUMBER_HINT");
+            const costHtml = usingFreeBonus
+              ? `<br><span class="subtle">✓ Bonus gratuito attivo: non verranno consumati segnalini indizio.</span>`
+              : "";
+            preview.innerHTML = `<strong>${opponentClueDraft.hintType === "color" ? "Colore" : "Numero"} “${escapeHtml(shownValue)}”</strong><br>Tocca le carte in posizione ${matches.map(x => x.index + 1).join(", ")}.${advisorMatchHtml}${costHtml}`;
             confirm.disabled = false;
           }
 
@@ -2710,6 +2820,9 @@ function togglePanelPreference(panelName) {
               state.freeClueType = state.freeClueType === selected ? null : selected;
               toast(`Bonus pronto: registra ora un indizio ${state.freeClueType === "color" ? "colore" : "numero"} senza spendere segnalini.`);
               renderBonuses();
+              // Lo stato del bonus cambia anche la disponibilità dei pulsanti indizio.
+              renderOpponents();
+              renderAssistant();
             } else {
               toast("Tocca una carta negli scarti e scegli l'azione del bonus.");
               document.getElementById("discard-zone")?.scrollIntoView({behavior:"smooth",block:"center"});
