@@ -869,6 +869,138 @@
           }
           .tracker-header .status-value-row .value { font-size: .88rem; }
         }
+    
+        /* Header ultracompatto — etichette, valori e pulsanti in linea */
+        .tracker-header {
+          gap: 6px;
+          padding: 4px 5px;
+          margin: -4px 0 8px;
+          border-radius: 9px;
+        }
+        .tracker-header .status-grid {
+          display: flex;
+          flex: 1 1 auto;
+          gap: 4px;
+          align-items: stretch;
+          min-width: 0;
+        }
+        .tracker-header .status-box {
+          display: flex;
+          flex: 1 1 auto;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          min-width: 0;
+          padding: 3px 5px;
+          border-radius: 6px;
+          white-space: nowrap;
+          line-height: 1;
+        }
+        .tracker-header .status-box > .subtle {
+          display: inline;
+          flex: 0 0 auto;
+          font-size: .71rem;
+          line-height: 1.1;
+        }
+        .tracker-header .status-box > .value,
+        .tracker-header .status-value-row .value {
+          display: inline;
+          font-size: .96rem;
+          line-height: 1.1;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+        .tracker-header #final-countdown {
+          font-size: .62rem;
+          margin: 0;
+          white-space: nowrap;
+        }
+        .tracker-header .status-value-row {
+          display: inline-flex;
+          gap: 3px;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 auto;
+        }
+        .tracker-header .status-value-row button {
+          flex: 0 0 21px;
+          width: 21px;
+          height: 21px;
+          border-radius: 5px;
+          font-size: .89rem;
+        }
+        .tracker-header-actions { gap: 3px; }
+        .tracker-header-actions button {
+          padding: 5px 7px;
+          border-radius: 6px;
+          font-size: .72rem;
+          line-height: 1.1;
+        }
+        @media (max-width: 900px) {
+          .tracker-header { flex-direction: column; align-items: stretch; gap: 3px; padding: 4px; }
+          .tracker-header .status-grid {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+          }
+          .tracker-header .status-box { flex: 1 0 auto; padding: 3px 5px; }
+          .tracker-header .status-box > .subtle { font-size: .69rem; }
+          .tracker-header .status-box > .value,
+          .tracker-header .status-value-row .value { font-size: .91rem; }
+          .tracker-header .status-value-row button {
+            flex-basis: 19px;
+            width: 19px;
+            height: 20px;
+          }
+          .tracker-header-actions { display: flex; width: 100%; gap: 4px; }
+          .tracker-header-actions button { padding: 3px 5px; font-size: .70rem; }
+        }
+
+        /* Barra definitiva: stato e comandi SEMPRE sulla stessa riga. */
+        .tracker-header,
+        .tracker-header#panel-status {
+          flex-direction: row;
+          flex-wrap: nowrap;
+          align-items: center;
+          gap: 5px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: thin;
+          -webkit-overflow-scrolling: touch;
+        }
+        .tracker-header .status-grid {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          flex: 1 0 auto;
+          min-width: max-content;
+          width: auto;
+          overflow: visible;
+          gap: 4px;
+        }
+        .tracker-header .status-box {
+          flex: 0 0 auto;
+          white-space: nowrap;
+          padding: 3px 5px;
+        }
+        .tracker-header-actions {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          flex: 0 0 auto;
+          width: auto;
+          gap: 4px;
+          margin-left: auto;
+        }
+        .tracker-header-actions button { flex: 0 0 auto; }
+        @media (max-width: 900px) {
+          .tracker-header,
+          .tracker-header#panel-status { flex-direction: row; align-items: center; gap: 4px; }
+          .tracker-header .status-grid { width: auto; min-width: max-content; overflow: visible; }
+          .tracker-header-actions { width: auto; margin-left: auto; }
+        }
     </style>
 </head>
 
