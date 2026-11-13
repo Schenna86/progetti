@@ -958,6 +958,16 @@
           .tracker-header-actions button { padding: 3px 5px; font-size: .70rem; }
         }
 
+        /* Pulsante schermo intero: icona piccola, senza allargare la barra. */
+        .tracker-header-actions .fullscreen-button {
+          min-width: 25px;
+          width: 25px;
+          padding: 4px 3px;
+          font-size: 1rem;
+          line-height: 1;
+          text-align: center;
+        }
+
         /* Barra definitiva: stato e comandi SEMPRE sulla stessa riga. */
         .tracker-header,
         .tracker-header#panel-status {
@@ -1036,6 +1046,7 @@
             </div>
           </div>
           <nav class="tracker-header-actions" aria-label="Comandi partita">
+            <button type="button" id="fullscreen-toggle" class="ghost fullscreen-button" onclick="toggleFullscreen()" title="Schermo intero" aria-label="Attiva schermo intero" aria-pressed="false">⛶</button>
             <button class="ghost" onclick="tornaAllaHome()" title="Torna alla Home">Home</button>
             <button onclick="undo()" title="Annulla l'ultima modifica">Undo</button>
             <button class="danger" onclick="resetPartita()" title="Inizia nuova partita">Nuova partita</button>
@@ -3771,6 +3782,34 @@ function togglePanelPreference(panelName) {
             saveState();
           }
         
+          // Visualizzazione a schermo intero: la modalità segue lo stato reale del browser.
+          async function toggleFullscreen() {
+            try {
+              if (document.fullscreenElement) {
+                await document.exitFullscreen();
+              } else if (document.documentElement.requestFullscreen) {
+                await document.documentElement.requestFullscreen();
+              } else {
+                toast("Schermo intero non supportato da questo browser.");
+              }
+            } catch (error) {
+              console.warn("Impossibile modificare lo schermo intero:", error);
+              toast("Il browser non consente lo schermo intero.");
+            }
+          }
+
+          function updateFullscreenButton() {
+            const button = document.getElementById("fullscreen-toggle");
+            if (!button) return;
+            const active = Boolean(document.fullscreenElement);
+            button.textContent = active ? "⤡" : "⛶";
+            button.title = active ? "Esci da schermo intero" : "Schermo intero";
+            button.setAttribute("aria-label", button.title);
+            button.setAttribute("aria-pressed", String(active));
+          }
+
+          document.addEventListener("fullscreenchange", updateFullscreenButton);
+
           function tornaAllaHome() {
             if (state.started && !confirm("Tornare alla Home? La partita rimarrà salvata su questo dispositivo.")) return;
             location.href = "index.html";
@@ -3825,6 +3864,7 @@ function togglePanelPreference(panelName) {
             undo,
             openBonusModal, closeBonusModal, registerDrawnBonus, activateBonus,
             tornaAllaHome,
+            toggleFullscreen,
             resetPartita,
             adjustClues,
             adjustStrikes,
